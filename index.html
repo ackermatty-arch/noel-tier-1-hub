@@ -4431,6 +4431,368 @@ window.NOEL_MEALS = (function () {
       roast, roastText: hm(roast), rest: 25, thawDays: Math.max(1, Math.ceil(w * 5 / 24)), pies: 1, dishes: Math.max(1, Math.ceil(f - 0.25)), ribs };
   }
 
+  // lamb doneness: [key, label, pull °F, after resting, time factor]
+  const LAMB_DONENESS = [["rare", "Rare", 120, "125°F", 0.85], ["mediumrare", "Med-rare", 130, "135°F", 1], ["medium", "Medium", 135, "140–145°F", 1.12], ["mediumwell", "Med-well", 145, "150°F", 1.25]];
+  const lambcrown = {
+    id: "lambcrown",
+    tab: "elegant",
+    name: "Crown Roast of Lamb",
+    icon: "🐑",
+    blurb: "Garlic-rosemary-Dijon lamb crown filled with roasted wild mushrooms, fingerlings, charred asparagus and berry pavlova.",
+    options: { doneness: LAMB_DONENESS },
+    menu: [
+      ["Signature drinks", ["Pomegranate-Rosemary Prosecco Fizz", "Cucumber-Mint Lime Spritz (alcohol-free)"]],
+      ["Appetizers", ["Warm Goat Cheese & Fig Crostini with Honey (warm)", "Smoked Salmon Bites with Dill Cream (light)"]],
+      ["Main", ["Garlic, Rosemary & Dijon Crown Roast of Lamb", "Quick Red Wine & Mint Demi-Glace"]],
+      ["In the crown", ["Herb-Roasted Wild Mushrooms & Pearl Onions"]],
+      ["Sides", ["Lemon-Herb Roasted Fingerling Potatoes", "Charred Asparagus with Lemon Zest"]],
+      ["Dessert", ["Winter Berry Pavlova"]]
+    ],
+    drinks: [
+      ["With the starters", "Sauvignon Blanc or Sancerre with the goat cheese and salmon, or keep pouring the Prosecco."],
+      ["With the lamb", "Bordeaux-style red, Rioja Reserva or Syrah. Their savoury depth loves rosemary and garlic."],
+      ["Alcohol-free", "Cucumber-Mint Lime Spritz (recipe included)."],
+      ["With dessert", "A late-harvest or ice wine, or coffee."]
+    ],
+    recipes: [
+      {
+        id: "pomfizz", course: "Drinks", name: "Pomegranate-Rosemary Prosecco Fizz",
+        prep: "10 min, plus cooling the syrup", cook: "5 min", yieldText: f => `${Math.round(8 * f)} drinks`,
+        ing: [
+          { q: 0.5, u: "cup", t: "granulated sugar" },
+          { q: 0.5, u: "cup", t: "water" },
+          { q: 3, u: "", t: ["sprig fresh rosemary, plus extra to garnish", "sprigs fresh rosemary, plus extra to garnish"] },
+          { q: 1, u: "cup", t: "pomegranate juice, chilled" },
+          { q: 1, u: "", up: true, t: ["bottle (750 ml) Prosecco, chilled", "bottles (750 ml) Prosecco, chilled"] },
+          { q: null, u: "", s: "n", t: "Pomegranate seeds, to garnish" }
+        ],
+        steps: [
+          "Rosemary syrup: simmer the sugar, water and rosemary for 3 minutes, stirring until the sugar dissolves. Cool, then remove the rosemary.",
+          "For each drink, add 1 oz pomegranate juice and ½ oz rosemary syrup to a flute.",
+          "Top with Prosecco and garnish with a few pomegranate seeds and a small rosemary sprig."
+        ],
+        tip: "Make the syrup up to a week ahead and keep it in the fridge."
+      },
+      {
+        id: "spritz", course: "Drinks", name: "Cucumber-Mint Lime Spritz (alcohol-free)",
+        prep: "10 min", cook: "none", yieldText: f => `about ${Math.round(6 * f)} cups`,
+        ing: [
+          { q: 0.5, u: "", up: true, t: ["English cucumber, thinly sliced", "English cucumbers, thinly sliced"] },
+          { q: 0.5, u: "cup", t: "fresh mint leaves" },
+          { q: 0.5, u: "cup", t: "fresh lime juice" },
+          { q: 0.33, u: "cup", t: "honey, dissolved in the same amount of warm water" },
+          { q: 4, u: "cup", t: "sparkling water, chilled" }
+        ],
+        steps: [
+          "In a large pitcher, gently press the mint with a spoon to release its scent.",
+          "Add the cucumber, lime juice and honey water and stir.",
+          "Just before serving, add the sparkling water and pour over ice."
+        ],
+        tip: "Mint and lamb are classic partners, so this ties the whole menu together."
+      },
+      {
+        id: "goatcrostini", course: "Appetizer", name: "Warm Goat Cheese & Fig Crostini with Honey",
+        prep: "15 min", cook: "10 min", yieldText: f => `about ${Math.round(24 * f)} pieces`,
+        ing: [
+          { q: 1, u: "", up: true, t: ["baguette, cut into ½-inch slices", "baguettes, cut into ½-inch slices"] },
+          { q: 2, u: "tbsp", t: "olive oil" },
+          { q: 8, u: "oz", t: "soft goat cheese, at room temperature" },
+          { q: 0.5, u: "cup", t: "fig jam" },
+          { q: 2, u: "tbsp", t: "honey" },
+          { q: 1, u: "tsp", t: "fresh thyme leaves" },
+          { q: null, u: "", s: "n", t: "Flaky salt and cracked black pepper" }
+        ],
+        steps: [
+          "Brush the bread slices lightly with olive oil and toast at 425°F for 5 minutes, until just crisp.",
+          "Spread each toast with goat cheese and top with a small spoonful of fig jam.",
+          "Return to the oven for 4–5 minutes, until the cheese is warm and soft.",
+          "Drizzle with honey and finish with thyme, flaky salt and pepper. Serve warm."
+        ],
+        tip: "Toast the bread the day before. On the day, they need only a few minutes in the hot oven."
+      },
+      {
+        id: "salmonbites", course: "Appetizer", name: "Smoked Salmon Bites with Dill Cream",
+        prep: "20 min", cook: "none", yieldText: f => `about ${Math.round(24 * f)} pieces`,
+        ing: [
+          { q: 1, u: "", up: true, t: ["English cucumber, cut into ½-inch rounds", "English cucumbers, cut into ½-inch rounds"] },
+          { q: 4, u: "oz", t: "cream cheese, softened" },
+          { q: 2, u: "tbsp", t: "sour cream" },
+          { q: 1, u: "tbsp", t: "fresh dill, chopped, plus sprigs to garnish" },
+          { q: 1, u: "tsp", t: "lemon zest" },
+          { q: 8, u: "oz", t: "smoked salmon, cut into small strips" },
+          { q: 1, u: "tbsp", t: "capers, drained" }
+        ],
+        steps: [
+          "Pat the cucumber rounds dry.",
+          "Mix the cream cheese, sour cream, dill and lemon zest until smooth.",
+          "Pipe or spoon a little dill cream onto each cucumber round.",
+          "Top with a curl of smoked salmon, a caper and a tiny sprig of dill."
+        ],
+        tip: "Light, fresh and naturally gluten-free. Assemble up to 1 hour ahead and keep chilled."
+      },
+      {
+        id: "lamb", course: "Main", name: "Garlic, Rosemary & Dijon Crown Roast of Lamb",
+        prep: "30 min (tie the crown the day before)", cook: p => p.roastText, rest: p => p.rest + " min", yieldText: (f, p) => `${p.ribs} ribs (${p.racks} racks${p.crowns > 1 ? ", 2 crowns" : ""})`,
+        note: (f, p) => `Your doneness: ${p.doneLabel}. Pull the lamb out at ${p.pull}°F. It rises to about ${p.final} while it rests.` + (p.crowns > 1 ? " For this many guests, make 2 crowns and roast them side by side." : ""),
+        ing: [
+          { q: null, u: "", s: "n", t: p => `${p.racks} frenched racks of lamb, 8 ribs each (about ${fmtNum(p.w)} lb in total)` },
+          { head: "Garlic, rosemary & Dijon crust" },
+          { q: 4, u: "", s: "w", t: ["garlic clove, finely minced", "garlic cloves, finely minced"] },
+          { q: 3, u: "tbsp", s: "w", t: "Dijon mustard" },
+          { q: 2, u: "tbsp", s: "w", t: "fresh rosemary, finely chopped" },
+          { q: 1, u: "tbsp", s: "w", t: "fresh thyme leaves" },
+          { q: 2, u: "tbsp", s: "w", t: "olive oil" },
+          { q: 0.33, u: "cup", s: "w", t: "panko breadcrumbs (optional, for extra crunch)" },
+          { q: 2, u: "tsp", s: "w", t: "kosher salt" },
+          { q: 1, u: "tsp", s: "w", t: "black pepper" }
+        ],
+        steps: [
+          "Shape the crown (the day before is easiest): stand each rack upright with the bones pointing up and the fat side facing out.",
+          "To help them bend, make small 1-inch cuts between the ribs at the base of the meat, on the inside of the curve.",
+          "Curve the racks into a circle and interlock the end bones where the racks meet, so they hold each other.",
+          "Tie butcher's twine snugly around the crown in two places: once around the base and once around the middle. Knot it securely.",
+          "Wrap each exposed bone tip in a small square of foil so it doesn't burn, and set a ball of foil in the centre to hold the shape. Refrigerate until needed.",
+          "On the day, take the lamb out of the fridge 1 hour before roasting and season it all over with the salt and pepper.",
+          "Stir together the garlic, Dijon, rosemary, thyme and olive oil and spread it over the outside of the meat. Press on the panko, if using.",
+          "Roast at 450°F (230°C) for 15 minutes, then turn the oven down to 375°F (190°C).",
+          p => `Roast until a thermometer in the thickest part of the meat (not touching bone) reads ${p.pull}°F for ${p.doneLabel.toLowerCase()}, about ${p.roastText} in total. Lamb cooks quickly, so start checking after 25 minutes.`,
+          p => `Rest ${p.rest} minutes, loosely tented with foil. It rises to about ${p.final}, tender and rosy pink.`,
+          "Remove the foil ball and bone caps, fill the centre with the roasted mushrooms and carve at the table by slicing between the bones."
+        ],
+        tip: "Lamb doneness (pull → after resting): Rare 120°F → 125°F · Medium-rare 130°F → 135°F · Medium 135°F → 140–145°F · Medium-well 145°F → 150°F. A 15-minute rest is crucial for juicy, pink meat."
+      },
+      {
+        id: "mushrooms", course: "In the crown", name: "Herb-Roasted Wild Mushrooms & Pearl Onions",
+        prep: "15 min", cook: "25 min", yieldText: f => servings(f),
+        ing: [
+          { q: 2, u: "lb", t: "mixed mushrooms (cremini, shiitake, oyster), trimmed and halved or torn" },
+          { q: 10, u: "oz", t: "frozen pearl onions, thawed and patted dry" },
+          { q: 2, u: "", t: ["shallot, thinly sliced", "shallots, thinly sliced"] },
+          { q: 4, u: "", t: ["garlic clove, sliced", "garlic cloves, sliced"] },
+          { q: 3, u: "tbsp", t: "olive oil" },
+          { q: 2, u: "tbsp", t: "unsalted butter, melted" },
+          { q: 1, u: "tbsp", t: "fresh thyme leaves" },
+          { q: 1, u: "tsp", t: "kosher salt" },
+          { q: 0.5, u: "tsp", t: "black pepper" },
+          { q: 1, u: "tbsp", t: "sherry vinegar or balsamic vinegar" },
+          { q: 2, u: "tbsp", t: "fresh flat-leaf parsley, chopped" }
+        ],
+        steps: [
+          "Heat the oven to 425°F (220°C).",
+          "Toss the mushrooms, pearl onions, shallots and garlic with the oil, butter, thyme, salt and pepper.",
+          "Spread on two large baking sheets so nothing is crowded.",
+          "Roast 25 minutes, stirring once, until golden and the edges are crisp.",
+          "Toss with the vinegar and parsley. Keep warm, and rewarm 5 minutes in the oven while the lamb rests.",
+          "Pile into the centre of the crown just before serving."
+        ],
+        tip: "Don't crowd the pans. Mushrooms need space to roast instead of steam."
+      },
+      {
+        id: "fingerlings", course: "Sides", name: "Lemon-Herb Roasted Fingerling Potatoes",
+        prep: "10 min", cook: "about 45 min", yieldText: f => servings(f),
+        ing: [
+          { q: 3, u: "lb", t: "fingerling potatoes, halved lengthwise" },
+          { q: 3, u: "tbsp", t: "olive oil" },
+          { q: 1, u: "tsp", t: "kosher salt" },
+          { q: 0.5, u: "tsp", t: "black pepper" },
+          { q: 1, u: "", t: ["lemon, zested and juiced", "lemons, zested and juiced"] },
+          { q: 2, u: "tbsp", t: "fresh parsley and chives, chopped" }
+        ],
+        steps: [
+          "Toss the potatoes with the oil, salt and pepper and spread cut side down on a baking sheet.",
+          "Roast on the lower rack alongside the lamb: 15 minutes at 450°F, then at 375°F until the lamb comes out.",
+          "While the lamb rests, turn the oven back up to 450°F and give the potatoes 10 more minutes until crisp.",
+          "Toss with the lemon zest, a squeeze of lemon juice and the herbs."
+        ],
+        tip: "Roasting on their own? 425°F for 30–35 minutes, cut side down, until golden."
+      },
+      {
+        id: "asparagus", course: "Sides", name: "Charred Asparagus with Lemon Zest",
+        prep: "5 min", cook: "8–10 min", yieldText: f => servings(f),
+        ing: [
+          { q: 2, u: "lb", t: "asparagus, woody ends snapped off" },
+          { q: 2, u: "tbsp", t: "olive oil" },
+          { q: 0.5, u: "tsp", t: "kosher salt" },
+          { q: 0.25, u: "tsp", t: "black pepper" },
+          { q: 1, u: "tsp", t: "lemon zest" },
+          { q: null, u: "", s: "n", t: "Flaky salt and a squeeze of lemon, to finish" }
+        ],
+        steps: [
+          "Toss the asparagus with the oil, salt and pepper on a baking sheet in a single layer.",
+          "Roast on the top rack at 450°F for 8–10 minutes, until tender with charred tips.",
+          "Finish with lemon zest, flaky salt and a squeeze of lemon."
+        ],
+        tip: "It roasts in the hot oven while the lamb rests."
+      },
+      {
+        id: "demiglace", course: "Main", name: "Quick Red Wine & Mint Demi-Glace",
+        prep: "5 min", cook: "30 min (make ahead)", yieldText: f => `about ${fmtCups(1.25 * f)}`,
+        ing: [
+          { q: 1, u: "tbsp", t: "olive oil" },
+          { q: 1, u: "", t: ["shallot, finely minced", "shallots, finely minced"] },
+          { q: 1, u: "", t: ["garlic clove, minced", "garlic cloves, minced"] },
+          { q: 1, u: "cup", t: "dry red wine" },
+          { q: 2.5, u: "cup", t: "low-sodium beef or lamb stock" },
+          { q: 2, u: "", t: ["sprig fresh rosemary", "sprigs fresh rosemary"] },
+          { q: 2, u: "tbsp", t: "cold unsalted butter" },
+          { q: 2, u: "tbsp", t: "fresh mint, finely chopped" },
+          { q: 1, u: "tsp", t: "red wine vinegar" },
+          { q: null, u: "", s: "n", t: "Kosher salt and black pepper, to taste" }
+        ],
+        steps: [
+          "Warm the oil in a saucepan and cook the shallot and garlic for 2 minutes.",
+          "Add the wine and simmer until reduced by half.",
+          "Add the stock and rosemary and simmer 20–25 minutes, until reduced to about a cup and glossy enough to coat a spoon.",
+          "Strain. You can refrigerate it now for up to 3 days.",
+          "To serve, rewarm it and stir in any juices from the roasting pan.",
+          "Off the heat, swirl in the butter, then the mint and vinegar. Season to taste."
+        ],
+        tip: "A true demi-glace takes hours; this quick reduction gives the same silky richness. Add the mint at the very end so it stays bright green."
+      },
+      {
+        id: "pavlova", course: "Dessert", name: "Winter Berry Pavlova",
+        prep: "20 min", cook: "1 hour 30 min, plus cooling in the oven", yieldText: (f, p) => p.pies > 1 ? `${p.pies} pavlovas (8 servings each)` : "one pavlova (8 servings)",
+        note: (f, p) => p.pies > 1 ? `Amounts below are for all ${p.pies} pavlovas. Bake each on its own tray.` : "",
+        ing: [
+          { q: 4, u: "", s: "p", t: ["large egg white, at room temperature", "large egg whites, at room temperature"] },
+          { q: 1, u: "cup", s: "p", t: "superfine (caster) sugar" },
+          { q: 2, u: "tsp", s: "p", t: "cornstarch" },
+          { q: 1, u: "tsp", s: "p", t: "white vinegar" },
+          { q: 1, u: "tsp", s: "p", t: "vanilla extract" },
+          { head: "Topping" },
+          { q: 1.5, u: "cup", s: "p", t: "cold heavy cream" },
+          { q: 2, u: "tbsp", s: "p", t: "icing sugar" },
+          { q: 4, u: "cup", s: "p", t: "mixed berries (raspberries, blueberries, blackberries)" },
+          { q: null, u: "", s: "n", t: "Pomegranate seeds and mint leaves, to garnish" }
+        ],
+        steps: [
+          "Heat the oven to 250°F (120°C). Draw an 8-inch circle on parchment and flip it over onto a baking sheet.",
+          "Beat the egg whites to soft peaks. Add the sugar a spoonful at a time, beating until thick, glossy and the sugar has dissolved (rub a little between your fingers; it should feel smooth).",
+          "Beat in the cornstarch, vinegar and vanilla.",
+          "Spread the meringue inside the circle, building up the sides to make a shallow nest.",
+          "Bake 1 hour 30 minutes, then turn the oven off and leave the pavlova inside, door closed, until completely cool (or overnight).",
+          "Just before serving, whip the cream with the icing sugar to soft peaks, pile it into the nest and top with berries, pomegranate seeds and mint."
+        ],
+        tip: "Naturally gluten-free. Bake it the day before and store it airtight at room temperature, never in the fridge. Top it only at the last minute so it stays crisp."
+      }
+    ],
+
+    timeline(p) {
+      const out = [], R = p.roast, tOut = -(p.rest + 5), tIn = tOut - R;
+      const add = (m, icon, text, alarm = true, main = false) => out.push({ m, icon, text, alarm, main });
+      add(Math.min(-120, tIn - 60), "🐑", "Take the lamb crown out of the fridge");
+      add(-120, "🔥", "Heat the oven to 425°F");
+      add(-105, "🍄", "Mushrooms and pearl onions into the oven (25 minutes)");
+      add(-90, "🐑", "Season the lamb and spread on the garlic-rosemary-Dijon crust");
+      add(-80, "🍄", "Mushrooms out. Keep them warm");
+      add(-78, "🥖", "Crostini into the oven (toast 5 min, then add cheese and fig for 5 min)");
+      add(-70, "🐟", "Assemble the smoked salmon bites");
+      add(-65, "🔥", "Crostini out. Turn the oven up to 450°F for the lamb");
+      add(-62, "🍸", "Mix the spritz base. Set out the rosemary syrup and Prosecco");
+      add(-60, "🥂", "Drinks and appetizers out for arriving guests");
+      add(tIn - 5, "🥔", "Toss the fingerling potatoes with oil and seasoning");
+      add(tIn, "🐑", `Lamb crown in on the middle rack and potatoes below, at 450°F (about ${p.roastText} in total)`, true, true);
+      add(tIn + 15, "🌡️", "Turn the oven down to 375°F");
+      add(Math.max(tIn + 25, tOut - 12), "🌡️", `Start checking the lamb: pull it at ${p.pull}°F for ${p.doneLabel.toLowerCase()}`);
+      add(tOut, "🐑", "Lamb out to rest 15 minutes. Oven up to 450°F");
+      add(tOut + 2, "🥬", "Asparagus in on the top rack. Mushrooms back in to rewarm");
+      add(-14, "🍷", "Rewarm the demi-glace with the pan juices; finish with butter and mint");
+      add(-8, "🥔", "Asparagus and potatoes out. Toss the potatoes with lemon and herbs");
+      add(-5, "🐑", "Fill the crown with mushrooms and bring it to the table to carve");
+      add(0, "🍽️", "Dinner is served!");
+      add(45, "🍓", "Whip the cream and top the pavlova with berries");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) {
+      return [
+        [Math.max(2, p.thawDays + 1), 9, "🧊", `Pick up the lamb racks. If they're frozen, move them to the fridge to thaw today (about ${p.thawDays} ${p.thawDays === 1 ? "day" : "days"})`],
+        [1, 10, "📋", `Prep day: bake ${p.pies > 1 ? p.pies + " pavlovas" : "the pavlova"} and leave to cool in the oven, tie the lamb crown, make the demi-glace and rosemary syrup, make the dill cream and toast the crostini bread`]
+      ];
+    },
+
+    shop(f, p) {
+      const wf = p.w / 3.5, up = (x, step = 1) => Math.ceil(x / step - 1e-9) * step, n = x => Math.max(1, Math.ceil(x - 1e-9));
+      const pl = (k, one, many) => k > 1 ? many : one;
+      const cloves = 4 * wf + 4 * f + 1 * f, garlic = n(cloves / 10), shallots = n(3 * f), mush = up(2 * f, 0.5), pearl = n(10 * f / 14);
+      const fing = up(3 * f, 0.5), asp = up(2 * f, 0.5), lemons = n(1.5 * f), limes = n(4 * f), cukes = n(f) + n(f / 2);
+      const berries = n(4 * f), salmon = n(f), goat = n(2 * f), cc = n(f / 2), sour = 1;
+      const cream = n(1.5 * p.pies / 2), sticks = n(4 * f / 8), eggs = 4 * p.pies;
+      const stock = n(2.5 * f / 4), wine = n(f / 3), bag = n(f), sugarC = up(1 * p.pies + 0.5 * f, 0.25);
+      const prosecco = n(f), pj = n(f / 4), fizz = n(f);
+      return [
+        ["Meat & Seafood", [
+          [`${p.racks} racks`, `frenched racks of lamb, 8 ribs each (about ${fmtNum(p.w)} lb total)`, p.racks * 25],
+          [`${salmon} × 8 oz`, "smoked salmon", salmon * 12]
+        ]],
+        ["Produce", [
+          [`${fmtNum(mush)} lb`, "mixed mushrooms (cremini, shiitake, oyster)", mush * 8],
+          [`${garlic}`, pl(garlic, "head garlic", "heads garlic"), garlic],
+          [`${shallots}`, "shallots", shallots * 0.75],
+          [`${fmtNum(fing)} lb`, "fingerling potatoes", fing * 3],
+          [`${fmtNum(asp)} lb`, "asparagus", asp * 5],
+          [`${cukes}`, "English cucumbers", cukes * 1.5],
+          [`${lemons}`, pl(lemons, "lemon", "lemons"), lemons],
+          [`${limes}`, "limes", limes * 0.6],
+          [`${berries} × 170 g`, "containers mixed berries (raspberries, blueberries, blackberries)", berries * 5],
+          ["1", "pomegranate, for garnish", 3],
+          [`${n((2 * wf + 3 * f + 3) / 6)}`, "bunch fresh rosemary (extra for drinks and garnish)", n((2 * wf + 3 * f + 3) / 6) * 3],
+          [`${n((wf + 1.5 * f) / 8)}`, "bunch fresh thyme", n((wf + 1.5 * f) / 8) * 3],
+          [`${n(f)}`, pl(n(f), "bunch fresh mint", "bunches fresh mint"), n(f) * 3],
+          ["1", "bunch fresh dill", 3],
+          ["1", "bunch fresh flat-leaf parsley", 2],
+          ["1", "bunch fresh chives", 3]
+        ]],
+        ["Frozen", [[`${pearl} × 400 g`, pl(pearl, "bag frozen pearl onions", "bags frozen pearl onions"), pearl * 4]]],
+        ["Dairy & Refrigerated", [
+          [`${goat} × 4 oz`, "soft goat cheese logs", goat * 5],
+          [`${cc} × 8 oz`, "cream cheese", cc * 4.5],
+          [`${sour} × 250 ml`, "sour cream", sour * 2.5],
+          [`${cream} × 500 ml`, "heavy cream", cream * 4.5],
+          [`${sticks}`, pl(sticks, "stick unsalted butter", "sticks unsalted butter"), sticks * 1.75],
+          [`${eggs}`, "large eggs (for the egg whites)", eggs * 0.45]
+        ]],
+        ["Pantry, Grains & Spices", [
+          [`${bag}`, pl(bag, "baguette", "baguettes"), bag * 3.5],
+          ["1", "jar fig jam", 6],
+          ["1", "small jar capers", 4],
+          [`${stock} × 1 L`, "low-sodium beef or lamb stock", stock * 3.5],
+          ["1", "small box panko breadcrumbs (optional)", 3],
+          [cupsT(sugarC), "superfine (caster) sugar", sugarC * 0.6],
+          ["", "Dijon mustard, olive oil, honey", null],
+          ["", "sherry or balsamic vinegar, red wine vinegar, white vinegar", null],
+          ["", "cornstarch, vanilla extract, icing sugar", null],
+          ["", "kosher salt, flaky salt, black pepper", null]
+        ]],
+        ["Wine, Spirits & Mixers", [
+          [`${prosecco} × 750 ml`, pl(prosecco, "bottle Prosecco", "bottles Prosecco"), prosecco * 16],
+          [`${wine}`, pl(wine, "bottle dry red wine (for the demi-glace)", "bottles dry red wine (for the demi-glace)"), wine * 14],
+          [`${pj} × 946 ml`, "pomegranate juice", pj * 6],
+          [`${fizz} × 1 L`, "sparkling water", fizz * 1.75],
+          ["", "optional: Bordeaux, Rioja Reserva or Syrah; Sauvignon Blanc; ice wine", null]
+        ]],
+        ["Baking & Miscellaneous", [
+          ["", "butcher's twine and heavy-duty aluminum foil", null],
+          ["", "instant-read meat thermometer", null],
+          ["", "roasting pan, 3 large baking sheets, parchment paper", null],
+          ["", "piping bag (optional), paper frills for the bones (optional)", null]
+        ]]
+      ];
+    }
+  };
+
+  // sizes for a lamb crown: about 2 ribs per guest, racks of 8 ribs; 2 crowns for big groups
+  function lambCrownPlan(guests, c = {}) {
+    const g = Math.min(20, Math.max(1, guests | 0)), f = g / 8;
+    const racks = Math.max(2, Math.ceil(g * 2 / 8)), crowns = racks > 3 ? 2 : 1, w = racks * 1.75;
+    const d = LAMB_DONENESS.find(x => x[0] === c.doneness) || LAMB_DONENESS[1];
+    const per = racks / crowns, base = per <= 2 ? 35 : 35 + (per - 2) * 10;
+    const roast = Math.round((base * d[4] + (crowns > 1 ? 5 : 0)) / 5) * 5;
+    return { g, f, w, wBase: 3.5, icon: "🐑", meat: `lamb crown (${racks * 8} ribs${crowns > 1 ? ", 2 crowns" : ""})`, verb: "roasts",
+      bigNote: `Pull it out at ${d[2]}°F for ${d[1].toLowerCase().replace("med-", "medium-")}. It rises to about ${d[3]} as it rests.`,
+      roast, roastText: hm(roast), rest: 15, thawDays: 1, pies: Math.max(1, Math.ceil(g / 8)), dishes: 1,
+      ribs: racks * 8, racks, crowns, pull: d[2], final: d[3], doneLabel: d[1].replace("Med-", "Medium-") };
+  }
+
   // sizes for a turkey dinner: weight, roast time, rest, pies, dishes
   function turkeyPlan(guests) {
     const g = Math.min(20, Math.max(1, guests | 0));
@@ -4463,12 +4825,12 @@ window.NOEL_MEALS = (function () {
       turkey,
       primerib,
       ham,
-      placeholder("lambcrown", "elegant", "Crown Roast of Lamb", "👑", "Recipe coming soon."),
+      lambcrown,
       porkcrown,
       placeholder("vegan1", "vegan", "Vegan Holiday Dinner", "🌱", "Recipes coming soon."),
       placeholder("diet1", "dietary", "Dietary Holiday Dinner", "🥗", "Recipes coming soon.")
     ],
-    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan },
+    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan },
     doneness: DONENESS,
     frac, hm, fmtNum
   };
@@ -7411,7 +7773,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         <div class="meal-row two">
           <label><span class="meal-lab">Dinner date</span><input class="input" type="date" id="mealDate" value="${c.date}"></label>
           <label><span class="meal-lab">Dinner time</span><input class="input" type="time" id="mealTime" value="${c.time}"></label></div>
-        ${m.options && m.options.doneness ? `<span class="meal-lab">How do you like it?</span><div class="seg seg4 sub-tabs meal-done" role="group" aria-label="Doneness">${MD.doneness.map(([k, l]) => `<button type="button" data-done="${k}" aria-pressed="${c.doneness === k}">${l}</button>`).join("")}</div>` : ""}
+        ${m.options && m.options.doneness ? `<span class="meal-lab">How do you like it?</span><div class="seg seg4 sub-tabs meal-done" role="group" aria-label="Doneness">${(Array.isArray(m.options.doneness) ? m.options.doneness : MD.doneness).map(([k, l]) => `<button type="button" data-done="${k}" aria-pressed="${c.doneness === k}">${l}</button>`).join("")}</div>` : ""}
         ${m.options && m.options.gf ? `<label class="meal-gf"><input type="checkbox" id="mealGf" ${c.gf ? "checked" : ""}> Make it gluten-free</label>` : ""}
         ${p.w ? `<p class="meal-sum">${p.icon} <b>${p.w} lb ${p.meat}</b> · ${p.verb} about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.bigNote ? `<br><small>${p.bigNote}</small>` : ""}</p>` : ""}
         <div class="send-btns">
