@@ -332,68 +332,78 @@ window.NOEL_MEALS = (function () {
       ];
     },
 
-    // 🛒 Shopping list for f = guests ÷ 8, w = turkey lb, pies
+    // 🛒 Shopping list for f = guests ÷ 8, w = turkey lb, pies.
+    // Each line: [amount, item, estimated price in CAD (null = pantry staple, not counted)]
+    // ✏️ Prices are rough Canadian grocery estimates (fall 2026). Buyers can tap a price to change it.
     shop(f, p) {
       const wf = p.w / 13, up = (x, step = 1) => Math.ceil(x / step - 1e-9) * step, n = x => Math.max(1, Math.ceil(x - 1e-9));
-      const lb = x => `${fmtNum(up(x, 0.5))} lb`;
       const butterTbsp = 8 * wf + 9 * f + 8 * f + 3 * f + 8 * p.pies + 2;
       const sticks = n(butterTbsp / 8);
       const creamCups = 0.5 * f + 2 * p.pies, milkCups = 1 * f + 0.5 * p.pies;
       const stockCups = 2 + 5 * f + 2.75 * f;
       const cloves = 3 * wf + 3 * f + 6 * f + 1 * f;
+      const onions = 2 + n(2 * f), celery = n((2 + 3 * f) / 8), garlic = 1 + n(cloves / 10);
+      const pot = up(4 * f, 0.5), spr = up(2 * f, 0.5), car = up(2 * f + 0.25, 0.5), cran = n(f);
+      const lemons = Math.max(2, 1 + n(f / 2)), oranges = n(f) + n(f);
+      const sage = n((2 * wf + 2 * f + 2) / 8), thyme = n((wf + 1.7 * f + 2) / 8), rose = n((wf + 2 + f) / 6), pars = n((2 * wf + 5 * f) / 16), chive = n(4 * f / 8);
+      const cream = n(creamCups / 2), milk = n(milkCups / 4), eggs = up(2 * f) + 3 * p.pies, cc = n(f);
+      const stock = n(stockCups / 4), bread = n(f), bag = n(f);
+      const flour = up(0.25 * f + 1.5 * p.pies, 0.5), sugar = up(0.75 * f + 0.2 * p.pies, 0.25), brown = up(0.75 * p.pies, 0.25);
+      const cj = up(f, 0.5), oj = up(2.75 * f / 4, 0.5), fizz = up(f, 0.5);
+      const pl = (k, one, many) => k > 1 ? many : one;
       return [
         ["Produce", [
-          [`${2 + n(2 * f)}`, "yellow onions"],
-          [`${n((2 + 3 * f) / 8)}`, n((2 + 3 * f) / 8) > 1 ? "bunches celery" : "bunch celery"],
-          [`${1 + n(cloves / 10)}`, "heads garlic"],
-          [lb(4 * f), "Yukon Gold potatoes"],
-          [lb(2 * f), "Brussels sprouts"],
-          [lb(2 * f + 0.25), "carrots"],
-          [`${n(f)} × 12 oz`, n(f) > 1 ? "bags fresh cranberries (plus a handful for the punch)" : "bag fresh cranberries (plus a handful for the punch)"],
-          [`${Math.max(2, 1 + n(f / 2))}`, "lemons"],
-          [`${n(f) + n(f)}`, "oranges"],
-          [`${n((2 * wf + 2 * f + 2) / 8)}`, "bunch fresh sage"],
-          [`${n((wf + 1.7 * f + 2) / 8)}`, "bunch fresh thyme"],
-          [`${n((wf + 2 + f) / 6)}`, "bunch fresh rosemary"],
-          [`${n((2 * wf + 5 * f) / 16)}`, "bunch fresh flat-leaf parsley"],
-          [`${n(4 * f / 8)}`, "bunch fresh chives"]
+          [`${onions}`, "yellow onions", onions * 0.6],
+          [`${celery}`, pl(celery, "bunch celery", "bunches celery"), celery * 3.5],
+          [`${garlic}`, "heads garlic", garlic * 1],
+          [`${fmtNum(pot)} lb`, "Yukon Gold potatoes", pot * 1.1],
+          [`${fmtNum(spr)} lb`, "Brussels sprouts", spr * 4],
+          [`${fmtNum(car)} lb`, "carrots", car * 1],
+          [`${cran} × 12 oz`, pl(cran, "bag fresh cranberries (plus a handful for the punch)", "bags fresh cranberries (plus a handful for the punch)"), cran * 4.5],
+          [`${lemons}`, "lemons", lemons * 1],
+          [`${oranges}`, "oranges", oranges * 1],
+          [`${sage}`, pl(sage, "bunch fresh sage", "bunches fresh sage"), sage * 3],
+          [`${thyme}`, pl(thyme, "bunch fresh thyme", "bunches fresh thyme"), thyme * 3],
+          [`${rose}`, pl(rose, "bunch fresh rosemary", "bunches fresh rosemary"), rose * 3],
+          [`${pars}`, pl(pars, "bunch fresh flat-leaf parsley", "bunches fresh flat-leaf parsley"), pars * 2],
+          [`${chive}`, pl(chive, "bunch fresh chives", "bunches fresh chives"), chive * 3]
         ]],
-        ["Meat", [[`${p.w} lb`, "whole turkey (fresh, or frozen and thawed in time)"]]],
+        ["Meat", [[`${p.w} lb`, "whole turkey (fresh, or frozen and thawed in time)", p.w * 3.3]]],
         ["Dairy & Refrigerated", [
-          [`${sticks} sticks`, `unsalted butter (${fmtNum(up(sticks / 4, 0.25))} lb)`],
-          [`${fmtNum(up(creamCups, 0.5))} cups`, `heavy cream (${n(creamCups / 2)} × 500 ml / 1 pint)`],
-          [`${fmtNum(up(milkCups, 0.5))} cups`, `whole milk (${n(milkCups / 4)} × 1 L / 1 quart)`],
-          [`${up(2 * f) + 3 * p.pies}`, "large eggs"],
-          [`${n(f)} × 8 oz`, "cream cheese"]
+          [`${sticks} sticks`, `unsalted butter (${fmtNum(up(sticks / 4, 0.25))} lb)`, sticks * 1.75],
+          [`${fmtNum(up(creamCups, 0.5))} cups`, `heavy cream (${cream} × 500 ml)`, cream * 4.5],
+          [`${fmtNum(up(milkCups, 0.5))} cups`, `whole milk (${milk} × 1 L)`, milk * 2.8],
+          [`${eggs}`, "large eggs", eggs * 0.45],
+          [`${cc} × 8 oz`, "cream cheese", cc * 4.5]
         ]],
         ["Pantry & Dry Goods", [
-          [`${n(stockCups / 4)} × 1 L`, `low-sodium chicken or turkey stock (about ${Math.ceil(stockCups)} cups)`],
-          [`${n(f)} × 1 lb`, "crusty white or sourdough bread"],
-          [`${n(f)}`, n(f) > 1 ? "French baguettes" : "French baguette"],
-          [`${p.pies} × 15 oz`, p.pies > 1 ? "cans pure pumpkin purée" : "can pure pumpkin purée"],
-          [`${fmtNum(up(0.25 * f + 1.5 * p.pies, 0.5))} cups`, "all-purpose flour"],
-          [`${fmtNum(up(0.75 * f + 0.2 * p.pies, 0.25))} cups`, "granulated sugar"],
-          [`${fmtNum(up(0.75 * p.pies, 0.25))} cups`, "brown sugar"],
-          [`${Math.ceil(3 * f)} tbsp`, "honey"],
-          [`${Math.ceil(6 * f)} tbsp`, "olive oil"],
-          ["", "vanilla extract"],
-          ["", "balsamic vinegar (optional)"],
-          ["", "kosher salt and black pepper"],
-          ["", "ground cinnamon (plus a cinnamon stick, optional)"],
-          ["", "ground ginger, ground nutmeg, ground cloves"]
+          [`${stock} × 1 L`, `low-sodium chicken or turkey stock (about ${Math.ceil(stockCups)} cups)`, stock * 3.5],
+          [`${bread} × 1 lb`, pl(bread, "loaf crusty white or sourdough bread", "loaves crusty white or sourdough bread"), bread * 4.5],
+          [`${bag}`, pl(bag, "French baguette", "French baguettes"), bag * 3.5],
+          [`${p.pies} × 15 oz`, pl(p.pies, "can pure pumpkin purée", "cans pure pumpkin purée"), p.pies * 3.5],
+          [`${fmtNum(flour)} cups`, "all-purpose flour", flour * 0.25],
+          [`${fmtNum(sugar)} cups`, "granulated sugar", sugar * 0.4],
+          [`${fmtNum(brown)} cups`, "brown sugar", brown * 0.6],
+          [`${Math.ceil(3 * f)} tbsp`, "honey", Math.ceil(3 * f) * 0.3],
+          [`${Math.ceil(6 * f)} tbsp`, "olive oil", Math.ceil(6 * f) * 0.25],
+          ["", "vanilla extract", null],
+          ["", "balsamic vinegar (optional)", null],
+          ["", "kosher salt and black pepper", null],
+          ["", "ground cinnamon (plus a cinnamon stick, optional)", null],
+          ["", "ground ginger, ground nutmeg, ground cloves", null]
         ]],
         ["Drinks", [
-          [`${fmtNum(up(4 * f / 4, 0.5))} L`, "cranberry juice"],
-          [`${fmtNum(up(2.75 * f / 4, 0.5))} L`, "orange juice"],
-          [`${fmtNum(up(4 * f / 4, 0.5))} L`, "sparkling water or ginger ale"],
-          ["", "optional: sparkling apple cider, wine (1 bottle for every 3–4 adults), coffee, tea"]
+          [`${fmtNum(cj)} L`, "cranberry juice", cj * 3.5],
+          [`${fmtNum(oj)} L`, "orange juice", oj * 4.5],
+          [`${fmtNum(fizz)} L`, "sparkling water or ginger ale", fizz * 1.75],
+          ["", "optional: sparkling apple cider, wine (1 bottle for every 3–4 adults), coffee, tea", null]
         ]],
         ["Kitchen Supplies", [
-          ["", "instant-read meat thermometer"],
-          ["", "large roasting pan with a rack"],
-          [`${p.dishes}`, p.dishes > 1 ? "baking dishes (9×13-inch)" : "baking dish (9×13-inch)"],
-          [`${p.pies}`, p.pies > 1 ? "pie dishes (9-inch)" : "pie dish (9-inch)"],
-          ["", "kitchen twine, foil, parchment paper, pie weights or dried beans"]
+          ["", "instant-read meat thermometer", null],
+          ["", "large roasting pan with a rack", null],
+          [`${p.dishes}`, pl(p.dishes, "baking dish (9×13-inch)", "baking dishes (9×13-inch)"), null],
+          [`${p.pies}`, pl(p.pies, "pie dish (9-inch)", "pie dishes (9-inch)"), null],
+          ["", "kitchen twine, foil, parchment paper, pie weights or dried beans", null]
         ]]
       ];
     }
