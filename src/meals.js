@@ -34,7 +34,7 @@
   }
   function cfgFor(id) {
     const c = mealCfg[id] || {};
-    return { guests: Math.min(20, Math.max(1, +c.guests || 12)), date: c.date || nextXmasDate(), time: c.time || "17:00" };
+    return { guests: Math.min(20, Math.max(1, +c.guests || 12)), date: c.date || nextXmasDate(), time: c.time || "17:00", doneness: c.doneness || "mediumrare", gf: !!c.gf };
   }
   const dinnerAt = c => { const [y, mo, d] = c.date.split("-").map(Number), [h, mi] = c.time.split(":").map(Number); return new Date(y, mo - 1, d, h, mi).getTime(); };
   const mclock = t => new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
@@ -60,11 +60,11 @@
   }
   const val = (x, f, p) => typeof x === "function" ? x(f, p) : x;
 
-  function mealSizes(m, guests) { return MD.plan[m.id] ? MD.plan[m.id](guests) : { g: guests, f: guests / 8, pies: 1, dishes: 1 }; }
+  function mealSizes(m, c) { return MD.plan[m.id] ? MD.plan[m.id](c.guests, c) : { g: c.guests, f: c.guests / 8, pies: 1, dishes: 1 }; }
 
   // ---- the day's alarms, as real times ----
   function buildSteps(m, c) {
-    const p = mealSizes(m, c.guests), D = dinnerAt(c), out = [];
+    const p = mealSizes(m, c), D = dinnerAt(c), out = [];
     m.ahead(p).forEach(([days, hour, icon, text], i) => {
       const d = new Date(D); d.setDate(d.getDate() - days); d.setHours(hour, 0, 0, 0);
       out.push({ k: "a" + i, t: d.getTime(), icon, text, alarm: true, ahead: true });
@@ -97,7 +97,7 @@
   }
 
   function renderMealDetail(m) {
-    const c = cfgFor(m.id), p = mealSizes(m, c.guests), f = p.f, D = dinnerAt(c);
+    const c = cfgFor(m.id), p = mealSizes(m, c), f = p.f, D = dinnerAt(c);
     const active = mealPlan && mealPlan.id === m.id;
     const steps = buildSteps(m, c), tIn = steps.find(s => s.main);
     const panes = [["timeline", "⏰ Timeline"], ["shop", "🛒 Shopping"], ["recipes", "📖 Recipes"], ["menu", "🥂 Menu"]];
@@ -135,6 +135,8 @@
         <div class="meal-row two">
           <label><span class="meal-lab">Dinner date</span><input class="input" type="date" id="mealDate" value="${c.date}"></label>
           <label><span class="meal-lab">Dinner time</span><input class="input" type="time" id="mealTime" value="${c.time}"></label></div>
+        ${m.options && m.options.doneness ? `<span class="meal-lab">How do you like it?</span><div class="seg seg4 sub-tabs meal-done" role="group" aria-label="Doneness">${MD.doneness.map(([k, l]) => `<button type="button" data-done="${k}" aria-pressed="${c.doneness === k}">${l}</button>`).join("")}</div>` : ""}
+        ${m.options && m.options.gf ? `<label class="meal-gf"><input type="checkbox" id="mealGf" ${c.gf ? "checked" : ""}> Make it gluten-free</label>` : ""}
         ${p.w ? `<p class="meal-sum">${p.icon} <b>${p.w} lb ${p.meat}</b> · ${p.verb} about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.bigNote ? `<br><small>${p.bigNote}</small>` : ""}</p>` : ""}
         <div class="send-btns">
           ${active ? `<button type="button" class="btn btn-ghost" id="mealStop">⏹ Stop dinner alarms</button>` : `<button type="button" class="btn btn-red" id="mealStart">⏰ Start my dinner alarms</button>`}
@@ -144,7 +146,7 @@
       </div>
       <div class="seg seg4 sub-tabs" id="mealPanes">${panes.map(([k, l]) => `<button type="button" data-mpane="${k}" aria-pressed="${k === pane}">${l}</button>`).join("")}</div>
       <div class="card meal-body">${body}</div>`;
-    if (active && (mealPlan.guests !== c.guests || mealPlan.at !== D)) $("#mealDetail .meal-on").innerHTML = "⚠️ You changed the guests or time. Tap <b>Stop</b>, then <b>Start</b> again to update the alarms.";
+    if (active && (mealPlan.guests !== c.guests || mealPlan.at !== D || (m.options && (mealPlan.doneness !== c.doneness || !!mealPlan.gf !== c.gf)))) $("#mealDetail .meal-on").innerHTML = "⚠️ You changed your dinner details. Tap <b>Stop</b>, then <b>Start</b> again to update the alarms.";
   }
 
   function shopTotalHtml(ps, guests) {
@@ -166,7 +168,7 @@
     const c = cfgFor(m.id), D = dinnerAt(c), now = Date.now();
     if (D < now) { toast("🕰️ That dinner time has passed. Pick a time in the future."); return; }
     const steps = buildSteps(m, c).map(s => ({ k: s.k, t: s.t, icon: s.icon, text: s.text, alarm: s.alarm, fired: s.t <= now }));
-    mealPlan = { id: m.id, name: m.name, guests: c.guests, at: D, steps };
+    mealPlan = { id: m.id, name: m.name, guests: c.guests, at: D, doneness: c.doneness, gf: c.gf, steps };
     save("mealPlan", mealPlan); syncMealNative(); getAudio();
     const missed = steps.filter(s => s.fired).length;
     toast(missed ? `⏰ Dinner alarms set. ${missed} earlier step${missed > 1 ? "s were" : " was"} already past.` : "⏰ Dinner alarms are set!");
@@ -219,9 +221,9 @@
 
   // ---- print (paper backup) ----
   function printMeal(m) {
-    const c = cfgFor(m.id), p = mealSizes(m, c.guests), f = p.f, steps = buildSteps(m, c);
+    const c = cfgFor(m.id), p = mealSizes(m, c), f = p.f, steps = buildSteps(m, c);
     let lastDay = "";
-    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} guests · dinner ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
+    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} guests · dinner ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
       <h2>Timeline</h2><table class="pm-tl">${steps.map(s => { const d = dayName(s.t), h = d !== lastDay ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; lastDay = d; return h + `<tr><td>${s.ahead ? "All day" : mclock(s.t)}</td><td>☐ ${esc(s.text)}</td></tr>`; }).join("")}</table>
       <h2>Shopping list</h2>${(ps => `<p><b>Estimated total: ${cad0(ps.total)} CAD</b> (about ${cad(ps.total / c.guests)} per guest)</p>` + ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join(""))(pricedShop(m, f, p))}
       <h2>Menu</h2>${m.menu.map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v.join(", "))}</p>`).join("")}
@@ -267,12 +269,14 @@
     const m = mealSel.id && mealById(mealSel.id); if (!m) return;
     const g = t.closest("[data-g]");
     if (g) { const c = cfgFor(m.id); c.guests = Math.min(20, Math.max(1, c.guests + +g.dataset.g)); mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
+    const dn = t.closest("[data-done]");
+    if (dn) { const c = cfgFor(m.id); c.doneness = dn.dataset.done; mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
     const pn = t.closest("[data-mpane]"); if (pn) { mealSel.pane = pn.dataset.mpane; save("mealSel", mealSel); renderMealDetail(m); return; }
     if (t.closest("#mealStart")) { startMealPlan(m); return; }
     if (t.closest("#mealStop")) { if (confirm("Stop all the dinner alarms for this meal?")) stopMealPlan(); return; }
     if (t.closest("#mealPrint")) { printMeal(m); return; }
     if (t.closest("#shopToBudget")) {
-      const c = cfgFor(m.id), p = mealSizes(m, c.guests), ps = pricedShop(m, p.f, p);
+      const c = cfgFor(m.id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
       const amt = Math.round(ps.total * 100) / 100, name = `${m.name} (${c.guests} guests)`;
       const it = foodBudget.items.find(x => x.meal === m.id);
       if (it) { it.name = name; it.amt = amt; } else foodBudget.items.push({ id: uid(), meal: m.id, name, amt });
@@ -285,6 +289,7 @@
   $("#view-meals").addEventListener("change", e => {
     const m = mealSel.id && mealById(mealSel.id); if (!m) return;
     const t = e.target;
+    if (t.id === "mealGf") { const c = cfgFor(m.id); c.gf = t.checked; mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
     if (t.id === "mealDate" || t.id === "mealTime") {
       const c = cfgFor(m.id); if (t.id === "mealDate" && t.value) c.date = t.value; if (t.id === "mealTime" && t.value) c.time = t.value;
       mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return;
@@ -304,7 +309,7 @@
     }
   });
   function refreshShopTotal(m) {
-    const c = cfgFor(m.id), p = mealSizes(m, c.guests), el = $("#shopTotal");
+    const c = cfgFor(m.id), p = mealSizes(m, c), el = $("#shopTotal");
     if (el) el.innerHTML = shopTotalHtml(pricedShop(m, p.f, p), c.guests);
   }
 
