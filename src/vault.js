@@ -21,11 +21,7 @@
   const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
   const enc = new TextEncoder(), dec = new TextDecoder();
 
-  function nativeStore() {
-    const C = window.Capacitor;
-    if (!C || !C.isNativePlatform || !C.isNativePlatform()) return null;
-    return (C.Plugins && C.Plugins.SecureStoragePlugin) || null;
-  }
+  const nativeStore = () => (window.NoelNative && NoelNative.plugin("SecureStoragePlugin")) || null;
 
   // ---- web: keep a non-exportable key in IndexedDB ----
   function idb(mode, fn) {

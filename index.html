@@ -7,6 +7,7 @@
 <!-- ============================================================
      ✏️ BRANDING: App name (browser tab + home-screen label)
      ============================================================ -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: capacitor:; script-src 'self' 'unsafe-inline' capacitor:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src data:; connect-src 'self' data: blob: capacitor:">
 <title>Noël Tier 1 Hub</title>
 <meta name="description" content="Your all-in-one Christmas companion: games, planner checklist and kitchen duty timers.">
 <meta name="apple-mobile-web-app-title" content="Noël Tier 1 Hub">
@@ -1629,7 +1630,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
           <option value="18">6:00 in the evening</option>
           <option value="19">7:00 in the evening</option>
         </select></label>
-      <p class="checkin-step"><b>One-time setup:</b> add the reminders to your phone's calendar so they pop up even when Noël is closed.</p>
+      <p class="checkin-step" id="checkinStep"><b>One-time setup:</b> add the reminders to your phone's calendar so they pop up even when Noël is closed.</p>
       <div class="send-btns">
         <a class="btn btn-green" id="checkinGoogle" target="_blank" rel="noopener">📅 Google Calendar</a>
         <button class="btn btn-ghost" id="checkinIcs" type="button">📅 Apple / other</button>
@@ -2451,6 +2452,81 @@ window.noelCrash = function (msg) {
 window.addEventListener("error", function (e) { window.noelCrash(e.message); });
 window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.reason && e.reason.message || e.reason); });
 </script>
+<script id="noel-native">
+/* ============================================================
+   📱 NOËL NATIVE: iPhone app extras (does nothing in a browser)
+   - Duty timers ring as phone notifications, even if Noël is closed.
+   - Weekly check-ins become phone reminders (no calendar or Google needed).
+   All reminders are scheduled on the phone itself. Nothing is sent anywhere.
+   ============================================================ */
+(function () {
+  "use strict";
+  const plugins = {};
+  function isNative() { const C = window.Capacitor; return !!(C && C.isNativePlatform && C.isNativePlatform()); }
+  function plugin(name) {
+    if (!isNative()) return null;
+    if (plugins[name]) return plugins[name];
+    const C = window.Capacitor, reg = (window.capacitorExports && window.capacitorExports.registerPlugin) || C.registerPlugin;
+    plugins[name] = reg ? reg(name) : (C.Plugins && C.Plugins[name]) || null;
+    return plugins[name];
+  }
+  const LN = () => plugin("LocalNotifications");
+  const DUTY_BASE = 1000, CHECKIN_BASE = 5000;
+
+  async function allowed() {
+    const ln = LN(); if (!ln) return false;
+    try {
+      let p = await ln.checkPermissions();
+      if (p.display === "prompt" || p.display === "prompt-with-rationale") p = await ln.requestPermissions();
+      return p.display === "granted";
+    } catch (e) { return false; }
+  }
+  async function cancelRange(lo, hi) {
+    const ln = LN(); if (!ln) return;
+    try {
+      const { notifications } = await ln.getPending();
+      const ids = (notifications || []).filter(n => n.id >= lo && n.id < hi).map(n => ({ id: n.id }));
+      if (ids.length) await ln.cancel({ notifications: ids });
+    } catch (e) { /* nothing pending */ }
+  }
+
+  let dutyQueue = Promise.resolve();
+  const Native = {
+    isNative,
+    plugin,
+    // called every time the timers are saved: phone alarms always match the app
+    syncDuties(duties) {
+      if (!isNative()) return;
+      dutyQueue = dutyQueue.then(async () => {
+        await cancelRange(DUTY_BASE, CHECKIN_BASE);
+        const now = Date.now();
+        const running = (duties || []).map((d, i) => ({ d, i })).filter(x => x.d.status === "running" && x.d.endAt > now + 1500);
+        if (!running.length || !(await allowed())) return;
+        await LN().schedule({ notifications: running.map(({ d, i }) => ({
+          id: DUTY_BASE + i,
+          title: `${d.icon || "⏰"} ${d.name || "Timer"}`,
+          body: "⏰ Time's up! Tap to open Noël.",
+          schedule: { at: new Date(d.endAt), allowWhileIdle: true }
+        })) });
+      }).catch(() => {});
+    },
+    // weekly "time to check in" reminders through Christmas
+    async scheduleCheckins(dates) {
+      if (!isNative()) return false;
+      if (!(await allowed())) return false;
+      await cancelRange(CHECKIN_BASE, CHECKIN_BASE + 100);
+      const now = Date.now(), future = dates.filter(d => d.getTime() > now).slice(0, 60);
+      if (future.length) await LN().schedule({ notifications: future.map((d, i) => ({
+        id: CHECKIN_BASE + i, title: "🎄 Time to check in!", body: "Open Noël to check your list, gifts and budget.",
+        schedule: { at: d, allowWhileIdle: true }
+      })) });
+      return true;
+    },
+    cancelCheckins: () => cancelRange(CHECKIN_BASE, CHECKIN_BASE + 100)
+  };
+  window.NoelNative = Native;
+})();
+</script>
 <script id="noel-vault">
 /* ============================================================
    🔐 NOËL VAULT: encrypted on-device storage
@@ -2475,11 +2551,7 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
   const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
   const enc = new TextEncoder(), dec = new TextDecoder();
 
-  function nativeStore() {
-    const C = window.Capacitor;
-    if (!C || !C.isNativePlatform || !C.isNativePlatform()) return null;
-    return (C.Plugins && C.Plugins.SecureStoragePlugin) || null;
-  }
+  const nativeStore = () => (window.NoelNative && NoelNative.plugin("SecureStoragePlugin")) || null;
 
   // ---- web: keep a non-exportable key in IndexedDB ----
   function idb(mode, fn) {
@@ -2747,11 +2819,11 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
 
     // phone share sheet (native app), else the browser's, else download
     async share(blob, name, text) {
-      const C = window.Capacitor, native = C && C.isNativePlatform && C.isNativePlatform();
-      if (native && C.Plugins.Filesystem && C.Plugins.Share) {
+      const N = window.NoelNative, fs = N && N.plugin("Filesystem"), sh = N && N.plugin("Share");
+      if (fs && sh) {
         const data = await new Promise(res => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.readAsDataURL(blob); });
-        const { uri } = await C.Plugins.Filesystem.writeFile({ path: name, data, directory: "CACHE" });
-        await C.Plugins.Share.share({ title: name, text, files: [uri] });
+        const { uri } = await fs.writeFile({ path: name, data, directory: "CACHE" });
+        await sh.share({ title: name, text, files: [uri] });
         return "shared";
       }
       const file = new File([blob], name, { type: blob.type });
@@ -2787,7 +2859,7 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
   let mode = "unlock", firstPin = "", resolveGate = null, tries = 0, waitUntil = 0, hiddenAt = 0;
 
   const cfg = () => { try { return JSON.parse(NoelVault.getItem(KEY) || "null"); } catch (e) { return null; } };
-  const bioPlugin = () => { const C = window.Capacitor; return C && C.isNativePlatform && C.isNativePlatform() && C.Plugins && C.Plugins.NativeBiometric || null; };
+  const bioPlugin = () => (window.NoelNative && NoelNative.plugin("NativeBiometric")) || null;
 
   async function hashPin(pin, salt) {
     const base = await crypto.subtle.importKey("raw", enc.encode(pin), "PBKDF2", false, ["deriveBits"]);
@@ -3044,6 +3116,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
   function save(key, value) {
     try { NoelVault.setItem(PREFIX + key, JSON.stringify(value)); } catch (e) { /* storage full or blocked */ }
+    if (key === KEYS.duties) NoelNative.syncDuties(value);   // 📱 phone alarms follow the timers
   }
 
   let toastTimer;
@@ -4712,10 +4785,21 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       "&text=" + encodeURIComponent("🎄 Time to check in!") + "&dates=" + icsDate(first) + "/" + icsDate(stop) +
       "&details=" + encodeURIComponent(details) + "&recur=" + encodeURIComponent("RRULE:FREQ=WEEKLY;UNTIL=" + icsDate(end));
     const next = seasonDates().find(d => d > new Date());
+    if (NoelNative.isNative()) {
+      $("#checkinGoogle").hidden = true;
+      $("#checkinIcs").textContent = checkin.phone ? "🔔 Reminders are on" : "🔔 Turn on reminders";
+      $("#checkinStep").innerHTML = "<b>One tap:</b> Noël reminds you every week through Christmas, even when it's closed.";
+    }
     $("#checkinNext").textContent = next ? `Next check-in: ${next.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} at ${next.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}` : "Check-ins are done for this season. Happy New Year! 🥂";
   }
-  $("#checkinHour").addEventListener("change", e => { checkin.hour = +e.target.value; save("checkin", checkin); renderCheckinCard(); toast("🔔 Reminder time saved. Add it to your calendar again to update it there."); });
-  $("#checkinIcs").addEventListener("click", () => {
+  $("#checkinHour").addEventListener("change", e => { checkin.hour = +e.target.value; save("checkin", checkin); renderCheckinCard();
+    if (NoelNative.isNative() && checkin.phone) { NoelNative.scheduleCheckins(seasonDates()); toast("🔔 Reminder time updated"); return; } toast("🔔 Reminder time saved. Add it to your calendar again to update it there."); });
+  $("#checkinIcs").addEventListener("click", async () => {
+    if (NoelNative.isNative()) {
+      if (await NoelNative.scheduleCheckins(seasonDates())) { checkin.phone = true; save("checkin", checkin); renderCheckinCard(); toast("🔔 Weekly reminders are on"); }
+      else toast("🔔 Please allow notifications for Noël in your iPhone Settings");
+      return;
+    }
     const { first, end, hubUrl } = calRange(), stop = new Date(first.getTime() + 15 * 60000);
     const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Earth & Wonder//Noel Tier 1 Hub//EN", "BEGIN:VEVENT",
       "UID:holidayhub-checkin-" + first.getFullYear() + "@earthandwonder", "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z",
@@ -5509,6 +5593,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const name = `Noel-Tier-1-Hub-Backup-${new Date().toISOString().slice(0, 10)}.json`;
     const blob = new Blob([backupText()], { type: "application/json" });
     const done = () => { save("lastBackup", Date.now()); showLastBackup(); toast("💾 Backup saved"); };
+    if (NoelNative.isNative()) {   // 📱 iPhone: share sheet → Save to Files, AirDrop, email…
+      try { if (await NoelMedia.share(blob, name, "My Noël Tier 1 Hub backup. Keep this file safe.") !== "cancelled") done(); }
+      catch (e) { /* closed the share sheet */ }
+      return;
+    }
     try {
       const file = new File([blob], name, { type: "application/json" });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {

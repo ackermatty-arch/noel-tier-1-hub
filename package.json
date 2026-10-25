@@ -1,0 +1,22 @@
+{
+  "name": "noel-tier-1-hub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Noël Tier 1 Hub: a private, offline holiday planner by Earth & Wonder",
+  "scripts": {
+    "build": "python3 build.py && python3 scripts/build_www.py",
+    "sync": "npm run build && npx cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.5.3",
+    "@capacitor/ios": "8.5.3",
+    "@capacitor/filesystem": "8.1.4",
+    "@capacitor/local-notifications": "8.3.1",
+    "@capacitor/share": "8.0.3",
+    "@capgo/capacitor-native-biometric": "8.8.1",
+    "capacitor-secure-storage-plugin": "0.13.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3"
+  }
+}
