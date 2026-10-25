@@ -1553,11 +1553,10 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
       </div>
       <div class="card send-card">
         <div class="step">3 · Send it</div>
-        <p class="tip" style="margin:6px 0 12px">Each card plays its own music when it opens. Pick who to send it to in your Messages or email app.</p>
+        <p class="tip" style="margin:6px 0 12px">The video shows your card flipping open with its own music. Send it by text, email or any app. Everything is made right here on your phone.</p>
         <div class="send-btns">
-          <button type="button" class="btn btn-red" id="cardText">💬 Send by text</button>
-          <button type="button" class="btn btn-green" id="cardEmail">✉️ Send by email</button>
-          <button type="button" class="btn btn-ghost" id="cardShare">📤 Share or copy the link</button>
+          <button type="button" class="btn btn-red" id="cardVideo">🎬 Share as a video</button>
+          <button type="button" class="btn btn-green" id="cardPicture">🖼️ Share as a picture</button>
         </div>
       </div>
       <!-- ✏️ Link to your Etsy shop: set SHOP_URL in the script -->
@@ -1602,11 +1601,11 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 
     <div class="card send-card">
       <div class="step">4 · Send it</div>
-      <p class="tip" style="margin:6px 0 12px">Tap 💬 or ✉️ beside a guest. Your Messages or email app opens with the invite ready, so you just press Send. Tap a guest's status to update their RSVP.</p>
+      <p class="tip" style="margin:6px 0 12px">Share your invite as a video (it flips open with music) or a picture. Tap 💬 or ✉️ beside a guest to send them the party details as a message. When guests reply, tap their status to update the RSVP.</p>
       <div class="send-btns">
-        <button type="button" class="btn btn-red" id="emailAll">✉️ Email everyone at once</button>
-        <button type="button" class="btn btn-green" id="shareInvite">📤 Share the invite link</button>
-        <button type="button" class="btn btn-ghost" id="copyInvite">🔗 Copy the link</button>
+        <button type="button" class="btn btn-red" id="invVideo">🎬 Share invite video</button>
+        <button type="button" class="btn btn-green" id="invPicture">🖼️ Share invite picture</button>
+        <button type="button" class="btn btn-ghost" id="emailAll">✉️ Email the details to everyone</button>
       </div>
     </div>
     </div>
@@ -2143,6 +2142,11 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="mediaBusy" hidden style="position:fixed;inset:0;z-index:300;background:rgba(19,40,30,.88);display:flex;align-items:center;justify-content:center;text-align:center;color:#F3EBDA;padding:30px">
+  <div><div style="font:italic 400 26px/1.3 Lora,Georgia,serif;color:#fff">Making your video…</div>
+  <div style="width:220px;height:3px;background:rgba(217,191,140,.25);margin:18px auto 12px"><div id="mediaBar" style="height:100%;width:0;background:#D9BF8C"></div></div>
+  <div style="font:300 13px/1.5 Poppins,sans-serif;opacity:.8">About 10 seconds. Please keep Noël open.</div></div>
+</div>
 
 <script>
 /* ============================================================
@@ -2560,6 +2564,208 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
   document.addEventListener("visibilitychange", () => { if (document.hidden) Vault.flush(); });
   window.addEventListener("pagehide", () => Vault.flush());
   window.NoelVault = Vault;
+})();
+</script>
+<script id="noel-media">
+/* ============================================================
+   🎬 NOËL MEDIA: turn a flip card or invite into a video or picture
+   - Everything is made on the phone. Nothing is uploaded.
+   - Video: the card fades in, flips open and plays its own music
+     (about 10 seconds, MP4 on iPhone).
+   - Picture: the front and inside side by side, as one image.
+   - Sharing opens the phone's share sheet (Messages, Mail, WhatsApp…).
+   ============================================================ */
+(function () {
+  "use strict";
+  const W = 360, H = 504;                       // card size used by the app (5:7)
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const frame = () => new Promise(r => requestAnimationFrame(() => r()));
+
+  // ---- the card's own styles + built-in fonts, so the snapshot looks identical ----
+  let cssCache = null;
+  function cardCss() {
+    if (cssCache) return cssCache;
+    let all = "";
+    document.querySelectorAll("style").forEach(s => { all += s.textContent + "\n"; });
+    const a = all.indexOf("💌 INVITE CARDS"), b = all.indexOf("/* ---------- 💌 Invites tab");
+    const cards = a > -1 && b > a ? all.slice(all.lastIndexOf("/*", a), b) : "";
+    const fonts = (document.getElementById("embeddedFonts") || {}).textContent || "";
+    cssCache = fonts + "\n" + cards +
+      "\n*{animation:none!important;transition:none!important}" +
+      ".inv{width:" + W + "px!important;margin:0!important}" +
+      ".inv .flip-inner{transform:none!important;width:" + W + "px;height:" + H + "px}" +
+      ".inv .face{transform:none!important;backface-visibility:visible!important;-webkit-backface-visibility:visible!important;box-shadow:none!important}" +
+      ".inv .rsvp,.inv .rsvp-name,.inv .hint{display:none!important}";
+    return cssCache;
+  }
+
+  function loadImg(src) {
+    return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("Could not draw the card")); i.src = src; });
+  }
+
+  // one face (front or inside) → an image at 2× sharpness
+  async function snapshot(face) {
+    const clone = face.cloneNode(true);
+    const html = '<div xmlns="http://www.w3.org/1999/xhtml" class="inv"><style>' + cardCss() + '</style>' +
+      '<div class="flip"><div class="flip-inner">' + new XMLSerializer().serializeToString(clone) + '</div></div></div>';
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W * 2 + '" height="' + H * 2 + '" viewBox="0 0 ' + W + ' ' + H + '">' +
+      '<foreignObject x="0" y="0" width="' + W + '" height="' + H + '">' + html + '</foreignObject></svg>';
+    const src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    await loadImg(src);           // first load warms up the fonts
+    await sleep(120);
+    return loadImg(src);
+  }
+
+  // build the card off screen with the app's own renderer, then photograph both sides
+  async function cardImages(buildEl) {
+    const host = document.createElement("div");
+    host.style.cssText = "position:fixed;left:-10000px;top:0;width:" + W + "px;pointer-events:none";
+    host.appendChild(buildEl());
+    document.body.appendChild(host);
+    try {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      await frame(); await frame();
+      const front = await snapshot(host.querySelector(".face.front"));
+      const inside = await snapshot(host.querySelector(".face.back"));
+      return { front, inside };
+    } finally { host.remove(); }
+  }
+
+  // ---- drawing helpers ----
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function drawCard(ctx, img, cx, cy, w, h, sx) {
+    const dw = Math.max(0.001, w * sx);
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,.38)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 18;
+    roundRect(ctx, cx - dw / 2, cy - h / 2, dw, h, 26 * Math.min(1, sx + .2)); ctx.fillStyle = "#fff"; ctx.fill();
+    ctx.restore();
+    ctx.save(); roundRect(ctx, cx - dw / 2, cy - h / 2, dw, h, 26 * Math.min(1, sx + .2)); ctx.clip();
+    ctx.drawImage(img, cx - dw / 2, cy - h / 2, dw, h);
+    if (sx < 1) { ctx.fillStyle = "rgba(0,0,0," + (0.35 * (1 - sx)).toFixed(3) + ")"; ctx.fillRect(cx - dw / 2, cy - h / 2, dw, h); }
+    ctx.restore();
+  }
+  // gentle gold sparkles that drift upward
+  const SPARKS = Array.from({ length: 34 }, (_, i) => ({ x: (i * 197) % 720, y: (i * 331) % 1280, r: 1.2 + (i % 4) * .7, s: 14 + (i % 5) * 7, p: i * .7 }));
+  function background(ctx, t, kicker) {
+    const g = ctx.createLinearGradient(0, 0, 720, 1280); g.addColorStop(0, "#21402F"); g.addColorStop(1, "#13281E");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 720, 1280);
+    SPARKS.forEach(s => {
+      const y = (s.y - t * s.s + 1280) % 1280, a = .25 + .35 * (0.5 + 0.5 * Math.sin(t * 1.6 + s.p));
+      ctx.fillStyle = "rgba(217,191,140," + a.toFixed(3) + ")"; ctx.beginPath(); ctx.arc(s.x, y, s.r, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.fillStyle = "#D9BF8C"; ctx.textAlign = "center";
+    ctx.font = "500 22px Poppins, sans-serif"; spaced(ctx, kicker, 360, 150, 7);
+    ctx.fillStyle = "rgba(243,235,218,.45)"; ctx.font = "300 17px Poppins, sans-serif"; spaced(ctx, "MADE WITH NOËL TIER 1 HUB", 360, 1215, 3);
+  }
+  function spaced(ctx, text, cx, y, gap) {          // letter-spaced capitals
+    const chars = [...text], widths = chars.map(c => ctx.measureText(c).width);
+    let x = cx - (widths.reduce((a, b) => a + b, 0) + gap * (chars.length - 1)) / 2;
+    ctx.textAlign = "left"; chars.forEach((c, i) => { ctx.fillText(c, x, y); x += widths[i] + gap; }); ctx.textAlign = "center";
+  }
+  const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+
+  function pickType() {
+    if (!window.MediaRecorder) return null;
+    return ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"]
+      .find(t => { try { return MediaRecorder.isTypeSupported(t); } catch (e) { return false; } }) || null;
+  }
+
+  const Media = {
+    canVideo: () => !!(pickType() && HTMLCanvasElement.prototype.captureStream),
+    cardImages,
+
+    // ⚠️ call straight from a tap so the phone allows the music to play
+    async video({ buildEl, songSrc, kicker, onProgress }) {
+      const type = pickType(); if (!type) throw new Error("no-video");
+      const AC = window.AudioContext || window.webkitAudioContext, ac = AC ? new AC() : null;
+      if (ac && ac.state === "suspended") ac.resume();
+      const { front, inside } = await cardImages(buildEl);
+      const canvas = document.createElement("canvas"); canvas.width = 720; canvas.height = 1280;
+      const ctx = canvas.getContext("2d");
+      const stream = canvas.captureStream(30);
+      let src = null, gain = null;
+      if (ac && songSrc) {
+        try {
+          const buf = await ac.decodeAudioData(await (await fetch(songSrc)).arrayBuffer());
+          const dest = ac.createMediaStreamDestination();
+          src = ac.createBufferSource(); src.buffer = buf; gain = ac.createGain();
+          src.connect(gain).connect(dest);
+          dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+        } catch (e) { src = null; }              // no music is better than no video
+      }
+      const DUR = 10, FLIP_AT = 3, FLIP = 1.2;
+      const cw = 540, ch = 756, cx = 360, cy = 660;
+      const draw = t => {
+        background(ctx, t, kicker);
+        const fade = Math.min(1, t / .6);
+        ctx.globalAlpha = fade;
+        const p = Math.min(1, Math.max(0, (t - FLIP_AT) / FLIP)), e = ease(p);
+        if (p < .5) drawCard(ctx, front, cx, cy, cw, ch, Math.cos(e * Math.PI));
+        else drawCard(ctx, inside, cx, cy, cw, ch, -Math.cos(e * Math.PI));
+        ctx.globalAlpha = Math.max(0, Math.min(1, (t - (DUR - .6)) / .6));   // soft fade to pine at the end
+        if (ctx.globalAlpha > 0) { ctx.fillStyle = "#13281E"; ctx.fillRect(0, 0, 720, 1280); }
+        ctx.globalAlpha = 1;
+      };
+      draw(0);
+      const chunks = [], rec = new MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 3500000 });
+      rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+      const done = new Promise(res => { rec.onstop = res; });
+      rec.start(250);
+      const t0 = performance.now();
+      if (src) { gain.gain.setValueAtTime(1, ac.currentTime + DUR - 1.2); gain.gain.linearRampToValueAtTime(0, ac.currentTime + DUR); src.start(); }
+      await new Promise(res => {
+        const step = () => {
+          const t = (performance.now() - t0) / 1000;
+          draw(Math.min(t, DUR)); if (onProgress) onProgress(Math.min(1, t / DUR));
+          if (t >= DUR) res(); else requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+        // keep drawing even if a frame is missed (e.g. screen dims)
+      });
+      rec.stop(); await done;
+      try { src && src.stop(); } catch (e) {}
+      stream.getTracks().forEach(t => t.stop()); if (ac) ac.close();
+      const mime = type.split(";")[0];
+      return { blob: new Blob(chunks, { type: mime }), ext: mime === "video/mp4" ? "mp4" : "webm" };
+    },
+
+    // front and inside, side by side
+    async picture({ buildEl }) {
+      const { front, inside } = await cardImages(buildEl);
+      const c = document.createElement("canvas"); c.width = 1600; c.height = 1180;
+      const ctx = c.getContext("2d");
+      ctx.fillStyle = "#FBF6EC"; ctx.fillRect(0, 0, c.width, c.height);
+      drawCard(ctx, front, 420, 560, 680, 952, 1);
+      drawCard(ctx, inside, 1180, 560, 680, 952, 1);
+      ctx.fillStyle = "rgba(30,58,47,.45)"; ctx.font = "300 22px Poppins, sans-serif"; ctx.textAlign = "center";
+      spaced(ctx, "MADE WITH NOËL TIER 1 HUB", 800, 1125, 4);
+      return new Promise(res => c.toBlob(res, "image/jpeg", 0.92));
+    },
+
+    // phone share sheet (native app), else the browser's, else download
+    async share(blob, name, text) {
+      const C = window.Capacitor, native = C && C.isNativePlatform && C.isNativePlatform();
+      if (native && C.Plugins.Filesystem && C.Plugins.Share) {
+        const data = await new Promise(res => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.readAsDataURL(blob); });
+        const { uri } = await C.Plugins.Filesystem.writeFile({ path: name, data, directory: "CACHE" });
+        await C.Plugins.Share.share({ title: name, text, files: [uri] });
+        return "shared";
+      }
+      const file = new File([blob], name, { type: blob.type });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], text }); return "shared"; }
+        catch (e) { if (e && e.name === "AbortError") return "cancelled"; }
+      }
+      const url = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      return "saved";
+    }
+  };
+  window.NoelMedia = Media;
 })();
 </script>
 <script id="noel-lock">
@@ -4767,10 +4973,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
 
   /* ============================================================
      💌 PARTY INVITES & GUEST LIST
-     Guests open INVITE_PAGE (invite.html), which must sit next to this
-     file on your website, so they never see or download the full Hub.
+     Invites are shared as a video or picture made on the phone,
+     so guests never need a website or an app.
      ============================================================ */
-  const INVITE_PAGE = "invite.html";   // ✏️ name of the guest invite page
   // ✏️ Party types in the picker ("Custom" is added automatically)
   const EVENTS = ["Christmas Party", "Christmas Dinner", "Cookie Exchange", "Ugly Sweater Party", "Holiday Open House", "New Year's Eve Party"];
   const DESIGNS = [
@@ -4800,10 +5005,41 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (!d.dt) return "Add the party date first.";
     return "";
   }
-  const invLink = () => new URL(INVITE_PAGE, location.href.split("#")[0]).href + "#i=" + INVITE.encode(invData());
-  function invMessage(withLink = true) {
+  function invMessage() {
     const d = invData();
-    return `You're invited! ${INVITE.emojiFor(d)} ${d.ev}${d.h ? " with " + d.h : ""} on ${INVITE.fmtDate(d.dt)}. Tap to open your invitation:` + (withLink ? " " + invLink() : "");
+    return `You're invited! ${INVITE.emojiFor(d)} ${d.ev}${d.h ? " with " + d.h : ""} on ${INVITE.fmtDate(d.dt)}` +
+      (d.tm ? ` at ${INVITE.fmtTime(d.tm)}` : "") + "." + (d.p ? ` Where: ${d.p}.` : "") + (d.n ? ` ${d.n}` : "") +
+      (d.r ? ` Please RSVP to ${d.r}.` : "");
+  }
+  // 🎬 the invite as the guest sees it, with the RSVP contact written on the inside
+  function inviteForMedia() {
+    const d = Object.assign({}, invData()); const r = d.r; delete d.r;
+    const el = INVITE.build(d, {});
+    if (r) { const n = document.createElement("div"); n.className = "note"; n.textContent = "RSVP to " + r; el.querySelector(".details").appendChild(n); }
+    return el;
+  }
+  async function makeAndShare(kind, buildEl, songKey, kicker, fileBase, text) {
+    try {
+      if (kind === "video") {
+        if (!NoelMedia.canVideo()) { toast("🖼️ This phone can't make videos here, so here's a picture instead"); kind = "picture"; }
+      }
+      if (kind === "video") {
+        getAudio(); if (!music.paused) pauseMusic();
+        $("#mediaBar").style.width = "0"; $("#mediaBusy").hidden = false;
+        const { blob, ext } = await NoelMedia.video({ buildEl, songSrc: inviteSong(songKey), kicker, onProgress: p => { $("#mediaBar").style.width = Math.round(p * 100) + "%"; } });
+        $("#mediaBusy").hidden = true;
+        const how = await NoelMedia.share(blob, `${fileBase}.${ext}`, text);
+        if (how === "saved") toast("🎬 Video saved to your downloads");
+      } else {
+        const blob = await NoelMedia.picture({ buildEl });
+        const how = await NoelMedia.share(blob, `${fileBase}.jpg`, text);
+        if (how === "saved") toast("🖼️ Picture saved to your downloads");
+      }
+    } catch (e) {
+      $("#mediaBusy").hidden = true;
+      if (e && (e.name === "AbortError" || /cancel/i.test(e.message || ""))) return;
+      console.error(e); toast("Sorry, that didn't work. Please try again.");
+    }
   }
   function guardInvite() { const p = invProblem(); if (p) { toast("✏️ " + p); $("#invDate").scrollIntoView({ behavior: "smooth", block: "center" }); return false; } return true; }
 
@@ -4912,10 +5148,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     Object.keys(d).forEach(k => { if (!d[k]) delete d[k]; });
     return d;
   }
-  const cardLink = () => new URL(INVITE_PAGE, location.href.split("#")[0]).href + "#c=" + INVITE.encode(cardData());
-  function cardMessage(withLink = true) {
+  function cardMessage() {
     const d = cardData();
-    return `${d.d === "nyc" ? "🥂 A New Year's card" : "🎄 A Christmas card"} for you${d.to ? ", " + d.to : ""}! Tap to open it:` + (withLink ? " " + cardLink() : "");
+    return `${d.d === "nyc" ? "🥂 A New Year's card" : "🎄 A Christmas card"} for you${d.to ? ", " + d.to : ""}!`;
   }
   function guardCard() { if (!String(ecard.msg || "").trim()) { toast("✏️ Write a short message first"); $("#cardMsg").focus(); return false; } return true; }
   function initCards() {
@@ -4942,19 +5177,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const d = cardData();
     showPreview(o => INVITE.buildCard(d, o), INVITE.CARD_MUSIC[d.d]);
   });
-  $("#cardText").addEventListener("click", () => { if (guardCard()) location.href = INVITE.smsHref("", cardMessage()); });
-  $("#cardEmail").addEventListener("click", () => {
-    if (!guardCard()) return;
-    const d = cardData();
-    location.href = INVITE.mailHref("", d.d === "nyc" ? "A New Year's card for you" : "A Christmas card for you", cardMessage());
+  $("#cardVideo").addEventListener("click", () => {
+    if (!guardCard()) return; const d = cardData();
+    makeAndShare("video", () => INVITE.buildCard(d, {}), INVITE.CARD_MUSIC[d.d], d.d === "nyc" ? "HAPPY NEW YEAR" : "A CARD FOR YOU", d.d === "nyc" ? "New-Year-Card" : "Christmas-Card", cardMessage());
   });
-  $("#cardShare").addEventListener("click", async () => {
-    if (!guardCard()) return;
-    if (navigator.share) {
-      try { await navigator.share({ title: "A card for you", text: cardMessage(false), url: cardLink() }); return; }
-      catch (e) { if (e && e.name === "AbortError") return; }
-    }
-    copyText(cardLink());
+  $("#cardPicture").addEventListener("click", () => {
+    if (!guardCard()) return; const d = cardData();
+    makeAndShare("picture", () => INVITE.buildCard(d, {}), null, "", d.d === "nyc" ? "New-Year-Card" : "Christmas-Card", cardMessage());
   });
 
   // ---------- guest list ----------
@@ -5021,21 +5250,15 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     saveGuests(); renderGuests();
     location.href = INVITE.mailHref("", `You're invited: ${d.ev}`, invMessage(), list.map(g => g.email).join(","));
   });
-  $("#shareInvite").addEventListener("click", async () => {
-    if (!guardInvite()) return;
-    const link = invLink();
-    if (navigator.share) {
-      try { await navigator.share({ title: "You're invited!", text: invMessage(false), url: link }); return; }
-      catch (e) { if (e && e.name === "AbortError") return; }
-    }
-    copyText(link);
+  const invFile = () => (invData().ev || "Invite").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-Invite";
+  $("#invVideo").addEventListener("click", () => {
+    if (!guardInvite()) return; const d = invData();
+    makeAndShare("video", inviteForMedia, INVITE.INVITE_MUSIC_BY_DESIGN[d.d], "YOU'RE INVITED", invFile(), invMessage());
   });
-  $("#copyInvite").addEventListener("click", () => { if (guardInvite()) copyText(invLink()); });
-  function copyText(t) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(t).then(() => toast("🔗 Invite link copied"), () => window.prompt("Copy this invite link:", t));
-    } else window.prompt("Copy this invite link:", t);
-  }
+  $("#invPicture").addEventListener("click", () => {
+    if (!guardInvite()) return;
+    makeAndShare("picture", inviteForMedia, null, "", invFile(), invMessage());
+  });
 
   /* ============================================================
      🎆 NEW YEAR'S PARTY GAMES (pass-the-phone)
