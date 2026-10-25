@@ -45,7 +45,7 @@
     if (ing.head) return { head: ing.head };
     let t = typeof ing.t === "function" ? ing.t(p) : ing.t;
     if (ing.q == null) return { text: Array.isArray(t) ? t[0] : t };
-    const k = ing.s === "n" ? 1 : ing.s === "w" ? p.w / 13 : ing.s === "p" ? p.pies : f;
+    const k = ing.s === "n" ? 1 : ing.s === "w" ? p.w / (p.wBase || 13) : ing.s === "p" ? p.pies : f;
     let v = ing.q * k, amt = "", many = v > 1.0001;
     if (UNIT_TSP[ing.u]) {
       const tsp = v * UNIT_TSP[ing.u];
@@ -69,7 +69,7 @@
       const d = new Date(D); d.setDate(d.getDate() - days); d.setHours(hour, 0, 0, 0);
       out.push({ k: "a" + i, t: d.getTime(), icon, text, alarm: true, ahead: true });
     });
-    m.timeline(p).forEach((s, i) => out.push({ k: "s" + i, m: s.m, t: D + s.m * 60000, icon: s.icon, text: s.text, alarm: s.alarm }));
+    m.timeline(p).forEach((s, i) => out.push({ k: "s" + i, m: s.m, t: D + s.m * 60000, icon: s.icon, text: s.text, alarm: s.alarm, main: s.main }));
     return out.sort((a, b) => a.t - b.t);
   }
 
@@ -99,7 +99,7 @@
   function renderMealDetail(m) {
     const c = cfgFor(m.id), p = mealSizes(m, c.guests), f = p.f, D = dinnerAt(c);
     const active = mealPlan && mealPlan.id === m.id;
-    const steps = buildSteps(m, c), tIn = steps.find(s => /into the oven \(/.test(s.text));
+    const steps = buildSteps(m, c), tIn = steps.find(s => s.main);
     const panes = [["timeline", "⏰ Timeline"], ["shop", "🛒 Shopping"], ["recipes", "📖 Recipes"], ["menu", "🥂 Menu"]];
     const pane = panes.some(x => x[0] === mealSel.pane) ? mealSel.pane : "timeline";
     let body = "";
@@ -135,7 +135,7 @@
         <div class="meal-row two">
           <label><span class="meal-lab">Dinner date</span><input class="input" type="date" id="mealDate" value="${c.date}"></label>
           <label><span class="meal-lab">Dinner time</span><input class="input" type="time" id="mealTime" value="${c.time}"></label></div>
-        ${p.w ? `<p class="meal-sum">🦃 <b>${p.w} lb turkey</b> · roasts about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.g >= 17 ? "<br><small>For a big crowd, a 24 lb turkey is about the largest most ovens hold.</small>" : ""}</p>` : ""}
+        ${p.w ? `<p class="meal-sum">${p.icon} <b>${p.w} lb ${p.meat}</b> · ${p.verb} about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.bigNote ? `<br><small>${p.bigNote}</small>` : ""}</p>` : ""}
         <div class="send-btns">
           ${active ? `<button type="button" class="btn btn-ghost" id="mealStop">⏹ Stop dinner alarms</button>` : `<button type="button" class="btn btn-red" id="mealStart">⏰ Start my dinner alarms</button>`}
           <button type="button" class="btn btn-green" id="mealPrint">🖨️ Print everything</button>
@@ -221,7 +221,7 @@
   function printMeal(m) {
     const c = cfgFor(m.id), p = mealSizes(m, c.guests), f = p.f, steps = buildSteps(m, c);
     let lastDay = "";
-    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} guests · dinner ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.w ? ` · ${p.w} lb turkey, about ${p.roastText}` : ""}</p>
+    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} guests · dinner ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
       <h2>Timeline</h2><table class="pm-tl">${steps.map(s => { const d = dayName(s.t), h = d !== lastDay ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; lastDay = d; return h + `<tr><td>${s.ahead ? "All day" : mclock(s.t)}</td><td>☐ ${esc(s.text)}</td></tr>`; }).join("")}</table>
       <h2>Shopping list</h2>${(ps => `<p><b>Estimated total: ${cad0(ps.total)} CAD</b> (about ${cad(ps.total / c.guests)} per guest)</p>` + ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join(""))(pricedShop(m, f, p))}
       <h2>Menu</h2>${m.menu.map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v.join(", "))}</p>`).join("")}

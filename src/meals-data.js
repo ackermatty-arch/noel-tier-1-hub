@@ -299,10 +299,10 @@ window.NOEL_MEALS = (function () {
     // ⏰ The day's plan, counted back from dinner time (minutes). p = sizes worked out for this meal.
     timeline(p) {
       const out = [], R = p.roast, rest = p.rest, tIn = -(rest + R), tOut = -rest;
-      const add = (m, icon, text, alarm = true) => out.push({ m, icon, text, alarm });
+      const add = (m, icon, text, alarm = true, main = false) => out.push({ m, icon, text, alarm, main });
       add(tIn - 60, "🦃", "Take the turkey out of the fridge");
       add(tIn - 35, "🔥", "Heat the oven to 325°F and butter the turkey");
-      add(tIn, "🦃", `Turkey into the oven (${p.w} lb, about ${p.roastText})`);
+      add(tIn, "🦃", `Turkey into the oven (${p.w} lb, about ${p.roastText})`, true, true);
       add(tIn + 25, "🍲", "Start the giblet stock (simmers 1 hour)");
       for (let b = tIn + 45; b < tOut - 35; b += 45) add(b, "🥄", "Baste the turkey");
       add(tIn + 85, "🍲", "Strain the giblet stock");
@@ -409,6 +409,320 @@ window.NOEL_MEALS = (function () {
     }
   };
 
+  const ham = {
+    id: "ham",
+    tab: "traditional",
+    name: "Christmas Glazed Ham Dinner",
+    icon: "🍖",
+    blurb: "Brown sugar & orange glazed ham, cheesy scalloped potatoes, green beans, winter salad and gingerbread.",
+    menu: [
+      ["Appetizer", ["Cranberry Pecan Cheese Ball with Crackers"]],
+      ["Main", ["Brown Sugar & Orange Glazed Ham"]],
+      ["Sides", ["Cheesy Scalloped Potatoes", "Garlic Green Beans with Toasted Almonds", "Winter Pear & Pomegranate Salad"]],
+      ["Dessert", ["Old-Fashioned Gingerbread Cake with Whipped Cream"]]
+    ],
+    drinks: [
+      ["With dinner", "An off-dry Riesling or Gewürztraminer, or a light, fruity red such as Pinot Noir. Their gentle sweetness loves a salty glazed ham."],
+      ["Non-alcoholic", "Hot Spiced Apple Cider (recipe included) or chilled sparkling pear or apple juice."],
+      ["With dessert", "Hot coffee, chai tea or a mug of the spiced cider."]
+    ],
+    recipes: [
+      {
+        id: "cheeseball", course: "Appetizer", name: "Cranberry Pecan Cheese Ball with Crackers",
+        prep: "20 min, plus 2 hours chilling", cook: "none", yieldText: f => f > 1.25 ? `${Math.ceil(f - 0.25)} cheese balls` : "1 cheese ball (serves 8)",
+        ing: [
+          { q: 8, u: "oz", t: "cream cheese, softened" },
+          { q: 1, u: "cup", t: "sharp white cheddar, finely shredded" },
+          { q: 0.25, u: "cup", t: "dried cranberries, chopped" },
+          { q: 2, u: "tbsp", t: "green onion, thinly sliced" },
+          { q: 1, u: "", t: ["small garlic clove, finely grated", "small garlic cloves, finely grated"] },
+          { q: 0.25, u: "tsp", t: "black pepper" },
+          { q: 0.75, u: "cup", t: "pecans, toasted and finely chopped" },
+          { q: 2, u: "tbsp", t: "fresh flat-leaf parsley, finely chopped" },
+          { q: 8, u: "oz", t: "crackers, for serving" }
+        ],
+        steps: [
+          "Beat the cream cheese until smooth. Stir in the cheddar, cranberries, green onion, garlic and pepper.",
+          "Scrape onto plastic wrap, gather into a ball and chill for at least 2 hours, until firm.",
+          "Mix the pecans and parsley on a plate. Unwrap the ball and roll it in the mixture, pressing gently so it sticks.",
+          "Rewrap and chill until 20 minutes before serving. Serve with crackers."
+        ],
+        tip: "Make the cheese ball the day before. It needs no oven at all, which leaves plenty of room for the ham and potatoes."
+      },
+      {
+        id: "ham", course: "Main", name: "Brown Sugar & Orange Glazed Ham",
+        prep: "15 min", cook: p => p.roastText, rest: p => p.rest + " min", yieldText: (f, p) => `one ${p.w} lb ham`,
+        ing: [
+          { q: 1, u: "", s: "n", t: p => `fully cooked bone-in ham, ${p.w} lb (not spiral-cut)` },
+          { q: 1, u: "cup", s: "n", t: "water, for the roasting pan" },
+          { q: null, u: "", s: "n", t: "Whole cloves, for studding (optional)" },
+          { head: "Glaze" },
+          { q: 1, u: "cup", s: "w", t: "packed brown sugar" },
+          { q: 0.33, u: "cup", s: "w", t: "orange juice" },
+          { q: 0.25, u: "cup", s: "w", t: "honey" },
+          { q: 2, u: "tbsp", s: "w", t: "Dijon mustard" },
+          { q: 1, u: "tbsp", s: "w", t: "apple cider vinegar" },
+          { q: 2, u: "tbsp", s: "w", t: "unsalted butter" },
+          { q: 0.5, u: "tsp", s: "w", t: "ground cinnamon" },
+          { q: 0.25, u: "tsp", s: "w", t: "ground cloves" },
+          { q: 0.25, u: "tsp", s: "w", t: "black pepper" }
+        ],
+        steps: [
+          p => `If your ham is frozen, thaw it in the refrigerator, allowing about 5 hours per pound. A ${p.w} lb ham needs about ${p.thawDays} ${p.thawDays === 1 ? "day" : "days"}.`,
+          "Take the ham out of the refrigerator 1 hour before baking.",
+          "Place a rack in the lower third of the oven and heat it to 325°F (165°C).",
+          "With a sharp knife, score the fat in a diamond pattern about ¼ inch deep. Press a whole clove into the centre of each diamond, if you like.",
+          "Set the ham, flat cut side down, on a rack in a roasting pan. Pour the water into the pan and cover the ham loosely with foil.",
+          p => `Bake for about ${p.roastText} in total, until a thermometer in the thickest part (not touching the bone) reads 140°F (60°C).`,
+          "While it bakes, make the glaze: simmer all the glaze ingredients in a small saucepan for 4–5 minutes, stirring, until syrupy.",
+          "For the last 30 minutes, remove the foil and brush the ham generously with glaze. Brush again every 10 minutes.",
+          p => `Move the ham to a carving board, tent loosely with foil and rest for ${p.rest} minutes. Carve thin slices across the grain and spoon any extra glaze over the top.`
+        ],
+        tip: "A fully cooked ham only needs warming through, so the glaze is where the magic happens. Keep the foil on until the last 30 minutes, so the meat stays moist."
+      },
+      {
+        id: "scalloped", course: "Sides", name: "Cheesy Scalloped Potatoes",
+        prep: "30 min", cook: "about 1 hour 35 min", rest: "10 min", yieldText: f => servings(f),
+        note: (f, p) => p.dishes > 1 ? `For this many guests, use ${p.dishes} baking dishes (9×13-inch).` : "",
+        ing: [
+          { q: 3, u: "lb", t: "Yukon Gold potatoes, peeled and sliced ⅛ inch thick" },
+          { q: 3, u: "tbsp", t: "unsalted butter, plus extra for the dish" },
+          { q: 2, u: "", t: ["garlic clove, minced", "garlic cloves, minced"] },
+          { q: 3, u: "tbsp", t: "all-purpose flour" },
+          { q: 2.5, u: "cup", t: "whole milk, warmed" },
+          { q: 0.5, u: "cup", t: "heavy cream" },
+          { q: 1.5, u: "tsp", t: "kosher salt" },
+          { q: 0.5, u: "tsp", t: "black pepper" },
+          { q: 0.25, u: "tsp", t: "ground nutmeg" },
+          { q: 1, u: "tbsp", t: "fresh thyme leaves" },
+          { q: 1.5, u: "cup", t: "Gruyère or Swiss cheese, shredded" },
+          { q: 0.5, u: "cup", t: "sharp white cheddar, shredded" }
+        ],
+        steps: [
+          "Butter the baking dish.",
+          "Melt the butter in a saucepan over medium heat. Add the garlic and cook 30 seconds.",
+          "Whisk in the flour and cook 1 minute. Slowly whisk in the warm milk, then the cream.",
+          "Simmer, whisking, for 3–4 minutes until slightly thickened. Stir in the salt, pepper, nutmeg and thyme.",
+          "Layer a third of the potatoes in the dish, overlapping them. Pour over a third of the sauce and sprinkle with a third of the cheeses. Repeat twice more, ending with cheese.",
+          "Cover tightly with foil and bake at 325°F (165°C) for 75 minutes, alongside the ham.",
+          "When the ham comes out, raise the oven to 400°F (200°C). Uncover the potatoes and bake 20 minutes more, until golden, bubbling and tender.",
+          "Rest 10 minutes before serving, so the sauce sets."
+        ],
+        tip: "Slice the potatoes the same thickness so they cook evenly. If baking on their own: 375°F (190°C) for 45 minutes covered, then 30 minutes uncovered."
+      },
+      {
+        id: "beans", course: "Sides", name: "Garlic Green Beans with Toasted Almonds",
+        prep: "10 min", cook: "10 min", yieldText: f => servings(f),
+        ing: [
+          { q: 2, u: "lb", t: "green beans, trimmed" },
+          { q: 1, u: "tbsp", t: "kosher salt, for the cooking water" },
+          { q: 3, u: "tbsp", t: "unsalted butter" },
+          { q: 0.5, u: "cup", t: "sliced almonds" },
+          { q: 2, u: "", t: ["garlic clove, thinly sliced", "garlic cloves, thinly sliced"] },
+          { q: 1, u: "tsp", t: "lemon zest" },
+          { q: 1, u: "tbsp", t: "fresh lemon juice" },
+          { q: 0.5, u: "tsp", t: "kosher salt" },
+          { q: 0.25, u: "tsp", t: "black pepper" }
+        ],
+        steps: [
+          "Bring a large pot of water to a boil with the salt. Fill a large bowl with ice water.",
+          "Boil the beans 3–4 minutes, until bright green and just tender. Drain and plunge into the ice water, then drain well and pat dry.",
+          "Just before dinner, melt the butter in a large skillet over medium heat. Add the almonds and stir 2–3 minutes until golden.",
+          "Add the garlic and cook 30 seconds. Add the beans and toss 3–4 minutes until hot.",
+          "Stir in the lemon zest, lemon juice, salt and pepper."
+        ],
+        tip: "Blanch the beans the day before and keep them in the fridge. On the day, they're ready in 5 minutes on the stove, with no oven needed."
+      },
+      {
+        id: "salad", course: "Sides", name: "Winter Pear & Pomegranate Salad",
+        prep: "15 min", cook: "none", yieldText: f => servings(f),
+        ing: [
+          { q: 10, u: "oz", t: "mixed greens (spinach, arugula or spring mix)" },
+          { q: 2, u: "", t: ["ripe pear, thinly sliced", "ripe pears, thinly sliced"] },
+          { q: 0.5, u: "cup", t: "pomegranate seeds" },
+          { q: 0.5, u: "cup", t: "crumbled feta or goat cheese" },
+          { q: 0.5, u: "cup", t: "pecans, toasted and roughly chopped" },
+          { head: "Maple-Dijon vinaigrette" },
+          { q: 0.33, u: "cup", t: "olive oil" },
+          { q: 2, u: "tbsp", t: "apple cider vinegar" },
+          { q: 1, u: "tbsp", t: "maple syrup" },
+          { q: 1, u: "tsp", t: "Dijon mustard" },
+          { q: 1, u: "", t: ["small shallot, finely minced", "small shallots, finely minced"] },
+          { q: 0.25, u: "tsp", t: "kosher salt" },
+          { q: null, u: "", s: "n", t: "Pinch of black pepper" }
+        ],
+        steps: [
+          "Shake all the vinaigrette ingredients together in a jar until creamy.",
+          "Arrange the greens in a large bowl or platter.",
+          "Top with the pear slices, pomegranate seeds, cheese and pecans.",
+          "Drizzle with the vinaigrette just before serving, or pass it at the table."
+        ],
+        tip: "Make the vinaigrette up to 3 days ahead. Slice the pears at the last minute so they stay pale and crisp."
+      },
+      {
+        id: "gingerbread", course: "Dessert", name: "Old-Fashioned Gingerbread Cake with Whipped Cream",
+        prep: "15 min", cook: "30–35 min", rest: "cool 1 hour",
+        yieldText: (f, p) => p.pies > 1 ? `${p.pies} cakes (9-inch square), 9 pieces each` : "one 9-inch square cake (9 pieces)",
+        note: (f, p) => p.pies > 1 ? `Amounts below are for all ${p.pies} cakes together. Bake each in its own pan.` : "",
+        ing: [
+          { q: 1.5, u: "cup", s: "p", t: "all-purpose flour" },
+          { q: 1, u: "tsp", s: "p", t: "baking soda" },
+          { q: 1.5, u: "tsp", s: "p", t: "ground ginger" },
+          { q: 1, u: "tsp", s: "p", t: "ground cinnamon" },
+          { q: 0.25, u: "tsp", s: "p", t: "ground cloves" },
+          { q: 0.25, u: "tsp", s: "p", t: "kosher salt" },
+          { q: 0.5, u: "cup", s: "p", t: "unsalted butter, melted" },
+          { q: 0.5, u: "cup", s: "p", t: "packed brown sugar" },
+          { q: 0.5, u: "cup", s: "p", t: "molasses (not blackstrap)" },
+          { q: 1, u: "", s: "p", t: ["large egg", "large eggs"] },
+          { q: 0.5, u: "cup", s: "p", t: "boiling water" },
+          { head: "Whipped cream" },
+          { q: 1, u: "cup", s: "p", t: "cold heavy cream" },
+          { q: 2, u: "tbsp", s: "p", t: "granulated sugar" }
+        ],
+        steps: [
+          "Heat the oven to 350°F (175°C). Butter a 9-inch square pan and line the bottom with parchment.",
+          "Whisk the flour, baking soda, ginger, cinnamon, cloves and salt in a bowl.",
+          "In a large bowl, whisk the melted butter, brown sugar, molasses and egg until smooth.",
+          "Stir the dry ingredients into the wet ones until just combined. Carefully stir in the boiling water. The batter will be thin.",
+          "Pour into the pan and bake 30–35 minutes, until a toothpick in the centre comes out clean.",
+          "Cool in the pan at least 1 hour.",
+          "Just before serving, whip the cold cream and sugar to soft peaks. Serve squares of cake with a spoonful of cream."
+        ],
+        tip: "Gingerbread tastes even better the next day, so bake it the day before and keep it covered at room temperature."
+      },
+      {
+        id: "cider", course: "Drinks", name: "Hot Spiced Apple Cider",
+        prep: "5 min", cook: "20 min", yieldText: f => `about ${Math.round(8 * f)} cups`,
+        ing: [
+          { q: 8, u: "cup", t: "apple cider or unfiltered apple juice" },
+          { q: 2, u: "", t: ["cinnamon stick", "cinnamon sticks"] },
+          { q: 6, u: "", t: ["whole clove", "whole cloves"] },
+          { q: 1, u: "", t: ["orange, sliced into rounds", "oranges, sliced into rounds"] },
+          { q: 2, u: "tbsp", t: "maple syrup (optional)" }
+        ],
+        steps: [
+          "Put everything in a large pot over medium-low heat.",
+          "Bring just to a gentle simmer, then turn the heat to low and steep 20 minutes. Don't let it boil.",
+          "Keep warm on the lowest heat or in a slow cooker. Ladle into mugs, leaving the spices behind."
+        ],
+        tip: "For adult guests, a splash of dark rum or brandy can go into individual mugs."
+      }
+    ],
+
+    timeline(p) {
+      const out = [], H = p.roast, tOut = -35, tIn = tOut - H;
+      const add = (m, icon, text, alarm = true, main = false) => out.push({ m, icon, text, alarm, main });
+      add(tIn - 60, "🍖", "Take the ham out of the fridge");
+      add(tIn - 20, "🔥", "Heat the oven to 325°F and score the ham");
+      add(tIn, "🍖", `Ham into the oven, covered with foil (${p.w} lb, about ${p.roastText})`, true, true);
+      add(tOut - 105, "🥔", "Slice the potatoes and assemble the scalloped potatoes");
+      add(tOut - 75, "🥔", "Scalloped potatoes into the oven, covered");
+      add(-80, "🍎", "Start the hot spiced cider (keep warm on low)");
+      add(tOut - 40, "🍯", "Make the glaze (simmer 5 minutes)");
+      add(tOut - 30, "🍖", "Uncover the ham and brush on the first coat of glaze");
+      add(tOut - 20, "🍖", "Brush the ham with glaze again");
+      add(tOut - 10, "🍖", "Last coat of glaze, and check it reads 140°F");
+      add(-60, "🧀", "Set out the cheese ball, crackers and cider for arriving guests");
+      add(tOut, "🍖", "Ham out to rest. Oven up to 400°F. Uncover the potatoes");
+      add(-20, "🥗", "Slice the pears and assemble the salad");
+      add(-15, "🥔", "Scalloped potatoes out to rest");
+      add(-12, "🫛", "Finish the green beans on the stove (5 minutes)");
+      add(-10, "🔪", "Carve the ham");
+      add(0, "🍽️", "Dinner is served!");
+      add(45, "🍰", "Whip the cream and serve the gingerbread");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) {
+      return [
+        [p.thawDays, 9, "🧊", `If your ham is frozen, move it to the fridge to thaw today (${p.w} lb needs about ${p.thawDays} ${p.thawDays === 1 ? "day" : "days"})`],
+        [1, 10, "📋", `Prep day: make the cheese ball, bake ${p.pies > 1 ? p.pies + " gingerbread cakes" : "the gingerbread"}, blanch the green beans, make the salad dressing, toast the nuts and shred the cheese`]
+      ];
+    },
+
+    shop(f, p) {
+      const hf = p.w / 9, up = (x, step = 1) => Math.ceil(x / step - 1e-9) * step, n = x => Math.max(1, Math.ceil(x - 1e-9));
+      const pl = (k, one, many) => k > 1 ? many : one;
+      const cloves = 1 * f + 2 * f + 2 * f, garlic = n(cloves / 10);
+      const pot = up(3 * f, 0.5), beans = up(2 * f, 0.5), lemons = n(f), greens = n(2 * f), pears = Math.ceil(2 * f), pom = n(f / 2), shallots = n(f);
+      const butterTbsp = 2 * hf + 3 * f + 1 + 3 * f + 8 * p.pies, sticks = n(butterTbsp / 8);
+      const milkCups = 2.5 * f, milk = n(milkCups / 4), creamCups = 0.5 * f + 1 * p.pies, cream = n(creamCups / 2);
+      const cc = n(f), ched = n(6 * f / 7), gru = n(f), feta = n(f / 2.5), eggs = p.pies;
+      const brown = up(1 * hf + 0.5 * p.pies, 0.25), flour = up(0.2 * f + 1.5 * p.pies, 0.5), molasses = n(0.5 * p.pies / 1.5);
+      const pecans = n(1.25 * f / 2), almonds = n(f / 2), cran = n(f / 4), crackers = n(f), cider = n(8 * f / 7.5), oranges = n(f);
+      return [
+        ["Produce", [
+          [`${garlic}`, pl(garlic, "head garlic", "heads garlic"), garlic * 1],
+          [`${fmtNum(pot)} lb`, "Yukon Gold potatoes", pot * 1.1],
+          [`${fmtNum(beans)} lb`, "green beans", beans * 3.5],
+          [`${greens} × 5 oz`, pl(greens, "container mixed greens", "containers mixed greens"), greens * 5],
+          [`${pears}`, pl(pears, "ripe pear", "ripe pears"), pears * 1.2],
+          [`${pom}`, pl(pom, "pomegranate (or 1 small tub of seeds)", "pomegranates (or tubs of seeds)"), pom * 3],
+          [`${shallots}`, pl(shallots, "shallot", "shallots"), shallots * 0.75],
+          [`${lemons}`, pl(lemons, "lemon", "lemons"), lemons * 1],
+          [`${oranges}`, pl(oranges, "orange (for the cider)", "oranges (for the cider)"), oranges * 1],
+          ["1", "bunch green onions", 1.5],
+          ["1", "bunch fresh flat-leaf parsley", 2],
+          ["1", "bunch fresh thyme", 3]
+        ]],
+        ["Meat", [[`${p.w} lb`, "fully cooked bone-in ham (not spiral-cut)", p.w * 4]]],
+        ["Dairy & Refrigerated", [
+          [`${sticks} sticks`, `unsalted butter (${fmtNum(up(sticks / 4, 0.25))} lb)`, sticks * 1.75],
+          [`${fmtNum(up(milkCups, 0.5))} cups`, `whole milk (${milk} × 1 L)`, milk * 2.8],
+          [`${fmtNum(up(creamCups, 0.5))} cups`, `heavy cream (${cream} × 500 ml)`, cream * 4.5],
+          [`${cc} × 8 oz`, "cream cheese", cc * 4.5],
+          [`${ched} × 7 oz`, pl(ched, "block sharp white cheddar", "blocks sharp white cheddar"), ched * 6],
+          [`${gru} × 6 oz`, "Gruyère or Swiss cheese", gru * 8],
+          [`${feta} × 7 oz`, "crumbled feta or goat cheese", feta * 5],
+          [`${eggs}`, pl(eggs, "large egg", "large eggs"), eggs * 0.45]
+        ]],
+        ["Pantry & Baking", [
+          [`${crackers} × 8 oz`, pl(crackers, "box crackers", "boxes crackers"), crackers * 4],
+          [`${pecans} × 200 g`, pl(pecans, "bag pecans", "bags pecans"), pecans * 7],
+          [`${almonds} × 100 g`, pl(almonds, "bag sliced almonds", "bags sliced almonds"), almonds * 3.5],
+          [`${cran}`, "bag dried cranberries", cran * 4],
+          [`${fmtNum(brown)} cups`, "brown sugar", brown * 0.6],
+          [`${fmtNum(flour)} cups`, "all-purpose flour", flour * 0.25],
+          [`${molasses}`, "jar molasses (not blackstrap)", molasses * 5],
+          ["1", "small carton orange juice (for the glaze)", 3],
+          ["", "honey", null],
+          ["", "maple syrup", null],
+          ["", "Dijon mustard", null],
+          ["", "apple cider vinegar", null],
+          ["", "olive oil", null],
+          ["", "granulated sugar and baking soda", null]
+        ]],
+        ["Spices", [
+          ["", "whole cloves", null],
+          ["", "cinnamon sticks and ground cinnamon", null],
+          ["", "ground ginger, ground cloves, ground nutmeg", null],
+          ["", "kosher salt and black pepper", null]
+        ]],
+        ["Drinks", [
+          [`${cider} × 1.89 L`, pl(cider, "jug apple cider or unfiltered apple juice", "jugs apple cider or unfiltered apple juice"), cider * 5],
+          ["", "optional: sparkling pear or apple juice, Riesling or Pinot Noir, coffee, chai", null]
+        ]],
+        ["Kitchen Supplies", [
+          ["", "instant-read meat thermometer", null],
+          ["", "roasting pan with a rack, foil, pastry brush", null],
+          [`${p.dishes}`, pl(p.dishes, "baking dish (9×13-inch)", "baking dishes (9×13-inch)"), null],
+          [`${p.pies}`, pl(p.pies, "square cake pan (9-inch)", "square cake pans (9-inch)"), null],
+          ["", "plastic wrap and parchment paper", null]
+        ]]
+      ];
+    }
+  };
+
+  // sizes for a ham dinner: about ¾ lb of bone-in ham per guest, warmed at 325°F
+  function hamPlan(guests) {
+    const g = Math.min(20, Math.max(1, guests | 0)), f = g / 8;
+    const w = Math.min(18, Math.max(5, Math.round(g * 0.75)));
+    const perLb = w <= 8 ? 20 : w >= 14 ? 15 : 20 - (w - 8) * 5 / 6;   // smaller hams take longer per pound
+    const roast = Math.round(w * perLb / 5) * 5;
+    return { g, f, w, wBase: 9, icon: "🍖", meat: "ham", verb: "bakes", bigNote: "", roast, roastText: hm(roast), rest: 25,
+      thawDays: Math.max(1, Math.ceil(w * 5 / 24)), pies: Math.max(1, Math.ceil(g / 9)), dishes: Math.max(1, Math.ceil(f - 0.25)) };
+  }
+
   // sizes for a turkey dinner: weight, roast time, rest, pies, dishes
   function turkeyPlan(guests) {
     const g = Math.min(20, Math.max(1, guests | 0));
@@ -417,7 +731,7 @@ window.NOEL_MEALS = (function () {
     let roast = pts[pts.length - 1][1];
     for (let i = 1; i < pts.length; i++) if (w <= pts[i][0]) { const [a, ma] = pts[i - 1], [b, mb] = pts[i]; roast = Math.round((ma + (mb - ma) * (w - a) / (b - a)) / 5) * 5; break; }
     const f = g / 8;
-    return { g, f, w, roast, roastText: hm(roast), rest: w < 12 ? 30 : 40, thawDays: Math.ceil(w / 4.5), pies: Math.max(1, Math.ceil(g / 8)), dishes: Math.max(1, Math.ceil(f - 0.25)) };
+    return { g, f, w, wBase: 13, icon: "🦃", meat: "turkey", verb: "roasts", bigNote: g >= 17 ? "For a big crowd, a 24 lb turkey is about the largest most ovens hold." : "", roast, roastText: hm(roast), rest: w < 12 ? 30 : 40, thawDays: Math.ceil(w / 4.5), pies: Math.max(1, Math.ceil(g / 8)), dishes: Math.max(1, Math.ceil(f - 0.25)) };
   }
 
   // ---- small text helpers ----
@@ -439,13 +753,13 @@ window.NOEL_MEALS = (function () {
     meals: [
       turkey,
       placeholder("beef", "traditional", "Roast Beef Dinner", "🥩", "Recipe coming soon."),
-      placeholder("ham", "traditional", "Glazed Ham Dinner", "🍖", "Recipe coming soon."),
+      ham,
       placeholder("crown1", "elegant", "Crown Roast", "👑", "Recipe coming soon."),
       placeholder("crown2", "elegant", "Crown Roast (second)", "👑", "Recipe coming soon."),
       placeholder("vegan1", "vegan", "Vegan Holiday Dinner", "🌱", "Recipes coming soon."),
       placeholder("diet1", "dietary", "Dietary Holiday Dinner", "🥗", "Recipes coming soon.")
     ],
-    plan: { turkey: turkeyPlan },
+    plan: { turkey: turkeyPlan, ham: hamPlan },
     frac, hm, fmtNum
   };
 })();
