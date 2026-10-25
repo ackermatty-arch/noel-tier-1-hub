@@ -4051,6 +4051,386 @@ window.NOEL_MEALS = (function () {
       ribs, roasts, pull: d[2], final: d[3], doneLabel: d[1].replace("Med-", "Medium-"), gf: !!c.gf, tins: Math.max(1, Math.ceil(f - 0.1)) };
   }
 
+  const porkcrown = {
+    id: "porkcrown",
+    tab: "elegant",
+    name: "Crown Roast of Pork",
+    icon: "👑",
+    blurb: "Garlic-herb crown roast filled with wild rice stuffing, cider gravy, truffle mash and brioche bread pudding.",
+    menu: [
+      ["Signature drinks", ["Spiced Bourbon Apple Cider", "Cranberry-Ginger Fizz (alcohol-free)"]],
+      ["Appetizers", ["Baked Brie in Puff Pastry with Fig & Walnuts (warm)", "Prosciutto-Wrapped Pears with Arugula & Balsamic (cold)"]],
+      ["Main", ["Garlic-Herb Crown Roast of Pork", "Apple Cider & Thyme Pan Gravy"]],
+      ["In the crown", ["Wild Rice, Pecan & Cranberry Stuffing"]],
+      ["Sides", ["Truffle & Parmesan Mashed Potatoes", "Balsamic-Maple Roasted Brussels Sprouts"]],
+      ["Dessert", ["Brioche Bread Pudding with Bourbon Caramel"]]
+    ],
+    drinks: [
+      ["With the appetizers", "Champagne, Crémant or a dry sparkling wine. The bubbles cut through rich brie and salty prosciutto."],
+      ["With the crown roast", "Pinot Noir, Beaujolais Cru or a lightly off-dry Chenin Blanc (Vouvray). Bright fruit flatters pork and cider gravy."],
+      ["Alcohol-free", "Cranberry-Ginger Fizz (recipe included) or sparkling apple cider."],
+      ["With dessert", "A small pour of bourbon or tawny port, or coffee."]
+    ],
+    recipes: [
+      {
+        id: "bourboncider", course: "Drinks", name: "Spiced Bourbon Apple Cider",
+        prep: "5 min", cook: "15 min", yieldText: f => `${Math.round(8 * f)} drinks`,
+        ing: [
+          { q: 6, u: "cup", t: "apple cider or unfiltered apple juice" },
+          { q: 2, u: "", t: ["cinnamon stick, plus extra to garnish", "cinnamon sticks, plus extra to garnish"] },
+          { q: 4, u: "", t: ["whole clove", "whole cloves"] },
+          { q: 2, u: "", t: ["star anise (optional)", "star anise (optional)"] },
+          { q: 1, u: "", t: ["orange, sliced", "oranges, sliced"] },
+          { q: 2, u: "tbsp", t: "maple syrup" },
+          { q: 1.5, u: "cup", t: "bourbon (1½ oz per drink)" }
+        ],
+        steps: [
+          "Warm the cider, spices, orange and maple syrup over low heat for 15 minutes. Don't let it boil.",
+          "Keep warm on the lowest setting.",
+          "Pour 1½ oz of bourbon into each mug and top with the hot cider. Garnish with a cinnamon stick."
+        ],
+        tip: "Add the bourbon by the mug rather than to the pot, so guests can choose."
+      },
+      {
+        id: "fizz", course: "Drinks", name: "Cranberry-Ginger Fizz (alcohol-free)",
+        prep: "5 min", cook: "none", yieldText: f => `about ${Math.round(7 * f)} cups`,
+        ing: [
+          { q: 3, u: "cup", t: "cranberry juice, chilled" },
+          { q: 0.25, u: "cup", t: "fresh lime juice" },
+          { q: 4, u: "cup", t: "non-alcoholic ginger beer, chilled" },
+          { q: null, u: "", s: "n", t: "Lime wheels, rosemary sprigs and a few cranberries, to garnish" }
+        ],
+        steps: ["Stir the cranberry and lime juice together in a pitcher.", "Just before serving, add the ginger beer.", "Pour over ice and garnish with lime and rosemary."],
+        tip: "A rosemary sprig in each glass makes it look like a proper cocktail."
+      },
+      {
+        id: "brie", course: "Appetizer", name: "Baked Brie in Puff Pastry with Fig & Walnuts",
+        prep: "15 min", cook: "40–45 min at 325°F (or 20–25 min at 400°F)", rest: "15 min", yieldText: f => servings(f),
+        ing: [
+          { q: 1, u: "", up: true, t: ["wheel of brie (about 8 oz)", "wheels of brie (about 8 oz each)"] },
+          { q: 1, u: "", up: true, t: ["sheet frozen puff pastry, thawed in the fridge", "sheets frozen puff pastry, thawed in the fridge"] },
+          { q: 0.25, u: "cup", t: "fig jam (or cranberry sauce)" },
+          { q: 0.25, u: "cup", t: "walnuts, toasted and chopped" },
+          { q: 1, u: "tsp", t: "fresh thyme leaves" },
+          { q: 1, u: "", s: "n", t: ["large egg, beaten (for brushing)", "large eggs, beaten (for brushing)"] },
+          { q: 1, u: "", up: true, t: ["baguette, sliced, or crackers for serving", "baguettes, sliced, or crackers for serving"] }
+        ],
+        steps: [
+          "Line a baking sheet with parchment. Roll the pastry out slightly and set the brie in the centre.",
+          "Spread the jam over the top of the brie and scatter on the walnuts and thyme.",
+          "Fold the pastry up over the cheese, pleating it neatly, and trim any thick excess. Turn it seam-side down.",
+          "Brush all over with beaten egg and cut two small vents on top.",
+          "Bake at 325°F alongside the roast for 40–45 minutes, until deep golden. (On its own: 400°F for 20–25 minutes.)",
+          "Rest 15 minutes before cutting, so the cheese is molten but not runny. Serve with baguette slices or crackers."
+        ],
+        tip: "Assemble it in the morning and keep it chilled. Cold pastry puffs better in the oven."
+      },
+      {
+        id: "pears", course: "Appetizer", name: "Prosciutto-Wrapped Pears with Arugula & Balsamic",
+        prep: "20 min", cook: "none", yieldText: f => `${Math.round(24 * f)} pieces`,
+        ing: [
+          { q: 2, u: "", t: ["ripe but firm pear (Bosc or Anjou)", "ripe but firm pears (Bosc or Anjou)"] },
+          { q: 1, u: "tbsp", t: "fresh lemon juice" },
+          { q: 6, u: "oz", t: "thinly sliced prosciutto (about 12 slices), halved lengthwise" },
+          { q: 1, u: "cup", t: "baby arugula" },
+          { q: 2, u: "tbsp", t: "balsamic glaze" },
+          { q: null, u: "", s: "n", t: "Freshly cracked black pepper" }
+        ],
+        steps: [
+          "Cut each pear into 12 slim wedges, remove the core, and toss with the lemon juice so they don't brown.",
+          "Lay a few arugula leaves on a pear wedge and wrap it snugly in a half-slice of prosciutto.",
+          "Arrange on a platter, drizzle with balsamic glaze and finish with black pepper."
+        ],
+        tip: "Make them up to 2 hours ahead and keep them covered in the fridge. Drizzle the glaze just before serving."
+      },
+      {
+        id: "crown", course: "Main", name: "Garlic-Herb Crown Roast of Pork",
+        prep: "25 min", cook: p => p.roastText, rest: p => p.rest + " min", yieldText: (f, p) => `${p.ribs} ribs (about ${fmtNum(p.w)} lb)`,
+        note: (f, p) => `Pull the roast at 140°F. It rises to a juicy, safe 145°F while it rests.` + (p.g < 10 ? " A crown needs at least 10 ribs to hold its shape, so you'll have delicious leftovers." : ""),
+        ing: [
+          { q: null, u: "", s: "n", t: p => `1 crown roast of pork, ${p.ribs} ribs (about ${fmtNum(p.w)} lb), frenched and tied by your butcher` },
+          { head: "Garlic-herb crust" },
+          { q: 6, u: "", s: "w", t: ["garlic clove, finely minced", "garlic cloves, finely minced"] },
+          { q: 2, u: "tbsp", s: "w", t: "fresh rosemary, finely chopped" },
+          { q: 1, u: "tbsp", s: "w", t: "fresh thyme leaves" },
+          { q: 1, u: "tbsp", s: "w", t: "fresh sage, finely chopped" },
+          { q: 2, u: "tbsp", s: "w", t: "Dijon mustard" },
+          { q: 3, u: "tbsp", s: "w", t: "olive oil" },
+          { q: 1, u: "tbsp", s: "w", t: "kosher salt" },
+          { q: 1.5, u: "tsp", s: "w", t: "black pepper" },
+          { head: "For the pan" },
+          { q: 1, u: "", s: "n", t: "yellow onion, quartered" },
+          { q: 1, u: "cup", s: "n", t: "apple cider" }
+        ],
+        steps: [
+          p => `Order ahead: ask your butcher for a ${p.ribs}-rib crown roast, frenched (bones scraped clean) and tied into a crown. If your roast is frozen, thaw it in the fridge for about ${p.thawDays} ${p.thawDays === 1 ? "day" : "days"}.`,
+          "Take the roast out of the refrigerator 1 hour before roasting and pat it dry.",
+          "Heat the oven to 450°F (230°C) with a rack in the lower third.",
+          "Stir together the garlic, herbs, Dijon, olive oil, salt and pepper. Rub it all over the meat, inside the crown and out.",
+          "Stand the roast in a roasting pan. Scrunch a ball of foil into the centre to hold the crown's shape, and wrap each bone tip in a small piece of foil so it doesn't burn.",
+          "Scatter the onion around it and pour the cider into the pan.",
+          "Roast 15 minutes at 450°F, then turn the oven down to 325°F (165°C) without opening the door.",
+          p => `Roast until a thermometer in the thickest part of the meat, not touching bone, reads 140°F (60°C), about ${p.roastText} in total. Start checking 30 minutes early.`,
+          p => `Move to a platter, tent with foil and rest ${p.rest} minutes. It will rise to 145°F, juicy with a hint of blush.`,
+          "Remove the foil ball and bone caps. Fill the centre with the hot wild rice stuffing and decorate the bones with rosemary or paper frills.",
+          "Carve at the table by slicing down between the bones into thick chops."
+        ],
+        tip: "Pork is safe and juiciest at 145°F after resting, which is why you pull it at 140°F. Never let it go past 150°F. Bake the stuffing separately and spoon it in at the end, so the roast cooks evenly and the stuffing stays safe."
+      },
+      {
+        id: "wildrice", course: "In the crown", name: "Wild Rice, Pecan & Cranberry Stuffing",
+        prep: "20 min", cook: "about 1 hour 20 min", yieldText: f => servings(f),
+        ing: [
+          { q: 1.5, u: "cup", t: "wild rice blend, rinsed" },
+          { q: 4, u: "cup", t: "low-sodium chicken stock, plus ½ cup more for baking" },
+          { q: 3, u: "tbsp", t: "unsalted butter" },
+          { q: 1, u: "", t: ["yellow onion, diced", "yellow onions, diced"] },
+          { q: 2, u: "", t: ["celery rib, diced", "celery ribs, diced"] },
+          { q: 1, u: "", t: ["crisp apple (such as Honeycrisp), diced", "crisp apples (such as Honeycrisp), diced"] },
+          { q: 2, u: "", t: ["garlic clove, minced", "garlic cloves, minced"] },
+          { q: 1, u: "tbsp", t: "fresh sage, chopped" },
+          { q: 2, u: "tsp", t: "fresh thyme leaves" },
+          { q: 0.75, u: "cup", t: "dried cranberries" },
+          { q: 0.75, u: "cup", t: "pecans, toasted and chopped" },
+          { q: 0.25, u: "cup", t: "fresh flat-leaf parsley, chopped" },
+          { q: 0.5, u: "tsp", t: "kosher salt" },
+          { q: 0.25, u: "tsp", t: "black pepper" }
+        ],
+        steps: [
+          "Simmer the wild rice in the stock, covered, for 45–50 minutes until tender and some grains have split. Drain off any extra liquid.",
+          "Meanwhile, melt the butter in a large skillet and cook the onion and celery for 8 minutes until soft.",
+          "Add the apple, garlic, sage and thyme and cook 2 minutes more.",
+          "Fold together the rice, vegetables, cranberries, pecans, parsley, salt and pepper.",
+          "Spoon into a buttered baking dish, drizzle with the extra stock, cover with foil and keep warm in the 325°F oven for 30 minutes.",
+          "Spoon into the centre of the crown just before serving, with the rest in a bowl alongside."
+        ],
+        tip: "Cook the wild rice the day before to save time. It's naturally gluten-free if your stock is."
+      },
+      {
+        id: "trufflemash", course: "Sides", name: "Truffle & Parmesan Mashed Potatoes",
+        prep: "15 min", cook: "25 min", yieldText: f => servings(f),
+        ing: [
+          { q: 4, u: "lb", t: "Yukon Gold potatoes, peeled and cut into 2-inch chunks" },
+          { q: 1, u: "tbsp", t: "kosher salt, for the cooking water" },
+          { q: 0.5, u: "cup", t: "unsalted butter" },
+          { q: 1, u: "cup", t: "whole milk" },
+          { q: 0.5, u: "cup", t: "heavy cream" },
+          { q: 0.75, u: "cup", t: "Parmesan, finely grated" },
+          { q: 1.5, u: "tsp", t: "truffle oil, or to taste" },
+          { q: null, u: "", s: "n", t: "Kosher salt, white or black pepper, and chopped chives" }
+        ],
+        steps: [
+          "Cover the potatoes with cold water by 1 inch, add the salt, bring to a boil and simmer 20–25 minutes until very tender.",
+          "Warm the butter, milk and cream together until the butter melts.",
+          "Drain the potatoes, return them to the hot pot for a minute to dry, then mash until smooth.",
+          "Stir in the warm milk mixture and the Parmesan.",
+          "Off the heat, stir in the truffle oil a little at a time and season. Top with chives."
+        ],
+        tip: "Truffle oil is powerful and fades with heat, so add it at the very end and taste as you go."
+      },
+      {
+        id: "balsamicsprouts", course: "Sides", name: "Balsamic-Maple Roasted Brussels Sprouts",
+        prep: "10 min", cook: "25 min", yieldText: f => servings(f),
+        ing: [
+          { q: 2, u: "lb", t: "Brussels sprouts, trimmed and halved" },
+          { q: 3, u: "tbsp", t: "olive oil" },
+          { q: 1, u: "tsp", t: "kosher salt" },
+          { q: 0.5, u: "tsp", t: "black pepper" },
+          { q: 2, u: "tbsp", t: "balsamic vinegar" },
+          { q: 1, u: "tbsp", t: "maple syrup" }
+        ],
+        steps: [
+          "Toss the sprouts with the oil, salt and pepper and spread cut side down on large baking sheets.",
+          "Roast at 425°F for 20–25 minutes, until deeply golden.",
+          "Whisk the balsamic and maple syrup together, drizzle over the hot sprouts and toss."
+        ],
+        tip: "They roast while the crown rests. Use two sheets so they brown rather than steam."
+      },
+      {
+        id: "cidergravy", course: "Main", name: "Apple Cider & Thyme Pan Gravy",
+        prep: "5 min", cook: "15 min", yieldText: f => `about ${fmtCups(3 * f)}`,
+        ing: [
+          { q: null, u: "", s: "n", t: "Pan drippings from the roast" },
+          { q: 3, u: "tbsp", t: "unsalted butter (or fat from the drippings)" },
+          { q: 1, u: "", t: ["shallot, finely minced", "shallots, finely minced"] },
+          { q: 0.25, u: "cup", t: "all-purpose flour" },
+          { q: 1, u: "cup", t: "apple cider" },
+          { q: 2, u: "cup", t: "low-sodium chicken stock" },
+          { q: 2, u: "tsp", t: "fresh thyme leaves" },
+          { q: 1, u: "tsp", t: "Dijon mustard" },
+          { q: 1, u: "tsp", t: "apple cider vinegar" },
+          { q: null, u: "", s: "n", t: "Kosher salt and black pepper, to taste" }
+        ],
+        steps: [
+          "Strain the pan juices into a cup and skim off the fat.",
+          "Melt the butter in a saucepan over medium heat and cook the shallot 2 minutes.",
+          "Whisk in the flour and cook 2 minutes until golden.",
+          "Slowly whisk in the cider, then the stock and the skimmed pan juices.",
+          "Simmer 8–10 minutes, whisking, until smooth and glossy.",
+          "Stir in the thyme, Dijon and vinegar, and season to taste."
+        ],
+        tip: "The splash of vinegar at the end wakes up the apple flavour."
+      },
+      {
+        id: "breadpudding", course: "Dessert", name: "Brioche Bread Pudding with Bourbon Caramel",
+        prep: "20 min, plus 30 min soaking", cook: "45–50 min", yieldText: f => servings(f),
+        note: (f, p) => p.dishes > 1 ? `For this many guests, use ${p.dishes} baking dishes (9×13-inch).` : "",
+        ing: [
+          { q: 1, u: "lb", t: "day-old brioche or challah, cut into 1-inch cubes" },
+          { q: 2, u: "tbsp", t: "unsalted butter, for the dish" },
+          { q: 5, u: "", up: true, t: ["large egg", "large eggs"] },
+          { q: 2, u: "cup", t: "whole milk" },
+          { q: 1, u: "cup", t: "heavy cream" },
+          { q: 0.75, u: "cup", t: "packed brown sugar" },
+          { q: 2, u: "tsp", t: "vanilla extract" },
+          { q: 1.5, u: "tsp", t: "ground cinnamon" },
+          { q: 0.5, u: "tsp", t: "ground nutmeg" },
+          { q: 0.25, u: "tsp", t: "kosher salt" },
+          { head: "Bourbon caramel" },
+          { q: 1, u: "cup", t: "packed brown sugar" },
+          { q: 0.5, u: "cup", t: "unsalted butter" },
+          { q: 0.5, u: "cup", t: "heavy cream" },
+          { q: 2, u: "tbsp", t: "bourbon (or 1 tsp vanilla for an alcohol-free sauce)" },
+          { q: null, u: "", s: "n", t: "Pinch of flaky salt" }
+        ],
+        steps: [
+          "Butter a 9×13-inch baking dish and spread the bread cubes in it.",
+          "Whisk the eggs, milk, cream, brown sugar, vanilla, spices and salt until smooth.",
+          "Pour over the bread, press down gently and let it soak at least 30 minutes (or cover and refrigerate overnight).",
+          "Bake at 350°F (175°C) for 45–50 minutes, until puffed, golden and set in the centre.",
+          "Caramel: melt the butter and brown sugar together over medium heat, stirring, for 3 minutes. Whisk in the cream and simmer 2–3 minutes until glossy. Off the heat, stir in the bourbon and salt.",
+          "Serve warm, with the caramel poured over at the table."
+        ],
+        tip: "It goes into the oven just as you sit down to dinner, so it comes out warm and fragrant for dessert. The caramel can be made 3 days ahead and rewarmed."
+      }
+    ],
+
+    timeline(p) {
+      const out = [], R = p.roast, tOut = -(p.rest + 10), tIn = tOut - R;
+      const add = (m, icon, text, alarm = true, main = false) => out.push({ m, icon, text, alarm, main });
+      add(tIn - 60, "👑", "Take the crown roast out of the fridge");
+      add(tIn - 20, "🔥", "Heat the oven to 450°F. Rub on the herb crust and cap the bones with foil");
+      add(tIn, "👑", `Crown roast into the oven at 450°F (${fmtNum(p.w)} lb, about ${p.roastText} in total)`, true, true);
+      add(tIn + 15, "🌡️", "Turn the oven down to 325°F (don't open the door)");
+      add(tOut - 100, "🍚", "Wild rice on to simmer (45–50 minutes)");
+      add(-110, "🧀", "Brie into the oven at 325°F, beside the roast");
+      add(-90, "🍞", "Assemble the bread pudding and leave it to soak");
+      add(-80, "🍐", "Wrap the prosciutto pears");
+      add(-75, "🍎", "Warm the spiced cider; mix the cranberry fizz base");
+      add(-65, "🥔", "Peel the potatoes and put them on to boil");
+      add(-60, "🧀", "Brie out to rest. Drinks and appetizers out for guests");
+      add(tOut - 40, "🍚", "Finish the stuffing, cover it and put it in the oven");
+      add(tOut - 30, "🌡️", "Start checking the roast: pull it at 140°F");
+      add(tOut, "👑", "Crown roast out to rest under foil. Oven up to 425°F. Stuffing out (keep covered)");
+      add(tOut + 5, "🥬", "Brussels sprouts into the oven (20–25 minutes)");
+      add(-25, "🥔", "Mash the potatoes, then stir in the truffle oil");
+      add(-22, "🍎", "Make the apple cider gravy");
+      add(-10, "👑", "Fill the crown with stuffing and bring it to the table to carve");
+      add(tOut + 30, "🥬", "Sprouts out. Toss with balsamic and maple. Oven down to 350°F");
+      add(0, "🍽️", "Dinner is served!");
+      add(2, "🍞", "Bread pudding into the 350°F oven (45–50 minutes)");
+      add(42, "🍯", "Warm the bourbon caramel");
+      add(48, "🍮", "Bread pudding out. Serve warm with caramel");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) {
+      return [
+        [p.thawDays + 1, 9, "🧊", `Order or pick up the crown roast. If it's frozen, move it to the fridge to thaw today (${fmtNum(p.w)} lb needs about ${p.thawDays} ${p.thawDays === 1 ? "day" : "days"})`],
+        [1, 10, "📋", "Prep day: cube the brioche to dry out, make the bourbon caramel, cook the wild rice, toast the nuts, trim the sprouts and assemble the brie"]
+      ];
+    },
+
+    shop(f, p) {
+      const wf = p.w / 8, up = (x, step = 1) => Math.ceil(x / step - 1e-9) * step, n = x => Math.max(1, Math.ceil(x - 1e-9));
+      const pl = (k, one, many) => k > 1 ? many : one;
+      const wheels = n(f), sheets = n(wheels / 2), cloves = 6 * wf + 2 * f, garlic = n(cloves / 10);
+      const pears = Math.ceil(2 * f - 1e-9), onions = 1 + n(f), apples = n(f), pot = up(4 * f, 0.5), spr = up(2 * f, 0.5), shallots = n(f);
+      const rose = n((2 * wf + 1) / 6), thyme = n((wf + 1.5 * f) / 8), sage = n((wf + f) / 8), limes = n(2 * f), oranges = n(f), arug = n(f / 3);
+      const prosc = n(6 * f / 3.5);
+      const butterTbsp = 3 * f + 8 * f + 3 * f + 2 * p.dishes + 8 * f, sticks = n(butterTbsp / 8);
+      const milkCups = 1 * f + 2 * f, milk = n(milkCups / 4), creamCups = 0.5 * f + 1.5 * f, cream = n(creamCups / 2);
+      const parm = n(65 * f / 150), eggs = Math.ceil(5 * f - 1e-9) + 1;
+      const rice = n(1.5 * f / 2.5), cran = n(0.75 * f / 1.5), pecans = n(0.75 * f / 2), walnuts = n(0.25 * f / 1);
+      const stockCups = 6.5 * f, stock = n(stockCups / 4), brown = up(1.75 * f, 0.25), brioche = n(f), baguette = n(f);
+      const cider = n((7 * f + 1) / 8), bourbon = n(1.6 * f / 3.2), cj = n(3 * f / 8), gb = n(4 * f / 6);
+      return [
+        ["Meat & Seafood", [
+          [`${fmtNum(p.w)} lb`, `crown roast of pork, ${p.ribs} ribs, frenched and tied (order ahead from your butcher)`, p.w * 9],
+          [`${prosc} × 100 g`, pl(prosc, "package thinly sliced prosciutto", "packages thinly sliced prosciutto"), prosc * 6]
+        ]],
+        ["Produce", [
+          [`${garlic}`, pl(garlic, "head garlic", "heads garlic"), garlic],
+          [`${onions}`, "yellow onions", onions * 0.6],
+          ["1", "bunch celery", 3.5],
+          [`${shallots}`, pl(shallots, "shallot", "shallots"), shallots * 0.75],
+          [`${apples}`, pl(apples, "crisp apple (Honeycrisp)", "crisp apples (Honeycrisp)"), apples * 1.2],
+          [`${pears}`, "ripe but firm pears (Bosc or Anjou)", pears * 1.2],
+          [`${fmtNum(pot)} lb`, "Yukon Gold potatoes", pot * 1.1],
+          [`${fmtNum(spr)} lb`, "Brussels sprouts", spr * 4],
+          [`${arug} × 5 oz`, pl(arug, "container baby arugula", "containers baby arugula"), arug * 5],
+          [`${rose}`, pl(rose, "bunch fresh rosemary", "bunches fresh rosemary"), rose * 3],
+          [`${thyme}`, pl(thyme, "bunch fresh thyme", "bunches fresh thyme"), thyme * 3],
+          [`${sage}`, pl(sage, "bunch fresh sage", "bunches fresh sage"), sage * 3],
+          ["1", "bunch fresh flat-leaf parsley", 2],
+          ["1", "bunch fresh chives", 3],
+          ["1", "lemon", 1],
+          [`${limes}`, "limes", limes * 0.6],
+          [`${oranges}`, pl(oranges, "orange", "oranges"), oranges]
+        ]],
+        ["Dairy & Refrigerated", [
+          [`${wheels} × 8 oz`, pl(wheels, "wheel of brie", "wheels of brie"), wheels * 8],
+          [`${sticks}`, `sticks unsalted butter (${fmtNum(up(sticks / 4, 0.25))} lb)`, sticks * 1.75],
+          [cupsT(up(milkCups, 0.5)), `whole milk (${milk} × 1 L)`, milk * 2.8],
+          [cupsT(up(creamCups, 0.5)), `heavy cream (${cream} × 500 ml)`, cream * 4.5],
+          [`${parm} × 150 g`, pl(parm, "wedge Parmesan", "wedges Parmesan"), parm * 6],
+          [`${eggs}`, "large eggs", eggs * 0.45],
+          [`${sheets}`, pl(sheets, "box frozen puff pastry (2 sheets)", "boxes frozen puff pastry (2 sheets each)"), sheets * 5]
+        ]],
+        ["Pantry, Grains & Spices", [
+          [`${rice} × 454 g`, pl(rice, "bag wild rice blend", "bags wild rice blend"), rice * 7],
+          [`${stock} × 1 L`, `low-sodium chicken stock (about ${Math.ceil(stockCups)} cups)`, stock * 3.5],
+          [`${cran}`, pl(cran, "bag dried cranberries", "bags dried cranberries"), cran * 4],
+          [`${pecans} × 200 g`, pl(pecans, "bag pecans", "bags pecans"), pecans * 7],
+          [`${walnuts} × 100 g`, pl(walnuts, "bag walnuts", "bags walnuts"), walnuts * 4],
+          ["1", "jar fig jam", 6],
+          ["1", "bottle balsamic glaze", 6],
+          ["1", "small bottle truffle oil", 12],
+          [`${brioche} × 1 lb`, pl(brioche, "loaf brioche or challah", "loaves brioche or challah"), brioche * 6],
+          [`${baguette}`, pl(baguette, "baguette (or a box of crackers)", "baguettes (or boxes of crackers)"), baguette * 3.5],
+          [cupsT(brown), "brown sugar", brown * 0.6],
+          ["", "all-purpose flour, Dijon mustard, olive oil, maple syrup", null],
+          ["", "balsamic vinegar, apple cider vinegar, vanilla extract", null],
+          ["", "cinnamon sticks, whole cloves, star anise (optional)", null],
+          ["", "ground cinnamon, ground nutmeg, kosher salt, black pepper, flaky salt", null]
+        ]],
+        ["Wine, Spirits & Mixers", [
+          [`${cider} × 1.89 L`, pl(cider, "jug apple cider", "jugs apple cider"), cider * 5],
+          [`${bourbon} × 750 ml`, pl(bourbon, "bottle bourbon", "bottles bourbon"), bourbon * 35],
+          [`${cj} × 1.89 L`, pl(cj, "jug cranberry juice", "jugs cranberry juice"), cj * 5],
+          [`${gb} × 4-pack`, "non-alcoholic ginger beer", gb * 6],
+          ["", "optional: Champagne or Crémant, Pinot Noir or Chenin Blanc, port", null]
+        ]],
+        ["Baking & Miscellaneous", [
+          ["", "butcher's twine and heavy-duty aluminum foil", null],
+          ["", "instant-read meat thermometer", null],
+          ["", "roasting pan, 2 large baking sheets, parchment paper", null],
+          [`${p.dishes * 2}`, "baking dishes (9×13-inch), for the stuffing and the bread pudding", null],
+          ["", "paper frills for the bones (optional)", null]
+        ]]
+      ];
+    }
+  };
+
+  // sizes for a crown roast: 1 rib per guest (a crown needs at least 10), about 0.65 lb per rib
+  function porkCrownPlan(guests) {
+    const g = Math.min(20, Math.max(1, guests | 0)), f = g / 8;
+    const ribs = Math.min(20, Math.max(10, g)), w = Math.round(ribs * 0.65 * 2) / 2;
+    const roast = Math.round((15 + w * 15) / 5) * 5;
+    return { g, f, w, wBase: 8, icon: "👑", meat: `crown roast (${ribs} ribs)`, verb: "roasts",
+      bigNote: "Pull it out at 140°F. It rises to a juicy 145°F as it rests." + (g < 10 ? " A crown needs at least 10 ribs, so expect leftovers." : ""),
+      roast, roastText: hm(roast), rest: 25, thawDays: Math.max(1, Math.ceil(w * 5 / 24)), pies: 1, dishes: Math.max(1, Math.ceil(f - 0.25)), ribs };
+  }
+
   // sizes for a turkey dinner: weight, roast time, rest, pies, dishes
   function turkeyPlan(guests) {
     const g = Math.min(20, Math.max(1, guests | 0));
@@ -4084,11 +4464,11 @@ window.NOEL_MEALS = (function () {
       primerib,
       ham,
       placeholder("lambcrown", "elegant", "Crown Roast of Lamb", "👑", "Recipe coming soon."),
-      placeholder("porkcrown", "elegant", "Crown Roast of Pork", "👑", "Recipe coming soon."),
+      porkcrown,
       placeholder("vegan1", "vegan", "Vegan Holiday Dinner", "🌱", "Recipes coming soon."),
       placeholder("diet1", "dietary", "Dietary Holiday Dinner", "🥗", "Recipes coming soon.")
     ],
-    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan },
+    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan },
     doneness: DONENESS,
     frac, hm, fmtNum
   };
