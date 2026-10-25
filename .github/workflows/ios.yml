@@ -1,0 +1,102 @@
+# 📱 Builds the Noël Tier 1 Hub iPhone app on GitHub's Mac computers (no Mac needed).
+#
+# • Every push to main: a quick check that the iPhone app still builds (no Apple account needed).
+# • "Run workflow" button (Actions tab → Build iPhone app): builds, signs and uploads to
+#   TestFlight / App Store Connect. Needs these repository secrets (Settings → Secrets → Actions):
+#     APPLE_TEAM_ID   your 10-character Team ID (developer.apple.com → Membership)
+#     ASC_KEY_ID      App Store Connect API key ID
+#     ASC_ISSUER_ID   App Store Connect API issuer ID
+#     ASC_KEY_P8      the full text of the downloaded AuthKey_XXXX.p8 file
+name: Build iPhone app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install
+        run: npm ci
+
+      - name: Build the web app into the iPhone project
+        run: |
+          python3 build.py
+          python3 scripts/build_www.py
+          npx cap sync ios
+
+      - name: Check build (simulator, unsigned)
+        if: github.event_name == 'push'
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build | tail -n 40
+
+      - name: Save App Store Connect key
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        run: |
+          test -n "$ASC_KEY_P8" || { echo "::error::Add the ASC_KEY_P8 secret first"; exit 1; }
+          mkdir -p "$RUNNER_TEMP/keys"
+          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8"
+
+      - name: Archive (signed for the App Store)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/Noel.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Automatic \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            archive | tail -n 60
+
+      - name: Upload to App Store Connect (TestFlight)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/Noel.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+          echo "✅ Uploaded build ${{ github.run_number }}. It appears in App Store Connect → TestFlight in about 15–30 minutes."

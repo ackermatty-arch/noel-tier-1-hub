@@ -16,7 +16,7 @@
   let mode = "unlock", firstPin = "", resolveGate = null, tries = 0, waitUntil = 0, hiddenAt = 0;
 
   const cfg = () => { try { return JSON.parse(NoelVault.getItem(KEY) || "null"); } catch (e) { return null; } };
-  const bioPlugin = () => { const C = window.Capacitor; return C && C.isNativePlatform && C.isNativePlatform() && C.Plugins && C.Plugins.NativeBiometric || null; };
+  const bioPlugin = () => (window.NoelNative && NoelNative.plugin("NativeBiometric")) || null;
 
   async function hashPin(pin, salt) {
     const base = await crypto.subtle.importKey("raw", enc.encode(pin), "PBKDF2", false, ["deriveBits"]);

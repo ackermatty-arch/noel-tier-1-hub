@@ -1,0 +1,16 @@
+{
+  "appId": "com.earthandwonder.noeltier1hub",
+  "appName": "Noël Tier 1 Hub",
+  "webDir": "www",
+  "backgroundColor": "#1E3A2F",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#1E3A2F",
+    "allowsLinkPreview": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "presentationOptions": ["banner", "sound", "list"]
+    }
+  }
+}

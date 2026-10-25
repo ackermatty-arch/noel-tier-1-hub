@@ -178,11 +178,11 @@
 
     // phone share sheet (native app), else the browser's, else download
     async share(blob, name, text) {
-      const C = window.Capacitor, native = C && C.isNativePlatform && C.isNativePlatform();
-      if (native && C.Plugins.Filesystem && C.Plugins.Share) {
+      const N = window.NoelNative, fs = N && N.plugin("Filesystem"), sh = N && N.plugin("Share");
+      if (fs && sh) {
         const data = await new Promise(res => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.readAsDataURL(blob); });
-        const { uri } = await C.Plugins.Filesystem.writeFile({ path: name, data, directory: "CACHE" });
-        await C.Plugins.Share.share({ title: name, text, files: [uri] });
+        const { uri } = await fs.writeFile({ path: name, data, directory: "CACHE" });
+        await sh.share({ title: name, text, files: [uri] });
         return "shared";
       }
       const file = new File([blob], name, { type: blob.type });
