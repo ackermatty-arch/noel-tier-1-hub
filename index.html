@@ -1093,6 +1093,80 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .app-footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 30px; }
 .brand-title, .brand-sub { white-space: nowrap; }
 @media (max-width: 380px) { .brand-title { font-size: 16.5px; } .brand-sub { font-size: 10px; letter-spacing: .5px; } }
+
+/* ---------- 🍽️ Meal planner ---------- */
+.seg.seg4 { grid-template-columns: repeat(4, 1fr); }
+.seg.seg4 button { font-size: 12.5px; padding: 0 2px; }
+.meal-skip { display: block; text-align: center; margin: 4px 0 14px; font-size: 13.5px; font-weight: 700; color: var(--pine); text-decoration: underline; text-underline-offset: 3px; }
+.meal-card { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 16px; margin-top: 12px; border: 1px solid var(--line); }
+.meal-card .meal-ico { font-size: 34px; }
+.meal-card .meal-txt { flex: 1; }
+.meal-card b { display: block; font-family: var(--font-display); font-size: 18px; color: var(--pine-dark); }
+.meal-card small { display: block; font-size: 13px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
+.meal-card .meal-go { font-size: 24px; color: var(--gold); font-weight: 800; }
+.meal-card.soon { opacity: .6; }
+.meal-card.soon .meal-go { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+.meal-back { font-weight: 800; color: var(--pine); padding: 6px 0; font-size: 15px; }
+.meal-title { font-family: var(--font-display); font-size: 24px; color: var(--pine-dark); margin: 6px 0 12px; }
+.meal-setup { padding: 16px; margin-bottom: 14px; }
+.meal-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.meal-row.two { display: grid; grid-template-columns: 1fr 1fr; }
+.meal-row.two .input { width: 100%; }
+.meal-lab { display: block; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.stepper { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.stepper button { width: 48px; height: 46px; font-size: 24px; font-weight: 800; color: var(--pine); background: #f4efe3; }
+.stepper output { min-width: 54px; text-align: center; font-size: 22px; font-weight: 800; color: var(--pine-dark); }
+.meal-sum { font-size: 14.5px; line-height: 1.5; margin: 0 0 12px; padding: 10px 12px; background: #f8f3e6; border-radius: 12px; }
+.meal-on { font-size: 13.5px; margin: 10px 0 0; color: var(--pine); }
+.meal-body { padding: 14px 16px; margin-top: 12px; }
+.meal-tl { list-style: none; padding: 0; margin: 0; }
+.meal-tl li { display: grid; grid-template-columns: 74px 1fr; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; line-height: 1.4; }
+.meal-tl li time { font-weight: 800; color: var(--pine); font-size: 13.5px; }
+.meal-tl li.tl-day { display: block; border: 0; padding: 14px 0 4px; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+.meal-tl li.done { opacity: .45; text-decoration: line-through; }
+.meal-tl li.serve { font-weight: 800; color: var(--red); }
+.shop-dept { font-family: var(--font-display); font-size: 17px; color: var(--pine-dark); margin: 16px 0 6px; }
+.shop-dept:first-child { margin-top: 0; }
+.shop-list, .menu-list { list-style: none; padding: 0; margin: 0; }
+.shop-list label { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; font-size: 14.5px; line-height: 1.4; border-bottom: 1px solid var(--line); }
+.shop-list input { width: 20px; height: 20px; accent-color: var(--pine); flex: none; margin-top: 1px; }
+.shop-list label.on span { text-decoration: line-through; opacity: .5; }
+.menu-list li { padding: 4px 0; font-size: 15px; }
+.drink { font-size: 14.5px; line-height: 1.5; margin: 4px 0 8px; }
+.recipe { border-bottom: 1px solid var(--line); padding: 10px 0; }
+.recipe summary { cursor: pointer; font-family: var(--font-display); font-size: 17px; color: var(--pine-dark); list-style: none; }
+.recipe summary::-webkit-details-marker { display: none; }
+.recipe summary::after { content: " ›"; color: var(--gold); }
+.recipe[open] summary::after { content: " ⌄"; }
+.r-course { display: block; font-family: var(--font-body); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+.r-meta { font-size: 13px; color: var(--muted); margin: 8px 0; }
+.r-note { font-size: 13.5px; background: #f8f3e6; border-radius: 10px; padding: 8px 10px; }
+.r-ing { padding-left: 0; list-style: none; margin: 8px 0; font-size: 14.5px; }
+.r-ing li { padding: 3px 0; }
+.r-ing .r-head { font-weight: 800; color: var(--pine); margin-top: 8px; }
+.r-steps { padding-left: 20px; font-size: 14.5px; line-height: 1.5; }
+.r-steps li { margin-bottom: 6px; }
+.r-tip { font-size: 13.5px; font-style: italic; color: var(--ink); }
+.meal-master { background: linear-gradient(160deg, #213f33, #182f25); color: #F3EBDA; border-radius: var(--radius); padding: 16px 18px; margin-bottom: 14px; text-align: center; box-shadow: var(--shadow); }
+.meal-master .mm-k { font-size: 11px; letter-spacing: .25em; text-transform: uppercase; color: #D9BF8C; }
+.meal-master .mm-time { font: 600 40px/1.15 "Lora", Georgia, serif; color: #fff; margin: 4px 0 8px; font-variant-numeric: tabular-nums; }
+.meal-master .mm-row { font-size: 14px; line-height: 1.45; margin-top: 4px; text-align: left; }
+.meal-master .mm-row b { display: inline-block; min-width: 44px; color: #D9BF8C; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+.meal-own { padding: 16px; margin-top: 22px; }
+.meal-own h3 { margin: 0 0 4px; font-size: 18px; }
+.meal-own .input { width: 100%; margin-bottom: 10px; }
+.meal-own-list { list-style: none; padding: 0; margin: 10px 0 0; font-size: 14px; }
+#printArea { display: none; }
+@media print {
+  body > *:not(#printArea) { display: none !important; }
+  #printArea { display: block !important; font: 11.5pt/1.45 Georgia, serif; color: #222; }
+  #printArea h1 { font-size: 20pt; margin: 0; } #printArea h2 { font-size: 14pt; border-bottom: 1.5px solid #B8935A; margin: 18px 0 6px; padding-bottom: 2px; }
+  #printArea h3 { font-size: 11.5pt; margin: 10px 0 2px; } #printArea table { border-collapse: collapse; width: 100%; }
+  #printArea td, #printArea th { text-align: left; padding: 2px 6px; border-bottom: 1px solid #ddd; vertical-align: top; } #printArea td:first-child { white-space: nowrap; width: 72px; }
+  #printArea ul { list-style: none; padding: 0; margin: 0; } #printArea details { margin: 10px 0; break-inside: avoid-page; }
+  #printArea summary { font-weight: bold; font-size: 12.5pt; list-style: none; } #printArea .r-course { display: block; font-size: 8.5pt; letter-spacing: .15em; text-transform: uppercase; color: #8a6d3b; }
+  #printArea .r-steps { padding-left: 18px; } #printArea .pm-foot { text-align: center; color: #888; font-size: 8.5pt; margin-top: 20px; }
+}
 </style>
 </head>
 <body>
@@ -1469,6 +1543,34 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
   </section>
 
   <!-- ============================================================
+       VIEW — 🍽️ MEAL PLANNER (Family edition)
+       ============================================================ -->
+  <section class="view" id="view-meals" aria-labelledby="mealsTitle">
+    <h2 class="view-title" id="mealsTitle">Meal Planner</h2>
+    <p class="view-intro">Pick a dinner, choose how many guests and when you'll eat. Noël sizes every recipe, writes your shopping list and sets every alarm.</p>
+    <div class="meal-master" id="mealMaster" hidden></div>
+    <a href="#mealOwn" class="meal-skip" id="mealSkip">Not needed? Set your own dinner timers ↓</a>
+    <div id="mealHome">
+      <div class="seg seg4 sub-tabs" id="mealTabs" role="group" aria-label="Meal type"></div>
+      <div id="mealList"></div>
+    </div>
+    <div id="mealDetail" hidden></div>
+    <div class="card meal-own" id="mealOwn">
+      <h3>⏲️ Your own dinner timers</h3>
+      <p class="review-sub">Cooking your own menu? Type in a timer for each dish and Noël will ring when it's time.</p>
+      <form id="mealOwnForm" autocomplete="off">
+        <input class="input" name="oname" maxlength="40" placeholder="e.g. Ham out of the oven" aria-label="Timer name">
+        <div class="meal-row two">
+          <label><span class="meal-lab">Hours</span><input class="input" name="ohours" type="number" inputmode="numeric" min="0" max="24" placeholder="0"></label>
+          <label><span class="meal-lab">Minutes</span><input class="input" name="omins" type="number" inputmode="numeric" min="0" max="59" placeholder="30"></label>
+        </div>
+        <button class="btn btn-green btn-block" type="submit">▶ Start timer</button>
+      </form>
+      <ul class="meal-own-list" id="mealOwnList"></ul>
+    </div>
+  </section>
+
+  <!-- ============================================================
        VIEW — 🎁 GIFT TRACKER (live budget, saved on the phone)
        ============================================================ -->
   <section class="view" id="view-gifts" aria-labelledby="giftsTitle">
@@ -1776,6 +1878,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 <nav class="bottom-nav" aria-label="Main">
   <button class="nav-btn" data-view="games"><span class="nav-ico">🎮</span>Games</button>
   <button class="nav-btn" data-view="planner"><span class="nav-ico">📝</span>Planner</button>
+  <button class="nav-btn" data-view="meals" id="navMeals"><span class="nav-ico">🍽️</span>Meals</button>
   <button class="nav-btn" data-view="gifts"><span class="nav-ico">🎁</span>Gifts</button>
   <button class="nav-btn" data-view="invites"><span class="nav-ico">💌</span>Cards</button>
   <button class="nav-btn" data-view="alarms"><span class="nav-ico">⏰</span>Alarms<span class="nav-badge" id="alarmBadge">0</span></button>
@@ -2143,6 +2246,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="printArea" aria-hidden="true"></div>
 <div id="mediaBusy" hidden style="position:fixed;inset:0;z-index:300;background:rgba(19,40,30,.88);display:flex;align-items:center;justify-content:center;text-align:center;color:#F3EBDA;padding:30px">
   <div><div style="font:italic 400 26px/1.3 Lora,Georgia,serif;color:#fff">Making your video…</div>
   <div style="width:220px;height:3px;background:rgba(217,191,140,.25);margin:18px auto 12px"><div id="mediaBar" style="height:100%;width:0;background:#D9BF8C"></div></div>
@@ -2522,7 +2626,17 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
       })) });
       return true;
     },
-    cancelCheckins: () => cancelRange(CHECKIN_BASE, CHECKIN_BASE + 100)
+    cancelCheckins: () => cancelRange(CHECKIN_BASE, CHECKIN_BASE + 100),
+    // any list of { t, title, body } as phone notifications, using ids lo…hi (replaces what was there)
+    scheduleList(lo, hi, items) {
+      if (!isNative()) return;
+      dutyQueue = dutyQueue.then(async () => {
+        await cancelRange(lo, hi);
+        const list = items.filter(x => x.t > Date.now() + 1000).slice(0, hi - lo);
+        if (!list.length || !(await allowed())) return;
+        await LN().schedule({ notifications: list.map((x, i) => ({ id: lo + i, title: x.title, body: x.body || "", schedule: { at: new Date(x.t), allowWhileIdle: true } })) });
+      }).catch(() => {});
+    }
   };
   window.NoelNative = Native;
 })();
@@ -2838,6 +2952,449 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
     }
   };
   window.NoelMedia = Media;
+})();
+</script>
+<script id="noel-meals-data">
+/* ============================================================
+   🍽️ MEAL PLANNER: the menus (original recipes, Earth & Wonder)
+   Every recipe is written for 8 people. The app scales it for 1–20.
+   Ingredient: { q: amount, u: unit, t: "text" or ["one", "many"], s: how it scales }
+     s: "f" = with guests (default) · "w" = with turkey size · "p" = per pie · "n" = never
+     u: "cup" "tbsp" "tsp" "lb" "oz" or "" for a count
+   ✏️ To add a meal, copy one block in MEALS and change it.
+   ============================================================ */
+window.NOEL_MEALS = (function () {
+  const turkey = {
+    id: "turkey",
+    tab: "traditional",
+    name: "Christmas Turkey Dinner",
+    icon: "🦃",
+    blurb: "Herb butter roast turkey, gravy, stuffing, three sides and pumpkin pie.",
+    menu: [
+      ["Appetizer", ["Herbed Cream Cheese Crostini with Cranberry"]],
+      ["Main", ["Herb Butter Roast Turkey", "Giblet Pan Gravy"]],
+      ["Stuffing", ["Classic Herb & Onion Bread Stuffing"]],
+      ["Sides", ["Garlic Mashed Potatoes", "Roasted Brussels Sprouts", "Honey-Glazed Carrots", "Fresh Orange-Cranberry Sauce"]],
+      ["Dessert", ["Spiced Pumpkin Pie with Whipped Cream"]]
+    ],
+    drinks: [
+      ["With dinner", "A light red such as Pinot Noir, or a dry white such as Riesling or unoaked Chardonnay."],
+      ["Non-alcoholic", "Sparkling Cranberry-Orange Punch (recipe included) or chilled sparkling apple cider."],
+      ["With dessert", "Hot coffee, black tea or warm spiced apple cider."]
+    ],
+    recipes: [
+      {
+        id: "crostini", course: "Appetizer", name: "Herbed Cream Cheese Crostini with Cranberry",
+        prep: "15 min", cook: "10 min", yieldText: f => `about ${Math.round(30 * f)} pieces`,
+        ing: [
+          { q: 1, u: "", t: ["French baguette, cut into ½-inch slices", "French baguettes, cut into ½-inch slices"] },
+          { q: 3, u: "tbsp", t: "olive oil" },
+          { q: 8, u: "oz", t: "cream cheese, softened" },
+          { q: 2, u: "tbsp", t: "fresh chives, finely chopped" },
+          { q: 1, u: "tbsp", t: "fresh flat-leaf parsley, finely chopped" },
+          { q: 1, u: "", t: ["small garlic clove, finely grated", "small garlic cloves, finely grated"] },
+          { q: 0.5, u: "tsp", t: "lemon zest" },
+          { q: 0.25, u: "tsp", t: "kosher salt" },
+          { q: 0.5, u: "cup", t: "Orange-Cranberry Sauce (from the recipe below)" }
+        ],
+        steps: [
+          "Heat the oven to 400°F (200°C).",
+          "Arrange the bread slices on baking sheets and brush the tops lightly with olive oil.",
+          "Toast for 8–10 minutes, until golden and crisp. Cool completely.",
+          "Beat the cream cheese, chives, parsley, garlic, lemon zest and salt until smooth.",
+          "Just before serving, spread each toast with the herb cheese and top with a small spoonful of cranberry sauce."
+        ],
+        tip: "Toast the crostini the day before and store them airtight, so the oven is free for the turkey. Assemble no more than 30 minutes before guests arrive so they stay crisp."
+      },
+      {
+        id: "turkey", course: "Main", name: "Herb Butter Roast Turkey",
+        prep: "30 min", cook: p => p.roastText, rest: p => p.rest + " min", yieldText: (f, p) => `one ${p.w} lb turkey`,
+        ing: [
+          { q: 1, u: "", s: "n", t: p => `whole turkey, ${p.w} lb, fully thawed, neck and giblets removed and saved for the gravy` },
+          { q: 2, u: "cup", s: "n", t: "low-sodium chicken or turkey stock, for the roasting pan" },
+          { q: 1, u: "tbsp", s: "w", t: "kosher salt" },
+          { q: 1, u: "tsp", s: "w", t: "black pepper" },
+          { head: "Herb butter" },
+          { q: 0.5, u: "cup", s: "w", t: "unsalted butter, softened" },
+          { q: 2, u: "tbsp", s: "w", t: "fresh sage, chopped" },
+          { q: 1, u: "tbsp", s: "w", t: "fresh thyme leaves" },
+          { q: 1, u: "tbsp", s: "w", t: "fresh rosemary, finely chopped" },
+          { q: 2, u: "tbsp", s: "w", t: "fresh flat-leaf parsley, chopped" },
+          { q: 3, u: "", s: "w", t: ["garlic clove, minced", "garlic cloves, minced"] },
+          { q: 1, u: "tsp", s: "w", t: "lemon zest" },
+          { q: 1.5, u: "tsp", s: "w", t: "kosher salt" },
+          { q: 0.5, u: "tsp", s: "w", t: "black pepper" },
+          { head: "For the cavity" },
+          { q: 1, u: "", s: "n", t: "yellow onion, quartered" },
+          { q: 1, u: "", s: "n", t: "lemon, halved (the one you zested)" },
+          { q: 1, u: "", s: "n", t: "head of garlic, halved crosswise" },
+          { q: null, u: "", s: "n", t: "A few sprigs each of sage, thyme and rosemary" }
+        ],
+        steps: [
+          p => `Thaw the turkey in the refrigerator, allowing about 24 hours for every 4–5 lb. A ${p.w} lb turkey needs about ${p.thawDays} days.`,
+          "Take the turkey out of the refrigerator 1 hour before roasting.",
+          "Place a rack in the lower third of the oven and heat it to 325°F (165°C).",
+          "Pat the turkey completely dry inside and out with paper towels. Dry skin browns better.",
+          "Mash together all the herb butter ingredients until evenly mixed.",
+          "Gently loosen the breast skin with your fingers. Spread about two-thirds of the herb butter on the meat under the skin, and rub the rest over the outside.",
+          "Season the outside and the cavity with the salt and pepper.",
+          "Fill the cavity loosely with the onion, lemon, garlic and herb sprigs. Tuck the wing tips under and tie the legs loosely with kitchen twine.",
+          "Set the turkey breast-side up on a rack in a large roasting pan and pour the stock into the pan.",
+          p => `Roast for about ${p.roastText}. Baste with the pan juices every 45 minutes. If the breast browns too quickly, cover it loosely with foil.`,
+          "Start checking 30 minutes before the expected finish. The turkey is done when a thermometer in the thickest part of the thigh, not touching the bone, reads 165°F (74°C).",
+          p => `Move the turkey to a cutting board, cover loosely with foil and rest for ${p.rest} minutes before carving. Keep the pan drippings for the gravy.`
+        ],
+        tip: "Resting time is your best friend: while the turkey rests, the oven is free for the stuffing and sprouts. An instant-read thermometer is the only reliable way to know it's done."
+      },
+      {
+        id: "gravy", course: "Main", name: "Giblet Pan Gravy",
+        prep: "10 min", cook: "1 hour for the stock (hands-off), then 10–15 min", yieldText: f => `about ${fmtCups(4 * f)} of gravy`,
+        ing: [
+          { head: "Giblet stock" },
+          { q: null, u: "", s: "n", t: "Turkey neck and giblets (heart and gizzard; leave out the liver)" },
+          { q: 5, u: "cup", t: "low-sodium chicken or turkey stock" },
+          { q: 1, u: "", t: ["yellow onion, quartered", "yellow onions, quartered"] },
+          { q: 2, u: "", t: ["celery rib, cut in chunks", "celery ribs, cut in chunks"] },
+          { q: 1, u: "", t: ["carrot, cut in chunks", "carrots, cut in chunks"] },
+          { head: "Gravy" },
+          { q: null, u: "", s: "n", t: "Pan drippings from the roasted turkey" },
+          { q: 0.25, u: "cup", t: "turkey fat skimmed from the drippings (top up with butter if needed)" },
+          { q: 0.25, u: "cup", t: "all-purpose flour" },
+          { q: 4, u: "cup", t: "giblet stock (from above)" },
+          { q: 1, u: "tsp", t: "fresh thyme leaves" },
+          { q: null, u: "", s: "n", t: "Kosher salt and black pepper, to taste" }
+        ],
+        steps: [
+          "While the turkey roasts, put the neck, giblets, onion, celery and carrot in a saucepan with the stock.",
+          "Bring to a boil, then simmer gently, uncovered, for 1 hour.",
+          "Strain and discard the solids. Top up with plain stock if you're short.",
+          "When the turkey comes out, pour the drippings into a heatproof cup and let them settle for 5 minutes. Spoon the fat from the top into a saucepan.",
+          "Heat the fat over medium heat. Whisk in the flour and cook, whisking, for 2–3 minutes until golden and nutty-smelling.",
+          "Slowly whisk in the warm giblet stock, then the remaining drippings with the fat skimmed off.",
+          "Simmer, whisking often, for 5–8 minutes until smooth and thick enough to coat a spoon.",
+          "Stir in the thyme and season with salt and pepper."
+        ],
+        tip: "Pour a little stock into the empty roasting pan and scrape up the browned bits, then add that liquid to the gravy for deeper flavour."
+      },
+      {
+        id: "stuffing", course: "Stuffing", name: "Classic Herb & Onion Bread Stuffing",
+        prep: "25 min, plus drying the bread", cook: "55–60 min", yieldText: f => servings(f),
+        note: (f, p) => p.dishes > 1 ? `For this many guests, use ${p.dishes} baking dishes (9×13-inch).` : "",
+        ing: [
+          { q: 1, u: "lb", t: "crusty white or sourdough bread, cut into 1-inch cubes" },
+          { q: 0.5, u: "cup", t: "unsalted butter, plus extra for the dish" },
+          { q: 2, u: "", t: ["medium yellow onion, diced", "medium yellow onions, diced"] },
+          { q: 3, u: "", t: ["celery rib, diced", "celery ribs, diced"] },
+          { q: 3, u: "", t: ["garlic clove, minced", "garlic cloves, minced"] },
+          { q: 2, u: "tbsp", t: "fresh sage, chopped" },
+          { q: 1, u: "tbsp", t: "fresh thyme leaves" },
+          { q: 0.25, u: "cup", t: "fresh flat-leaf parsley, chopped" },
+          { q: 1, u: "tsp", t: "kosher salt" },
+          { q: 0.5, u: "tsp", t: "black pepper" },
+          { q: 2, u: "", up: true, t: ["large egg", "large eggs"] },
+          { q: 2.75, u: "cup", t: "low-sodium chicken or turkey stock (use a little less or more as needed)" }
+        ],
+        steps: [
+          "Dry the bread: spread the cubes on baking sheets and leave them out overnight, or bake at 300°F (150°C) for 15–20 minutes until dry but not browned.",
+          "Butter the baking dish.",
+          "Melt the butter in a large skillet over medium heat. Cook the onions and celery for 8–10 minutes until soft.",
+          "Add the garlic, sage and thyme and cook 1 minute more.",
+          "In a very large bowl, toss the bread with the vegetables, parsley, salt and pepper.",
+          "Whisk the eggs with most of the stock. Pour over the bread and toss gently. Add more stock if it seems dry.",
+          "Spread in the dish and cover tightly with foil.",
+          "Bake covered at 325°F (165°C) for 40 minutes, alongside the turkey.",
+          "When the turkey comes out, raise the oven to 425°F (220°C). Uncover and bake 15–20 minutes more until golden and crisp on top."
+        ],
+        tip: "Baking stuffing in its own dish is safer than inside the bird and gives crispy edges. You can assemble it up to 4 hours ahead and refrigerate it; add 10 minutes to the covered time."
+      },
+      {
+        id: "potatoes", course: "Sides", name: "Garlic Mashed Potatoes",
+        prep: "15 min", cook: "25 min", yieldText: f => servings(f),
+        note: f => f > 1.5 ? "For this many guests, cook the potatoes in two large pots." : "",
+        ing: [
+          { q: 4, u: "lb", t: "Yukon Gold potatoes, peeled and cut into 2-inch chunks" },
+          { q: 6, u: "", t: ["garlic clove, peeled", "garlic cloves, peeled"] },
+          { q: 1, u: "tbsp", t: "kosher salt, for the cooking water" },
+          { q: 0.5, u: "cup", t: "unsalted butter" },
+          { q: 1, u: "cup", t: "whole milk" },
+          { q: 0.5, u: "cup", t: "heavy cream" },
+          { q: null, u: "", s: "n", t: "Kosher salt and black pepper, to taste" },
+          { q: 2, u: "tbsp", t: "fresh chives, chopped" }
+        ],
+        steps: [
+          "Put the potatoes and garlic in a large pot, cover with cold water by 1 inch and add the salt.",
+          "Bring to a boil, then simmer 20–25 minutes until a knife slides through easily.",
+          "Meanwhile, warm the butter, milk and cream together until the butter melts. Don't let it boil.",
+          "Drain well and return to the hot pot over low heat for 1 minute to dry off.",
+          "Mash until smooth, then stir in the warm milk mixture.",
+          "Season with salt and pepper and sprinkle with chives."
+        ],
+        tip: "Mashed potatoes hold for up to an hour in a covered pot over the lowest heat, or in a slow cooker on warm. Stir in a splash of warm milk before serving."
+      },
+      {
+        id: "sprouts", course: "Sides", name: "Roasted Brussels Sprouts",
+        prep: "10 min", cook: "20–25 min", yieldText: f => servings(f),
+        note: f => f > 1.5 ? "For a big crowd, use both oven racks and swap the sheets halfway through." : "",
+        ing: [
+          { q: 2, u: "lb", t: "Brussels sprouts, trimmed and halved" },
+          { q: 3, u: "tbsp", t: "olive oil" },
+          { q: 1, u: "tsp", t: "kosher salt" },
+          { q: 0.5, u: "tsp", t: "black pepper" },
+          { q: 1, u: "tbsp", t: "balsamic vinegar or fresh lemon juice (optional)" }
+        ],
+        steps: [
+          "Heat the oven to 425°F (220°C).",
+          "Toss the sprouts with the olive oil, salt and pepper.",
+          "Spread in a single layer, cut side down, on baking sheets. Don't crowd them, or they steam instead of browning.",
+          "Roast 20–25 minutes, until the cut sides are deep golden and the centres are tender.",
+          "Drizzle with balsamic or lemon juice just before serving, if using."
+        ],
+        tip: "Trim and halve the sprouts the day before and refrigerate them in a bag. They go into the oven the moment the turkey comes out."
+      },
+      {
+        id: "carrots", course: "Sides", name: "Honey-Glazed Carrots",
+        prep: "10 min", cook: "15–17 min", yieldText: f => servings(f),
+        ing: [
+          { q: 2, u: "lb", t: "carrots, peeled and sliced ½-inch thick on the diagonal" },
+          { q: 3, u: "tbsp", t: "unsalted butter" },
+          { q: 3, u: "tbsp", t: "honey" },
+          { q: 0.5, u: "tsp", t: "kosher salt" },
+          { q: 0.5, u: "cup", t: "water" },
+          { q: 1, u: "tsp", t: "fresh thyme leaves or chopped parsley" }
+        ],
+        steps: [
+          "Put the carrots, butter, honey, salt and water in a large skillet.",
+          "Bring to a simmer, cover and cook 8–10 minutes until just tender.",
+          "Uncover, turn the heat to medium-high and cook 5–7 minutes, stirring often, until the liquid becomes a shiny glaze.",
+          "Sprinkle with thyme or parsley."
+        ],
+        tip: "This one cooks on the stovetop, so it never competes for oven space."
+      },
+      {
+        id: "cranberry", course: "Sides", name: "Fresh Orange-Cranberry Sauce",
+        prep: "5 min", cook: "12 min", yieldText: f => `about ${fmtCups(2.5 * f)}`,
+        ing: [
+          { q: 12, u: "oz", t: "fresh or frozen cranberries" },
+          { q: 0.75, u: "cup", t: "granulated sugar" },
+          { q: 0.75, u: "cup", t: "orange juice" },
+          { q: 0.25, u: "cup", t: "water" },
+          { q: 1, u: "", t: ["orange, zested", "oranges, zested"] },
+          { q: null, u: "", s: "n", t: "Pinch of kosher salt" },
+          { q: 1, u: "", t: ["cinnamon stick (optional)", "cinnamon sticks (optional)"] }
+        ],
+        steps: [
+          "Put everything in a saucepan over medium heat.",
+          "Bring to a simmer, stirring until the sugar dissolves.",
+          "Simmer 10–12 minutes, stirring now and then, until most berries burst and the sauce thickens.",
+          "Remove the cinnamon stick and cool. It thickens more as it cools.",
+          "Refrigerate until serving."
+        ],
+        tip: "Make it up to 5 days ahead. Set aside some for the crostini."
+      },
+      {
+        id: "pie", course: "Dessert", name: "Spiced Pumpkin Pie with Whipped Cream",
+        prep: "30 min, plus chilling", cook: "about 1 hour 15 min", rest: "cool 2 hours",
+        yieldText: (f, p) => p.pies > 1 ? `${p.pies} pies (9-inch), 8 slices each` : "one 9-inch pie (8 slices)",
+        note: (f, p) => p.pies > 1 ? `Amounts below are for all ${p.pies} pies together. Make each crust separately.` : "",
+        ing: [
+          { head: "All-butter crust" },
+          { q: 1.25, u: "cup", s: "p", t: "all-purpose flour, plus extra for rolling" },
+          { q: 1, u: "tbsp", s: "p", t: "granulated sugar" },
+          { q: 0.25, u: "tsp", s: "p", t: "kosher salt" },
+          { q: 0.5, u: "cup", s: "p", t: "cold unsalted butter, cubed" },
+          { q: 3.5, u: "tbsp", s: "p", t: "ice water, about" },
+          { head: "Filling" },
+          { q: 1, u: "", s: "p", t: ["can (15 oz) pure pumpkin purée (not pie filling)", "cans (15 oz each) pure pumpkin purée (not pie filling)"] },
+          { q: 0.75, u: "cup", s: "p", t: "packed brown sugar" },
+          { q: 1.5, u: "tsp", s: "p", t: "ground cinnamon" },
+          { q: 1, u: "tsp", s: "p", t: "ground ginger" },
+          { q: 0.25, u: "tsp", s: "p", t: "ground nutmeg" },
+          { q: 0.125, u: "tsp", s: "p", t: "ground cloves" },
+          { q: 0.5, u: "tsp", s: "p", t: "kosher salt" },
+          { q: 3, u: "", s: "p", t: ["large egg", "large eggs"] },
+          { q: 1, u: "cup", s: "p", t: "heavy cream" },
+          { q: 0.5, u: "cup", s: "p", t: "whole milk" },
+          { q: 1, u: "tsp", s: "p", t: "vanilla extract" },
+          { head: "Whipped cream" },
+          { q: 1, u: "cup", s: "p", t: "cold heavy cream" },
+          { q: 2, u: "tbsp", s: "p", t: "granulated sugar" },
+          { q: 0.5, u: "tsp", s: "p", t: "vanilla extract" }
+        ],
+        steps: [
+          "Crust: mix the flour, sugar and salt. Cut in the butter until it looks like coarse crumbs with some pea-sized pieces.",
+          "Sprinkle in the ice water a tablespoon at a time, tossing with a fork, until the dough holds together when squeezed.",
+          "Shape into a disk, wrap and chill at least 1 hour.",
+          "Roll into a 12-inch circle, fit into a 9-inch pie dish and crimp the edges. Chill 30 minutes.",
+          "Heat the oven to 400°F (200°C). Line the crust with parchment and fill with pie weights or dried beans. Bake 15 minutes, remove the weights and bake 5 minutes more.",
+          "Lower the oven to 350°F (175°C).",
+          "Filling: whisk the pumpkin, brown sugar, spices and salt until smooth. Whisk in the eggs one at a time, then the cream, milk and vanilla.",
+          "Pour into the warm crust and bake 45–55 minutes, until the edges are set and the centre jiggles only slightly. Cover the crust edges with foil if they brown too fast.",
+          "Cool on a rack at least 2 hours.",
+          "Just before serving, beat the cold cream, sugar and vanilla to soft peaks."
+        ],
+        tip: "Bake the pie the day before. It sets beautifully overnight in the fridge, and your oven stays free on Christmas Day."
+      },
+      {
+        id: "punch", course: "Drinks", name: "Sparkling Cranberry-Orange Punch",
+        prep: "5 min", cook: "none", yieldText: f => `about ${Math.round(10 * f)} cups`,
+        ing: [
+          { q: 4, u: "cup", t: "cranberry juice, chilled" },
+          { q: 2, u: "cup", t: "orange juice, chilled" },
+          { q: 4, u: "cup", t: "sparkling water or ginger ale, chilled" },
+          { q: 1, u: "", t: ["orange, thinly sliced", "oranges, thinly sliced"] },
+          { q: null, u: "", s: "n", t: "A handful of fresh cranberries and a few rosemary sprigs" }
+        ],
+        steps: [
+          "Stir the cranberry and orange juice together in a large pitcher or punch bowl.",
+          "Just before serving, add the sparkling water or ginger ale.",
+          "Float the orange slices, cranberries and rosemary on top. Serve over ice."
+        ],
+        tip: "For adult guests, top individual glasses with sparkling wine, so the bowl stays family-friendly."
+      }
+    ],
+
+    // ⏰ The day's plan, counted back from dinner time (minutes). p = sizes worked out for this meal.
+    timeline(p) {
+      const out = [], R = p.roast, rest = p.rest, tIn = -(rest + R), tOut = -rest;
+      const add = (m, icon, text, alarm = true) => out.push({ m, icon, text, alarm });
+      add(tIn - 60, "🦃", "Take the turkey out of the fridge");
+      add(tIn - 35, "🔥", "Heat the oven to 325°F and butter the turkey");
+      add(tIn, "🦃", `Turkey into the oven (${p.w} lb, about ${p.roastText})`);
+      add(tIn + 25, "🍲", "Start the giblet stock (simmers 1 hour)");
+      for (let b = tIn + 45; b < tOut - 35; b += 45) add(b, "🥄", "Baste the turkey");
+      add(tIn + 85, "🍲", "Strain the giblet stock");
+      add(Math.max(tIn + 30, tOut - 100), "🍞", "Assemble the stuffing and refrigerate it");
+      add(-105, "🥤", "Mix the punch base and chill it");
+      add(tOut - 40, "🍞", "Stuffing into the oven, covered");
+      add(tOut - 30, "🌡️", "Start checking the turkey: 165°F in the thickest part of the thigh");
+      add(-75, "🥔", "Peel and cut the potatoes");
+      add(-60, "🥔", "Potatoes on to boil");
+      add(-60, "🥂", "Set out the crostini and punch for arriving guests");
+      add(tOut, "🦃", "Turkey out to rest. Oven up to 425°F. Uncover the stuffing");
+      add(tOut + 5, "🥬", "Brussels sprouts into the oven (20–25 min)");
+      add(-30, "🥕", "Mash the potatoes and keep warm. Start the carrots");
+      add(-25, "🫗", "Make the gravy");
+      add(tOut + 20, "🍞", "Stuffing out of the oven");
+      add(tOut + 27, "🥬", "Brussels sprouts out of the oven");
+      add(-10, "🔪", "Carve the turkey");
+      add(0, "🍽️", "Dinner is served!");
+      add(60, "🥧", "Whip the cream and serve the pie");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    // days before dinner: [days before, hour, icon, text]
+    ahead(p) {
+      return [
+        [p.thawDays, 9, "🧊", `If your turkey is frozen, move it to the fridge to thaw today (${p.w} lb needs about ${p.thawDays} days)`],
+        [1, 10, "📋", `Prep day: make the cranberry sauce, bake ${p.pies > 1 ? p.pies + " pumpkin pies" : "the pumpkin pie"}, dry the bread cubes, toast the crostini, make the herb butter, trim the sprouts and slice the carrots`]
+      ];
+    },
+
+    // 🛒 Shopping list for f = guests ÷ 8, w = turkey lb, pies
+    shop(f, p) {
+      const wf = p.w / 13, up = (x, step = 1) => Math.ceil(x / step - 1e-9) * step, n = x => Math.max(1, Math.ceil(x - 1e-9));
+      const lb = x => `${fmtNum(up(x, 0.5))} lb`;
+      const butterTbsp = 8 * wf + 9 * f + 8 * f + 3 * f + 8 * p.pies + 2;
+      const sticks = n(butterTbsp / 8);
+      const creamCups = 0.5 * f + 2 * p.pies, milkCups = 1 * f + 0.5 * p.pies;
+      const stockCups = 2 + 5 * f + 2.75 * f;
+      const cloves = 3 * wf + 3 * f + 6 * f + 1 * f;
+      return [
+        ["Produce", [
+          [`${2 + n(2 * f)}`, "yellow onions"],
+          [`${n((2 + 3 * f) / 8)}`, n((2 + 3 * f) / 8) > 1 ? "bunches celery" : "bunch celery"],
+          [`${1 + n(cloves / 10)}`, "heads garlic"],
+          [lb(4 * f), "Yukon Gold potatoes"],
+          [lb(2 * f), "Brussels sprouts"],
+          [lb(2 * f + 0.25), "carrots"],
+          [`${n(f)} × 12 oz`, n(f) > 1 ? "bags fresh cranberries (plus a handful for the punch)" : "bag fresh cranberries (plus a handful for the punch)"],
+          [`${Math.max(2, 1 + n(f / 2))}`, "lemons"],
+          [`${n(f) + n(f)}`, "oranges"],
+          [`${n((2 * wf + 2 * f + 2) / 8)}`, "bunch fresh sage"],
+          [`${n((wf + 1.7 * f + 2) / 8)}`, "bunch fresh thyme"],
+          [`${n((wf + 2 + f) / 6)}`, "bunch fresh rosemary"],
+          [`${n((2 * wf + 5 * f) / 16)}`, "bunch fresh flat-leaf parsley"],
+          [`${n(4 * f / 8)}`, "bunch fresh chives"]
+        ]],
+        ["Meat", [[`${p.w} lb`, "whole turkey (fresh, or frozen and thawed in time)"]]],
+        ["Dairy & Refrigerated", [
+          [`${sticks} sticks`, `unsalted butter (${fmtNum(up(sticks / 4, 0.25))} lb)`],
+          [`${fmtNum(up(creamCups, 0.5))} cups`, `heavy cream (${n(creamCups / 2)} × 500 ml / 1 pint)`],
+          [`${fmtNum(up(milkCups, 0.5))} cups`, `whole milk (${n(milkCups / 4)} × 1 L / 1 quart)`],
+          [`${up(2 * f) + 3 * p.pies}`, "large eggs"],
+          [`${n(f)} × 8 oz`, "cream cheese"]
+        ]],
+        ["Pantry & Dry Goods", [
+          [`${n(stockCups / 4)} × 1 L`, `low-sodium chicken or turkey stock (about ${Math.ceil(stockCups)} cups)`],
+          [`${n(f)} × 1 lb`, "crusty white or sourdough bread"],
+          [`${n(f)}`, n(f) > 1 ? "French baguettes" : "French baguette"],
+          [`${p.pies} × 15 oz`, p.pies > 1 ? "cans pure pumpkin purée" : "can pure pumpkin purée"],
+          [`${fmtNum(up(0.25 * f + 1.5 * p.pies, 0.5))} cups`, "all-purpose flour"],
+          [`${fmtNum(up(0.75 * f + 0.2 * p.pies, 0.25))} cups`, "granulated sugar"],
+          [`${fmtNum(up(0.75 * p.pies, 0.25))} cups`, "brown sugar"],
+          [`${Math.ceil(3 * f)} tbsp`, "honey"],
+          [`${Math.ceil(6 * f)} tbsp`, "olive oil"],
+          ["", "vanilla extract"],
+          ["", "balsamic vinegar (optional)"],
+          ["", "kosher salt and black pepper"],
+          ["", "ground cinnamon (plus a cinnamon stick, optional)"],
+          ["", "ground ginger, ground nutmeg, ground cloves"]
+        ]],
+        ["Drinks", [
+          [`${fmtNum(up(4 * f / 4, 0.5))} L`, "cranberry juice"],
+          [`${fmtNum(up(2.75 * f / 4, 0.5))} L`, "orange juice"],
+          [`${fmtNum(up(4 * f / 4, 0.5))} L`, "sparkling water or ginger ale"],
+          ["", "optional: sparkling apple cider, wine (1 bottle for every 3–4 adults), coffee, tea"]
+        ]],
+        ["Kitchen Supplies", [
+          ["", "instant-read meat thermometer"],
+          ["", "large roasting pan with a rack"],
+          [`${p.dishes}`, p.dishes > 1 ? "baking dishes (9×13-inch)" : "baking dish (9×13-inch)"],
+          [`${p.pies}`, p.pies > 1 ? "pie dishes (9-inch)" : "pie dish (9-inch)"],
+          ["", "kitchen twine, foil, parchment paper, pie weights or dried beans"]
+        ]]
+      ];
+    }
+  };
+
+  // sizes for a turkey dinner: weight, roast time, rest, pies, dishes
+  function turkeyPlan(guests) {
+    const g = Math.min(20, Math.max(1, guests | 0));
+    const w = Math.min(24, Math.max(8, Math.round(g <= 12 ? g * 1.5 : 18 + (g - 12) * 0.75)));
+    const pts = [[8, 165], [12, 180], [14, 210], [18, 245], [20, 262], [24, 285]];   // lb → minutes at 325°F, unstuffed
+    let roast = pts[pts.length - 1][1];
+    for (let i = 1; i < pts.length; i++) if (w <= pts[i][0]) { const [a, ma] = pts[i - 1], [b, mb] = pts[i]; roast = Math.round((ma + (mb - ma) * (w - a) / (b - a)) / 5) * 5; break; }
+    const f = g / 8;
+    return { g, f, w, roast, roastText: hm(roast), rest: w < 12 ? 30 : 40, thawDays: Math.ceil(w / 4.5), pies: Math.max(1, Math.ceil(g / 8)), dishes: Math.max(1, Math.ceil(f - 0.25)) };
+  }
+
+  // ---- small text helpers ----
+  function hm(min) { const h = Math.floor(min / 60), m = min % 60; return (h ? h + (h === 1 ? " hour" : " hours") : "") + (h && m ? " " : "") + (m ? m + " min" : ""); }
+  function fmtNum(x) { return Number.isInteger(x) ? String(x) : x.toFixed(2).replace(/0+$/, "").replace(/\.$/, ""); }
+  function fmtCups(c) { return frac(Math.round(c * 4) / 4) + (c > 1 ? " cups" : " cup"); }
+  function servings(f) { const s = Math.round(8 * f); return s + (s === 1 ? " serving" : " servings"); }
+  function frac(x) {
+    const whole = Math.floor(x + 1e-9), r = x - whole;
+    const map = [[0, ""], [0.125, "⅛"], [0.25, "¼"], [1 / 3, "⅓"], [0.5, "½"], [2 / 3, "⅔"], [0.75, "¾"], [1, ""]];
+    let best = map[0], d = 9; map.forEach(m => { const dd = Math.abs(m[0] - r); if (dd < d) { d = dd; best = m; } });
+    const w = best[0] === 1 ? whole + 1 : whole;
+    return (w ? String(w) : "") + (best[1] ? (w ? " " : "") + best[1] : "") || "0";
+  }
+
+  const placeholder = (id, tab, name, icon, blurb) => ({ id, tab, name, icon, blurb, soon: true });
+  return {
+    tabs: [["traditional", "Traditional"], ["elegant", "Elegant"], ["vegan", "Vegan"], ["dietary", "Dietary"]],
+    meals: [
+      turkey,
+      placeholder("beef", "traditional", "Roast Beef Dinner", "🥩", "Recipe coming soon."),
+      placeholder("ham", "traditional", "Glazed Ham Dinner", "🍖", "Recipe coming soon."),
+      placeholder("crown1", "elegant", "Crown Roast", "👑", "Recipe coming soon."),
+      placeholder("crown2", "elegant", "Crown Roast (second)", "👑", "Recipe coming soon."),
+      placeholder("vegan1", "vegan", "Vegan Holiday Dinner", "🌱", "Recipes coming soon."),
+      placeholder("diet1", "dietary", "Dietary Holiday Dinner", "🥗", "Recipes coming soon.")
+    ],
+    plan: { turkey: turkeyPlan },
+    frac, hm, fmtNum
+  };
 })();
 </script>
 <script id="noel-lock">
@@ -3187,7 +3744,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   /* 👆 SWIPE between tabs (left = next tab, right = previous tab)
      Ignores up/down scrolling, edge swipes (Android "back"), text boxes,
      sliders and anything inside a pop-up or full-screen page. */
-  const VIEW_ORDER = ["inspire", "games", "planner", "gifts", "invites", "alarms", "review"];
+  const VIEW_ORDER = ["inspire", "games", "planner", "meals", "gifts", "invites", "alarms", "review"];
   let swipe = null;
   document.querySelector("main").addEventListener("touchstart", e => {
     const t = e.touches[0];
@@ -3200,9 +3757,10 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const t = e.changedTouches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y, ms = Date.now() - swipe.at;
     swipe = null;
     if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8 || ms > 700) return;
-    const cur = VIEW_ORDER.indexOf(load(KEYS.view, "games")), next = cur + (dx < 0 ? 1 : -1);
-    if (next < 0 || next >= VIEW_ORDER.length) return;
-    showView(VIEW_ORDER[next], dx < 0 ? "left" : "right");
+    const order = VIEW_ORDER.filter(v => v !== "meals" || hubMode !== "company");   // meals are Family-only
+    const cur = order.indexOf(load(KEYS.view, "games")), next = cur + (dx < 0 ? 1 : -1);
+    if (next < 0 || next >= order.length) return;
+    showView(order[next], dx < 0 ? "left" : "right");
   }, { passive: true });
 
   // Full-screen sheets
@@ -3712,6 +4270,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
 
   // Main clock: checks every running timer 4× per second
   function tick() {
+    mealTick();
     const now = Date.now();
     const fired = [];
     duties.forEach(d => {
@@ -3822,7 +4381,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function triggerAlert(list) {
     list.forEach(d => { if (!alertIds.includes(d.id)) alertIds.push(d.id); });
     $("#alertList").innerHTML = alertIds
-      .map(id => duties.find(d => d.id === id))
+      .map(id => duties.find(d => d.id === id) || mealAlertItem(id))
       .filter(Boolean)
       .map(d => `<li>${d.icon} ${esc(d.name)}</li>`).join("");
     $("#alertOverlay").classList.add("show");
@@ -3863,6 +4422,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       const d = duties.find(x => x.id === id);
       if (d) { d.remaining = 300; d.endAt = now + 300000; d.status = "running"; }
     });
+    mealSnooze(alertIds);
     alertIds = [];
     save(KEYS.duties, duties); renderDuties(); closeAlert();
     toast("😴 Snoozed for 5 minutes");
@@ -5041,6 +5601,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $(".brand-title").textContent = t || "Noël Tier 1 Hub";          // ✏️ default title
     $(".brand-sub").textContent = t ? "Noël Tier 1 Hub" : "by Earth & Wonder";  // ✏️ default subtitle
     document.title = t ? `${t} · Noël Tier 1 Hub` : "Noël Tier 1 Hub";
+    $("#navMeals").hidden = hubMode === "company";   // 🍽️ the big-dinner planner is for families
+    if (hubMode === "company" && load(KEYS.view, "games") === "meals") showView("planner");
     $("#licenseLine").textContent = hubMode === "company" ? "Licensed for one company." : "Personal use for one household.";   // ✏️ licence wording
   }
   function openWelcome() { $("#familyInput").value = family; pickedMode = hubMode; syncModePick(hubMode); $("#welcomeOverlay").classList.add("show"); }
@@ -5634,6 +6196,276 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (!load("welcomed", false)) setTimeout(() => { if (!$("#alertOverlay").classList.contains("show")) openWelcome(); }, 500);
     else setTimeout(() => { if ($("#alertOverlay").classList.contains("show")) return; maybeNewYear(); if (!$("#newYearOverlay").classList.contains("show")) maybeCheckin(/#checkin/.test(location.hash)); }, 900);
   }
+  /* @meals-start */
+  /* ============================================================
+     🍽️ MEAL PLANNER (Family edition)
+     Pick a dinner → guests (1–20) + dinner time → Noël scales every
+     recipe and the shopping list, builds the day's timeline and sets
+     all the alarms. Print gives a paper backup for power cuts.
+     Recipes live in NOEL_MEALS (the "noel-meals-data" script).
+     ============================================================ */
+  const MD = window.NOEL_MEALS;
+  let mealSel = load("mealSel", { id: null, tab: "traditional", pane: "timeline" });
+  let mealCfg = load("mealCfg", {});                 // { turkey: { guests, date, time } }
+  let mealPlan = load("mealPlan", null);             // the running plan with its alarms
+  let mealTicks = load("mealTicks", {});             // shopping list ticks
+  const mealById = id => MD.meals.find(m => m.id === id);
+  const UNIT_TSP = { cup: 48, tbsp: 3, tsp: 1 };
+
+  function nextXmasDate() {
+    const now = new Date(); let y = now.getFullYear();
+    if (now > new Date(y, 11, 25, 23, 59)) y++;
+    return `${y}-12-25`;
+  }
+  function cfgFor(id) {
+    const c = mealCfg[id] || {};
+    return { guests: Math.min(20, Math.max(1, +c.guests || 12)), date: c.date || nextXmasDate(), time: c.time || "17:00" };
+  }
+  const dinnerAt = c => { const [y, mo, d] = c.date.split("-").map(Number), [h, mi] = c.time.split(":").map(Number); return new Date(y, mo - 1, d, h, mi).getTime(); };
+  const clock = t => new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  const dayName = t => new Date(t).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+
+  // ---- amounts: scale, then show in friendly kitchen units ----
+  function ingLine(ing, f, p) {
+    if (ing.head) return { head: ing.head };
+    let t = typeof ing.t === "function" ? ing.t(p) : ing.t;
+    if (ing.q == null) return { text: Array.isArray(t) ? t[0] : t };
+    const k = ing.s === "n" ? 1 : ing.s === "w" ? p.w / 13 : ing.s === "p" ? p.pies : f;
+    let v = ing.q * k, amt = "", many = v > 1.0001;
+    if (UNIT_TSP[ing.u]) {
+      const tsp = v * UNIT_TSP[ing.u];
+      if (tsp >= 12 - 1e-9) { const c = Math.round(tsp / 48 * 8) / 8; amt = MD.frac(c) + (c > 1 ? " cups" : " cup"); }
+      else if (tsp >= 3 - 1e-9) { const tb = Math.round(tsp / 3 * 2) / 2; amt = MD.frac(tb) + " tbsp"; }
+      else { const ts = Math.max(0.125, Math.round(tsp * 8) / 8); amt = MD.frac(ts) + " tsp"; }
+    } else if (ing.u === "lb") { amt = MD.frac(Math.max(0.25, Math.round(v * 4) / 4)) + " lb"; }
+    else if (ing.u === "oz") { amt = v >= 16 ? MD.frac(Math.round(v / 16 * 4) / 4) + " lb" : Math.round(v) + " oz"; }
+    else { const c = ing.up ? Math.ceil(v - 1e-9) : Math.max(1, Math.round(v)); amt = String(c); many = c > 1; }
+    if (Array.isArray(t)) t = many ? t[1] : t[0];
+    return { amt, text: t };
+  }
+  const val = (x, f, p) => typeof x === "function" ? x(f, p) : x;
+
+  function mealSizes(m, guests) { return MD.plan[m.id] ? MD.plan[m.id](guests) : { g: guests, f: guests / 8, pies: 1, dishes: 1 }; }
+
+  // ---- the day's alarms, as real times ----
+  function buildSteps(m, c) {
+    const p = mealSizes(m, c.guests), D = dinnerAt(c), out = [];
+    m.ahead(p).forEach(([days, hour, icon, text], i) => {
+      const d = new Date(D); d.setDate(d.getDate() - days); d.setHours(hour, 0, 0, 0);
+      out.push({ k: "a" + i, t: d.getTime(), icon, text, alarm: true, ahead: true });
+    });
+    m.timeline(p).forEach((s, i) => out.push({ k: "s" + i, m: s.m, t: D + s.m * 60000, icon: s.icon, text: s.text, alarm: s.alarm }));
+    return out.sort((a, b) => a.t - b.t);
+  }
+
+  // ---- screens ----
+  function renderMealHome() {
+    $("#mealTabs").innerHTML = MD.tabs.map(([k, l]) => `<button type="button" data-mtab="${k}" aria-pressed="${mealSel.tab === k}">${l}</button>`).join("");
+    $("#mealList").innerHTML = MD.meals.filter(m => m.tab === mealSel.tab).map(m => `
+      <button type="button" class="card meal-card${m.soon ? " soon" : ""}" data-meal="${m.id}">
+        <span class="meal-ico">${m.icon}</span>
+        <span class="meal-txt"><b>${esc(m.name)}</b><small>${esc(m.blurb)}</small></span>
+        <span class="meal-go">${m.soon ? "Soon" : "›"}</span>
+      </button>`).join("");
+  }
+  function openMeal(id) {
+    const m = mealById(id); if (!m) return;
+    if (m.soon) { toast("🍽️ This menu is coming soon"); return; }
+    mealSel.id = id; save("mealSel", mealSel); renderMeals(); window.scrollTo({ top: 0 });
+  }
+  function renderMeals() {
+    const m = mealSel.id && mealById(mealSel.id);
+    $("#mealHome").hidden = !!m; $("#mealDetail").hidden = !m;
+    if (!m || m.soon) { mealSel.id = null; $("#mealHome").hidden = false; $("#mealDetail").hidden = true; renderMealHome(); }
+    else renderMealDetail(m);
+    renderMaster();
+  }
+
+  function renderMealDetail(m) {
+    const c = cfgFor(m.id), p = mealSizes(m, c.guests), f = p.f, D = dinnerAt(c);
+    const active = mealPlan && mealPlan.id === m.id;
+    const steps = buildSteps(m, c), tIn = steps.find(s => /into the oven \(/.test(s.text));
+    const panes = [["timeline", "⏰ Timeline"], ["shop", "🛒 Shopping"], ["recipes", "📖 Recipes"], ["menu", "🥂 Menu"]];
+    const pane = panes.some(x => x[0] === mealSel.pane) ? mealSel.pane : "timeline";
+    let body = "";
+    if (pane === "timeline") {
+      let lastDay = "";
+      body = `<ol class="meal-tl">` + steps.map(s => {
+        const day = dayName(s.t), head = day !== lastDay ? `<li class="tl-day">${esc(day)}</li>` : ""; lastDay = day;
+        const st = active && mealPlan.steps.find(x => x.k === s.k), past = st && st.fired;
+        return head + `<li class="${past ? "done" : ""}${s.m === 0 ? " serve" : ""}"><time>${s.ahead ? "All day" : clock(s.t)}</time><span>${s.icon} ${esc(s.text)}</span></li>`;
+      }).join("") + `</ol>`;
+    } else if (pane === "shop") {
+      const ticks = mealTicks[m.id] || {};
+      body = m.shop(f, p).map(([dept, items]) => `<h4 class="shop-dept">${esc(dept)}</h4><ul class="shop-list">` + items.map(([q, name]) => {
+        const key = dept + "|" + name, on = !!ticks[key];
+        return `<li><label class="${on ? "on" : ""}"><input type="checkbox" data-shop="${esc(key)}" ${on ? "checked" : ""}><span><b>${esc(q)}</b> ${esc(name)}</span></label></li>`;
+      }).join("") + `</ul>`).join("") + `<button type="button" class="btn btn-ghost btn-block" id="shopClear">Untick everything</button>`;
+    } else if (pane === "recipes") {
+      body = m.recipes.map(r => recipeHtml(r, f, p)).join("");
+    } else {
+      body = m.menu.map(([course, items]) => `<h4 class="shop-dept">${esc(course)}</h4><ul class="menu-list">${items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`).join("") +
+        `<h4 class="shop-dept">Drink pairings</h4>` + m.drinks.map(([k, v]) => `<p class="drink"><b>${esc(k)}:</b> ${esc(v)}</p>`).join("");
+    }
+    $("#mealDetail").innerHTML = `
+      <button type="button" class="meal-back" id="mealBack">‹ All meals</button>
+      <h3 class="meal-title">${m.icon} ${esc(m.name)}</h3>
+      <div class="card meal-setup">
+        <div class="meal-row"><span class="meal-lab">Guests</span>
+          <div class="stepper"><button type="button" data-g="-1" aria-label="Fewer guests">−</button><output id="mealGuests">${c.guests}</output><button type="button" data-g="1" aria-label="More guests">+</button></div></div>
+        <div class="meal-row two">
+          <label><span class="meal-lab">Dinner date</span><input class="input" type="date" id="mealDate" value="${c.date}"></label>
+          <label><span class="meal-lab">Dinner time</span><input class="input" type="time" id="mealTime" value="${c.time}"></label></div>
+        ${p.w ? `<p class="meal-sum">🦃 <b>${p.w} lb turkey</b> · roasts about ${p.roastText} · into the oven at <b>${tIn ? clock(tIn.t) : ""}</b>${p.g >= 17 ? "<br><small>For a big crowd, a 24 lb turkey is about the largest most ovens hold.</small>" : ""}</p>` : ""}
+        <div class="send-btns">
+          ${active ? `<button type="button" class="btn btn-ghost" id="mealStop">⏹ Stop dinner alarms</button>` : `<button type="button" class="btn btn-red" id="mealStart">⏰ Start my dinner alarms</button>`}
+          <button type="button" class="btn btn-green" id="mealPrint">🖨️ Print everything</button>
+        </div>
+        ${active ? `<p class="meal-on">✅ Alarms are set. Noël will ring for every step${NoelNative.isNative() ? ", even when the app is closed" : ". Keep Noël open on this device"}.</p>` : ""}
+      </div>
+      <div class="seg seg4 sub-tabs" id="mealPanes">${panes.map(([k, l]) => `<button type="button" data-mpane="${k}" aria-pressed="${k === pane}">${l}</button>`).join("")}</div>
+      <div class="card meal-body">${body}</div>`;
+    if (active && (mealPlan.guests !== c.guests || mealPlan.at !== D)) $("#mealDetail .meal-on").innerHTML = "⚠️ You changed the guests or time. Tap <b>Stop</b>, then <b>Start</b> again to update the alarms.";
+  }
+
+  function recipeHtml(r, f, p) {
+    const note = val(r.note, f, p);
+    return `<details class="recipe"><summary><span class="r-course">${esc(r.course)}</span>${esc(r.name)}</summary>
+      <p class="r-meta">Prep ${esc(val(r.prep, p) || "")} · Cook ${esc(typeof r.cook === "function" ? r.cook(p) : r.cook)}${r.rest ? " · Rest " + esc(typeof r.rest === "function" ? r.rest(p) : r.rest) : ""} · Makes ${esc(val(r.yieldText, f, p))}</p>
+      ${note ? `<p class="r-note">${esc(note)}</p>` : ""}
+      <ul class="r-ing">${r.ing.map(i => { const l = ingLine(i, f, p); return l.head ? `<li class="r-head">${esc(l.head)}</li>` : `<li>${l.amt ? `<b>${esc(l.amt)}</b> ` : ""}${esc(l.text)}</li>`; }).join("")}</ul>
+      <ol class="r-steps">${r.steps.map(s => `<li>${esc(typeof s === "function" ? s(p) : s)}</li>`).join("")}</ol>
+      ${r.tip ? `<p class="r-tip"><b>Chef's tip:</b> ${esc(r.tip)}</p>` : ""}</details>`;
+  }
+
+  // ---- alarms ----
+  function startMealPlan(m) {
+    const c = cfgFor(m.id), D = dinnerAt(c), now = Date.now();
+    if (D < now) { toast("🕰️ That dinner time has passed. Pick a time in the future."); return; }
+    const steps = buildSteps(m, c).map(s => ({ k: s.k, t: s.t, icon: s.icon, text: s.text, alarm: s.alarm, fired: s.t <= now }));
+    mealPlan = { id: m.id, name: m.name, guests: c.guests, at: D, steps };
+    save("mealPlan", mealPlan); syncMealNative(); getAudio();
+    const missed = steps.filter(s => s.fired).length;
+    toast(missed ? `⏰ Dinner alarms set. ${missed} earlier step${missed > 1 ? "s were" : " was"} already past.` : "⏰ Dinner alarms are set!");
+    renderMeals();
+  }
+  function stopMealPlan() {
+    mealPlan = null; save("mealPlan", null); syncMealNative(); renderMeals(); toast("⏹ Dinner alarms stopped");
+  }
+  function syncMealNative() {
+    if (!NoelNative.isNative()) return;
+    const items = mealPlan ? mealPlan.steps.filter(s => s.alarm && !s.fired && s.t > Date.now() + 1000).map(s => ({ t: s.t, title: `${s.icon} ${s.text}`, body: `${mealPlan.name} · dinner at ${clock(mealPlan.at)}` })) : [];
+    NoelNative.scheduleList(3000, 5000, items);
+  }
+  function mealTick() {
+    if (!mealPlan) return;
+    const now = Date.now(), due = mealPlan.steps.filter(s => s.alarm && !s.fired && s.t <= now);
+    if (!due.length) return;
+    due.forEach(s => { s.fired = true; });
+    save("mealPlan", mealPlan);
+    const fresh = due.filter(s => now - s.t < 10 * 60000);   // don't ring for steps long past (e.g. phone was off)
+    if (fresh.length) triggerAlert(fresh.map(s => ({ id: "meal:" + s.k })));
+    if ($("#view-meals").classList.contains("active")) renderMeals();
+  }
+  function mealAlertItem(id) {
+    if (!mealPlan || !String(id).startsWith("meal:")) return null;
+    const s = mealPlan.steps.find(x => "meal:" + x.k === id);
+    return s ? { icon: s.icon, name: s.text } : null;
+  }
+  function mealSnooze(ids) {
+    if (!mealPlan) return;
+    ids.forEach(id => { const s = mealPlan.steps.find(x => "meal:" + x.k === id); if (s) { s.t = Date.now() + 300000; s.fired = false; } });
+    save("mealPlan", mealPlan); syncMealNative();
+  }
+
+  // ---- master timer: one countdown to dinner, with what's now and next ----
+  function renderMaster() {
+    const el = $("#mealMaster");
+    if (!mealPlan || Date.now() > mealPlan.at + 3 * 3600000) { el.hidden = true; return; }
+    const now = Date.now(), left = mealPlan.at - now;
+    const next = mealPlan.steps.find(s => s.t > now), last = [...mealPlan.steps].reverse().find(s => s.t <= now);
+    const fmt = ms => { const s = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
+      return d ? `${d}d ${h}h ${m}m` : `${h ? h + ":" : ""}${String(m).padStart(h ? 2 : 1, "0")}:${String(ss).padStart(2, "0")}`; };
+    el.hidden = false;
+    el.innerHTML = `<div class="mm-k">${left > 0 ? "Dinner is served in" : "Dinner time!"}</div>
+      <div class="mm-time">${left > 0 ? fmt(left) : "🍽️"}</div>
+      ${last ? `<div class="mm-row"><b>Now</b> ${last.icon} ${esc(last.text)}</div>` : ""}
+      ${next ? `<div class="mm-row"><b>Next</b> ${next.icon} ${esc(next.text)} · ${clock(next.t)} <small>(in ${fmt(next.t - now)})</small></div>` : ""}`;
+  }
+  setInterval(() => { if ($("#view-meals").classList.contains("active")) renderMaster(); }, 1000);
+
+  // ---- print (paper backup) ----
+  function printMeal(m) {
+    const c = cfgFor(m.id), p = mealSizes(m, c.guests), f = p.f, steps = buildSteps(m, c);
+    let lastDay = "";
+    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} guests · dinner ${esc(dayName(dinnerAt(c)))} at ${clock(dinnerAt(c))}${p.w ? ` · ${p.w} lb turkey, about ${p.roastText}` : ""}</p>
+      <h2>Timeline</h2><table class="pm-tl">${steps.map(s => { const d = dayName(s.t), h = d !== lastDay ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; lastDay = d; return h + `<tr><td>${s.ahead ? "All day" : clock(s.t)}</td><td>☐ ${esc(s.text)}</td></tr>`; }).join("")}</table>
+      <h2>Shopping list</h2>${m.shop(f, p).map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(([q, n]) => `<li>☐ <b>${esc(q)}</b> ${esc(n)}</li>`).join("")}</ul>`).join("")}
+      <h2>Menu</h2>${m.menu.map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v.join(", "))}</p>`).join("")}
+      ${m.drinks.map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v)}</p>`).join("")}
+      <h2>Recipes</h2>${m.recipes.map(r => recipeHtml(r, f, p).replace("<details", "<details open")).join("")}
+      <p class="pm-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p>`;
+    $("#printArea").innerHTML = html;
+    if (NoelNative.isNative()) {   // 📱 iPhone: open the print-ready page in the share sheet (Print is in the list)
+      const doc = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${PRINT_CSS}</style></head><body><div id="printArea">${html}</div></body></html>`;
+      NoelMedia.share(new Blob([doc], { type: "text/html" }), m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Plan.html", m.name).catch(() => {});
+      return;
+    }
+    setTimeout(() => window.print(), 50);
+  }
+  const PRINT_CSS = `body{font:12pt/1.45 Georgia,serif;color:#222;margin:24px} h1{font-size:22pt;margin:0} h2{font-size:15pt;border-bottom:1.5px solid #B8935A;margin:22px 0 8px;padding-bottom:3px} h3{font-size:12pt;margin:12px 0 4px}
+    .pm-sub{color:#555;margin:4px 0 0} table{border-collapse:collapse;width:100%} td,th{text-align:left;padding:3px 6px;vertical-align:top;border-bottom:1px solid #eee} th{background:#f4efe3} td:first-child{white-space:nowrap;width:80px}
+    ul{margin:0;padding-left:0;list-style:none} details{margin:14px 0;break-inside:avoid-page} summary{font-weight:bold;font-size:13pt;list-style:none} .r-course{display:block;font-size:9pt;letter-spacing:.15em;text-transform:uppercase;color:#8a6d3b}
+    .r-meta,.r-note{color:#555;font-size:10.5pt;margin:4px 0} .r-ing li{margin:1px 0} .r-head{font-weight:bold;margin-top:6px!important} .r-steps{padding-left:20px} .r-tip{font-style:italic} .pm-foot{margin-top:24px;color:#888;font-size:9pt;text-align:center}`;
+
+  // ---- your own timers (when a meal plan isn't needed) ----
+  $("#mealOwnForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const fm = e.target, name = fm.oname.value.trim() || "Dinner timer";
+    const secs = ((parseInt(fm.ohours.value, 10) || 0) * 60 + (parseInt(fm.omins.value, 10) || 0)) * 60;
+    if (secs < 60) { toast("⏲️ Set at least 1 minute"); return; }
+    const d = { id: "c-" + uid(), icon: "🍽️", name: name.slice(0, 40), custom: true, duration: secs, remaining: secs, endAt: null, status: "idle" };
+    duties.push(d); startDuty(d, secs); commitDuties();
+    fm.oname.value = ""; fm.ohours.value = ""; fm.omins.value = "";
+    toast(`⏲️ "${d.name}" started. You'll find it in Alarms too.`);
+    renderOwnTimers();
+  });
+  function renderOwnTimers() {
+    const mine = duties.filter(d => d.icon === "🍽️" && d.custom && d.status === "running");
+    $("#mealOwnList").innerHTML = mine.map(d => `<li>🍽️ ${esc(d.name)} · rings at ${clock(d.endAt)}</li>`).join("");
+  }
+
+  // ---- taps ----
+  $("#view-meals").addEventListener("click", e => {
+    const t = e.target;
+    const tab = t.closest("[data-mtab]"); if (tab) { mealSel.tab = tab.dataset.mtab; save("mealSel", mealSel); renderMealHome(); return; }
+    const card = t.closest("[data-meal]"); if (card) { openMeal(card.dataset.meal); return; }
+    if (t.closest("#mealBack")) { mealSel.id = null; save("mealSel", mealSel); renderMeals(); return; }
+    const m = mealSel.id && mealById(mealSel.id); if (!m) return;
+    const g = t.closest("[data-g]");
+    if (g) { const c = cfgFor(m.id); c.guests = Math.min(20, Math.max(1, c.guests + +g.dataset.g)); mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
+    const pn = t.closest("[data-mpane]"); if (pn) { mealSel.pane = pn.dataset.mpane; save("mealSel", mealSel); renderMealDetail(m); return; }
+    if (t.closest("#mealStart")) { startMealPlan(m); return; }
+    if (t.closest("#mealStop")) { if (confirm("Stop all the dinner alarms for this meal?")) stopMealPlan(); return; }
+    if (t.closest("#mealPrint")) { printMeal(m); return; }
+    if (t.closest("#shopClear")) { if (confirm("Untick everything on the shopping list?")) { mealTicks[m.id] = {}; save("mealTicks", mealTicks); renderMealDetail(m); } return; }
+  });
+  $("#view-meals").addEventListener("change", e => {
+    const m = mealSel.id && mealById(mealSel.id); if (!m) return;
+    const t = e.target;
+    if (t.id === "mealDate" || t.id === "mealTime") {
+      const c = cfgFor(m.id); if (t.id === "mealDate" && t.value) c.date = t.value; if (t.id === "mealTime" && t.value) c.time = t.value;
+      mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return;
+    }
+    if (t.dataset.shop) {
+      const tk = mealTicks[m.id] = mealTicks[m.id] || {};
+      if (t.checked) tk[t.dataset.shop] = 1; else delete tk[t.dataset.shop];
+      save("mealTicks", mealTicks); t.closest("label").classList.toggle("on", t.checked);
+    }
+  });
+  $("#mealSkip").addEventListener("click", e => { e.preventDefault(); $("#mealOwn").scrollIntoView({ behavior: "smooth", block: "start" }); });
+  /* @meals-end */
+
   /* ============================================================
      START THE APP
      ============================================================ */
@@ -5655,6 +6487,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   renderTeams();
   renderPlanner();
   renderDuties();
+  renderMeals();
+  renderOwnTimers();
   showView(load(KEYS.view, "games"));
   setInterval(tick, 250);
   tick(); // catches timers that finished while the app was closed
