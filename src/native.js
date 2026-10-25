@@ -67,7 +67,17 @@
       })) });
       return true;
     },
-    cancelCheckins: () => cancelRange(CHECKIN_BASE, CHECKIN_BASE + 100)
+    cancelCheckins: () => cancelRange(CHECKIN_BASE, CHECKIN_BASE + 100),
+    // any list of { t, title, body } as phone notifications, using ids lo…hi (replaces what was there)
+    scheduleList(lo, hi, items) {
+      if (!isNative()) return;
+      dutyQueue = dutyQueue.then(async () => {
+        await cancelRange(lo, hi);
+        const list = items.filter(x => x.t > Date.now() + 1000).slice(0, hi - lo);
+        if (!list.length || !(await allowed())) return;
+        await LN().schedule({ notifications: list.map((x, i) => ({ id: lo + i, title: x.title, body: x.body || "", schedule: { at: new Date(x.t), allowWhileIdle: true } })) });
+      }).catch(() => {});
+    }
   };
   window.NoelNative = Native;
 })();
