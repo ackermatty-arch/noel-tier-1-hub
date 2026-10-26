@@ -17,5 +17,8 @@ s = s[:a] + "  /* @gideas-start */\n" + code + s[b:]
 code = open("src/santa.js").read()
 a, b = s.index("  /* @santa-start */"), s.index("  /* @santa-end */\n") + len("  /* @santa-end */\n")
 s = s[:a] + "  /* @santa-start */\n" + code + s[b:]
+code = open("src/host.js").read()
+a, b = s.index("  /* @host-start */"), s.index("  /* @host-end */\n") + len("  /* @host-end */\n")
+s = s[:a] + "  /* @host-start */\n" + code + s[b:]
 open("index.html", "w").write(s)
 print("index.html updated")
