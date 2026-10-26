@@ -94,6 +94,15 @@
   function survivalDoc() {
     const O = hubMode === "company";
     if (!O) return origSurvival();
+    return { title: "Advanced Office & Social Survival", css: ORIG_CSS + " .og .og-div{margin:6px 0 24px} .og .tip{margin:0 0 15px} .og h1{font-size:26pt!important} .og .tip b{font-size:17pt} .og .tip span{font-size:11.5pt} .og .og-close{margin-top:28px}", margin: 0.45, file: "Advanced-Office-Social-Survival",
+      html: origPage("An office survival guide", "Advanced Office &amp; Social Survival", "For when the eggnog runs out before the patience does", [
+        ["Establish a Secret Escape Signal", "Agree on a codeword or a frantic eye-twitch with your work bestie to instantly trigger a fake “urgent client call” at the office party."],
+        ["Mute the Notification Avalanche", "Silence any group chat containing more than four coworkers discussing the logistics of a potluck."],
+        ["Nod and Smile in Neutral", "Practice your best blank customer-service face for when a coworker comments on your workload, haircut, or holiday plans."],
+        ["Redefine Festive Baking", "Buy a box of bakery cookies, transfer them to a plate, dust them with powdered sugar, and look exhausted when you set them in the break room."],
+        ["The “Looking for a Stapler” Strategy", "Stare deeply into the back of the supply closet for five full minutes, pretending to look for staples, just to enjoy the quiet."],
+        ["The “Irish Goodbye” Masterclass", "Slip out of the office party while everyone is distracted by a fierce gift-exchange steal. Send a message from your couch two hours later: “So sorry, got swept away by the holiday magic!”"]],
+        "Stay merry. Stay hydrated.<br>Always know where the exits are.") };
     const G = O ? {
       title: "The Office Party Survival Guide", sub: "For surviving the most wonderful (and most awkward) time of the work year",
       kit: ["A name tag (even if everyone knows you)", "Breath mints", "Comfy shoes for the conga line", "A fully charged phone", "Your famous dip, labelled", "A polite reason to leave at 9", "A gift within the limit (really)", "Stain remover pen"],

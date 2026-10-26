@@ -1798,7 +1798,7 @@ body.space-switching main { opacity: .3; }
 
     <!-- ✏️ SELF-CARE PRINTABLES: replace href="#" with your PDF links -->
     <div class="print-grid">
-      <article class="card print-card">
+      <article class="card print-card" id="selfCareCard">
         <div class="print-thumb">🕯️</div>
         <div class="print-info">
           <h3>Holiday Self-Care</h3>
@@ -8379,8 +8379,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#navMeals").hidden = hubMode === "company";   // 🍽️ the big-dinner planner is for families
     $("#hostBanner").hidden = $("#orgBanner").hidden = hubMode === "company";   // 🏡 hosting is for families too
     $("#officeBanner").hidden = hubMode !== "company";                        // 🏢 the office party plan
-    $$(".sv-title").forEach(x => { x.textContent = hubMode === "company" ? "Office Party Survival Guide" : "Advanced Family & Social Survival"; });
-    $$(".sv-desc").forEach(x => { x.textContent = hubMode === "company" ? "Survival kit, the official rules, safe topics, emergency plans and Office Party Bingo." : "Six tongue-in-cheek tips for surviving the holidays."; });
+    $$(".sv-title").forEach(x => { x.textContent = hubMode === "company" ? "Advanced Office & Social Survival" : "Advanced Family & Social Survival"; });
+    $$(".sv-desc").forEach(x => { x.textContent = hubMode === "company" ? "Six tongue-in-cheek tips for surviving the office party." : "Six tongue-in-cheek tips for surviving the holidays."; });
+    $("#selfCareCard").hidden = hubMode === "company";   // 🕯️ self-care is family only
     $$(".sc-desc").forEach(x => { x.textContent = hubMode === "company" ? "Five gentle reminders, a calm plan and your own permission slip." : "Five gentle reminders for a calmer, merrier season."; });
     if (hubMode === "company" && load(KEYS.view, "games") === "host") showView("planner");
     applySeasonNav();                                 // 🥂 New Year button takes over from Dec 26
@@ -11793,6 +11794,15 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function survivalDoc() {
     const O = hubMode === "company";
     if (!O) return origSurvival();
+    return { title: "Advanced Office & Social Survival", css: ORIG_CSS + " .og .og-div{margin:6px 0 24px} .og .tip{margin:0 0 15px} .og h1{font-size:26pt!important} .og .tip b{font-size:17pt} .og .tip span{font-size:11.5pt} .og .og-close{margin-top:28px}", margin: 0.45, file: "Advanced-Office-Social-Survival",
+      html: origPage("An office survival guide", "Advanced Office &amp; Social Survival", "For when the eggnog runs out before the patience does", [
+        ["Establish a Secret Escape Signal", "Agree on a codeword or a frantic eye-twitch with your work bestie to instantly trigger a fake “urgent client call” at the office party."],
+        ["Mute the Notification Avalanche", "Silence any group chat containing more than four coworkers discussing the logistics of a potluck."],
+        ["Nod and Smile in Neutral", "Practice your best blank customer-service face for when a coworker comments on your workload, haircut, or holiday plans."],
+        ["Redefine Festive Baking", "Buy a box of bakery cookies, transfer them to a plate, dust them with powdered sugar, and look exhausted when you set them in the break room."],
+        ["The “Looking for a Stapler” Strategy", "Stare deeply into the back of the supply closet for five full minutes, pretending to look for staples, just to enjoy the quiet."],
+        ["The “Irish Goodbye” Masterclass", "Slip out of the office party while everyone is distracted by a fierce gift-exchange steal. Send a message from your couch two hours later: “So sorry, got swept away by the holiday magic!”"]],
+        "Stay merry. Stay hydrated.<br>Always know where the exits are.") };
     const G = O ? {
       title: "The Office Party Survival Guide", sub: "For surviving the most wonderful (and most awkward) time of the work year",
       kit: ["A name tag (even if everyone knows you)", "Breath mints", "Comfy shoes for the conga line", "A fully charged phone", "Your famous dip, labelled", "A polite reason to leave at 9", "A gift within the limit (really)", "Stain remover pen"],
