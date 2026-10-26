@@ -42,7 +42,7 @@
   function openShow(target, practice) {
     getAudio(); if (!music.paused) pauseMusic();
     showTarget = target; showPractice = practice; lastBeep = null;
-    $("#nyeShowMsg").textContent = ""; $("#nyeShowBig").textContent = ""; $("#nyeShowSub").textContent = practice ? "Practice run" : "until midnight";
+    $("#nyeShowMsg").textContent = ""; $("#nyeShowBig").textContent = ""; $("#nyeShowSub").textContent = practice === "kids" ? "Kids' countdown!" : practice ? "Practice run" : "until midnight";
     $("#nyeShow").classList.add("show"); document.body.classList.add("lock");
     clearInterval(showTimer); showTimer = setInterval(stepShow, 100); stepShow();
   }

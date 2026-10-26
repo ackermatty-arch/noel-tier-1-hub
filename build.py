@@ -26,5 +26,8 @@ s = s[:a] + "  /* @org-start */\n" + code + s[b:]
 code = open("src/print.js").read()
 a, b = s.index("  /* @print-start */"), s.index("  /* @print-end */\n") + len("  /* @print-end */\n")
 s = s[:a] + "  /* @print-start */\n" + code + s[b:]
+code = open("src/themes.js").read()
+a, b = s.index("  /* @themes-start */"), s.index("  /* @themes-end */\n") + len("  /* @themes-end */\n")
+s = s[:a] + "  /* @themes-start */\n" + code + s[b:]
 open("index.html", "w").write(s)
 print("index.html updated")

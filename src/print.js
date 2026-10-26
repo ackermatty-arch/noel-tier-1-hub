@@ -16,6 +16,7 @@
     let d = null;
     if (key.startsWith("meal:")) { const m = mealById(key.slice(5)); d = m ? mealDoc(m) : null; }
     else if (key.startsWith("shop:")) { const m = mealById(key.slice(5)); d = m ? shopDoc(m) : null; }
+    else if (key.startsWith("theme:")) d = themeDoc(key.slice(6));
     else if (key === "place") d = placeDoc();
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "labels" || key === "return") d = labelDoc(key);
@@ -54,7 +55,7 @@
     }
     // 🌐 web: everything goes into the print area, one section per page set, then the browser's print window
     const css = [...new Set(docs.map(d => d.css))].join("\n");
-    $("#printArea").innerHTML = `<style>@page{margin:.5in} @page zero{margin:0} ${css} #printArea .pt-zero{page:zero} #printArea .pt-sec + .pt-sec{break-before:page;page-break-before:always}</style>` +
+    $("#printArea").innerHTML = `<style>@page{margin:.5in} @page zero{margin:0} @media print { ${css} #printArea .pt-zero{page:zero} #printArea .pt-sec + .pt-sec{break-before:page;page-break-before:always} }</style>` +
       docs.map(d => `<section class="pt-sec${d.margin ? "" : " pt-zero"}">${d.html}</section>`).join("");
     setTimeout(() => window.print(), 60);
     return "printed";
