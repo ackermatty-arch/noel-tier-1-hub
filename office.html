@@ -1323,7 +1323,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .fill-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; } .fill-chip { font-size: 12.5px !important; padding: 6px 11px !important; background: #f3ecdc !important; border-color: rgba(184,147,90,.45) !important; color: var(--pine-dark) !important; }
 .fill-lab { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
 .ty-tpl { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 8px 0; text-align: left; font-size: 14px; background: #fff; } .ty-tpl p { margin: 0 0 8px; white-space: pre-wrap; } .ty-tpl .send-btns { gap: 6px; }
-body.co .fam-only { display: none !important; } body.co #giftTabs { grid-template-columns: repeat(3, 1fr); } body.co:not(.co-kids) .kids-only { display: none !important; }
+body:not(.co) .co-only { display: none !important; } body.co .fam-only { display: none !important; } body.co #giftTabs { grid-template-columns: repeat(3, 1fr); } body.co:not(.co-kids) .kids-only { display: none !important; }
 .who-pick { display: grid; gap: 10px; } .who-tile { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; text-align: left; padding: 14px; border-radius: 16px; border: 2px solid var(--line); background: var(--card); font: inherit; color: inherit; cursor: pointer; }
 .who-tile .wt-ico { font-size: 30px; } .who-tile b { display: block; color: var(--pine-dark); font-size: 16px; } .who-tile small { color: var(--muted); font-size: 13px; } .who-tile.on { border-color: var(--gold); background: #fbf5e6; }
 .who-pill { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; border-radius: 14px; background: #fbf5e6; border: 1px solid rgba(201,162,39,.4); margin-bottom: 12px; font-size: 14px; }
@@ -2302,7 +2302,8 @@ body.space-switching main { opacity: .3; }
       </div>
     </form>
 
-    <p class="tip">🎤 Hands busy? Tap the gold mic button and say “Start the turkey timer” or “How long on the cookies?”. The app answers out loud.</p>
+    <p class="tip fam-only">🎤 Hands busy? Tap the gold mic button and say “Start the turkey timer” or “How long on the cookies?”. The app answers out loud.</p>
+    <p class="tip co-only">🎤 Hands busy? Tap the gold mic button and say “Start the catering timer” or “How long on the gift exchange?”. The app answers out loud.</p>
     <p class="tip">💡 Tip: keep the app open on screen while timers run. Phones may silence sounds when the app is in the background or on silent mode.</p>
   </section>
 
@@ -2777,10 +2778,13 @@ body.space-switching main { opacity: .3; }
     <p class="voice-reply" id="voiceReply" aria-live="polite"></p>
     <div class="voice-try">Try saying</div>
     <div class="voice-chips" id="voiceChips">
-      <button class="chip" data-cmd="Start the turkey timer">“Start the turkey timer”</button>
-      <button class="chip" data-cmd="How long on the cookies?">“How long on the cookies?”</button>
-      <button class="chip" data-cmd="Set a 10 minute timer for potatoes">“Set a 10 minute timer for potatoes”</button>
-      <button class="chip" data-cmd="Check off wrap gifts">“Check off wrap gifts”</button>
+      <button class="chip fam-only" data-cmd="Start the turkey timer">“Start the turkey timer”</button>
+      <button class="chip fam-only" data-cmd="How long on the cookies?">“How long on the cookies?”</button>
+      <button class="chip fam-only" data-cmd="Set a 10 minute timer for potatoes">“Set a 10 minute timer for potatoes”</button>
+      <button class="chip fam-only" data-cmd="Check off wrap gifts">“Check off wrap gifts”</button>
+      <button class="chip co-only" data-cmd="Start the catering timer">“Start the catering timer”</button>
+      <button class="chip co-only" data-cmd="How long on the gift exchange?">“How long on the gift exchange?”</button>
+      <button class="chip co-only" data-cmd="Set a 10 minute timer for the raffle">“Set a 10 minute timer for the raffle”</button>
       <button class="chip" data-cmd="Pause all timers">“Pause all timers”</button>
       <button class="chip" data-cmd="Open the planner">“Open the planner”</button>
     </div>
@@ -6451,12 +6455,16 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const DEFAULT_TEAMS = ["Team Elves", "Team Reindeer"];
   // ✏️ Starter timers and teams when the Hub is set to Company
   const OFFICE_DUTIES = [
+    { id: "setup", icon: "🎄", name: "Set Up the Room", minutes: 30 },
     { id: "cater", icon: "🍽️", name: "Catering Arrives", minutes: 30 },
     { id: "speech", icon: "🎤", name: "Welcome Speech", minutes: 10 },
     { id: "games", icon: "🎲", name: "Games Start", minutes: 20 },
     { id: "santa", icon: "🎁", name: "Gift Exchange", minutes: 15 },
-    { id: "photo", icon: "📸", name: "Team Photo", minutes: 5 }
+    { id: "awards", icon: "🏆", name: "Awards & Draws", minutes: 15 },
+    { id: "photo", icon: "📸", name: "Team Photo", minutes: 5 },
+    { id: "clean", icon: "🧹", name: "Clean-Up", minutes: 20 }
   ];
+  const OLD_OFFICE_DUTIES = ["Catering Arrives", "Welcome Speech", "Games Start", "Gift Exchange", "Team Photo"];
   const OFFICE_TEAMS = ["Team Tinsel", "Team Snowflake"];
   const TEAM_COLORS = ["#b3202a", "#14532d", "#d4a537", "#2b6cb0", "#8e44ad", "#d35400", "#16a085", "#c2185b"];
 
@@ -6718,8 +6726,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
      GAME 2 — FAMILY SCOREBOARD
      ============================================================ */
   let teams = load(KEYS.teams, null);
+  if (SPACE === "office" && Array.isArray(teams) && teams.map(t => t.name).join("|") === DEFAULT_TEAMS.join("|") && teams.every(t => !t.score)) teams = null;
   if (!Array.isArray(teams)) {
-    teams = DEFAULT_TEAMS.map((name, i) => ({ id: uid(), name, score: 0, color: TEAM_COLORS[i % TEAM_COLORS.length] }));
+    teams = (SPACE === "office" ? OFFICE_TEAMS : DEFAULT_TEAMS).map((name, i) => ({ id: uid(), name, score: 0, color: TEAM_COLORS[i % TEAM_COLORS.length] }));
     save(KEYS.teams, teams);
   }
 
@@ -6952,8 +6961,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
      ============================================================ */
   const RING_C = 2 * Math.PI * 44; // circle circumference (r = 44)
   let duties = load(KEYS.duties, null);
+  // 🏢 the Office space starts with office timers (and swaps out family starters that were never changed)
+  const dutyNames = l => (l || []).map(x => x.name).join("|"), idleAll = l => l.every(x => x.status === "idle" || !x.status);
+  if (SPACE === "office" && Array.isArray(duties) && idleAll(duties) && [dutyNames(DEFAULT_DUTIES), OLD_OFFICE_DUTIES.join("|")].includes(dutyNames(duties))) duties = null;
   if (!Array.isArray(duties)) {
-    duties = DEFAULT_DUTIES.map(d => ({
+    duties = (SPACE === "office" ? OFFICE_DUTIES : DEFAULT_DUTIES).map(d => ({
       id: d.id, icon: d.icon, name: d.name, custom: false,
       duration: d.minutes * 60, remaining: d.minutes * 60, endAt: null, status: "idle"
     }));
@@ -7363,7 +7375,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     let reply = null;
     for (const t of alternatives) { reply = handleCommand(t); if (reply) break; }
     if (reply) showReply(reply, true);
-    else showReply("Sorry, I didn't catch that. Try “Start the turkey timer”.", false);
+    else showReply(`Sorry, I didn't catch that. Try “${hubMode === "company" ? "Start the catering timer" : "Start the turkey timer"}”.`, false);
   }
 
   function showReply(text, ok) {
