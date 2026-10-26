@@ -1199,6 +1199,37 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .diet-acts { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .diet-acts .btn { padding: 8px 12px; min-height: 0; font-size: 13.5px; }
 .diet-acts .meal-lab { margin: 0 4px 0 0; }
+
+/* ---------- 🥂 New Year's Eve ---------- */
+.nye-count-card { background: radial-gradient(circle at 30% 0%, #2c3a75, #0d1730 70%); color: #F3EBDA; border-radius: var(--radius); padding: 20px 16px; text-align: center; box-shadow: var(--shadow-lg); }
+.nc-k { font: 500 11px/1 "Poppins", sans-serif; letter-spacing: .3em; text-transform: uppercase; color: #D9BF8C; }
+.nc-big { display: flex; justify-content: center; gap: 10px; margin: 12px 0 6px; font: 600 38px/1 "Lora", Georgia, serif; color: #fff; font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.nc-big span { display: flex; flex-direction: column; align-items: center; min-width: 58px; }
+.nc-big small { font: 500 10px/1.6 "Poppins", sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #D9BF8C; margin-top: 4px; }
+.nc-sub { font-size: 13px; opacity: .8; }
+.nye-count-btns { display: grid; gap: 8px; margin-top: 14px; }
+.nye-ghost { color: #F3EBDA !important; border-color: rgba(217,191,140,.45) !important; background: transparent !important; }
+.nye-plan-card, .nye-wish-card { padding: 16px; }
+.nye-plan-card h3, .nye-wish-card h3 { margin: 0 0 4px; font-size: 18px; }
+.nye-plan-sum { font-size: 14px; line-height: 1.5; background: #f3f1fa; border-radius: 12px; padding: 10px 12px; }
+.nye-on { color: var(--pine); font-weight: 700; }
+.nye-wish-card .input { width: 100%; margin-bottom: 8px; resize: vertical; font: inherit; }
+.wish-sealed { font-size: 14px; line-height: 1.5; margin: 12px 0 6px; }
+.wish-open { font-size: 14.5px; line-height: 1.5; background: #fbf6ec; border-left: 3px solid var(--gold); padding: 8px 10px; margin: 6px 0; }
+.wish-wait { font-size: 13.5px; color: var(--muted); }
+.party-picks { margin: 6px 0 12px; }
+.party-picks .chip { font-size: 12.5px; }
+.nye-show { position: fixed; inset: 0; z-index: 400; background: radial-gradient(circle at 50% 20%, #1f2b5c, #05081a 75%); display: none; align-items: center; justify-content: center; color: #fff; text-align: center; }
+.nye-show.show { display: flex; }
+.nye-show canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ns-inner { position: relative; z-index: 1; padding: 20px; }
+.ns-clock { font: 600 64px/1 "Lora", Georgia, serif; font-variant-numeric: tabular-nums; }
+.ns-num { font: 700 180px/1 "Lora", Georgia, serif; color: #f2d68a; text-shadow: 0 0 40px rgba(242,214,138,.5); }
+.ns-num.pop { animation: nsPop .9s ease-out; }
+@keyframes nsPop { 0% { transform: scale(1.6); opacity: 0; } 30% { opacity: 1; } 100% { transform: scale(1); } }
+.ns-msg { font: italic 400 54px/1.1 "Lora", Georgia, serif; color: #fff; text-shadow: 0 0 30px rgba(242,214,138,.6); animation: nsPop 1.2s ease-out; }
+.ns-sub { font: 500 14px/1.4 "Poppins", sans-serif; letter-spacing: .3em; text-transform: uppercase; color: #D9BF8C; margin-top: 14px; }
+.ns-close { position: absolute; z-index: 2; bottom: calc(24px + var(--safe-b)); left: 50%; transform: translateX(-50%); color: #F3EBDA; border: 1px solid rgba(217,191,140,.5); padding: 10px 26px; border-radius: 99px; font-weight: 700; letter-spacing: .1em; }
 #printArea { display: none; }
 @media print {
   body > *:not(#printArea) { display: none !important; }
@@ -1290,10 +1321,10 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
     </div>
 
     <!-- 🎆 New Year's party games (opens the Party Games page) -->
-    <button class="advent-banner nye-banner" data-open="partySheet">
+    <button class="advent-banner nye-banner" data-goview="nye">
       <span class="ab-ico">🎆</span>
-      <span class="ab-text"><b>New Year's Party Games</b><small>7 pass-the-phone games, plus 2026 trivia</small></span>
-      <span class="ab-go">Play ›</span>
+      <span class="ab-text"><b>New Year's Eve</b><small>Party games, midnight countdown with fireworks, and more</small></span>
+      <span class="ab-go">Open ›</span>
     </button>
 
     <div class="section-label">Printable Games</div>
@@ -1467,23 +1498,13 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
     </button>
 
     <div class="section-label">New Year's Eve</div>
-    <!-- 🥂 Appetizer ideas (opens the Appetizer Ideas page) -->
-    <button class="advent-banner nye-banner" data-open="appsSheet">
+    <!-- 🥂 everything for New Year's lives on its own screen -->
+    <button class="advent-banner nye-banner" data-goview="nye">
       <span class="ab-ico">🥂</span>
-      <span class="ab-text"><b>Appetizer Ideas</b><small>30 party bites, make-ahead tips and a how-many guide</small></span>
+      <span class="ab-text"><b>New Year's Eve</b><small>Party planner, appetizers, midnight countdown and the Wishes Jar</small></span>
       <span class="ab-go">Open ›</span>
     </button>
 
-    <!-- ✏️ NEW YEAR'S PRINTABLE: replace href="#" with your PDF link -->
-    <article class="card print-card featured">
-      <div class="print-thumb">🥂</div>
-      <div class="print-info">
-        <span class="bundle-tag">4 pages · low ink</span>
-        <h3>New Year's Eve Party Planner</h3>
-        <p>Guest list, appetizers &amp; drinks menu with a how-many guide, a countdown timeline to midnight, shopping lists and a page for your wishes for the new year.</p>
-        <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
-      </div>
-    </article>
 
     <div class="section-label">Printable Planner</div>
 
@@ -1628,6 +1649,71 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
       <h3>🌱 Dietary dishes &amp; substitutes</h3>
       <p class="review-sub">Making your own dinner, or have guests who are vegan, gluten-free or dairy-free? These dishes work on their own for 1–5 people. Open one for its recipe, shopping list and timers, or print it straight away.</p>
       <div id="mealDietList"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW — 🥂 NEW YEAR'S EVE (its button replaces Meals from Dec 26)
+       ============================================================ -->
+  <section class="view" id="view-nye" aria-labelledby="nyeTitle">
+    <h2 class="view-title" id="nyeTitle">New Year's Eve</h2>
+    <p class="view-intro">Plan the party, play the games, seal your wishes and count down to midnight together.</p>
+
+    <div class="nye-count-card">
+      <div id="nyeCount"></div>
+      <div class="nye-count-btns">
+        <button type="button" class="btn btn-gold" id="nyeBig">🎆 Open the big countdown</button>
+        <button type="button" class="btn btn-ghost nye-ghost" id="nyePractice">▶ Practice (10 seconds)</button>
+      </div>
+    </div>
+
+    <div class="section-label">Party Planner</div>
+    <div class="card nye-plan-card">
+      <h3>🎉 New Year's Eve Party</h3>
+      <p class="review-sub">Choose your guests, start time and appetizers. Noël works out how many of each to make, writes a priced shopping list and sets alarms right through to the midnight toast.</p>
+      <p class="nye-plan-sum" id="nyePartySum"></p>
+      <button type="button" class="btn btn-red btn-block" id="nyePlan">🥂 Plan my party</button>
+    </div>
+
+    <div class="section-label">Games &amp; Ideas</div>
+    <button class="advent-banner nye-banner" data-open="partySheet">
+      <span class="ab-ico">🎆</span>
+      <span class="ab-text"><b>New Year's Party Games</b><small>7 pass-the-phone games, plus the Year-in-Review quiz</small></span>
+      <span class="ab-go">Play ›</span>
+    </button>
+    <button class="advent-banner nye-banner" data-open="appsSheet">
+      <span class="ab-ico">🥂</span>
+      <span class="ab-text"><b>Appetizer Ideas</b><small>30 party bites, make-ahead tips and a how-many guide</small></span>
+      <span class="ab-go">Open ›</span>
+    </button>
+    <button class="advent-banner nye-banner" id="nyeCard" type="button">
+      <span class="ab-ico">💌</span>
+      <span class="ab-text"><b>Send a New Year's card</b><small>The Midnight Champagne card, as a video or picture</small></span>
+      <span class="ab-go">Make ›</span>
+    </button>
+    <!-- ✏️ NEW YEAR'S PRINTABLE: replace href="#" with your PDF link -->
+    <article class="card print-card featured">
+      <div class="print-thumb">🥂</div>
+      <div class="print-info">
+        <span class="bundle-tag">4 pages · low ink</span>
+        <h3>New Year's Eve Party Planner</h3>
+        <p>Guest list, appetizers &amp; drinks menu with a how-many guide, a countdown timeline to midnight, shopping lists and a page for your wishes for the new year.</p>
+        <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
+      </div>
+    </article>
+
+    <div class="section-label">Wishes Jar</div>
+    <div class="card nye-wish-card">
+      <h3>💫 Seal a wish for next year</h3>
+      <p class="review-sub">Pass the phone around. Each person writes a wish or resolution and seals it. They open next New Year's Eve.</p>
+      <form id="jarForm" autocomplete="off">
+        <input class="input" name="wname" maxlength="30" placeholder="Your name" aria-label="Your name">
+        <textarea class="input" name="wtext" rows="2" maxlength="200" placeholder="My wish for next year…" aria-label="Your wish"></textarea>
+        <button class="btn btn-green btn-block" type="submit">🔒 Seal my wish</button>
+      </form>
+      <p class="wish-sealed" id="jarSealed"></p>
+      <div id="jarReveal"></div>
+      <button type="button" class="btn btn-ghost btn-block" id="jarPeek">👀 Organizer peek</button>
     </div>
   </section>
 
@@ -1940,6 +2026,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
   <button class="nav-btn" data-view="games"><span class="nav-ico">🎮</span>Games</button>
   <button class="nav-btn" data-view="planner"><span class="nav-ico">📝</span>Planner</button>
   <button class="nav-btn" data-view="meals" id="navMeals"><span class="nav-ico">🍽️</span>Meals</button>
+  <button class="nav-btn" data-view="nye" id="navNye" hidden><span class="nav-ico">🥂</span>New Year</button>
   <button class="nav-btn" data-view="gifts"><span class="nav-ico">🎁</span>Gifts</button>
   <button class="nav-btn" data-view="invites"><span class="nav-ico">💌</span>Cards</button>
   <button class="nav-btn" data-view="alarms"><span class="nav-ico">⏰</span>Alarms<span class="nav-badge" id="alarmBadge">0</span></button>
@@ -2308,6 +2395,11 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div id="printArea" aria-hidden="true"></div>
+<div class="nye-show" id="nyeShow" role="dialog" aria-modal="true" aria-label="Countdown to midnight">
+  <canvas id="nyeFw" aria-hidden="true"></canvas>
+  <div class="ns-inner"><div id="nyeShowBig" class="ns-clock"></div><div class="ns-sub" id="nyeShowSub"></div><div id="nyeShowMsg"></div></div>
+  <button type="button" class="ns-close" id="nyeShowClose">Close</button>
+</div>
 <div id="mediaBusy" hidden style="position:fixed;inset:0;z-index:300;background:rgba(19,40,30,.88);display:flex;align-items:center;justify-content:center;text-align:center;color:#F3EBDA;padding:30px">
   <div><div style="font:italic 400 26px/1.3 Lora,Georgia,serif;color:#fff">Making your video…</div>
   <div style="width:220px;height:3px;background:rgba(217,191,140,.25);margin:18px auto 12px"><div id="mediaBar" style="height:100%;width:0;background:#D9BF8C"></div></div>
@@ -5484,6 +5576,116 @@ window.NOEL_MEALS = (function () {
       ];
     }
   };
+  // 🥂 NEW YEAR'S EVE PARTY: built from the Appetizer Ideas list (window.NOEL_APPS)
+  // What to buy for one batch of each appetizer: [bites per batch, [[item, price CAD], ...]]  (null price = pantry staple)
+  // ✏️ Prices are rough Canadian estimates. Buyers can change any price.
+  const APP_SHOP = {
+    "Caprese Skewers": [24, [["pint cherry tomatoes", 5], ["tub (200 g) mini bocconcini", 6], ["bunch fresh basil", 3], ["balsamic glaze, skewers", null]]],
+    "Deviled Eggs": [24, [["dozen eggs", 5.4], ["bunch fresh chives", 3], ["mayonnaise, Dijon, paprika", null]]],
+    "Baked Brie": [16, [["wheel (200 g) brie", 8], ["sheet puff pastry (half a box)", 3], ["jar jam or honey", 5], ["box crackers", 4]]],
+    "Bacon-Wrapped Dates": [24, [["box (454 g) Medjool dates", 9], ["pack bacon", 7], ["toothpicks", null]]],
+    "Slow Cooker Meatballs": [40, [["bag (907 g) frozen meatballs", 14], ["bottle chili sauce", 4], ["jar grape jelly", 4]]],
+    "Pinwheel Roll-Ups": [32, [["large tortillas (half a pack)", 2], ["tub (250 g) cream cheese", 4.5], ["pack (175 g) deli turkey or ham", 5], ["handful baby spinach", 2]]],
+    "Stuffed Mushrooms": [24, [["lb large white mushrooms (about 24)", 4], ["half tub cream cheese", 2.5], ["wedge (50 g) Parmesan", 2], ["garlic, breadcrumbs", null]]],
+    "Shrimp Cocktail": [30, [["lb cooked shrimp, tails on", 22], ["jar cocktail sauce", 4], ["lemon", 1]]],
+    "Bruschetta": [24, [["baguette", 3.5], ["Roma tomatoes (4)", 3], ["bunch fresh basil", 3], ["garlic, olive oil", null]]],
+    "Charcuterie Board": [30, [["pack (200 g) cured meats", 10], ["cheeses (400 g total)", 14], ["box crackers", 4], ["lb grapes", 4], ["jar olives", 5], ["bag (100 g) nuts", 4]]],
+    "Pigs in a Blanket": [24, [["pack (375 g) cocktail sausages", 6], ["tube crescent dough or puff pastry", 4]]],
+    "Cucumber Bites": [24, [["English cucumber", 1.5], ["tub (227 g) herb & garlic cream cheese", 5], ["bunch fresh dill", 3]]],
+    "Antipasto Skewers": [24, [["pack (150 g) salami", 5], ["pack (350 g) fresh cheese tortellini", 6], ["jar olives", 5], ["jar roasted red peppers", 4]]],
+    "Smoked Salmon Crostini": [24, [["baguette", 3.5], ["pack (113 g) smoked salmon", 8], ["half tub cream cheese", 2.5], ["jar capers", 4]]],
+    "Mini Quiches": [24, [["box (24) frozen mini tart shells", 6], ["half dozen eggs", 2.7], ["cup milk or cream", 2], ["bag (170 g) shredded cheese", 4], ["bacon bits or spinach", 3]]],
+    "Spinach Artichoke Dip": [24, [["box (300 g) frozen spinach", 3], ["can artichoke hearts", 3], ["tub (250 g) cream cheese", 4.5], ["bag shredded mozzarella", 4], ["wedge Parmesan", 3], ["bag tortilla chips or a baguette", 5]]],
+    "Garlic Herb Cheese Ball": [24, [["tubs (250 g) cream cheese (2)", 9], ["bag shredded cheddar", 4], ["bag (100 g) pecans", 4], ["box crackers", 4]]],
+    "Veggie Cups": [24, [["tub (500 g) hummus or ranch", 6], ["lb carrots", 1.5], ["bunch celery", 3], ["English cucumber", 1.5], ["bell peppers (2)", 4], ["pack clear cups", 4]]],
+    "Prosciutto & Melon": [24, [["cantaloupe", 4], ["pack (100 g) prosciutto", 6]]],
+    "Mini Sliders": [24, [["pack (12) slider buns", 5], ["1½ lb ground beef", 9], ["pack cheese slices", 4], ["pickles, ketchup, mustard", null]]],
+    "Crispy Cauliflower Bites": [30, [["head cauliflower", 4], ["bottle buffalo or sweet chili sauce", 4], ["flour, panko", null]]],
+    "Spanakopita Triangles": [24, [["box (24) frozen spanakopita", 12]]],
+    "Seven-Layer Dip": [24, [["can refried beans", 2.5], ["tub (400 g) guacamole", 6], ["tub (500 ml) sour cream", 3.5], ["jar salsa", 4], ["bag shredded cheese", 4], ["tomato, green onions, olives", 4], ["bags tortilla chips (2)", 8]]],
+    "Honey Garlic Wings": [24, [["2 lb chicken wings", 14], ["honey, garlic, soy sauce", 2]]],
+    "Party Snack Mix": [40, [["box cereal squares", 5], ["bag pretzels", 4], ["can (300 g) mixed nuts", 8], ["butter, seasoning", null]]],
+    "Chocolate-Dipped Strawberries": [24, [["2 lb large strawberries", 8], ["bar (200 g) chocolate", 5]]],
+    "Mini Cheesecake Bites": [24, [["tubs (250 g) cream cheese (2)", 9], ["box graham crumbs", 4], ["container berries", 5], ["sugar, eggs, vanilla", 1]]],
+    "Cookie Platter": [30, [["box assorted cookies (or Christmas leftovers)", 8]]],
+    "Chocolate Fondue": [30, [["bars (300 g) chocolate", 7], ["carton (250 ml) whipping cream", 3], ["lb strawberries", 5], ["bag marshmallows", 3], ["bag pretzels", 3]]],
+    "Sparkling Punch": [10, [["bottles (750 ml) sparkling juice (2)", 8], ["carton (1 L) cranberry juice", 4], ["oranges (2)", 2]]]
+  };
+  const DRINK_APPS = ["Sparkling Punch"];
+  const NYE_DEFAULT = ["Charcuterie Board", "Slow Cooker Meatballs", "Spinach Artichoke Dip", "Caprese Skewers", "Pigs in a Blanket", "Chocolate-Dipped Strawberries", "Sparkling Punch"];
+  const appRow = name => (window.NOEL_APPS || []).find(a => a[1] === name);
+
+  function nyeDate() { const now = new Date(); let y = now.getFullYear(); if (now.getMonth() === 0 && now.getDate() <= 6) y--; return `${y}-12-31`; }
+  function nyePartyPlan(guests, c = {}) {
+    const g = Math.min(20, Math.max(1, guests | 0)), f = g / 8, mode = c.mode === "before" ? "before" : "meal";
+    let names = (c.picks && c.picks.length ? c.picks : NYE_DEFAULT).filter(n => appRow(n));
+    const food = names.filter(n => !DRINK_APPS.includes(n)), drinks = names.filter(n => DRINK_APPS.includes(n));
+    const per = mode === "meal" ? 12 : 5, total = g * per, each = food.length ? Math.ceil(total / food.length) : 0;
+    const items = food.map(n => { const [batch] = APP_SHOP[n] || [24]; return { name: n, row: appRow(n), pieces: each, batches: Math.max(1, Math.ceil(each / batch - 1e-9)) }; });
+    const drinkItems = drinks.map(n => { const [batch] = APP_SHOP[n]; return { name: n, row: appRow(n), batches: Math.max(1, Math.ceil(g * 1.5 / batch - 1e-9)) }; });
+    const [h, mi] = String(c.time || "20:00").split(":").map(Number), startMin = h * 60 + mi, toMidnight = startMin >= 360 ? 1440 - startMin : null;
+    return { g, f, mode, items, drinkItems, total, each, toMidnight, pies: 1, dishes: 1,
+      partySummary: `🥂 <b>${food.length} appetizers</b> · about <b>${total} bites</b> (${each} of each)${drinks.length ? " · " + drinks.join(", ") : ""}<br><small>${mode === "meal" ? "Appetizers are the meal: about 12 bites per guest through the night." : "Light bites before dinner: about 5 per guest."}${toMidnight ? ` Midnight is ${Math.floor(toMidnight / 60)}h${toMidnight % 60 ? " " + (toMidnight % 60) + "m" : ""} after the party starts.` : ""}</small>` };
+  }
+  const nyeparty = {
+    id: "nyeparty", tab: "nye", party: true,
+    name: "New Year's Eve Party", icon: "🥂",
+    blurb: "Appetizer party with a midnight countdown.",
+    defaultTime: "20:00", defaultDate: nyeDate,
+    get menu() { return [["Your party menu", ["Pick your appetizers above"]]]; },
+    menuFor(p) {
+      return [["Appetizers", p.items.map(i => `${i.name} (${i.pieces} pieces)`)], ["Drinks", p.drinkItems.map(i => i.name).concat(["Midnight toast: sparkling wine and sparkling juice"])]];
+    },
+    drinks: [
+      ["Midnight toast", "Plan one glass of bubbly per guest: a 750 ml bottle pours about 6 glasses. Have sparkling juice ready for kids and non-drinkers."],
+      ["Through the night", "Sparkling Punch keeps it family-friendly. Add a sparkling wine for adults, and water for everyone."]
+    ],
+    recipesFor(p) {
+      return p.items.concat(p.drinkItems).map(i => ({
+        id: "app-" + i.name, course: DRINK_APPS.includes(i.name) ? "Drink" : (i.row[4].includes("sweet") ? "Sweet bite" : "Appetizer"), name: i.name,
+        prep: i.row[5], cook: i.row[4].includes("warm") ? "served warm" : "no cooking needed",
+        yieldText: () => i.pieces ? `about ${i.pieces} pieces (${i.batches} ${i.batches === 1 ? "batch" : "batches"})` : `${i.batches} ${i.batches === 1 ? "batch" : "batches"}`,
+        ing: (APP_SHOP[i.name] || [0, []])[1].map(([n]) => ({ q: null, u: "", s: "n", t: (i.batches > 1 ? i.batches + " × " : "") + n })),
+        steps: [i.row[2], "Make-ahead: " + i.row[3]], tip: ""
+      }));
+    },
+    recipes: [],
+    timeline(p) {
+      const out = [], add = (m, icon, text, alarm = true) => out.push({ m, icon, text, alarm });
+      const tag = t => p.items.filter(i => i.row[4].split(" ").includes(t)).map(i => i.name);
+      const warm = tag("warm"), cold = p.items.filter(i => !i.row[4].includes("warm") && !i.row[4].includes("sweet")).map(i => i.name), sweet = tag("sweet");
+      add(-180, "🧊", "Put the bubbly, juices and sparkling water in the fridge to chill");
+      if (p.items.some(i => i.name === "Slow Cooker Meatballs")) add(-180, "🍝", "Slow cooker meatballs on low (3 hours)");
+      if (cold.length) add(-90, "🥗", "Prep the cold bites: " + cold.join(", "));
+      if (warm.length) add(-40, "🔥", "Oven on for the warm bites: " + warm.join(", "));
+      add(-15, "🍽️", "Set out the platters, napkins and drinks");
+      add(0, "🎉", "Party time! Welcome your guests");
+      add(60, "🎲", "Party games! Open New Year's Party Games on the New Year screen");
+      if (warm.length) add(120, "🔥", "Refresh the platters with a second round of warm bites");
+      if (p.toMidnight) {
+        const M = p.toMidnight;
+        add(M - 60, "📰", "Play the Year-in-Review quiz together");
+        add(M - 45, "💫", "Everyone seals a wish for next year in the Wishes Jar");
+        if (sweet.length) add(M - 30, "🍓", "Set out the sweet bites: " + sweet.join(", "));
+        add(M - 15, "🥂", "Pour the bubbly and sparkling juice. Hand out noisemakers");
+        add(M - 2, "🎆", "Open the big countdown on the New Year screen!");
+        add(M, "🎆", "HAPPY NEW YEAR!");
+      }
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) {
+      const make = p.items.filter(i => i.row[4].includes("make")).map(i => i.name);
+      return [[2, 11, "🛒", "Shop for the New Year's Eve party today (the list is in the Meal Planner)"]].concat(make.length ? [[1, 11, "📋", "Make ahead today: " + make.join(", ")]] : []);
+    },
+    shop(f, p) {
+      const groups = p.items.concat(p.drinkItems).map(i => [`${i.row[0]} ${i.name}${i.pieces ? ` (${i.pieces} pieces)` : ""}`,
+        (APP_SHOP[i.name] || [0, []])[1].map(([n, price]) => [price == null ? "" : String(i.batches), n, price == null ? null : price * i.batches])]);
+      const bubbly = Math.ceil(p.g / 6);
+      groups.push(["🥂 Midnight toast", [[String(bubbly), `bottle${bubbly > 1 ? "s" : ""} sparkling wine (750 ml, about 6 glasses each)`, bubbly * 16], [String(bubbly), `bottle${bubbly > 1 ? "s" : ""} sparkling juice, for kids and non-drinkers`, bubbly * 5], ["", "sparkling water and ice", null]]]);
+      groups.push(["🎉 Party supplies", [["1", "pack noisemakers and party hats (optional)", 8], ["", "napkins, small plates, toothpicks and skewers", null]]]);
+      return groups;
+    }
+  };
   // add-on sizes: 1–5 people
   const addonPlan = base => guests => { const g = Math.min(5, Math.max(1, guests | 0)); return { g, f: g / base, pies: 1, dishes: 1, batches: 1 }; };
 
@@ -5526,9 +5728,10 @@ window.NOEL_MEALS = (function () {
       shepherd,
       vgravyAddon,
       mousse,
-      pecanAddon
+      pecanAddon,
+      nyeparty
     ],
-    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8) },
+    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8), nyeparty: nyePartyPlan },
     doneness: DONENESS,
     frac, hm, fmtNum
   };
@@ -5868,6 +6071,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $$(".view").forEach(v => { v.classList.toggle("active", v.id === "view-" + name); v.classList.remove("slide-left", "slide-right"); });
     if (slide) $("#view-" + name).classList.add("slide-" + slide);
     if (name === "inspire" && typeof buildInspire === "function") buildInspire();
+    if (name === "nye") renderNye();
+    if (name === "meals") renderMeals();
     $$(".nav-btn").forEach(b => {
       const on = b.dataset.view === name;
       b.classList.toggle("active", on);
@@ -5881,7 +6086,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   /* 👆 SWIPE between tabs (left = next tab, right = previous tab)
      Ignores up/down scrolling, edge swipes (Android "back"), text boxes,
      sliders and anything inside a pop-up or full-screen page. */
-  const VIEW_ORDER = ["inspire", "games", "planner", "meals", "gifts", "invites", "alarms", "review"];
+  const VIEW_ORDER = ["inspire", "games", "planner", "meals", "nye", "gifts", "invites", "alarms", "review"];
   let swipe = null;
   document.querySelector("main").addEventListener("touchstart", e => {
     const t = e.touches[0];
@@ -7739,6 +7944,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $(".brand-sub").textContent = t ? "Noël Tier 1 Hub" : "by Earth & Wonder";  // ✏️ default subtitle
     document.title = t ? `${t} · Noël Tier 1 Hub` : "Noël Tier 1 Hub";
     $("#navMeals").hidden = hubMode === "company";   // 🍽️ the big-dinner planner is for families
+    applySeasonNav();                                 // 🥂 New Year button takes over from Dec 26
     if (hubMode === "company" && load(KEYS.view, "games") === "meals") showView("planner");
     $("#licenseLine").textContent = hubMode === "company" ? "Licensed for one company." : "Personal use for one household.";   // ✏️ licence wording
   }
@@ -8189,6 +8395,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     ["🍫", "Chocolate Fondue", "Melted chocolate with fruit, marshmallows and pretzels.", "Cut the fruit ahead; melt the chocolate when it's time.", "warm sweet veg", "15 min"],
     ["🥂", "Sparkling Punch", "Sparkling juice with cranberry and orange slices. Family friendly!", "Mix the juices ahead; add bubbles just before serving.", "make nocook veg", "10 min"]
   ];
+  window.NOEL_APPS = APPETIZERS;   // 🥂 the New Year's party planner builds its menu from this list
   const APP_TAG_NAMES = { make: "Make-ahead", nocook: "No-cook", warm: "Warm", veg: "Vegetarian", sweet: "Sweet" };
   let appFavs = load("appFavs", {}), appFilter = "all", appMode = load("appMode", "before");
   function renderApps() {
@@ -8350,8 +8557,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   let foodBudget = load("foodBudget", { limit: 0, items: [] });   // 💵 separate from the gift budget
   let mealAddons = load("mealAddons", {});           // 🌱 dietary add-ons switched on: { squash: true }
   // add-ons that join a main dinner (none for an add-on viewed on its own)
-  const activeAddons = m => m.addon ? [] : MD.meals.filter(a => a.addon && mealAddons[a.id]).map(a => { const ac = cfgFor(a.id); return { a, c: ac, p: mealSizes(a, ac) }; });
-  const addonSig = m => activeAddons(m).map(x => x.a.id + ":" + x.c.guests).join(",");
+  const activeAddons = m => m.addon || m.party ? [] : MD.meals.filter(a => a.addon && mealAddons[a.id]).map(a => { const ac = cfgFor(a.id); return { a, c: ac, p: mealSizes(a, ac) }; });
+  const addonSig = m => activeAddons(m).map(x => x.a.id + ":" + x.c.guests).join(",") + (m.party ? JSON.stringify([cfgFor(m.id).mode, cfgFor(m.id).picks]) : "");
+  const recipesOf = (m, p) => m.recipesFor ? m.recipesFor(p) : m.recipes;
   const cad = x => "$" + (Math.round(x * 100) / 100).toFixed(2);
   const cad0 = x => "$" + Math.round(x).toLocaleString();
   function pricedShop(m, f, p) {
@@ -8377,8 +8585,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     return `${y}-12-25`;
   }
   function cfgFor(id) {
-    const c = mealCfg[id] || {}, ad = (mealById(id) || {}).addon, mx = ad ? 5 : 20;
-    return { guests: Math.min(mx, Math.max(1, +c.guests || (ad ? 2 : 12))), date: c.date || nextXmasDate(), time: c.time || "17:00", doneness: c.doneness || "mediumrare", gf: !!c.gf };
+    const c = mealCfg[id] || {}, meal = mealById(id) || {}, ad = meal.addon, mx = ad ? 5 : 20;
+    return { guests: Math.min(mx, Math.max(1, +c.guests || (ad ? 2 : 12))), date: c.date || (meal.defaultDate ? meal.defaultDate() : nextXmasDate()), time: c.time || meal.defaultTime || "17:00",
+      doneness: c.doneness || "mediumrare", gf: !!c.gf, mode: c.mode || "meal", picks: c.picks || null };
   }
   const dinnerAt = c => { const [y, mo, d] = c.date.split("-").map(Number), [h, mi] = c.time.split(":").map(Number); return new Date(y, mo - 1, d, h, mi).getTime(); };
   const mclock = t => new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
@@ -8485,18 +8694,20 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         `<h4 class="shop-dept">Drink pairings</h4>` + m.drinks.map(([k, v]) => `<p class="drink"><b>${esc(k)}:</b> ${esc(v)}</p>`).join("");
     }
     $("#mealDetail").innerHTML = `
-      <button type="button" class="meal-back" id="mealBack">‹ All meals</button>
+      <button type="button" class="meal-back" id="mealBack">${m.tab === "nye" ? "‹ New Year's Eve" : "‹ All meals"}</button>
       <h3 class="meal-title">${m.icon} ${esc(m.name)}</h3>
       <div class="card meal-setup">
         <div class="meal-row"><span class="meal-lab">${m.addon ? "People (1–5)" : "Guests"}</span>
           <div class="stepper"><button type="button" data-g="-1" aria-label="Fewer guests">−</button><output id="mealGuests">${c.guests}</output><button type="button" data-g="1" aria-label="More guests">+</button></div></div>
         <div class="meal-row two">
-          <label><span class="meal-lab">Dinner date</span><input class="input" type="date" id="mealDate" value="${c.date}"></label>
-          <label><span class="meal-lab">Dinner time</span><input class="input" type="time" id="mealTime" value="${c.time}"></label></div>
+          <label><span class="meal-lab">${m.party ? "Party date" : "Dinner date"}</span><input class="input" type="date" id="mealDate" value="${c.date}"></label>
+          <label><span class="meal-lab">${m.party ? "Party starts" : "Dinner time"}</span><input class="input" type="time" id="mealTime" value="${c.time}"></label></div>
         ${m.options && m.options.doneness ? `<span class="meal-lab">How do you like it?</span><div class="seg seg4 sub-tabs meal-done" role="group" aria-label="Doneness">${(Array.isArray(m.options.doneness) ? m.options.doneness : MD.doneness).map(([k, l]) => `<button type="button" data-done="${k}" aria-pressed="${c.doneness === k}">${l}</button>`).join("")}</div>` : ""}
         ${m.options && m.options.gf ? `<label class="meal-gf"><input type="checkbox" id="mealGf" ${c.gf ? "checked" : ""}> Make it gluten-free</label>` : ""}
+        ${m.party ? partyControlsHtml(c, p) : ""}
         ${m.addon ? `<label class="meal-gf addon-join"><input type="checkbox" data-addon="${m.id}" ${mealAddons[m.id] ? "checked" : ""}> Add this to my main dinner</label>
-          <p class="meal-addon-sub">${m.tags}. When it's added, it joins whichever dinner you plan (its steps, alarms, shopping and recipe go right in). No main dinner? Just set a time below and start its alarms on their own.</p>` : addonPickerHtml()}
+          <p class="meal-addon-sub">${m.tags}. When it's added, it joins whichever dinner you plan (its steps, alarms, shopping and recipe go right in). No main dinner? Just set a time below and start its alarms on their own.</p>` : (m.party ? "" : addonPickerHtml())}
+        ${p.partySummary ? `<p class="meal-sum">${p.partySummary}</p>` : ""}
         ${p.w || p.mainLabel ? `<p class="meal-sum">${p.icon} <b>${p.w ? `${p.w} lb ${p.meat}` : p.mainLabel}</b> · ${p.verb} about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.bigNote ? `<br><small>${p.bigNote}</small>` : ""}</p>` : ""}
         <div class="send-btns">
           ${active ? `<button type="button" class="btn btn-ghost" id="mealStop">⏹ Stop dinner alarms</button>` : `<button type="button" class="btn btn-red" id="mealStart">⏰ Start my dinner alarms</button>`}
@@ -8509,6 +8720,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (active && (mealPlan.guests !== c.guests || mealPlan.at !== D || (mealPlan.addons || "") !== addonSig(m) || (m.options && (mealPlan.doneness !== c.doneness || !!mealPlan.gf !== c.gf)))) $("#mealDetail .meal-on").innerHTML = "⚠️ You changed your dinner details. Tap <b>Stop</b>, then <b>Start</b> again to update the alarms.";
   }
 
+  // 🥂 New Year's party: party style + pick the appetizers (from Appetizer Ideas)
+  function partyControlsHtml(c, p) {
+    const picked = new Set(p.items.concat(p.drinkItems).map(i => i.name));
+    return `<span class="meal-lab">Party style</span><div class="seg sub-tabs meal-done" role="group" aria-label="Party style">
+      <button type="button" data-pmode="meal" aria-pressed="${c.mode !== "before"}">Appetizers are the meal</button><button type="button" data-pmode="before" aria-pressed="${c.mode === "before"}">Before dinner</button></div>
+      <span class="meal-lab">Pick your appetizers (${picked.size})</span><div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])}</button>`).join("")}</div>`;
+  }
   // 🌱 the "dietary guests" picker shown on every main dinner
   function addonPickerHtml() {
     const list = MD.meals.filter(a => a.addon);
@@ -8520,12 +8738,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
           (on ? `<div class="stepper sm"><button type="button" data-ag="${a.id}:-1" aria-label="Fewer people">−</button><output>${g}</output><button type="button" data-ag="${a.id}:1" aria-label="More people">+</button></div>` : "") + `</div>`; }).join("") + `</div>`;
   }
   function allMenu(m) {
+    if (m.menuFor) return m.menuFor(mealSizes(m, cfgFor(m.id)));
     const extra = activeAddons(m).map(({ a, c: ac }) => `${a.name} (for ${ac.guests} ${ac.guests === 1 ? "guest" : "guests"}, vegan & gluten-free)`);
     return extra.length ? [...m.menu, ["Dietary add-ons", extra]] : m.menu;
   }
   function allRecipesHtml(m, f, p, open) {
     const o = h => open ? h.replace("<details", "<details open") : h;
-    return m.recipes.map(r => o(recipeHtml(r, f, p))).join("") +
+    return recipesOf(m, p).map(r => o(recipeHtml(r, f, p))).join("") +
       activeAddons(m).map(({ a, p: ap }) => a.recipes.map(r => o(recipeHtml(r, ap.f, ap))).join("")).join("");
   }
   function shopTotalHtml(ps, guests) {
@@ -8545,12 +8764,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   // ---- alarms ----
   function startMealPlan(m) {
     const c = cfgFor(m.id), D = dinnerAt(c), now = Date.now();
-    if (D < now) { toast("🕰️ That dinner time has passed. Pick a time in the future."); return; }
+    if (D < now) { toast(`🕰️ That ${m.party ? "party" : "dinner"} time has passed. Pick a time in the future.`); return; }
     const steps = buildSteps(m, c).map(s => ({ k: s.k, t: s.t, icon: s.icon, text: s.text, alarm: s.alarm, fired: s.t <= now }));
-    mealPlan = { id: m.id, name: m.name, guests: c.guests, at: D, doneness: c.doneness, gf: c.gf, addons: addonSig(m), steps };
+    const pp = mealSizes(m, c);
+    mealPlan = { id: m.id, name: m.name, guests: c.guests, at: D, doneness: c.doneness, gf: c.gf, addons: addonSig(m), party: !!m.party, mid: m.party && pp.toMidnight ? D + pp.toMidnight * 60000 : null, steps };
     save("mealPlan", mealPlan); syncMealNative(); getAudio();
     const missed = steps.filter(s => s.fired).length;
-    toast(missed ? `⏰ Dinner alarms set. ${missed} earlier step${missed > 1 ? "s were" : " was"} already past.` : "⏰ Dinner alarms are set!");
+    toast(missed ? `⏰ ${m.party ? "Party" : "Dinner"} alarms set. ${missed} earlier step${missed > 1 ? "s were" : " was"} already past.` : "⏰ Dinner alarms are set!");
     renderMeals();
   }
   function stopMealPlan() {
@@ -8585,14 +8805,14 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   // ---- master timer: one countdown to dinner, with what's now and next ----
   function renderMaster() {
     const el = $("#mealMaster");
-    if (!mealPlan || Date.now() > mealPlan.at + 3 * 3600000) { el.hidden = true; return; }
-    const now = Date.now(), left = mealPlan.at - now;
+    if (!mealPlan || Date.now() > (mealPlan.mid || mealPlan.at) + 3 * 3600000) { el.hidden = true; return; }
+    const now = Date.now(), toMid = mealPlan.mid && now >= mealPlan.at, left = (toMid ? mealPlan.mid : mealPlan.at) - now;
     const next = mealPlan.steps.find(s => s.t > now), last = [...mealPlan.steps].reverse().find(s => s.t <= now);
     const fmt = ms => { const s = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
       return d ? `${d}d ${h}h ${m}m` : `${h ? h + ":" : ""}${String(m).padStart(h ? 2 : 1, "0")}:${String(ss).padStart(2, "0")}`; };
     el.hidden = false;
-    el.innerHTML = `<div class="mm-k">${left > 0 ? "Dinner is served in" : "Dinner time!"}</div>
-      <div class="mm-time">${left > 0 ? fmt(left) : "🍽️"}</div>
+    el.innerHTML = `<div class="mm-k">${left > 0 ? (toMid ? "Midnight in" : mealPlan.party ? "Party starts in" : "Dinner is served in") : (mealPlan.party ? "Happy New Year!" : "Dinner time!")}</div>
+      <div class="mm-time">${left > 0 ? fmt(left) : (mealPlan.party ? "🎆" : "🍽️")}</div>
       ${last ? `<div class="mm-row"><b>Now</b> ${last.icon} ${esc(last.text)}</div>` : ""}
       ${next ? `<div class="mm-row"><b>Next</b> ${next.icon} ${esc(next.text)} · ${mclock(next.t)} <small>(in ${fmt(next.t - now)})</small></div>` : ""}`;
   }
@@ -8602,7 +8822,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function printMeal(m) {
     const c = cfgFor(m.id), p = mealSizes(m, c), f = p.f, steps = buildSteps(m, c);
     let lastDay = "";
-    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · dinner ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
+    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · ${m.party ? "party starts" : "dinner"} ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
       <h2>Timeline</h2><table class="pm-tl">${steps.map(s => { const d = dayName(s.t), h = d !== lastDay ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; lastDay = d; return h + `<tr><td>${s.ahead ? "All day" : mclock(s.t)}</td><td>☐ ${esc(s.text)}</td></tr>`; }).join("")}</table>
       <h2>Shopping list</h2>${(ps => `<p><b>Estimated total: ${cad0(ps.total)} CAD</b> (about ${cad(ps.total / c.guests)} per guest)</p>` + ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join(""))(pricedShop(m, f, p))}
       <h2>Menu</h2>${allMenu(m).map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v.join(", "))}</p>`).join("")}
@@ -8648,12 +8868,21 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (dg) { const [aid, d] = dg.dataset.dg.split(":"), ac = cfgFor(aid); ac.guests = Math.min(5, Math.max(1, ac.guests + +d)); mealCfg[aid] = ac; save("mealCfg", mealCfg); renderMeals(); return; }
     const dop = t.closest("[data-dopen]"); if (dop) { openMeal(dop.dataset.dopen); return; }
     const dpr = t.closest("[data-dprint]"); if (dpr) { printMeal(mealById(dpr.dataset.dprint)); return; }
-    if (t.closest("#mealBack")) { mealSel.id = null; save("mealSel", mealSel); renderMeals(); return; }
+    if (t.closest("#mealBack")) { const wasNye = mealSel.id && (mealById(mealSel.id) || {}).tab === "nye"; mealSel.id = null; save("mealSel", mealSel); renderMeals(); if (wasNye) showView("nye"); return; }
     const m = mealSel.id && mealById(mealSel.id); if (!m) return;
     const ag = t.closest("[data-ag]");
     if (ag) { const [aid, d] = ag.dataset.ag.split(":"), ac = cfgFor(aid); ac.guests = Math.min(5, Math.max(1, ac.guests + +d)); mealCfg[aid] = ac; save("mealCfg", mealCfg); renderMealDetail(m); return; }
     const g = t.closest("[data-g]");
     if (g) { const c = cfgFor(m.id); c.guests = Math.min(m.addon ? 5 : 20, Math.max(1, c.guests + +g.dataset.g)); mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
+    const pm = t.closest("[data-pmode]");
+    if (pm) { const c = cfgFor(m.id); c.mode = pm.dataset.pmode; mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
+    const pk = t.closest("[data-pick]");
+    if (pk) {
+      const c = cfgFor(m.id), cur = new Set(mealSizes(m, c).items.concat(mealSizes(m, c).drinkItems).map(i => i.name)), n = pk.dataset.pick;
+      if (cur.has(n)) cur.delete(n); else cur.add(n);
+      if (![...cur].some(x => x !== "Sparkling Punch")) { toast("🥂 Keep at least one appetizer"); return; }
+      c.picks = [...cur]; mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return;
+    }
     const dn = t.closest("[data-done]");
     if (dn) { const c = cfgFor(m.id); c.doneness = dn.dataset.done; mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
     const pn = t.closest("[data-mpane]"); if (pn) { mealSel.pane = pn.dataset.mpane; save("mealSel", mealSel); renderMealDetail(m); return; }
@@ -8729,6 +8958,152 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#mealSkip").addEventListener("click", e => { e.preventDefault(); $("#mealOwn").scrollIntoView({ behavior: "smooth", block: "start" }); });
   /* @meals-end */
 
+  /* @nye-start */
+  /* ============================================================
+     🥂 NEW YEAR'S EVE SCREEN
+     - Live countdown to midnight + a full-screen 10-second countdown
+       with fireworks, beeps and music (and a 10-second practice run)
+     - Party planner (opens the NYE party in the Meal Planner engine)
+     - Party games, appetizer ideas, printable planner, New Year's card
+     - Wishes Jar: everyone seals a wish to open next New Year's Eve
+     - The 🥂 button replaces Meals in the menu from Dec 26 to Jan 6
+     ============================================================ */
+  const nyeSeason = (d = new Date()) => (d.getMonth() === 11 && d.getDate() >= 26) || (d.getMonth() === 0 && d.getDate() <= 6);
+  function applySeasonNav() {
+    const nye = nyeSeason();
+    $("#navNye").hidden = !nye;
+    $("#navMeals").hidden = hubMode === "company" || nye;
+  }
+  const midnightTarget = () => { const n = new Date(); return new Date(n.getFullYear() + 1, 0, 1).getTime(); };
+  const isNewYearsDay = () => { const n = new Date(); return n.getMonth() === 0 && n.getDate() === 1; };
+  const two = x => String(x).padStart(2, "0");
+
+  function renderNyeCount() {
+    const el = $("#nyeCount"); if (!el) return;
+    if (isNewYearsDay()) { el.innerHTML = `<div class="nc-k">It's here!</div><div class="nc-big">Happy New Year ${new Date().getFullYear()}!</div>`; return; }
+    const ms = Math.max(0, midnightTarget() - Date.now()), s = Math.floor(ms / 1000);
+    const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
+    el.innerHTML = `<div class="nc-k">Midnight in</div>
+      <div class="nc-big">${d ? `<span>${d}<small>${d === 1 ? "day" : "days"}</small></span>` : ""}<span>${two(h)}<small>hrs</small></span><span>${two(m)}<small>min</small></span><span>${two(ss)}<small>sec</small></span></div>
+      <div class="nc-sub">Welcome to ${new Date(midnightTarget()).getFullYear()}</div>`;
+    // open the big countdown by itself in the last minute, if this screen is showing
+    if (s <= 60 && s > 0 && $("#view-nye").classList.contains("active") && !$("#nyeShow").classList.contains("show")) openShow(midnightTarget(), false);
+  }
+
+  // ---------- 🎆 the big countdown ----------
+  let showTarget = 0, showTimer = null, lastBeep = null, fwRun = false, showAudio = null, showPractice = false;
+  function beep(freq, len) {
+    const ac = getAudio(); if (!ac) return;
+    try {
+      const o = ac.createOscillator(), g = ac.createGain(); o.type = "sine"; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, ac.currentTime); g.gain.exponentialRampToValueAtTime(0.35, ac.currentTime + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + len);
+      o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime + len + 0.05);
+    } catch (e) {}
+  }
+  function openShow(target, practice) {
+    getAudio(); if (!music.paused) pauseMusic();
+    showTarget = target; showPractice = practice; lastBeep = null;
+    $("#nyeShowMsg").textContent = ""; $("#nyeShowBig").textContent = ""; $("#nyeShowSub").textContent = practice ? "Practice run" : "until midnight";
+    $("#nyeShow").classList.add("show"); document.body.classList.add("lock");
+    clearInterval(showTimer); showTimer = setInterval(stepShow, 100); stepShow();
+  }
+  function stepShow() {
+    const left = showTarget - Date.now(), s = Math.ceil(left / 1000);
+    const big = $("#nyeShowBig");
+    if (left > 10000) {
+      const t = Math.floor(left / 1000), h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), ss = t % 60;
+      big.className = "ns-clock"; big.textContent = (h ? h + ":" + two(m) : m) + ":" + two(ss);
+    } else if (left > 0) {
+      big.className = "ns-num"; if (big.textContent !== String(s)) { big.textContent = String(s); big.classList.remove("pop"); void big.offsetWidth; big.classList.add("pop"); }
+      if (lastBeep !== s) { lastBeep = s; beep(s <= 3 ? 1046 : 880, 0.18); if (navigator.vibrate) navigator.vibrate(40); }
+      $("#nyeShowSub").textContent = "";
+    } else {
+      clearInterval(showTimer);
+      const yr = showPractice ? new Date(midnightTarget()).getFullYear() : new Date(showTarget + 1000).getFullYear();
+      big.className = "ns-msg"; big.textContent = "Happy New Year!";
+      $("#nyeShowSub").textContent = String(yr);
+      [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, 0.6), i * 120));
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+      try { showAudio = new Audio((window.CARD_SONGS && window.CARD_SONGS.newyear) || ""); showAudio.play().catch(() => {}); } catch (e) {}
+      fireworks();
+    }
+  }
+  function closeShow() {
+    clearInterval(showTimer); fwRun = false; if (showAudio) { showAudio.pause(); showAudio = null; }
+    $("#nyeShow").classList.remove("show"); if (!$(".sheet.open")) document.body.classList.remove("lock");
+  }
+  function fireworks() {
+    const cv = $("#nyeFw"), ctx = cv.getContext("2d"), dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = cv.width = innerWidth * dpr, H = cv.height = innerHeight * dpr;
+    const cols = ["#D9BF8C", "#f2d68a", "#ffffff", "#e85a5a", "#7fb3ff", "#9ee6a8"], parts = [];
+    let lastBurst = 0; const start = performance.now(); fwRun = true;
+    const burst = () => {
+      const x = W * (0.15 + Math.random() * 0.7), y = H * (0.12 + Math.random() * 0.4), c = cols[Math.random() * cols.length | 0], n = 70;
+      for (let i = 0; i < n; i++) { const a = Math.PI * 2 * i / n, v = (1.5 + Math.random() * 3.5) * dpr; parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1, c }); }
+    };
+    const frame = now => {
+      if (!fwRun) { ctx.clearRect(0, 0, W, H); return; }
+      ctx.globalCompositeOperation = "destination-out"; ctx.fillStyle = "rgba(0,0,0,0.22)"; ctx.fillRect(0, 0, W, H);
+      ctx.globalCompositeOperation = "lighter";
+      if (now - lastBurst > 450 && now - start < 25000) { burst(); lastBurst = now; }
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const p = parts[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.05 * dpr; p.vx *= 0.985; p.vy *= 0.985; p.life -= 0.012;
+        if (p.life <= 0) { parts.splice(i, 1); continue; }
+        ctx.globalAlpha = p.life; ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, 2.2 * dpr, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      if (now - start < 32000 || parts.length) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- 🎉 party planner card ----------
+  function renderNyeParty() {
+    const m = mealById("nyeparty"); if (!m) return;
+    const c = cfgFor("nyeparty"), p = mealSizes(m, c), active = mealPlan && mealPlan.id === "nyeparty";
+    const ps = pricedShop(m, p.f, p);
+    $("#nyePartySum").innerHTML = `<b>${c.guests} guests</b> · starts ${mclock(dinnerAt(c))} · ${p.items.length} appetizers · about <b>${cad0(ps.total)}</b>` +
+      (active ? `<br><span class="nye-on">✅ Party alarms are set</span>` : "");
+  }
+
+  // ---------- 💫 wishes jar ----------
+  let wishesJar = load("wishesJar", { items: [] });   // { y: season year, name, text, at }
+  const seasonYear = () => { const n = new Date(); return n.getMonth() === 0 && n.getDate() <= 6 ? n.getFullYear() - 1 : n.getFullYear(); };
+  const revealAt = y => new Date(y + 1, 11, 31, 18, 0).getTime();   // a year later, on New Year's Eve at 6 PM
+  function renderJar() {
+    const y = seasonYear(), mine = wishesJar.items.filter(w => w.y === y);
+    const ready = wishesJar.items.filter(w => w.y < y && Date.now() >= revealAt(w.y));
+    const sealed = wishesJar.items.filter(w => w.y < y && Date.now() < revealAt(w.y));
+    $("#jarSealed").innerHTML = mine.length ? `🔒 <b>${mine.length}</b> ${mine.length === 1 ? "wish" : "wishes"} sealed this year: ${mine.map(w => esc(w.name)).join(", ")}<br><small>They open on New Year's Eve ${y + 1}.</small>` : "No wishes sealed yet. Pass the phone around!";
+    $("#jarReveal").innerHTML = ready.length ? `<h4>🎁 Your wishes from last year</h4>` + ready.map(w => `<p class="wish-open"><b>${esc(w.name)}</b> (${w.y + 1}): “${esc(w.text)}”</p>`).join("") :
+      sealed.length ? `<p class="wish-wait">🔒 ${sealed.length} older ${sealed.length === 1 ? "wish is" : "wishes are"} still sealed.</p>` : "";
+  }
+  $("#jarForm").addEventListener("submit", e => {
+    e.preventDefault(); const f = e.target, name = f.wname.value.trim(), text = f.wtext.value.trim();
+    if (!name || !text) { toast("💫 Add your name and your wish"); return; }
+    wishesJar.items.push({ y: seasonYear(), name: name.slice(0, 30), text: text.slice(0, 200), at: Date.now() }); save("wishesJar", wishesJar);
+    f.wname.value = ""; f.wtext.value = ""; renderJar(); toast("🔒 Sealed! Pass the phone to the next person");
+  });
+  $("#jarPeek").addEventListener("click", () => {
+    const mine = wishesJar.items.filter(w => w.y === seasonYear());
+    if (!mine.length) { toast("No wishes sealed yet"); return; }
+    if (!confirm("Peek at this year's wishes? They're meant to stay secret until next New Year's Eve!")) return;
+    $("#jarReveal").innerHTML = `<h4>👀 This year's wishes</h4>` + mine.map(w => `<p class="wish-open"><b>${esc(w.name)}</b>: “${esc(w.text)}”</p>`).join("");
+  });
+
+  function renderNye() { renderNyeCount(); renderNyeParty(); renderJar(); }
+  setInterval(() => { if ($("#view-nye").classList.contains("active")) renderNyeCount(); }, 1000);
+  setInterval(applySeasonNav, 60000);
+
+  // ---------- taps ----------
+  $("#nyeBig").addEventListener("click", () => openShow(midnightTarget(), false));
+  $("#nyePractice").addEventListener("click", () => openShow(Date.now() + 10500, true));
+  $("#nyeShowClose").addEventListener("click", closeShow);
+  $("#nyePlan").addEventListener("click", () => { showView("meals"); openMeal("nyeparty"); });
+  $("#nyeCard").addEventListener("click", () => { ecard.d = "nyc"; save("ecard", ecard); syncCards(); showView("invites"); showPane("cards"); toast("🥂 Midnight Champagne card selected"); });
+  document.addEventListener("click", e => { const g = e.target.closest("[data-goview]"); if (g) showView(g.dataset.goview); });
+  /* @nye-end */
+
   /* ============================================================
      START THE APP
      ============================================================ */
@@ -8752,6 +9127,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   renderDuties();
   renderMeals();
   renderOwnTimers();
+  renderNye();
   showView(load(KEYS.view, "games"));
   setInterval(tick, 250);
   tick(); // catches timers that finished while the app was closed

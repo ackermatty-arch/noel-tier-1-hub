@@ -14,8 +14,9 @@
   let foodBudget = load("foodBudget", { limit: 0, items: [] });   // 💵 separate from the gift budget
   let mealAddons = load("mealAddons", {});           // 🌱 dietary add-ons switched on: { squash: true }
   // add-ons that join a main dinner (none for an add-on viewed on its own)
-  const activeAddons = m => m.addon ? [] : MD.meals.filter(a => a.addon && mealAddons[a.id]).map(a => { const ac = cfgFor(a.id); return { a, c: ac, p: mealSizes(a, ac) }; });
-  const addonSig = m => activeAddons(m).map(x => x.a.id + ":" + x.c.guests).join(",");
+  const activeAddons = m => m.addon || m.party ? [] : MD.meals.filter(a => a.addon && mealAddons[a.id]).map(a => { const ac = cfgFor(a.id); return { a, c: ac, p: mealSizes(a, ac) }; });
+  const addonSig = m => activeAddons(m).map(x => x.a.id + ":" + x.c.guests).join(",") + (m.party ? JSON.stringify([cfgFor(m.id).mode, cfgFor(m.id).picks]) : "");
+  const recipesOf = (m, p) => m.recipesFor ? m.recipesFor(p) : m.recipes;
   const cad = x => "$" + (Math.round(x * 100) / 100).toFixed(2);
   const cad0 = x => "$" + Math.round(x).toLocaleString();
   function pricedShop(m, f, p) {
@@ -41,8 +42,9 @@
     return `${y}-12-25`;
   }
   function cfgFor(id) {
-    const c = mealCfg[id] || {}, ad = (mealById(id) || {}).addon, mx = ad ? 5 : 20;
-    return { guests: Math.min(mx, Math.max(1, +c.guests || (ad ? 2 : 12))), date: c.date || nextXmasDate(), time: c.time || "17:00", doneness: c.doneness || "mediumrare", gf: !!c.gf };
+    const c = mealCfg[id] || {}, meal = mealById(id) || {}, ad = meal.addon, mx = ad ? 5 : 20;
+    return { guests: Math.min(mx, Math.max(1, +c.guests || (ad ? 2 : 12))), date: c.date || (meal.defaultDate ? meal.defaultDate() : nextXmasDate()), time: c.time || meal.defaultTime || "17:00",
+      doneness: c.doneness || "mediumrare", gf: !!c.gf, mode: c.mode || "meal", picks: c.picks || null };
   }
   const dinnerAt = c => { const [y, mo, d] = c.date.split("-").map(Number), [h, mi] = c.time.split(":").map(Number); return new Date(y, mo - 1, d, h, mi).getTime(); };
   const mclock = t => new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
@@ -149,18 +151,20 @@
         `<h4 class="shop-dept">Drink pairings</h4>` + m.drinks.map(([k, v]) => `<p class="drink"><b>${esc(k)}:</b> ${esc(v)}</p>`).join("");
     }
     $("#mealDetail").innerHTML = `
-      <button type="button" class="meal-back" id="mealBack">‹ All meals</button>
+      <button type="button" class="meal-back" id="mealBack">${m.tab === "nye" ? "‹ New Year's Eve" : "‹ All meals"}</button>
       <h3 class="meal-title">${m.icon} ${esc(m.name)}</h3>
       <div class="card meal-setup">
         <div class="meal-row"><span class="meal-lab">${m.addon ? "People (1–5)" : "Guests"}</span>
           <div class="stepper"><button type="button" data-g="-1" aria-label="Fewer guests">−</button><output id="mealGuests">${c.guests}</output><button type="button" data-g="1" aria-label="More guests">+</button></div></div>
         <div class="meal-row two">
-          <label><span class="meal-lab">Dinner date</span><input class="input" type="date" id="mealDate" value="${c.date}"></label>
-          <label><span class="meal-lab">Dinner time</span><input class="input" type="time" id="mealTime" value="${c.time}"></label></div>
+          <label><span class="meal-lab">${m.party ? "Party date" : "Dinner date"}</span><input class="input" type="date" id="mealDate" value="${c.date}"></label>
+          <label><span class="meal-lab">${m.party ? "Party starts" : "Dinner time"}</span><input class="input" type="time" id="mealTime" value="${c.time}"></label></div>
         ${m.options && m.options.doneness ? `<span class="meal-lab">How do you like it?</span><div class="seg seg4 sub-tabs meal-done" role="group" aria-label="Doneness">${(Array.isArray(m.options.doneness) ? m.options.doneness : MD.doneness).map(([k, l]) => `<button type="button" data-done="${k}" aria-pressed="${c.doneness === k}">${l}</button>`).join("")}</div>` : ""}
         ${m.options && m.options.gf ? `<label class="meal-gf"><input type="checkbox" id="mealGf" ${c.gf ? "checked" : ""}> Make it gluten-free</label>` : ""}
+        ${m.party ? partyControlsHtml(c, p) : ""}
         ${m.addon ? `<label class="meal-gf addon-join"><input type="checkbox" data-addon="${m.id}" ${mealAddons[m.id] ? "checked" : ""}> Add this to my main dinner</label>
-          <p class="meal-addon-sub">${m.tags}. When it's added, it joins whichever dinner you plan (its steps, alarms, shopping and recipe go right in). No main dinner? Just set a time below and start its alarms on their own.</p>` : addonPickerHtml()}
+          <p class="meal-addon-sub">${m.tags}. When it's added, it joins whichever dinner you plan (its steps, alarms, shopping and recipe go right in). No main dinner? Just set a time below and start its alarms on their own.</p>` : (m.party ? "" : addonPickerHtml())}
+        ${p.partySummary ? `<p class="meal-sum">${p.partySummary}</p>` : ""}
         ${p.w || p.mainLabel ? `<p class="meal-sum">${p.icon} <b>${p.w ? `${p.w} lb ${p.meat}` : p.mainLabel}</b> · ${p.verb} about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.bigNote ? `<br><small>${p.bigNote}</small>` : ""}</p>` : ""}
         <div class="send-btns">
           ${active ? `<button type="button" class="btn btn-ghost" id="mealStop">⏹ Stop dinner alarms</button>` : `<button type="button" class="btn btn-red" id="mealStart">⏰ Start my dinner alarms</button>`}
@@ -173,6 +177,13 @@
     if (active && (mealPlan.guests !== c.guests || mealPlan.at !== D || (mealPlan.addons || "") !== addonSig(m) || (m.options && (mealPlan.doneness !== c.doneness || !!mealPlan.gf !== c.gf)))) $("#mealDetail .meal-on").innerHTML = "⚠️ You changed your dinner details. Tap <b>Stop</b>, then <b>Start</b> again to update the alarms.";
   }
 
+  // 🥂 New Year's party: party style + pick the appetizers (from Appetizer Ideas)
+  function partyControlsHtml(c, p) {
+    const picked = new Set(p.items.concat(p.drinkItems).map(i => i.name));
+    return `<span class="meal-lab">Party style</span><div class="seg sub-tabs meal-done" role="group" aria-label="Party style">
+      <button type="button" data-pmode="meal" aria-pressed="${c.mode !== "before"}">Appetizers are the meal</button><button type="button" data-pmode="before" aria-pressed="${c.mode === "before"}">Before dinner</button></div>
+      <span class="meal-lab">Pick your appetizers (${picked.size})</span><div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])}</button>`).join("")}</div>`;
+  }
   // 🌱 the "dietary guests" picker shown on every main dinner
   function addonPickerHtml() {
     const list = MD.meals.filter(a => a.addon);
@@ -184,12 +195,13 @@
           (on ? `<div class="stepper sm"><button type="button" data-ag="${a.id}:-1" aria-label="Fewer people">−</button><output>${g}</output><button type="button" data-ag="${a.id}:1" aria-label="More people">+</button></div>` : "") + `</div>`; }).join("") + `</div>`;
   }
   function allMenu(m) {
+    if (m.menuFor) return m.menuFor(mealSizes(m, cfgFor(m.id)));
     const extra = activeAddons(m).map(({ a, c: ac }) => `${a.name} (for ${ac.guests} ${ac.guests === 1 ? "guest" : "guests"}, vegan & gluten-free)`);
     return extra.length ? [...m.menu, ["Dietary add-ons", extra]] : m.menu;
   }
   function allRecipesHtml(m, f, p, open) {
     const o = h => open ? h.replace("<details", "<details open") : h;
-    return m.recipes.map(r => o(recipeHtml(r, f, p))).join("") +
+    return recipesOf(m, p).map(r => o(recipeHtml(r, f, p))).join("") +
       activeAddons(m).map(({ a, p: ap }) => a.recipes.map(r => o(recipeHtml(r, ap.f, ap))).join("")).join("");
   }
   function shopTotalHtml(ps, guests) {
@@ -209,12 +221,13 @@
   // ---- alarms ----
   function startMealPlan(m) {
     const c = cfgFor(m.id), D = dinnerAt(c), now = Date.now();
-    if (D < now) { toast("🕰️ That dinner time has passed. Pick a time in the future."); return; }
+    if (D < now) { toast(`🕰️ That ${m.party ? "party" : "dinner"} time has passed. Pick a time in the future.`); return; }
     const steps = buildSteps(m, c).map(s => ({ k: s.k, t: s.t, icon: s.icon, text: s.text, alarm: s.alarm, fired: s.t <= now }));
-    mealPlan = { id: m.id, name: m.name, guests: c.guests, at: D, doneness: c.doneness, gf: c.gf, addons: addonSig(m), steps };
+    const pp = mealSizes(m, c);
+    mealPlan = { id: m.id, name: m.name, guests: c.guests, at: D, doneness: c.doneness, gf: c.gf, addons: addonSig(m), party: !!m.party, mid: m.party && pp.toMidnight ? D + pp.toMidnight * 60000 : null, steps };
     save("mealPlan", mealPlan); syncMealNative(); getAudio();
     const missed = steps.filter(s => s.fired).length;
-    toast(missed ? `⏰ Dinner alarms set. ${missed} earlier step${missed > 1 ? "s were" : " was"} already past.` : "⏰ Dinner alarms are set!");
+    toast(missed ? `⏰ ${m.party ? "Party" : "Dinner"} alarms set. ${missed} earlier step${missed > 1 ? "s were" : " was"} already past.` : "⏰ Dinner alarms are set!");
     renderMeals();
   }
   function stopMealPlan() {
@@ -249,14 +262,14 @@
   // ---- master timer: one countdown to dinner, with what's now and next ----
   function renderMaster() {
     const el = $("#mealMaster");
-    if (!mealPlan || Date.now() > mealPlan.at + 3 * 3600000) { el.hidden = true; return; }
-    const now = Date.now(), left = mealPlan.at - now;
+    if (!mealPlan || Date.now() > (mealPlan.mid || mealPlan.at) + 3 * 3600000) { el.hidden = true; return; }
+    const now = Date.now(), toMid = mealPlan.mid && now >= mealPlan.at, left = (toMid ? mealPlan.mid : mealPlan.at) - now;
     const next = mealPlan.steps.find(s => s.t > now), last = [...mealPlan.steps].reverse().find(s => s.t <= now);
     const fmt = ms => { const s = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
       return d ? `${d}d ${h}h ${m}m` : `${h ? h + ":" : ""}${String(m).padStart(h ? 2 : 1, "0")}:${String(ss).padStart(2, "0")}`; };
     el.hidden = false;
-    el.innerHTML = `<div class="mm-k">${left > 0 ? "Dinner is served in" : "Dinner time!"}</div>
-      <div class="mm-time">${left > 0 ? fmt(left) : "🍽️"}</div>
+    el.innerHTML = `<div class="mm-k">${left > 0 ? (toMid ? "Midnight in" : mealPlan.party ? "Party starts in" : "Dinner is served in") : (mealPlan.party ? "Happy New Year!" : "Dinner time!")}</div>
+      <div class="mm-time">${left > 0 ? fmt(left) : (mealPlan.party ? "🎆" : "🍽️")}</div>
       ${last ? `<div class="mm-row"><b>Now</b> ${last.icon} ${esc(last.text)}</div>` : ""}
       ${next ? `<div class="mm-row"><b>Next</b> ${next.icon} ${esc(next.text)} · ${mclock(next.t)} <small>(in ${fmt(next.t - now)})</small></div>` : ""}`;
   }
@@ -266,7 +279,7 @@
   function printMeal(m) {
     const c = cfgFor(m.id), p = mealSizes(m, c), f = p.f, steps = buildSteps(m, c);
     let lastDay = "";
-    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · dinner ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
+    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · ${m.party ? "party starts" : "dinner"} ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
       <h2>Timeline</h2><table class="pm-tl">${steps.map(s => { const d = dayName(s.t), h = d !== lastDay ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; lastDay = d; return h + `<tr><td>${s.ahead ? "All day" : mclock(s.t)}</td><td>☐ ${esc(s.text)}</td></tr>`; }).join("")}</table>
       <h2>Shopping list</h2>${(ps => `<p><b>Estimated total: ${cad0(ps.total)} CAD</b> (about ${cad(ps.total / c.guests)} per guest)</p>` + ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join(""))(pricedShop(m, f, p))}
       <h2>Menu</h2>${allMenu(m).map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v.join(", "))}</p>`).join("")}
@@ -312,12 +325,21 @@
     if (dg) { const [aid, d] = dg.dataset.dg.split(":"), ac = cfgFor(aid); ac.guests = Math.min(5, Math.max(1, ac.guests + +d)); mealCfg[aid] = ac; save("mealCfg", mealCfg); renderMeals(); return; }
     const dop = t.closest("[data-dopen]"); if (dop) { openMeal(dop.dataset.dopen); return; }
     const dpr = t.closest("[data-dprint]"); if (dpr) { printMeal(mealById(dpr.dataset.dprint)); return; }
-    if (t.closest("#mealBack")) { mealSel.id = null; save("mealSel", mealSel); renderMeals(); return; }
+    if (t.closest("#mealBack")) { const wasNye = mealSel.id && (mealById(mealSel.id) || {}).tab === "nye"; mealSel.id = null; save("mealSel", mealSel); renderMeals(); if (wasNye) showView("nye"); return; }
     const m = mealSel.id && mealById(mealSel.id); if (!m) return;
     const ag = t.closest("[data-ag]");
     if (ag) { const [aid, d] = ag.dataset.ag.split(":"), ac = cfgFor(aid); ac.guests = Math.min(5, Math.max(1, ac.guests + +d)); mealCfg[aid] = ac; save("mealCfg", mealCfg); renderMealDetail(m); return; }
     const g = t.closest("[data-g]");
     if (g) { const c = cfgFor(m.id); c.guests = Math.min(m.addon ? 5 : 20, Math.max(1, c.guests + +g.dataset.g)); mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
+    const pm = t.closest("[data-pmode]");
+    if (pm) { const c = cfgFor(m.id); c.mode = pm.dataset.pmode; mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
+    const pk = t.closest("[data-pick]");
+    if (pk) {
+      const c = cfgFor(m.id), cur = new Set(mealSizes(m, c).items.concat(mealSizes(m, c).drinkItems).map(i => i.name)), n = pk.dataset.pick;
+      if (cur.has(n)) cur.delete(n); else cur.add(n);
+      if (![...cur].some(x => x !== "Sparkling Punch")) { toast("🥂 Keep at least one appetizer"); return; }
+      c.picks = [...cur]; mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return;
+    }
     const dn = t.closest("[data-done]");
     if (dn) { const c = cfgFor(m.id); c.doneness = dn.dataset.done; mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
     const pn = t.closest("[data-mpane]"); if (pn) { mealSel.pane = pn.dataset.mpane; save("mealSel", mealSel); renderMealDetail(m); return; }

@@ -2466,6 +2466,116 @@ window.NOEL_MEALS = (function () {
       ];
     }
   };
+  // 🥂 NEW YEAR'S EVE PARTY: built from the Appetizer Ideas list (window.NOEL_APPS)
+  // What to buy for one batch of each appetizer: [bites per batch, [[item, price CAD], ...]]  (null price = pantry staple)
+  // ✏️ Prices are rough Canadian estimates. Buyers can change any price.
+  const APP_SHOP = {
+    "Caprese Skewers": [24, [["pint cherry tomatoes", 5], ["tub (200 g) mini bocconcini", 6], ["bunch fresh basil", 3], ["balsamic glaze, skewers", null]]],
+    "Deviled Eggs": [24, [["dozen eggs", 5.4], ["bunch fresh chives", 3], ["mayonnaise, Dijon, paprika", null]]],
+    "Baked Brie": [16, [["wheel (200 g) brie", 8], ["sheet puff pastry (half a box)", 3], ["jar jam or honey", 5], ["box crackers", 4]]],
+    "Bacon-Wrapped Dates": [24, [["box (454 g) Medjool dates", 9], ["pack bacon", 7], ["toothpicks", null]]],
+    "Slow Cooker Meatballs": [40, [["bag (907 g) frozen meatballs", 14], ["bottle chili sauce", 4], ["jar grape jelly", 4]]],
+    "Pinwheel Roll-Ups": [32, [["large tortillas (half a pack)", 2], ["tub (250 g) cream cheese", 4.5], ["pack (175 g) deli turkey or ham", 5], ["handful baby spinach", 2]]],
+    "Stuffed Mushrooms": [24, [["lb large white mushrooms (about 24)", 4], ["half tub cream cheese", 2.5], ["wedge (50 g) Parmesan", 2], ["garlic, breadcrumbs", null]]],
+    "Shrimp Cocktail": [30, [["lb cooked shrimp, tails on", 22], ["jar cocktail sauce", 4], ["lemon", 1]]],
+    "Bruschetta": [24, [["baguette", 3.5], ["Roma tomatoes (4)", 3], ["bunch fresh basil", 3], ["garlic, olive oil", null]]],
+    "Charcuterie Board": [30, [["pack (200 g) cured meats", 10], ["cheeses (400 g total)", 14], ["box crackers", 4], ["lb grapes", 4], ["jar olives", 5], ["bag (100 g) nuts", 4]]],
+    "Pigs in a Blanket": [24, [["pack (375 g) cocktail sausages", 6], ["tube crescent dough or puff pastry", 4]]],
+    "Cucumber Bites": [24, [["English cucumber", 1.5], ["tub (227 g) herb & garlic cream cheese", 5], ["bunch fresh dill", 3]]],
+    "Antipasto Skewers": [24, [["pack (150 g) salami", 5], ["pack (350 g) fresh cheese tortellini", 6], ["jar olives", 5], ["jar roasted red peppers", 4]]],
+    "Smoked Salmon Crostini": [24, [["baguette", 3.5], ["pack (113 g) smoked salmon", 8], ["half tub cream cheese", 2.5], ["jar capers", 4]]],
+    "Mini Quiches": [24, [["box (24) frozen mini tart shells", 6], ["half dozen eggs", 2.7], ["cup milk or cream", 2], ["bag (170 g) shredded cheese", 4], ["bacon bits or spinach", 3]]],
+    "Spinach Artichoke Dip": [24, [["box (300 g) frozen spinach", 3], ["can artichoke hearts", 3], ["tub (250 g) cream cheese", 4.5], ["bag shredded mozzarella", 4], ["wedge Parmesan", 3], ["bag tortilla chips or a baguette", 5]]],
+    "Garlic Herb Cheese Ball": [24, [["tubs (250 g) cream cheese (2)", 9], ["bag shredded cheddar", 4], ["bag (100 g) pecans", 4], ["box crackers", 4]]],
+    "Veggie Cups": [24, [["tub (500 g) hummus or ranch", 6], ["lb carrots", 1.5], ["bunch celery", 3], ["English cucumber", 1.5], ["bell peppers (2)", 4], ["pack clear cups", 4]]],
+    "Prosciutto & Melon": [24, [["cantaloupe", 4], ["pack (100 g) prosciutto", 6]]],
+    "Mini Sliders": [24, [["pack (12) slider buns", 5], ["1½ lb ground beef", 9], ["pack cheese slices", 4], ["pickles, ketchup, mustard", null]]],
+    "Crispy Cauliflower Bites": [30, [["head cauliflower", 4], ["bottle buffalo or sweet chili sauce", 4], ["flour, panko", null]]],
+    "Spanakopita Triangles": [24, [["box (24) frozen spanakopita", 12]]],
+    "Seven-Layer Dip": [24, [["can refried beans", 2.5], ["tub (400 g) guacamole", 6], ["tub (500 ml) sour cream", 3.5], ["jar salsa", 4], ["bag shredded cheese", 4], ["tomato, green onions, olives", 4], ["bags tortilla chips (2)", 8]]],
+    "Honey Garlic Wings": [24, [["2 lb chicken wings", 14], ["honey, garlic, soy sauce", 2]]],
+    "Party Snack Mix": [40, [["box cereal squares", 5], ["bag pretzels", 4], ["can (300 g) mixed nuts", 8], ["butter, seasoning", null]]],
+    "Chocolate-Dipped Strawberries": [24, [["2 lb large strawberries", 8], ["bar (200 g) chocolate", 5]]],
+    "Mini Cheesecake Bites": [24, [["tubs (250 g) cream cheese (2)", 9], ["box graham crumbs", 4], ["container berries", 5], ["sugar, eggs, vanilla", 1]]],
+    "Cookie Platter": [30, [["box assorted cookies (or Christmas leftovers)", 8]]],
+    "Chocolate Fondue": [30, [["bars (300 g) chocolate", 7], ["carton (250 ml) whipping cream", 3], ["lb strawberries", 5], ["bag marshmallows", 3], ["bag pretzels", 3]]],
+    "Sparkling Punch": [10, [["bottles (750 ml) sparkling juice (2)", 8], ["carton (1 L) cranberry juice", 4], ["oranges (2)", 2]]]
+  };
+  const DRINK_APPS = ["Sparkling Punch"];
+  const NYE_DEFAULT = ["Charcuterie Board", "Slow Cooker Meatballs", "Spinach Artichoke Dip", "Caprese Skewers", "Pigs in a Blanket", "Chocolate-Dipped Strawberries", "Sparkling Punch"];
+  const appRow = name => (window.NOEL_APPS || []).find(a => a[1] === name);
+
+  function nyeDate() { const now = new Date(); let y = now.getFullYear(); if (now.getMonth() === 0 && now.getDate() <= 6) y--; return `${y}-12-31`; }
+  function nyePartyPlan(guests, c = {}) {
+    const g = Math.min(20, Math.max(1, guests | 0)), f = g / 8, mode = c.mode === "before" ? "before" : "meal";
+    let names = (c.picks && c.picks.length ? c.picks : NYE_DEFAULT).filter(n => appRow(n));
+    const food = names.filter(n => !DRINK_APPS.includes(n)), drinks = names.filter(n => DRINK_APPS.includes(n));
+    const per = mode === "meal" ? 12 : 5, total = g * per, each = food.length ? Math.ceil(total / food.length) : 0;
+    const items = food.map(n => { const [batch] = APP_SHOP[n] || [24]; return { name: n, row: appRow(n), pieces: each, batches: Math.max(1, Math.ceil(each / batch - 1e-9)) }; });
+    const drinkItems = drinks.map(n => { const [batch] = APP_SHOP[n]; return { name: n, row: appRow(n), batches: Math.max(1, Math.ceil(g * 1.5 / batch - 1e-9)) }; });
+    const [h, mi] = String(c.time || "20:00").split(":").map(Number), startMin = h * 60 + mi, toMidnight = startMin >= 360 ? 1440 - startMin : null;
+    return { g, f, mode, items, drinkItems, total, each, toMidnight, pies: 1, dishes: 1,
+      partySummary: `🥂 <b>${food.length} appetizers</b> · about <b>${total} bites</b> (${each} of each)${drinks.length ? " · " + drinks.join(", ") : ""}<br><small>${mode === "meal" ? "Appetizers are the meal: about 12 bites per guest through the night." : "Light bites before dinner: about 5 per guest."}${toMidnight ? ` Midnight is ${Math.floor(toMidnight / 60)}h${toMidnight % 60 ? " " + (toMidnight % 60) + "m" : ""} after the party starts.` : ""}</small>` };
+  }
+  const nyeparty = {
+    id: "nyeparty", tab: "nye", party: true,
+    name: "New Year's Eve Party", icon: "🥂",
+    blurb: "Appetizer party with a midnight countdown.",
+    defaultTime: "20:00", defaultDate: nyeDate,
+    get menu() { return [["Your party menu", ["Pick your appetizers above"]]]; },
+    menuFor(p) {
+      return [["Appetizers", p.items.map(i => `${i.name} (${i.pieces} pieces)`)], ["Drinks", p.drinkItems.map(i => i.name).concat(["Midnight toast: sparkling wine and sparkling juice"])]];
+    },
+    drinks: [
+      ["Midnight toast", "Plan one glass of bubbly per guest: a 750 ml bottle pours about 6 glasses. Have sparkling juice ready for kids and non-drinkers."],
+      ["Through the night", "Sparkling Punch keeps it family-friendly. Add a sparkling wine for adults, and water for everyone."]
+    ],
+    recipesFor(p) {
+      return p.items.concat(p.drinkItems).map(i => ({
+        id: "app-" + i.name, course: DRINK_APPS.includes(i.name) ? "Drink" : (i.row[4].includes("sweet") ? "Sweet bite" : "Appetizer"), name: i.name,
+        prep: i.row[5], cook: i.row[4].includes("warm") ? "served warm" : "no cooking needed",
+        yieldText: () => i.pieces ? `about ${i.pieces} pieces (${i.batches} ${i.batches === 1 ? "batch" : "batches"})` : `${i.batches} ${i.batches === 1 ? "batch" : "batches"}`,
+        ing: (APP_SHOP[i.name] || [0, []])[1].map(([n]) => ({ q: null, u: "", s: "n", t: (i.batches > 1 ? i.batches + " × " : "") + n })),
+        steps: [i.row[2], "Make-ahead: " + i.row[3]], tip: ""
+      }));
+    },
+    recipes: [],
+    timeline(p) {
+      const out = [], add = (m, icon, text, alarm = true) => out.push({ m, icon, text, alarm });
+      const tag = t => p.items.filter(i => i.row[4].split(" ").includes(t)).map(i => i.name);
+      const warm = tag("warm"), cold = p.items.filter(i => !i.row[4].includes("warm") && !i.row[4].includes("sweet")).map(i => i.name), sweet = tag("sweet");
+      add(-180, "🧊", "Put the bubbly, juices and sparkling water in the fridge to chill");
+      if (p.items.some(i => i.name === "Slow Cooker Meatballs")) add(-180, "🍝", "Slow cooker meatballs on low (3 hours)");
+      if (cold.length) add(-90, "🥗", "Prep the cold bites: " + cold.join(", "));
+      if (warm.length) add(-40, "🔥", "Oven on for the warm bites: " + warm.join(", "));
+      add(-15, "🍽️", "Set out the platters, napkins and drinks");
+      add(0, "🎉", "Party time! Welcome your guests");
+      add(60, "🎲", "Party games! Open New Year's Party Games on the New Year screen");
+      if (warm.length) add(120, "🔥", "Refresh the platters with a second round of warm bites");
+      if (p.toMidnight) {
+        const M = p.toMidnight;
+        add(M - 60, "📰", "Play the Year-in-Review quiz together");
+        add(M - 45, "💫", "Everyone seals a wish for next year in the Wishes Jar");
+        if (sweet.length) add(M - 30, "🍓", "Set out the sweet bites: " + sweet.join(", "));
+        add(M - 15, "🥂", "Pour the bubbly and sparkling juice. Hand out noisemakers");
+        add(M - 2, "🎆", "Open the big countdown on the New Year screen!");
+        add(M, "🎆", "HAPPY NEW YEAR!");
+      }
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) {
+      const make = p.items.filter(i => i.row[4].includes("make")).map(i => i.name);
+      return [[2, 11, "🛒", "Shop for the New Year's Eve party today (the list is in the Meal Planner)"]].concat(make.length ? [[1, 11, "📋", "Make ahead today: " + make.join(", ")]] : []);
+    },
+    shop(f, p) {
+      const groups = p.items.concat(p.drinkItems).map(i => [`${i.row[0]} ${i.name}${i.pieces ? ` (${i.pieces} pieces)` : ""}`,
+        (APP_SHOP[i.name] || [0, []])[1].map(([n, price]) => [price == null ? "" : String(i.batches), n, price == null ? null : price * i.batches])]);
+      const bubbly = Math.ceil(p.g / 6);
+      groups.push(["🥂 Midnight toast", [[String(bubbly), `bottle${bubbly > 1 ? "s" : ""} sparkling wine (750 ml, about 6 glasses each)`, bubbly * 16], [String(bubbly), `bottle${bubbly > 1 ? "s" : ""} sparkling juice, for kids and non-drinkers`, bubbly * 5], ["", "sparkling water and ice", null]]]);
+      groups.push(["🎉 Party supplies", [["1", "pack noisemakers and party hats (optional)", 8], ["", "napkins, small plates, toothpicks and skewers", null]]]);
+      return groups;
+    }
+  };
   // add-on sizes: 1–5 people
   const addonPlan = base => guests => { const g = Math.min(5, Math.max(1, guests | 0)); return { g, f: g / base, pies: 1, dishes: 1, batches: 1 }; };
 
@@ -2508,9 +2618,10 @@ window.NOEL_MEALS = (function () {
       shepherd,
       vgravyAddon,
       mousse,
-      pecanAddon
+      pecanAddon,
+      nyeparty
     ],
-    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8) },
+    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8), nyeparty: nyePartyPlan },
     doneness: DONENESS,
     frac, hm, fmtNum
   };
