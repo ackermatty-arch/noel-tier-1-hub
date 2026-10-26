@@ -1802,7 +1802,7 @@ body.space-switching main { opacity: .3; }
         <div class="print-thumb">🕯️</div>
         <div class="print-info">
           <h3>Holiday Self-Care</h3>
-          <p>Five gentle reminders, a calm plan and your own permission slip for a merrier season.</p>
+          <p class="sc-desc">Five gentle reminders for a calmer, merrier season.</p>
           <button type="button" class="btn btn-red btn-sm" data-print="selfcare">🖨️ Print</button>
         </div>
       </article>
@@ -1810,8 +1810,8 @@ body.space-switching main { opacity: .3; }
       <article class="card print-card">
         <div class="print-thumb">😅</div>
         <div class="print-info">
-          <h3 class="sv-title">Holiday Survival Guide</h3>
-          <p>Survival kit, the official rules, safe dinner topics, emergency plans and Survival Bingo.</p>
+          <h3 class="sv-title">Advanced Family &amp; Social Survival</h3>
+          <p class="sv-desc">Six tongue-in-cheek tips for surviving the holidays.</p>
           <button type="button" class="btn btn-red btn-sm" data-print="survival">🖨️ Print</button>
         </div>
       </article>
@@ -8379,7 +8379,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#navMeals").hidden = hubMode === "company";   // 🍽️ the big-dinner planner is for families
     $("#hostBanner").hidden = $("#orgBanner").hidden = hubMode === "company";   // 🏡 hosting is for families too
     $("#officeBanner").hidden = hubMode !== "company";                        // 🏢 the office party plan
-    $$(".sv-title").forEach(x => { x.textContent = hubMode === "company" ? "Office Party Survival Guide" : "Holiday Survival Guide"; });
+    $$(".sv-title").forEach(x => { x.textContent = hubMode === "company" ? "Office Party Survival Guide" : "Advanced Family & Social Survival"; });
+    $$(".sv-desc").forEach(x => { x.textContent = hubMode === "company" ? "Survival kit, the official rules, safe topics, emergency plans and Office Party Bingo." : "Six tongue-in-cheek tips for surviving the holidays."; });
+    $$(".sc-desc").forEach(x => { x.textContent = hubMode === "company" ? "Five gentle reminders, a calm plan and your own permission slip." : "Five gentle reminders for a calmer, merrier season."; });
     if (hubMode === "company" && load(KEYS.view, "games") === "host") showView("planner");
     applySeasonNav();                                 // 🥂 New Year button takes over from Dec 26
     if (hubMode === "company" && load(KEYS.view, "games") === "meals") showView("planner");
@@ -11736,8 +11738,37 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     return d;
   }
   // 🕯️ Holiday Self-Care: gentle reminders, a calm plan and a permission slip
+  // 🌟 Jenn's original pages (Family side): gold frame, holly, gold star bullets
+  const ORIG_CSS = `.og{box-sizing:border-box;min-height:9.25in;border:1.5px solid #c9a24f;outline:.5px solid #c9a24f;outline-offset:-7px;border-radius:16px;padding:.35in .55in .3in;font-family:Georgia,serif;color:#33302a;position:relative}
+    .og .og-top{text-align:center;color:#c9a24f;font-size:13pt;letter-spacing:.5em;margin:0} .og .og-holly{font-size:20pt;letter-spacing:0} .og .og-lab{text-align:center;font:600 8pt sans-serif;letter-spacing:.35em;text-transform:uppercase;color:#b8913f;margin:14px 0 4px}
+    .og h1{text-align:center;font:400 30pt/1.15 Georgia,serif!important;color:#1e4a33;margin:0!important} .og .og-sub{text-align:center;font:italic 12.5pt Georgia,serif;color:#444;margin:6px 0 4px}
+    .og .og-div{text-align:center;color:#c9a24f;margin:4px 0 18px} .og .og-div span{display:inline-block;width:1.3in;border-top:1px solid #c9a24f;vertical-align:middle;margin:0 10px}
+    .og .tip{display:grid;grid-template-columns:34px 1fr;gap:6px;margin:0 0 16px} .og .tip i{font-style:normal;color:#c9a24f;font-size:21pt;line-height:1} .og .tip b{display:block;font:600 16pt/1.2 Georgia,serif;color:#1e4a33;margin-bottom:3px} .og .tip span{font:11pt/1.5 sans-serif;color:#444}
+    .og .og-close{border:1px solid #c9a24f;border-radius:12px;width:4.6in;margin:22px auto 0;padding:12px;text-align:center;font:italic 13pt/1.45 Georgia,serif;color:#1e4a33;position:relative}
+    .og .og-close:before,.og .og-close:after{content:"★";color:#c9a24f;position:absolute;top:50%;transform:translateY(-50%);font-style:normal;font-size:10pt} .og .og-close:before{left:-6px} .og .og-close:after{right:-6px}`;
+  function origPage(lab, title, sub, tips, close) {
+    return `<div class="og"><p class="og-top">★ ★ <span class="og-holly">🌿</span> ★ ★</p><p class="og-lab">${lab}</p><h1>${title}</h1><p class="og-sub">${sub}</p><p class="og-div"><span></span>★<span></span></p>
+      ${tips.map(([h, t]) => `<div class="tip"><i>★</i><div><b>${h}</b><span>${t}</span></div></div>`).join("")}<div class="og-close">${close}</div></div>`;
+  }
+  function origSelfCare() {
+    return { title: "Holiday Self-Care", css: ORIG_CSS + " .og h1{font-size:36pt!important} .og .og-sub{font-size:13.5pt} .og .og-div{margin:8px 0 34px} .og .tip{margin:0 0 34px} .og .tip b{font-size:18.5pt} .og .tip span{font-size:12.5pt} .og .og-close{margin-top:40px;font-size:14pt}", margin: 0.45, file: "Holiday-Self-Care", html: origPage("A gentle reminder", "Holiday Self-Care", "Because you deserve a merry season too", [
+      ["Breathe before you begin", "Take three slow breaths before a busy task or a full room."], ["Say no with love", "You don't have to do it all. Protect a few quiet evenings."],
+      ["Keep your basics", "Water, sleep and a proper meal make every day a little easier."], ["Step outside", "Ten minutes of fresh air and winter light can lift your whole mood."],
+      ["Let it be enough", "Imperfect is still magical. The people matter more than the plans."]], "Be as kind to yourself as you are<br>to everyone you love.") };
+  }
+  function origSurvival() {
+    return { title: "Advanced Family & Social Survival", css: ORIG_CSS + " .og .og-div{margin:6px 0 24px} .og .tip{margin:0 0 15px} .og h1{font-size:26pt!important} .og .tip b{font-size:17pt} .og .tip span{font-size:11.5pt} .og .og-close{margin-top:28px}", margin: 0.45, file: "Advanced-Family-Social-Survival", html: origPage("A holiday survival guide", "Advanced Family &amp; Social Survival", "For when the eggnog runs out before the patience does", [
+      ["Establish a Secret Escape Signal", "Agree on a codeword or a frantic eye-twitch with your partner to instantly trigger a fake “plumbing emergency” at family gatherings."],
+      ["Mute the Notification Avalanche", "Silence any group chat containing more than four relatives discussing the logistics of a potluck."],
+      ["Nod and Smile in Neutral", "Practice your best blank customer-service face for when an aunt comments on your career, hair, or relationship status."],
+      ["Redefine Festive Baking", "Buy a box of bakery cookies, transfer them to a plate, dust them with powdered sugar, and look exhausted when you serve them."],
+      ["The “Looking for an Ingredient” Strategy", "Stare deeply into the back of the pantry or freezer for five full minutes, pretending to look for nutmeg, just to enjoy the cold silence."],
+      ["The “Irish Goodbye” Masterclass", "Slip out of the family gathering while everyone is distracted by a fierce board game argument. Send a text from your couch two hours later: “So sorry, got swept away by the Christmas magic!”"]],
+      "Stay merry. Stay hydrated.<br>Always know where the exits are.") };
+  }
   function selfCareDoc() {
     const O = hubMode === "company";
+    if (!O) return origSelfCare();
     const R = [["🌬️", "Breathe before you rush", "When the to-do list gets loud, stop for three slow breaths. The cookies can wait 30 seconds."],
       ["🎁", "Good enough is wonderful", "Nobody remembers if the bows matched. They remember that you were there and you laughed."],
       ["🙅", "No is a full sentence", "You don't have to go to every party or bake for every event. Choose the ones that light you up."],
@@ -11761,6 +11792,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   // 😅 the Holiday Survival Guide (Family) / Office Party Survival Guide (Office)
   function survivalDoc() {
     const O = hubMode === "company";
+    if (!O) return origSurvival();
     const G = O ? {
       title: "The Office Party Survival Guide", sub: "For surviving the most wonderful (and most awkward) time of the work year",
       kit: ["A name tag (even if everyone knows you)", "Breath mints", "Comfy shoes for the conga line", "A fully charged phone", "Your famous dip, labelled", "A polite reason to leave at 9", "A gift within the limit (really)", "Stain remover pen"],
