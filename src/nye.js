@@ -99,7 +99,7 @@
   // ---------- 🎉 party planner card ----------
   function renderNyeParty() {
     const m = mealById("nyeparty"); if (!m) return;
-    const c = cfgFor("nyeparty"), p = mealSizes(m, c), active = mealPlan && mealPlan.id === "nyeparty";
+    const c = cfgFor("nyeparty"), p = mealSizes(m, c), active = !!planOf("nyeparty");
     const ps = pricedShop(m, p.f, p);
     $("#nyePartySum").innerHTML = `<b>${c.guests} guests</b> · starts ${mclock(dinnerAt(c))} · ${p.items.length} appetizers · about <b>${cad0(ps.total)}</b>` +
       (active ? `<br><span class="nye-on">✅ Party alarms are set</span>` : "");

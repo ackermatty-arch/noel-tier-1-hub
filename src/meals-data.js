@@ -2518,6 +2518,16 @@ window.NOEL_MEALS = (function () {
     return { g, f, mode, items, drinkItems, total, each, toMidnight, pies: 1, dishes: 1,
       partySummary: `🥂 <b>${food.length} appetizers</b> · about <b>${total} bites</b> (${each} of each)${drinks.length ? " · " + drinks.join(", ") : ""}<br><small>${mode === "meal" ? "Appetizers are the meal: about 12 bites per guest through the night." : "Light bites before dinner: about 5 per guest."}${toMidnight ? ` Midnight is ${Math.floor(toMidnight / 60)}h${toMidnight % 60 ? " " + (toMidnight % 60) + "m" : ""} after the party starts.` : ""}</small>` };
   }
+  // 🕯️ CHRISTMAS EVE: a cozy appetizer night (same appetizer engine, no midnight countdown)
+  function eveDate() { const now = new Date(); let y = now.getFullYear(); if (now > new Date(y, 11, 24, 23, 59)) y++; return `${y}-12-24`; }
+  const EVE_DEFAULT = ["Charcuterie Board", "Baked Brie", "Slow Cooker Meatballs", "Pigs in a Blanket", "Shrimp Cocktail", "Cookie Platter", "Sparkling Punch"];
+  function evePartyPlan(guests, c = {}) {
+    const p = nyePartyPlan(guests, Object.assign({}, c, { picks: c.picks && c.picks.length ? c.picks : EVE_DEFAULT }));
+    const food = p.items.length, drinks = p.drinkItems.map(i => i.name);
+    p.toMidnight = null;
+    p.partySummary = `🕯️ <b>${food} appetizers</b> · about <b>${p.total} bites</b> (${p.each} of each)${drinks.length ? " · " + drinks.join(", ") : ""}<br><small>${p.mode === "meal" ? "Appetizers are the meal: about 12 bites per guest through the evening." : "Light bites before dinner: about 5 per guest."}</small>`;
+    return p;
+  }
   const nyeparty = {
     id: "nyeparty", tab: "nye", party: true,
     name: "New Year's Eve Party", icon: "🥂",
@@ -2581,6 +2591,55 @@ window.NOEL_MEALS = (function () {
       return groups;
     }
   };
+  const eveparty = Object.assign({}, nyeparty, {
+    id: "eveparty", tab: "eve", party: true, eve: true,
+    name: "Christmas Eve Appetizer Night", icon: "🕯️",
+    blurb: "Cozy appetizers, Christmas pajamas, a movie and cookies for Santa.",
+    defaultTime: "17:30", defaultDate: eveDate,
+    menu: [["Your Christmas Eve menu", ["Pick your appetizers above"]]],
+    menuFor(p) {
+      return [["Appetizers", p.items.map(i => `${i.name} (${i.pieces} pieces)`)], ["Drinks", p.drinkItems.map(i => i.name).concat(["Hot cocoa bar", "Eggnog or mulled wine for the grown-ups"])], ["For Santa", ["Milk and cookies", "A carrot for the reindeer"]]];
+    },
+    drinks: [
+      ["Cozy drinks", "Set up a hot cocoa bar: cocoa, mini marshmallows, whipped cream and candy canes to stir."],
+      ["For the grown-ups", "Eggnog, mulled wine or a sparkling punch. Keep water and juice out for everyone."]
+    ],
+    timeline(p) {
+      const out = [], add = (m, icon, text, alarm = true) => out.push({ m, icon, text, alarm });
+      const tag = t => p.items.filter(i => i.row[4].split(" ").includes(t)).map(i => i.name);
+      const fondue = n => /Fondue/.test(n), hasP = n => p.items.some(i => i.name === n);
+      const warm = tag("warm").filter(n => !fondue(n) && n !== "Slow Cooker Meatballs"), cold = p.items.filter(i => !i.row[4].includes("warm") && !i.row[4].includes("sweet")).map(i => i.name), sweet = tag("sweet");
+      add(-180, "🧊", "Put the drinks in the fridge to chill");
+      if (hasP("Slow Cooker Meatballs")) add(-180, "🍝", "Slow cooker meatballs on low (3 hours)");
+      if (cold.length) add(-90, "🥗", "Prep the cold bites: " + cold.join(", "));
+      if (warm.length) add(-40, "🔥", "Oven on for the warm bites: " + warm.join(", "));
+      add(-15, "🍽️", "Set out the platters, napkins and drinks. Put on the Christmas music");
+      if (hasP("Cheese Fondue")) add(-10, "🫕", "Melt the cheese fondue and keep it warm over a low flame. Set out the dippers");
+      add(0, "🕯️", "Christmas Eve begins! Welcome everyone");
+      add(60, "🎁", "Christmas Eve gift: everyone opens one present (new pajamas are a classic)");
+      add(90, "🎬", "Christmas movie time. Make the hot cocoa");
+      const sweetOut = sweet.filter(n => !fondue(n));
+      if (sweetOut.length) add(120, "🍪", "Set out the sweet bites: " + sweetOut.join(", "));
+      if (hasP("Chocolate Fondue")) add(115, "🍫", "Melt the chocolate fondue and set out the fruit, marshmallows and pretzels");
+      add(165, "🎅", "Check where Santa is on the Santa Tracker");
+      add(180, "📖", "Read 'Twas the Night Before Christmas together");
+      add(190, "🥛", "Set out milk and cookies for Santa, and a carrot for the reindeer");
+      add(200, "🛏️", "Little ones to bed. Santa only comes when everyone is asleep!");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) {
+      const make = p.items.filter(i => i.row[4].includes("make")).map(i => i.name);
+      return [[2, 11, "🛒", "Shop for Christmas Eve today (the list is in the Meal Planner)"]].concat(make.length ? [[1, 11, "📋", "Make ahead today: " + make.join(", ")]] : []);
+    },
+    shop(f, p) {
+      const groups = p.items.concat(p.drinkItems).map(i => [`${i.row[0]} ${i.name}${i.pieces ? ` (${i.pieces} pieces)` : ""}`,
+        (APP_SHOP[i.name] || [0, []])[1].map(([n, price]) => [price == null ? "" : String(i.batches), n, price == null ? null : price * i.batches])]);
+      const tins = Math.max(1, Math.ceil(p.g / 10));
+      groups.push(["☕ Hot cocoa bar", [[String(tins), `tin${tins > 1 ? "s" : ""} hot chocolate mix`, tins * 6], ["1", "bag mini marshmallows", 3], ["1", "can whipped cream", 4], ["1", "box candy canes", 3]]]);
+      groups.push(["🎅 For Santa", [["", "milk and cookies (from your cookie platter is perfect)", null], ["1", "carrot for the reindeer", null]]]);
+      return groups;
+    }
+  });
   // add-on sizes: 1–5 people
   const addonPlan = base => guests => { const g = Math.min(5, Math.max(1, guests | 0)); return { g, f: g / base, pies: 1, dishes: 1, batches: 1 }; };
 
@@ -2611,7 +2670,7 @@ window.NOEL_MEALS = (function () {
 
   const placeholder = (id, tab, name, icon, blurb) => ({ id, tab, name, icon, blurb, soon: true });
   return {
-    tabs: [["traditional", "Traditional"], ["elegant", "Elegant"], ["vegan", "Vegan"], ["dietary", "Dietary"]],
+    tabs: [["eve", "🕯️ Christmas Eve"], ["traditional", "Traditional"], ["elegant", "Elegant"], ["vegan", "Vegan"], ["dietary", "Dietary"]],
     meals: [
       turkey,
       primerib,
@@ -2624,8 +2683,10 @@ window.NOEL_MEALS = (function () {
       vgravyAddon,
       mousse,
       pecanAddon,
-      nyeparty
+      nyeparty,
+      eveparty
     ],
+    eveDate,
     // approximate cost of one appetizer for a party plan (if it's not picked yet: the cost of adding it)
     appCost(name, p) {
       const sh = APP_SHOP[name]; if (!sh) return 0;
@@ -2635,7 +2696,7 @@ window.NOEL_MEALS = (function () {
       const each = picked ? picked.pieces : Math.ceil(p.total / (p.items.length + 1));
       return perBatch * Math.max(1, Math.ceil(each / batch - 1e-9));
     },
-    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8), nyeparty: nyePartyPlan },
+    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8), nyeparty: nyePartyPlan, eveparty: evePartyPlan },
     doneness: DONENESS,
     appShop: APP_SHOP, drinkApps: DRINK_APPS,   // 🏢 the office food planner uses the same appetizer shopping data
     frac, hm, fmtNum

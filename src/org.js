@@ -77,9 +77,10 @@
     const out = org.events.map(e => Object.assign({ mine: true }, e));
     const add = (date, icon, title, time) => out.push({ date, icon, title, time: time || "", auto: true });
     const D = hostDinner(), dd = new Date(D);
-    add(ymd(dd), "🍽️", mealPlan && !mealPlan.party ? mealPlan.name : "Christmas dinner", `${String(dd.getHours()).padStart(2, "0")}:${String(dd.getMinutes()).padStart(2, "0")}`);
+    const mdp = mainDinnerPlan();
+    add(ymd(dd), "🍽️", mdp ? mdp.name : "Christmas dinner", `${String(dd.getHours()).padStart(2, "0")}:${String(dd.getMinutes()).padStart(2, "0")}`);
     add(`${orgYear()}-12-25`, "🎄", "Christmas Day"); add(`${orgYear()}-12-31`, "🥂", "New Year's Eve");
-    if (mealPlan && mealPlan.party) { const p = new Date(mealPlan.at); add(ymd(p), "🎉", "New Year's Eve party", `${String(p.getHours()).padStart(2, "0")}:${String(p.getMinutes()).padStart(2, "0")}`); }
+    mealPlans.filter(pl => pl !== mdp).forEach(pl => { { const p = new Date(pl.at); add(ymd(p), pl.svc ? "⛪" : pl.eve ? "🕯️" : pl.party ? "🎉" : "🍽️", pl.svc ? pl.name : pl.party && !pl.eve ? "New Year's Eve party" : pl.name, `${String(p.getHours()).padStart(2, "0")}:${String(p.getMinutes()).padStart(2, "0")}`); } });
     host.guests.forEach(g => { if (g.arrive) { const t = new Date(g.arrive); add(ymd(t), g.pickup ? "🚗" : "🚪", (g.pickup ? "Pick up " : "") + g.name + (g.pickup ? "" : " arrive"), g.arrive.slice(11, 16)); } });
     const cleanDays = {}; HOST_CLEAN.forEach(([id, days]) => { if (!host.clean[id] && days) { const k = ymd(new Date(atDay(D, days, 10))); cleanDays[k] = (cleanDays[k] || 0) + 1; } });
     Object.entries(cleanDays).forEach(([k, n]) => add(k, "🧽", `Cleaning day: ${n} ${n === 1 ? "task" : "tasks"} on your Hosting list`));

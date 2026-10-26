@@ -44,7 +44,7 @@
   ];
   const saveHost = () => save("hosting", host);
   const hostDinner = () => {   // the Christmas dinner time the reminders are built around
-    if (mealPlan && !mealPlan.party) return mealPlan.at;
+    const mp = mainDinnerPlan(); if (mp) return mp.at;
     const now = new Date(); let y = now.getFullYear(); if (now > new Date(y, 11, 25, 23)) y++;
     return new Date(y, 11, 25, 17, 0).getTime();
   };
