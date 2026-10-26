@@ -98,7 +98,15 @@
     if (m.soon) { toast("🍽️ This menu is coming soon"); return; }
     mealSel.id = id; save("mealSel", mealSel); renderMeals(); window.scrollTo({ top: 0 });
   }
+  // 🌱 the dietary dishes card at the bottom: open or print any one on its own
+  function renderDietBottom() {
+    $("#mealDietList").innerHTML = MD.meals.filter(a => a.addon).map(a => { const g = cfgFor(a.id).guests;
+      return `<div class="diet-row"><div class="diet-head"><span class="meal-ico">${a.icon}</span><span><b>${esc(a.name)}</b><small>${esc(a.tags || "")}</small></span></div>
+        <div class="diet-acts"><div class="stepper sm" title="People"><button type="button" data-dg="${a.id}:-1" aria-label="Fewer people">−</button><output aria-label="People">${g}</output><button type="button" data-dg="${a.id}:1" aria-label="More people">+</button></div>
+        <button type="button" class="btn btn-ghost" data-dopen="${a.id}">📖 Open</button><button type="button" class="btn btn-green" data-dprint="${a.id}">🖨️ Print</button></div></div>`; }).join("");
+  }
   function renderMeals() {
+    renderDietBottom();
     const m = mealSel.id && mealById(mealSel.id);
     $("#mealHome").hidden = !!m; $("#mealDetail").hidden = !m;
     if (!m || m.soon) { mealSel.id = null; $("#mealHome").hidden = false; $("#mealDetail").hidden = true; renderMealHome(); }
@@ -254,7 +262,7 @@
   function printMeal(m) {
     const c = cfgFor(m.id), p = mealSizes(m, c), f = p.f, steps = buildSteps(m, c);
     let lastDay = "";
-    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} guests · dinner ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
+    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · dinner ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
       <h2>Timeline</h2><table class="pm-tl">${steps.map(s => { const d = dayName(s.t), h = d !== lastDay ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; lastDay = d; return h + `<tr><td>${s.ahead ? "All day" : mclock(s.t)}</td><td>☐ ${esc(s.text)}</td></tr>`; }).join("")}</table>
       <h2>Shopping list</h2>${(ps => `<p><b>Estimated total: ${cad0(ps.total)} CAD</b> (about ${cad(ps.total / c.guests)} per guest)</p>` + ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join(""))(pricedShop(m, f, p))}
       <h2>Menu</h2>${allMenu(m).map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v.join(", "))}</p>`).join("")}
@@ -296,6 +304,10 @@
     const t = e.target;
     const tab = t.closest("[data-mtab]"); if (tab) { mealSel.tab = tab.dataset.mtab; save("mealSel", mealSel); renderMealHome(); return; }
     const card = t.closest("[data-meal]"); if (card) { openMeal(card.dataset.meal); return; }
+    const dg = t.closest("[data-dg]");
+    if (dg) { const [aid, d] = dg.dataset.dg.split(":"), ac = cfgFor(aid); ac.guests = Math.min(5, Math.max(1, ac.guests + +d)); mealCfg[aid] = ac; save("mealCfg", mealCfg); renderMeals(); return; }
+    const dop = t.closest("[data-dopen]"); if (dop) { openMeal(dop.dataset.dopen); return; }
+    const dpr = t.closest("[data-dprint]"); if (dpr) { printMeal(mealById(dpr.dataset.dprint)); return; }
     if (t.closest("#mealBack")) { mealSel.id = null; save("mealSel", mealSel); renderMeals(); return; }
     const m = mealSel.id && mealById(mealSel.id); if (!m) return;
     const ag = t.closest("[data-ag]");

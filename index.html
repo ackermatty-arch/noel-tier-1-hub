@@ -1190,6 +1190,15 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .addon-row label { display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 700; color: var(--pine-dark); }
 .addon-row input, .addon-join input { width: 20px; height: 20px; accent-color: var(--pine); }
 .stepper.sm button { width: 36px; height: 34px; font-size: 18px; } .stepper.sm output { min-width: 34px; font-size: 16px; }
+.diet-row { border-top: 1px solid var(--line); padding: 12px 0; }
+.diet-row:first-child { border-top: 0; }
+.diet-head { display: flex; align-items: flex-start; gap: 10px; }
+.diet-head .meal-ico { font-size: 28px; line-height: 1; }
+.diet-head b { display: block; font-family: var(--font-display); font-size: 16.5px; color: var(--pine-dark); line-height: 1.3; }
+.diet-head small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.diet-acts { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.diet-acts .btn { padding: 8px 12px; min-height: 0; font-size: 13.5px; }
+.diet-acts .meal-lab { margin: 0 4px 0 0; }
 #printArea { display: none; }
 @media print {
   body > *:not(#printArea) { display: none !important; }
@@ -1583,7 +1592,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
     <h2 class="view-title" id="mealsTitle">Meal Planner</h2>
     <p class="view-intro">Pick a dinner, choose how many guests and when you'll eat. Noël sizes every recipe, writes your shopping list and sets every alarm.</p>
     <div class="meal-master" id="mealMaster" hidden></div>
-    <a href="#mealOwn" class="meal-skip" id="mealSkip">Not needed? Set your own dinner timers ↓</a>
+    <a href="#mealOwn" class="meal-skip" id="mealSkip">Making your own dinner? Timers &amp; dietary dishes ↓</a>
     <div id="mealHome">
       <div class="seg seg4 sub-tabs" id="mealTabs" role="group" aria-label="Meal type"></div>
       <p class="meal-diet-note" id="mealDietNote" hidden>🌱 These vegan, gluten-free, dairy-free dishes are <b>add-ons</b> for 1–5 people. Add one to any dinner and it joins that meal's timeline, alarms and shopping list, or use it on its own.</p>
@@ -1614,6 +1623,11 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
         <button class="btn btn-green btn-block" type="submit">▶ Start timer</button>
       </form>
       <ul class="meal-own-list" id="mealOwnList"></ul>
+    </div>
+    <div class="card meal-own" id="mealDietBottom">
+      <h3>🌱 Dietary dishes &amp; substitutes</h3>
+      <p class="review-sub">Making your own dinner, or have guests who are vegan, gluten-free or dairy-free? These dishes work on their own for 1–5 people. Open one for its recipe, shopping list and timers, or print it straight away.</p>
+      <div id="mealDietList"></div>
     </div>
   </section>
 
@@ -8386,7 +8400,15 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (m.soon) { toast("🍽️ This menu is coming soon"); return; }
     mealSel.id = id; save("mealSel", mealSel); renderMeals(); window.scrollTo({ top: 0 });
   }
+  // 🌱 the dietary dishes card at the bottom: open or print any one on its own
+  function renderDietBottom() {
+    $("#mealDietList").innerHTML = MD.meals.filter(a => a.addon).map(a => { const g = cfgFor(a.id).guests;
+      return `<div class="diet-row"><div class="diet-head"><span class="meal-ico">${a.icon}</span><span><b>${esc(a.name)}</b><small>${esc(a.tags || "")}</small></span></div>
+        <div class="diet-acts"><div class="stepper sm" title="People"><button type="button" data-dg="${a.id}:-1" aria-label="Fewer people">−</button><output aria-label="People">${g}</output><button type="button" data-dg="${a.id}:1" aria-label="More people">+</button></div>
+        <button type="button" class="btn btn-ghost" data-dopen="${a.id}">📖 Open</button><button type="button" class="btn btn-green" data-dprint="${a.id}">🖨️ Print</button></div></div>`; }).join("");
+  }
   function renderMeals() {
+    renderDietBottom();
     const m = mealSel.id && mealById(mealSel.id);
     $("#mealHome").hidden = !!m; $("#mealDetail").hidden = !m;
     if (!m || m.soon) { mealSel.id = null; $("#mealHome").hidden = false; $("#mealDetail").hidden = true; renderMealHome(); }
@@ -8542,7 +8564,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function printMeal(m) {
     const c = cfgFor(m.id), p = mealSizes(m, c), f = p.f, steps = buildSteps(m, c);
     let lastDay = "";
-    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} guests · dinner ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
+    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · dinner ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
       <h2>Timeline</h2><table class="pm-tl">${steps.map(s => { const d = dayName(s.t), h = d !== lastDay ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; lastDay = d; return h + `<tr><td>${s.ahead ? "All day" : mclock(s.t)}</td><td>☐ ${esc(s.text)}</td></tr>`; }).join("")}</table>
       <h2>Shopping list</h2>${(ps => `<p><b>Estimated total: ${cad0(ps.total)} CAD</b> (about ${cad(ps.total / c.guests)} per guest)</p>` + ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join(""))(pricedShop(m, f, p))}
       <h2>Menu</h2>${allMenu(m).map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v.join(", "))}</p>`).join("")}
@@ -8584,6 +8606,10 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const t = e.target;
     const tab = t.closest("[data-mtab]"); if (tab) { mealSel.tab = tab.dataset.mtab; save("mealSel", mealSel); renderMealHome(); return; }
     const card = t.closest("[data-meal]"); if (card) { openMeal(card.dataset.meal); return; }
+    const dg = t.closest("[data-dg]");
+    if (dg) { const [aid, d] = dg.dataset.dg.split(":"), ac = cfgFor(aid); ac.guests = Math.min(5, Math.max(1, ac.guests + +d)); mealCfg[aid] = ac; save("mealCfg", mealCfg); renderMeals(); return; }
+    const dop = t.closest("[data-dopen]"); if (dop) { openMeal(dop.dataset.dopen); return; }
+    const dpr = t.closest("[data-dprint]"); if (dpr) { printMeal(mealById(dpr.dataset.dprint)); return; }
     if (t.closest("#mealBack")) { mealSel.id = null; save("mealSel", mealSel); renderMeals(); return; }
     const m = mealSel.id && mealById(mealSel.id); if (!m) return;
     const ag = t.closest("[data-ag]");
