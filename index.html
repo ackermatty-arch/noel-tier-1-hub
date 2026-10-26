@@ -1509,6 +1509,71 @@ body.space-switching main { opacity: .3; }
   #printArea summary { font-weight: bold; font-size: 12.5pt; list-style: none; } #printArea .r-course { display: block; font-size: 8.5pt; letter-spacing: .15em; text-transform: uppercase; color: #8a6d3b; }
   #printArea .r-steps { padding-left: 18px; } #printArea .pm-foot { text-align: center; color: #888; font-size: 8.5pt; margin-top: 20px; }
 }
+
+/* ============================================================
+   ✨ CLASSIC ELEGANT THEME (both Family and Office)
+   Deep pine, soft antique gold, warm cream. Hairline gold borders,
+   serif titles, flat buttons. ✏️ Change the look here.
+   ============================================================ */
+:root {
+  --pine: #1F4033; --pine-dark: #17332A; --pine-deep: #102419;
+  --gold: #B8935A; --gold-light: #E3CFA0; --gold-soft: #D9BF8C;
+  --cream: #FAF7F0; --card: #FFFDF8; --ink: #2B2F2B; --muted: #7C7F76; --line: #E8DFCC;
+  --red: #8E2A2F; --red-dark: #6E1F24;
+  --shadow: 0 2px 12px rgba(16, 36, 25, 0.06); --shadow-lg: 0 10px 30px rgba(16, 36, 25, 0.16);
+  --radius: 14px;
+}
+body { background: var(--cream); }
+/* header: one calm pine bar with a hairline of gold */
+.app-header, body.space-office .app-header { background: var(--pine-deep); border-bottom: 1px solid var(--gold); box-shadow: none; }
+.brand-logo { background: transparent; border: 1px solid var(--gold); border-radius: 10px; }
+.brand-title { letter-spacing: .1px; color: #FBF6EA; }
+.brand-sub { color: var(--gold-soft); font-weight: 600; letter-spacing: 1.6px; font-size: 10px; }
+.countdown-chip { background: transparent; border: 1px solid rgba(184,147,90,.6); border-radius: 10px; }
+.countdown-chip strong { color: var(--gold-light); font-family: var(--font-display); font-weight: 600; }
+.music-btn { background: transparent; border: 1px solid rgba(184,147,90,.55); border-radius: 10px; }
+.space-bar { background: rgba(255,255,255,.06); border: 1px solid rgba(184,147,90,.35); border-radius: 12px; }
+.space-bar button[aria-pressed="true"] { background: var(--gold); color: var(--pine-deep); }
+/* titles: elegant serif with a thin gold ✦ divider */
+.view-title { color: var(--pine-dark); font-weight: 600; letter-spacing: .2px; }
+.view-title::after { content: "✦"; display: block; width: 120px; margin: 8px 0 2px; font-size: 10px; line-height: 1; text-align: center; color: var(--gold);
+  background: linear-gradient(var(--gold-soft), var(--gold-soft)) left center / 50px 1px no-repeat, linear-gradient(var(--gold-soft), var(--gold-soft)) right center / 50px 1px no-repeat; }
+.view-intro { color: var(--muted); }
+/* cards: cream with a hairline gold edge */
+.card { background: var(--card); border: 1px solid rgba(184,147,90,.32); box-shadow: var(--shadow); }
+.card h3, .meal-title { color: var(--pine-dark); }
+/* buttons: flat pine with gold lettering; gold and outlined for the rest */
+.btn { border-radius: 12px; letter-spacing: .2px; }
+.btn-red, .btn-green { background: var(--pine); color: #F3E6C8; box-shadow: none; border: 1px solid var(--pine); }
+.btn-red:active, .btn-green:active { background: var(--pine-dark); }
+.btn-gold { background: var(--gold); color: var(--pine-deep); box-shadow: none; border: 1px solid var(--gold); }
+.btn-ghost { background: transparent; color: var(--pine); border: 1px solid rgba(184,147,90,.6); }
+.meal-back { background: var(--pine); color: #F3E6C8; box-shadow: none; }
+/* chips and switches */
+.chip { border: 1px solid rgba(184,147,90,.45); background: var(--card); color: var(--pine); }
+.chip.on, .chip[aria-pressed="true"] { background: var(--pine); border-color: var(--pine); color: #F3E6C8; }
+.fill-chip { background: #F6F0E2; }
+.seg { background: #F2ECDF; border: 1px solid rgba(184,147,90,.25); }
+.seg button[aria-pressed="true"] { background: var(--pine); color: #F3E6C8; box-shadow: none; }
+.input { border-color: var(--line); background: #FFFDF8; }
+.input:focus { border-color: var(--gold); }
+/* bottom bar */
+.bottom-nav { background: var(--pine-deep); border-top: 1px solid var(--gold); box-shadow: none; }
+.nav-btn.active { color: var(--gold-light); }
+.nav-btn.active::before { background: var(--gold); }
+.toast { background: var(--pine-deep); border: 1px solid var(--gold); }
+.near-card { background: #F6F2E8; border-color: rgba(184,147,90,.35); }
+.near-btn { border-color: rgba(184,147,90,.4); background: var(--card); }
+.near-t, .night-row b { color: var(--pine-dark); }
+/* banners and game cards: all pine with a gold hairline (Jenn's artwork goes here later) */
+.game-card.red, .game-card.green, .host-banner, .office-banner, .acts-banner, .st-banner, .org-banner, .nye-banner, .party-card {
+  background: linear-gradient(150deg, #24493A 0%, var(--pine-dark) 55%, var(--pine-deep) 100%); border: 1px solid rgba(184,147,90,.7); box-shadow: var(--shadow); }
+.game-card { box-shadow: var(--shadow); }
+.sheet-head { background: var(--pine-deep); border-bottom: 1px solid var(--gold); }
+.gate-logo { background: transparent; border: 1px solid var(--gold); box-shadow: none; }
+.progress-card, .budget-card, .meal-master { background: var(--pine-deep); border: 1px solid rgba(184,147,90,.6); }
+.brand-sub { letter-spacing: .2px; font-size: 9px; font-weight: 600; }
+
 </style>
 </head>
 <body>
