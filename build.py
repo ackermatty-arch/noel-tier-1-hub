@@ -32,5 +32,8 @@ s = s[:a] + "  /* @themes-start */\n" + code + s[b:]
 code = open("src/budget.js").read()
 a, b = s.index("  /* @budget-start */"), s.index("  /* @budget-end */\n") + len("  /* @budget-end */\n")
 s = s[:a] + "  /* @budget-start */\n" + code + s[b:]
+code = open("src/track.js").read()
+a, b = s.index("  /* @track-start */"), s.index("  /* @track-end */\n") + len("  /* @track-end */\n")
+s = s[:a] + "  /* @track-start */\n" + code + s[b:]
 open("index.html", "w").write(s)
 print("index.html updated")
