@@ -2544,12 +2544,14 @@ window.NOEL_MEALS = (function () {
     timeline(p) {
       const out = [], add = (m, icon, text, alarm = true) => out.push({ m, icon, text, alarm });
       const tag = t => p.items.filter(i => i.row[4].split(" ").includes(t)).map(i => i.name);
-      const warm = tag("warm"), cold = p.items.filter(i => !i.row[4].includes("warm") && !i.row[4].includes("sweet")).map(i => i.name), sweet = tag("sweet");
+      const fondue = n => /Fondue/.test(n), hasP = n => p.items.some(i => i.name === n);
+      const warm = tag("warm").filter(n => !fondue(n) && n !== "Slow Cooker Meatballs"), cold = p.items.filter(i => !i.row[4].includes("warm") && !i.row[4].includes("sweet")).map(i => i.name), sweet = tag("sweet");
       add(-180, "🧊", "Put the bubbly, juices and sparkling water in the fridge to chill");
       if (p.items.some(i => i.name === "Slow Cooker Meatballs")) add(-180, "🍝", "Slow cooker meatballs on low (3 hours)");
       if (cold.length) add(-90, "🥗", "Prep the cold bites: " + cold.join(", "));
       if (warm.length) add(-40, "🔥", "Oven on for the warm bites: " + warm.join(", "));
       add(-15, "🍽️", "Set out the platters, napkins and drinks");
+      if (hasP("Cheese Fondue")) add(-10, "🫕", "Melt the cheese fondue and keep it warm over a low flame. Set out the dippers");
       add(0, "🎉", "Party time! Welcome your guests");
       add(60, "🎲", "Party games! Open New Year's Party Games on the New Year screen");
       if (warm.length) add(120, "🔥", "Refresh the platters with a second round of warm bites");
@@ -2557,7 +2559,9 @@ window.NOEL_MEALS = (function () {
         const M = p.toMidnight;
         add(M - 60, "📰", "Play the Year-in-Review quiz together");
         add(M - 45, "💫", "Everyone seals a wish for next year in the Wishes Jar");
-        if (sweet.length) add(M - 30, "🍓", "Set out the sweet bites: " + sweet.join(", "));
+        const sweetOut = sweet.filter(n => !fondue(n));
+        if (sweetOut.length) add(M - 30, "🍓", "Set out the sweet bites: " + sweetOut.join(", "));
+        if (hasP("Chocolate Fondue")) add(M - 35, "🍫", "Melt the chocolate fondue and set out the fruit, marshmallows and pretzels");
         add(M - 15, "🥂", "Pour the bubbly and sparkling juice. Hand out noisemakers");
         add(M - 2, "🎆", "Open the big countdown on the New Year screen!");
         add(M, "🎆", "HAPPY NEW YEAR!");
