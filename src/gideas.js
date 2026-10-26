@@ -117,7 +117,19 @@
       ["Phone grip stand", "Handy for selfies and video calls.", 8, 15, "tech", 0],
       ["Mini LED headlamp", "Perfect for camping, reading or power outages.", 10, 15, "outdoors", 0],
       ["Flower and herb seed packets", "A promise of spring in their stocking.", 6, 12, "outdoors", 1],
-      ["Chocolate orange", "The stocking-toe classic.", 5, 10, "kitchen", 0]
+      ["Chocolate orange", "The stocking-toe classic.", 5, 10, "kitchen", 0],
+      ["Mini putty or slime tin", "Squishy, stretchy fidget fun for kids.", 5, 10, "creative", 0],
+      ["Stickers and temporary tattoos", "Cheap, cheerful and always a hit with little ones.", 4, 10, "creative", 0],
+      ["Glow sticks and bracelets", "Instant fun on Christmas night.", 4, 8, "games", 0],
+      ["Magic trick card set", "Learn a trick and show the whole family.", 8, 15, "games", 0],
+      ["Mini jigsaw puzzle", "A small puzzle for a quiet Boxing Day.", 8, 15, "games", 0],
+      ["Fun toothbrush and toothpaste", "A sneaky, useful classic (after all that candy!).", 4, 8, "cozy", 0],
+      ["Hair clips and scrunchies", "Pretty, practical and tiny enough to fit.", 6, 12, "cozy", 0],
+      ["Candy canes and mini chocolates", "Fill the gaps and the toe of the stocking.", 3, 8, "kitchen", 0],
+      ["Gourmet coffee or tea sampler", "A cozy treat for the grown-ups.", 8, 15, "kitchen cozy", 0],
+      ["Small hot sauce or spice blend", "A fun foodie surprise for adults.", 8, 15, "kitchen", 0],
+      ["Keychain flashlight or multi-tool", "Handy every day of the year.", 8, 15, "outdoors tech", 0],
+      ["Store or coffee shop gift card", "Always the right size and always welcome.", 10, 25, "", 0]
     ],
     teachers: [
       ["Coffee shop gift card", "Fuel for the busiest weeks of the year.", 10, 25, "kitchen", 0],

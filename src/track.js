@@ -91,9 +91,11 @@
       : st.phase === "done" ? "Santa is home, resting. Merry Christmas!" : st.phase === "flying" ? `Live: Santa is over ${st.cur[0]}` : "Santa is in the sky right now!";
   }
   // "time for bed" alarms
-  const stReminders = () => { if (!stAlarm.on) return []; const y = stYear(), a = stArrive(stMyOff(), y); return [{ k: y + "b3", t: a - 3 * 3600000, text: "Santa is 3 hours away. Time to get ready for bed!" }, { k: y + "b1", t: a - 3600000, text: "Santa is 1 hour away! Everyone into bed, quick! 🛷" }]; };
-  function stSync() { if (NoelNative.isNative()) NoelNative.scheduleList(9000, 9010, stReminders().filter(r => r.t > Date.now()).map(r => ({ t: r.t, title: "🎅 " + r.text, body: "Noël Tier 1 Hub · Santa Tracker" }))); }
-  function stAlertItem(id) { if (!String(id).startsWith("st:")) return null; const r = stReminders().find(x => "st:" + x.k === id); return r ? { icon: "🎅", name: r.text } : null; }
+  // 🍫 surprise nudges: always on, never listed anywhere (a little helper the family discovers)
+  const stSurprise = () => { const y = stYear(); return [{ k: y + "treats", t: new Date(y, 11, 20, 10, 0).getTime(), text: "Don't forget chocolates and treats! 🍫 Stocking stuffers too!" }]; };
+  const stReminders = () => { const sp = stSurprise(); if (!stAlarm.on) return sp; const y = stYear(), a = stArrive(stMyOff(), y); return sp.concat([{ k: y + "b3", t: a - 3 * 3600000, text: "Santa is 3 hours away. Time to get ready for bed!" }, { k: y + "b1", t: a - 3600000, text: "Santa is 1 hour away! Everyone into bed, quick! 🛷" }]); };
+  function stSync() { if (NoelNative.isNative()) NoelNative.scheduleList(9000, 9010, stReminders().filter(r => r.t > Date.now()).map(r => ({ t: r.t, title: (r.k.endsWith("treats") ? "🍫 " : "🎅 ") + r.text, body: "Noël Tier 1 Hub · Santa Tracker" }))); }
+  function stAlertItem(id) { if (!String(id).startsWith("st:")) return null; const r = stReminders().find(x => "st:" + x.k === id); return r ? { icon: r.k.endsWith("treats") ? "🍫" : "🎅", name: r.text } : null; }
   setInterval(() => {
     stBanner();
     const now = Date.now(), due = stReminders().filter(r => !stAlarm.fired[r.k] && r.t <= now);

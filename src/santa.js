@@ -8,7 +8,7 @@
      ============================================================ */
   let santa2 = load("santaList", { pin: null, kids: [] });
   let santaOpen = false, santaTimer = null, santaSetFirst = "";
-  const santaGifts = () => santa2.kids.flatMap(k => k.gifts);
+  const santaGifts = () => santa2.kids.flatMap(k => k.gifts.concat((k.stock || []).map(x => ({ price: x.price, status: x.got ? "bought" : "idea" }))));   // 🧦 stocking stuffers count too
   async function santaHash(pin, saltB64) {
     const salt = Uint8Array.from(atob(saltB64), c => c.charCodeAt(0));
     const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveBits"]);
@@ -48,6 +48,7 @@
           return `<li class="gift-item ${s.key}" data-sgid="${g.id}"><button class="status-chip s-${s.key}" data-sact="status">${s.icon} ${s.label}</button>
             <span class="g-name">${esc(g.name)}${g.spot ? `<small class="santa-spot">📍 Hidden: ${esc(g.spot)}</small>` : ""}</span><span class="g-price">${money(+g.price || 0)}</span>
             <button class="icon-btn" data-sact="delgift" aria-label="Remove">✕</button></li>`; }).join("")}</ul>
+        ${stockHtml(k)}
         <form class="santa-add" data-skadd autocomplete="off">
           <input class="input" name="name" maxlength="60" placeholder="Gift from Santa" aria-label="Gift">
           <input class="input" name="price" type="number" inputmode="decimal" min="0" placeholder="$" aria-label="Price">
@@ -55,12 +56,26 @@
           <button class="btn btn-green" type="submit">Add</button>
         </form></div>`).join("")}
       <form class="card add-task santa-kid" id="santaKidForm" autocomplete="off">
-        <h3>➕ Add a child</h3>
-        <div class="santa-kid-row"><input class="input" name="kid" maxlength="30" placeholder="Child's name" aria-label="Child's name"><button class="btn btn-green" type="submit">Add</button></div>
+        <h3>➕ Add a child (or anyone with a stocking)</h3>
+        <div class="santa-kid-row"><input class="input" name="kid" maxlength="30" placeholder="Name" aria-label="Name"><button class="btn btn-green" type="submit">Add</button></div>
       </form>
       <button type="button" class="btn btn-ghost btn-block" id="santaChangePin">Change the Santa PIN</button>`;
   }
 
+  // 🧦 stocking stuffers for each person, with quick ideas
+  function stockHtml(k) {
+    const st = k.stock || [], tot = st.reduce((a, x) => a + (+x.price || 0), 0), have = new Set(st.map(x => x.name));
+    const ideas = (GIDEAS.stocking || []).filter(x => !have.has(x[0])), pick = ideas.slice((k.ideaAt || 0) % Math.max(1, ideas.length)).concat(ideas).slice(0, 4);
+    return `<div class="stock-box"><div class="stock-head"><b>🧦 Stocking</b><small>${st.length} ${st.length === 1 ? "item" : "items"} · ${money(tot)}</small></div>
+      <ul class="host-list">${st.map(x => `<li data-stk="${x.id}"><label class="${x.got ? "on" : ""}"><input type="checkbox" data-stgot ${x.got ? "checked" : ""}><span>${esc(x.name)}${+x.price ? ` · ${money(+x.price)}` : ""}</span></label><button type="button" class="icon-btn" data-sact="delstock" aria-label="Remove">✕</button></li>`).join("")}</ul>
+      <div class="apps-filters stock-ideas">${pick.map(x => `<button type="button" class="chip" data-stidea="${esc(x[0])}" data-stp="${Math.round((x[2] + x[3]) / 2)}">＋ ${esc(x[0])}</button>`).join("")}<button type="button" class="chip" data-sact="moreideas">↻ More ideas</button></div>
+      <form class="santa-add stock-add" data-stadd autocomplete="off"><input class="input" name="name" maxlength="50" placeholder="Stocking stuffer" aria-label="Stocking stuffer"><input class="input" name="price" type="number" inputmode="decimal" min="0" placeholder="$" aria-label="Price"><button class="btn btn-green" type="submit">Add</button></form></div>`;
+  }
+  $("#paneSanta").addEventListener("change", e => {
+    if (!santaOpen || e.target.dataset.stgot == null) return; santaPoke();
+    const k = santa2.kids.find(x => x.id === e.target.closest("[data-skid]").dataset.skid), it = k && (k.stock || []).find(x => x.id === e.target.closest("[data-stk]").dataset.stk);
+    if (it) { it.got = e.target.checked; save("santaList", santa2); renderSanta2(); renderGifts(); }
+  });
   $("#paneSanta").addEventListener("submit", async e => {
     e.preventDefault(); const f = e.target;
     if (f.id === "santaPinForm") {
@@ -83,6 +98,11 @@
       const n = f.kid.value.trim(); if (!n) return;
       santa2.kids.push({ id: uid(), name: n, gifts: [] }); save("santaList", santa2); renderSanta2(); renderGifts(); return;
     }
+    if (f.hasAttribute("data-stadd")) {
+      const k = santa2.kids.find(x => x.id === f.closest("[data-skid]").dataset.skid), name = f.name.value.trim(); if (!k || !name) return;
+      (k.stock = k.stock || []).push({ id: uid(), name, price: parseFloat(f.price.value) || 0, got: false });
+      save("santaList", santa2); renderSanta2(); renderGifts(); toast("🧦 Into the stocking!"); return;
+    }
     if (f.hasAttribute("data-skadd")) {
       const k = santa2.kids.find(x => x.id === f.closest("[data-skid]").dataset.skid), name = f.name.value.trim(); if (!k || !name) return;
       k.gifts.push({ id: uid(), name, price: parseFloat(f.price.value) || 0, status: "idea", spot: f.spot.value.trim() });
@@ -100,9 +120,13 @@
     santaPoke();
     if (t.closest("#santaLockBtn")) { santaLock(); toast("🔒 Santa's list is locked"); return; }
     if (t.closest("#santaChangePin")) { santa2.pin = null; save("santaList", santa2); santaOpen = false; renderSanta2(); toast("🎅 Choose a new Santa PIN"); return; }
+    const idea = t.closest("[data-stidea]");
+    if (idea) { const k = santa2.kids.find(x => x.id === idea.closest("[data-skid]").dataset.skid); (k.stock = k.stock || []).push({ id: uid(), name: idea.dataset.stidea, price: +idea.dataset.stp || 0, got: false }); save("santaList", santa2); renderSanta2(); renderGifts(); toast("🧦 Into the stocking!"); return; }
     const b = t.closest("[data-sact]"); if (!b) return;
     const k = santa2.kids.find(x => x.id === b.closest("[data-skid]").dataset.skid); if (!k) return;
     const act = b.dataset.sact;
+    if (act === "moreideas") { k.ideaAt = (k.ideaAt || 0) + 4; save("santaList", santa2); renderSanta2(); return; }
+    if (act === "delstock") { k.stock = (k.stock || []).filter(x => x.id !== b.closest("[data-stk]").dataset.stk); save("santaList", santa2); renderSanta2(); renderGifts(); return; }
     if (act === "delkid") { if (!confirm(`Remove ${k.name} and their Santa gifts?`)) return; santa2.kids = santa2.kids.filter(x => x !== k); }
     else {
       const g = k.gifts.find(x => x.id === b.closest("[data-sgid]").dataset.sgid); if (!g) return;
