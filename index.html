@@ -794,6 +794,8 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .acts-count { text-align: center; font-weight: 800; color: var(--pine); margin-bottom: 8px; font-size: 14px; }
 .act-item { display: grid; grid-template-columns: 38px 1fr auto; gap: 10px; align-items: center; padding: 12px 14px; }
 .act-item .app-emo { font-size: 26px; }
+.act-map { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; padding: 6px 12px; border-radius: 99px; border: 1.5px solid rgba(47,107,74,.35); background: #eef6ef; color: var(--pine-dark); font: 700 13px var(--font-body, inherit); cursor: pointer; }
+.act-map-note { font-size: 12.5px; color: var(--muted); text-align: center; margin: 4px 0 12px; }
 .act-item h4 { margin: 0; font-size: 16px; color: var(--pine); }
 .act-item p { margin: 2px 0 0; font-size: 13px; color: var(--ink); line-height: 1.4; }
 .act-btn { min-width: 74px; padding: 8px 10px; border-radius: 99px; font-size: 12.5px; font-weight: 800; border: 1px solid var(--line); background: #fff; color: var(--pine); }
@@ -2493,6 +2495,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
         <button class="chip" data-af="free">💚 Free</button>
         <button class="chip" data-af="list">⭐ Our list</button>
       </div>
+      <p class="act-map-note">📍 <b>Find near me</b> opens your phone's Maps app to show what's close by. Noël never sees your location.</p>
       <div class="apps-list" id="actsList"></div>
       <form class="card add-task" id="actsAdd" autocomplete="off" style="margin-top:14px">
         <h3>➕ Add your own tradition</h3>
@@ -7770,30 +7773,30 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
      w: "out" or "in" · tags: kids, free  ✏️ Add or edit freely.
      ============================================================ */
   const ACTIVITIES = [
-    {"id": "a0", "w": "out", "ico": "🌲", "name": "Cut your own tree", "txt": "Visit a tree farm and choose the perfect tree together.", "tags": "kids"},
-    {"id": "a1", "w": "out", "ico": "🐴", "name": "Horse-drawn sleigh ride", "txt": "Snuggle under blankets for a jingling ride through the snow. Book ahead; many farms offer wagon rides when the snow is thin.", "tags": "kids"},
-    {"id": "a2", "w": "out", "ico": "✨", "name": "Christmas lights tour", "txt": "Walk or drive the neighbourhood with cocoa and vote on the best-lit house.", "tags": "kids free"},
-    {"id": "a3", "w": "out", "ico": "🛷", "name": "Sledding & snow day", "txt": "Find the best hill, then build a snow fort or a whole snowman family.", "tags": "kids free"},
-    {"id": "a4", "w": "out", "ico": "⛸️", "name": "Outdoor skating", "txt": "Lace up at a local rink or a pond that's been checked safe.", "tags": "kids"},
-    {"id": "a5", "w": "out", "ico": "🎪", "name": "Christmas market", "txt": "Wander the stalls for handmade gifts, warm drinks and seasonal treats.", "tags": ""},
-    {"id": "a6", "w": "out", "ico": "🚂", "name": "Holiday train ride", "txt": "Many towns run festive trains with lights, carols and sometimes Santa himself.", "tags": "kids"},
-    {"id": "a7", "w": "out", "ico": "🥾", "name": "Winter hike & cocoa picnic", "txt": "Pack a thermos and snacks for a crisp walk on a local trail.", "tags": "free"},
+    {"id": "a0", "map": "Christmas tree farm", "w": "out", "ico": "🌲", "name": "Cut your own tree", "txt": "Visit a tree farm and choose the perfect tree together.", "tags": "kids"},
+    {"id": "a1", "map": "sleigh rides", "w": "out", "ico": "🐴", "name": "Horse-drawn sleigh ride", "txt": "Snuggle under blankets for a jingling ride through the snow. Book ahead; many farms offer wagon rides when the snow is thin.", "tags": "kids"},
+    {"id": "a2", "map": "Christmas light displays", "w": "out", "ico": "✨", "name": "Christmas lights tour", "txt": "Walk or drive the neighbourhood with cocoa and vote on the best-lit house.", "tags": "kids free"},
+    {"id": "a3", "map": "sledding hill", "w": "out", "ico": "🛷", "name": "Sledding & snow day", "txt": "Find the best hill, then build a snow fort or a whole snowman family.", "tags": "kids free"},
+    {"id": "a4", "map": "outdoor skating rink", "w": "out", "ico": "⛸️", "name": "Outdoor skating", "txt": "Lace up at a local rink or a pond that's been checked safe.", "tags": "kids"},
+    {"id": "a5", "map": "Christmas market", "w": "out", "ico": "🎪", "name": "Christmas market", "txt": "Wander the stalls for handmade gifts, warm drinks and seasonal treats.", "tags": ""},
+    {"id": "a6", "map": "holiday train ride", "w": "out", "ico": "🚂", "name": "Holiday train ride", "txt": "Many towns run festive trains with lights, carols and sometimes Santa himself.", "tags": "kids"},
+    {"id": "a7", "map": "hiking trails", "w": "out", "ico": "🥾", "name": "Winter hike & cocoa picnic", "txt": "Pack a thermos and snacks for a crisp walk on a local trail.", "tags": "free"},
     {"id": "a8", "w": "out", "ico": "🏮", "name": "Lantern walk", "txt": "Make jar lanterns with battery tea lights and take a peaceful twilight stroll.", "tags": "kids free"},
     {"id": "a9", "w": "out", "ico": "🌰", "name": "Pinecone hunt", "txt": "Gather pinecones, then paint them or turn them into mini trees.", "tags": "kids free"},
-    {"id": "a10", "w": "out", "ico": "🌿", "name": "Make a fresh wreath", "txt": "Collect fallen evergreen branches and craft a wreath for the door.", "tags": "free"},
-    {"id": "a11", "w": "out", "ico": "🌟", "name": "Stargazing night", "txt": "Winter skies are the clearest. Bring blankets and look for Orion.", "tags": "free"},
+    {"id": "a10", "map": "Christmas wreath workshop", "w": "out", "ico": "🌿", "name": "Make a fresh wreath", "txt": "Collect fallen evergreen branches and craft a wreath for the door.", "tags": "free"},
+    {"id": "a11", "map": "stargazing spot", "w": "out", "ico": "🌟", "name": "Stargazing night", "txt": "Winter skies are the clearest. Bring blankets and look for Orion.", "tags": "free"},
     {"id": "a12", "w": "out", "ico": "🍭", "name": "Candy cane hunt", "txt": "Hide wrapped candy canes around the yard for a festive treasure hunt.", "tags": "kids"},
     {"id": "a13", "w": "out", "ico": "🔦", "name": "Flashlight tag", "txt": "Tag in the dark yard, with the lit-up tree as the safe zone.", "tags": "kids free"},
     {"id": "a14", "w": "out", "ico": "🧶", "name": "Ugly sweater walk", "txt": "A neighbourhood stroll in your most outrageous holiday gear.", "tags": "free"},
     {"id": "a15", "w": "out", "ico": "❄️", "name": "Snowball target toss", "txt": "Hang painted cardboard targets from a tree for snowball practice.", "tags": "kids free"},
-    {"id": "a16", "w": "in", "ico": "🏠", "name": "Gingerbread house night", "txt": "Decorate houses together, then crown the best design on the Scoreboard.", "tags": "kids"},
+    {"id": "a16", "map": "gingerbread house workshop", "w": "in", "ico": "🏠", "name": "Gingerbread house night", "txt": "Decorate houses together, then crown the best design on the Scoreboard.", "tags": "kids"},
     {"id": "a17", "w": "in", "ico": "🍪", "name": "Cookie exchange", "txt": "Bake one big batch, then swap plates with friends and neighbours.", "tags": ""},
     {"id": "a18", "w": "in", "ico": "🎁", "name": "Wrap & sip night", "txt": "Paper, ribbons, a Christmas movie and a festive drink make wrapping fun.", "tags": ""},
-    {"id": "a19", "w": "in", "ico": "🧸", "name": "Toy & food drive", "txt": "Pick out toys or food as a family and drop them at a local drive.", "tags": "kids"},
+    {"id": "a19", "map": "toy drive drop off", "w": "in", "ico": "🧸", "name": "Toy & food drive", "txt": "Pick out toys or food as a family and drop them at a local drive.", "tags": "kids"},
     {"id": "a20", "w": "in", "ico": "🎬", "name": "Movie marathon", "txt": "Pick favourites from your Christmas Movie Watch List and pop the popcorn.", "tags": "kids free"},
     {"id": "a21", "w": "in", "ico": "☕", "name": "Hot cocoa bar", "txt": "Marshmallows, peppermint and whipped cream: build your own mug.", "tags": "kids"},
     {"id": "a22", "w": "in", "ico": "🎨", "name": "Ornament making", "txt": "Salt dough, felt or photo ornaments to keep for years.", "tags": "kids"},
-    {"id": "a23", "w": "in", "ico": "✉️", "name": "Letters to Santa", "txt": "Write and decorate letters. Many postal services even write back!", "tags": "kids free"},
+    {"id": "a23", "map": "post office", "w": "in", "ico": "✉️", "name": "Letters to Santa", "txt": "Write and decorate letters. Many postal services even write back!", "tags": "kids free"},
     {"id": "a24", "w": "in", "ico": "🎶", "name": "Carol & karaoke night", "txt": "Sing the classics, with bonus points for dramatic solos.", "tags": "free"},
     {"id": "a25", "w": "in", "ico": "🎲", "name": "Family game night", "txt": "Play the party games in Noël and keep score on the Scoreboard.", "tags": "kids free"},
     {"id": "a26", "w": "in", "ico": "📸", "name": "Matching pajama photos", "txt": "Cozy pajamas, the tree and a timer for this year's family photo.", "tags": "kids free"},
@@ -7809,12 +7812,19 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#actsList").innerHTML = list.length ? list.map(a => {
       const m = acts.mark[a.id];
       return `<div class="card act-item ${m === "done" ? "done" : ""}" data-aid="${a.id}"><div class="app-emo">${a.ico}</div>
-        <div><h4>${esc(a.name)}</h4><p>${esc(a.txt)}</p></div>
+        <div><h4>${esc(a.name)}</h4><p>${esc(a.txt)}</p>${a.map ? `<button type="button" class="act-map" data-amap="${esc(a.map)}">📍 Find near me</button>` : ""}</div>
         <button class="act-btn ${m || ""}" data-amark aria-label="${esc(a.name)}">${m === "done" ? "✓ Done" : m === "plan" ? "⭐ On list" : "☆ Add"}</button></div>`;
     }).join("") : `<p class="apps-empty">Tap ☆ Add on any activity to build your family's bucket list.</p>`;
   }
   $("#actsFilters").addEventListener("click", e => { const b = e.target.closest("[data-af]"); if (!b) return; actFilter = b.dataset.af; $$("#actsFilters .chip").forEach(c => c.classList.toggle("on", c === b)); renderActs(); });
+  // 📍 opens the phone's own Maps app to search nearby. Noël never sees or stores the location.
+  function openMapSearch(q) {
+    if (NoelNative.isNative() && INVITE.isIOS()) { window.location.href = "maps://?q=" + encodeURIComponent(q); return; }
+    if (/Android/i.test(navigator.userAgent)) { window.location.href = "geo:0,0?q=" + encodeURIComponent(q); return; }
+    window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q + " near me"), "_blank", "noopener");
+  }
   $("#actsList").addEventListener("click", e => {
+    const mp = e.target.closest("[data-amap]"); if (mp) { openMapSearch(mp.dataset.amap); return; }
     const b = e.target.closest("[data-amark]"); if (!b) return;
     const id = b.closest("[data-aid]").dataset.aid, m = acts.mark[id];
     if (!m) acts.mark[id] = "plan"; else if (m === "plan") { acts.mark[id] = "done"; toast("🎉 Another happy memory!"); if (navigator.vibrate) navigator.vibrate(20); } else delete acts.mark[id];
