@@ -1758,16 +1758,6 @@ body.space-switching main { opacity: .3; }
     <!-- ✏️ PRINTABLE PLANNERS: replace each href="#" with your PDF link -->
 
     <article class="card print-card featured">
-      <div class="print-thumb">😅</div>
-      <div class="print-info">
-        <span class="bundle-tag">1 page · just for fun</span>
-        <h3 class="sv-title">Holiday Survival Guide</h3>
-        <p>A funny one-pager for the fridge: survival kit, the official rules, safe dinner topics, emergency plans and Survival Bingo.</p>
-        <button type="button" class="btn btn-red btn-sm" data-print="survival">🖨️ Print</button>
-      </div>
-    </article>
-
-    <article class="card print-card featured">
       <div class="print-thumb">🎁</div>
       <div class="print-info">
         <span class="bundle-tag">3 pages · low ink</span>
@@ -1812,17 +1802,17 @@ body.space-switching main { opacity: .3; }
         <div class="print-thumb">🕯️</div>
         <div class="print-info">
           <h3>Holiday Self-Care</h3>
-          <p>Five gentle reminders for a calmer, merrier season.</p>
-          <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
+          <p>Five gentle reminders, a calm plan and your own permission slip for a merrier season.</p>
+          <button type="button" class="btn btn-red btn-sm" data-print="selfcare">🖨️ Print</button>
         </div>
       </article>
 
       <article class="card print-card">
         <div class="print-thumb">😅</div>
         <div class="print-info">
-          <h3>Advanced Family &amp; Social Survival</h3>
-          <p>Six tongue-in-cheek tips for surviving the holidays.</p>
-          <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
+          <h3 class="sv-title">Holiday Survival Guide</h3>
+          <p>Survival kit, the official rules, safe dinner topics, emergency plans and Survival Bingo.</p>
+          <button type="button" class="btn btn-red btn-sm" data-print="survival">🖨️ Print</button>
         </div>
       </article>
     </div>
@@ -11725,6 +11715,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     else if (key.startsWith("shop:")) { const m = mealById(key.slice(5)); d = m ? shopDoc(m) : null; }
     else if (key.startsWith("theme:")) d = themeDoc(key.slice(6));
     else if (key === "survival") d = survivalDoc();
+    else if (key === "selfcare") d = selfCareDoc();
     else if (key === "place") d = placeDoc();
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "chores") d = choresDoc();
@@ -11743,6 +11734,29 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const who = familyTitle(family);
     if (who && !d.error && !d.noBrand && !d.branded) { d.html = `<div class="pt-brand">${esc(who)}</div>` + d.html; d.css += ` .pt-brand{font:600 8.5pt/1 sans-serif;letter-spacing:.28em;text-transform:uppercase;color:#a8823c;text-align:center;border-bottom:1px solid #e3d6b8;padding:0 0 6px;margin:0 0 14px}`; d.branded = 1; }
     return d;
+  }
+  // 🕯️ Holiday Self-Care: gentle reminders, a calm plan and a permission slip
+  function selfCareDoc() {
+    const O = hubMode === "company";
+    const R = [["🌬️", "Breathe before you rush", "When the to-do list gets loud, stop for three slow breaths. The cookies can wait 30 seconds."],
+      ["🎁", "Good enough is wonderful", "Nobody remembers if the bows matched. They remember that you were there and you laughed."],
+      ["🙅", "No is a full sentence", "You don't have to go to every party or bake for every event. Choose the ones that light you up."],
+      ["🚶", "Step outside every day", "Ten minutes of fresh air, Christmas lights or snow does more than another hour of scrolling."],
+      ["💛", "Fill your own cup too", "Rest, water, a real meal and one small thing just for you. You can't pour from an empty mug."]];
+    const perm = O ? ["Leave the party early", "Bring store-bought treats", "Turn on my out-of-office", "Take a real lunch break", "Say no to one more committee", "Not check email over the holidays"]
+      : ["Skip a party (or two)", "Buy store-bought cookies", "Take a nap", "Say no without explaining", "Wear pajamas all day", "Not make it perfect"];
+    const css = `.sc{font:12pt/1.5 Georgia,serif;color:#2a2a2a} .sc h1{font-size:26pt;margin:0;text-align:center;color:#1E3A2F} .sc .sc-sub{text-align:center;font:italic 10.5pt Georgia,serif;color:#8a6d3b;margin:4px 0 20px}
+      .sc .rem{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start;margin:0 0 14px} .sc .rem span{font-size:21pt;line-height:1} .sc .rem b{display:block;color:#b3262e;font-size:13pt}
+      .sc h2{font-size:13pt;margin:20px 0 6px;color:#1E3A2F;border-bottom:1.5px solid #e3d6b8;padding-bottom:2px} .sc .line{border-bottom:1px solid #bbb;height:30px;margin:0 0 4px}
+      .sc .cols{display:grid;grid-template-columns:1fr 1fr;gap:4px 22px} .sc .perm{border:2px dashed #c9b48a;border-radius:10px;padding:14px 18px;margin-top:22px} .sc .perm h3{margin:0 0 6px;font-size:14pt;color:#b3262e;text-align:center}
+      .sc .perm ul{list-style:none;margin:0;padding:0;columns:2} .sc .perm li{margin:5px 0} .sc .sign{margin-top:8px;text-align:right;font-size:10pt} .sc .sign span{display:inline-block;width:2.2in;border-bottom:1px solid #999}`;
+    const html = `<div class="sc"><h1>🕯️ Holiday Self-Care</h1><p class="sc-sub">Five gentle reminders for a calmer, merrier season</p>
+      ${R.map(([i, t, d]) => `<div class="rem"><span>${i}</span><div><b>${t}</b>${d}</div></div>`).join("")}
+      <div class="cols"><div><h2>🌿 This week, just for me</h2><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div>
+        <div><h2>🤍 Things I can let go of</h2><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div></div>
+      <div class="perm"><h3>📜 Official Permission Slip</h3><p style="text-align:center;margin:0 0 6px">I hereby give myself permission to:</p><ul>${perm.map(x => `<li>☐ ${x}</li>`).join("")}</ul>
+        <p class="sign">Signed: <span></span></p></div></div>`;
+    return { title: "Holiday Self-Care", css, html, margin: 0.55, file: "Holiday-Self-Care" };
   }
   // 😅 the Holiday Survival Guide (Family) / Office Party Survival Guide (Office)
   function survivalDoc() {
