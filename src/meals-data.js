@@ -2372,6 +2372,67 @@ window.NOEL_MEALS = (function () {
       ];
     }
   };
+  const vgravyAddon = {
+    id: "vgravy2", tab: "dietary", addon: true,
+    name: "Rich Savory Vegan Gravy", icon: "🫗",
+    blurb: "Glossy, ultra-savoury gravy for potatoes, stuffing and every vegan dish. Vegan, gluten-free and dairy-free.",
+    tags: "Vegan · Gluten-free · Dairy-free sauce",
+    menu: [["Dietary sauce", ["Rich Savory Vegan Gravy (vegan, gluten-free, dairy-free)"]]],
+    drinks: [["Goes with", "Mashed potatoes, stuffing, the Stuffed Holiday Squash, the Shepherd's Pie or the Vegan Wellington."]],
+    recipes: [{
+      id: "vgravy2", course: "Dietary sauce", name: "Rich Savory Vegan Gravy",
+      prep: "5 min", cook: "15 min", yieldText: (f, p) => `about ${fmtCups(2 * f)} (${p.g} ${p.g === 1 ? "serving" : "servings"})`,
+      note: () => "Vegan, gluten-free and dairy-free. Check that the tamari, broth and Dijon are labelled gluten-free.",
+      ing: [
+        { head: "Base & aromatics" },
+        { q: 2, u: "tbsp", t: "olive oil (or vegan butter)" },
+        { q: 0.5, u: "cup", t: "yellow onion or shallot, finely minced" },
+        { q: 2, u: "", t: ["garlic clove, minced", "garlic cloves, minced"] },
+        { q: 0.5, u: "cup", t: "cremini or button mushrooms, finely chopped (optional, for depth)" },
+        { q: 0.5, u: "tsp", t: "dried thyme" },
+        { q: 0.5, u: "tsp", t: "dried rosemary" },
+        { head: "Liquid" },
+        { q: 2, u: "cup", t: "low-sodium vegetable broth" },
+        { q: 2, u: "tbsp", t: "gluten-free tamari or soy sauce" },
+        { q: 1, u: "tbsp", t: "balsamic vinegar" },
+        { q: 1, u: "tsp", t: "Dijon mustard" },
+        { q: 1, u: "tsp", t: "pure maple syrup" },
+        { head: "Thickener" },
+        { q: 2, u: "tbsp", t: "cornstarch (or arrowroot) dissolved in an equal amount of cold water" },
+        { q: null, u: "", s: "n", t: "Salt and black pepper, to taste" }
+      ],
+      steps: [
+        "Heat the oil in a small saucepan over medium heat. Cook the onion (and mushrooms, if using) for 5–6 minutes until soft and lightly browned. Stir in the garlic, thyme and rosemary and cook 1 minute until fragrant.",
+        "Pour in the broth, tamari, balsamic, Dijon and maple syrup and whisk well to break up the mustard. Bring to a gentle boil, then simmer on low for 5 minutes.",
+        "Stir the cornstarch mixture, then slowly pour it into the simmering gravy, whisking constantly. Cook 2–3 minutes as it bubbles, thickens and turns glossy. Season with salt and pepper.",
+        "For a perfectly velvety gravy, pour it through a fine-mesh strainer into a warm gravy boat."
+      ],
+      tip: "Flavour boosts: add a splash of dry white wine after the aromatics and let it bubble away, or whisk in 1 tbsp nutritional yeast for extra depth. Make-ahead: it keeps 3 days in the fridge. Rewarm gently with a splash of broth, and whisk in a little more cornstarch mixture if it thins."
+    }],
+    timeline(p) {
+      return [
+        { m: -20, icon: "🫗", text: "Vegan gravy: sauté the onion, garlic and herbs", alarm: true },
+        { m: -12, icon: "🫗", text: "Vegan gravy: simmer, thicken with the cornstarch, strain and keep warm", alarm: true }
+      ];
+    },
+    ahead: () => [],
+    shop(f, p) {
+      const n = x => Math.max(1, Math.ceil(x - 1e-9)), broth = n(2 * f / 3.8);
+      return [
+        ["Produce", [
+          ["1", "small yellow onion or shallot", 0.75],
+          ["1", "head garlic", 1],
+          ["1 × 227 g", "pack cremini mushrooms (optional)", 3]
+        ]],
+        ["Pantry", [
+          [`${broth} × 900 ml`, "low-sodium vegetable broth (gluten-free)", broth * 3.5],
+          ["1", "bottle gluten-free tamari", 5],
+          ["", "balsamic vinegar, Dijon mustard, maple syrup, cornstarch or arrowroot", null],
+          ["", "dried thyme, dried rosemary, olive oil, salt, black pepper", null]
+        ]]
+      ];
+    }
+  };
   // add-on sizes: 1–5 people
   const addonPlan = base => guests => { const g = Math.min(5, Math.max(1, guests | 0)); return { g, f: g / base, pies: 1, dishes: 1, batches: 1 }; };
 
@@ -2412,9 +2473,10 @@ window.NOEL_MEALS = (function () {
       vegan,
       squash,
       shepherd,
+      vgravyAddon,
       mousse
     ],
-    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4) },
+    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5) },
     doneness: DONENESS,
     frac, hm, fmtNum
   };
