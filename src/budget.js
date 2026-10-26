@@ -166,7 +166,7 @@
         <tr><td><b>Total</b></td><td class="num"><b>${money(T.spent)}</b></td><td class="num"><b>${T.limit ? money(T.limit) : "—"}</b></td><td class="num"><b>${T.limit ? money(T.limit - T.spent) : "—"}</b></td></tr></table></div>
       ${T.rows.length ? `<h2>Spending over time</h2>${budLine(T.limit, 680, 200)}` : ""}
       <h2>Every purchase</h2><table><tr><th>Date</th><th>Category</th><th>Item</th><th class="num">Amount</th></tr>${T.rows.slice().sort((a, b) => (a.date || "0").localeCompare(b.date || "0")).map(r => `<tr><td>${r.date || "—"}</td><td>${budCat(r.cat)[2]}</td><td>${esc(r.name)}</td><td class="num">${money(r.amt)}</td></tr>`).join("")}</table>
-      <p class="bd-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p></div>`;
+      <p class="bd-foot">Made with Noël Tier 1 Hub</p></div>`;
     return { title: "Budget report", css, html, margin: 0.5, file: "Holiday-Budget-Report" };
   }
   // keep last year's total when the season is saved (called from Start fresh)

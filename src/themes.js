@@ -209,7 +209,7 @@
       <h2>Music</h2><ul>${t.music.map(d => `<li>• ${esc(d)}</li>`).join("")}</ul><p>Search your music app for: ${esc(t.search)}</p>
       <h2>Games</h2>${t.games.map(([n, how]) => `<h3>${esc(n)}</h3><p>${esc(how)}</p>`).join("")}
       <h2>Photo booth</h2><p>Tinsel fringe backdrop with fairy lights · a basket of props · instant cameras and a guestbook · a big clock set to 11:59</p>
-      <p class="pm-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p>`;
+      <p class="pm-foot">Made with Noël Tier 1 Hub</p>`;
     return { title: t.name + " party plan", css: PRINT_CSS, html, margin: 0.5, file: t.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Party-Plan" };
   }
 

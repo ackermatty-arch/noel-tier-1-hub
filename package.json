@@ -2,7 +2,7 @@
   "name": "noel-tier-1-hub",
   "version": "1.0.0",
   "private": true,
-  "description": "No\u00ebl Tier 1 Hub: a private, offline holiday planner by Earth & Wonder",
+  "description": "No\u00ebl Tier 1 Hub: a private, offline holiday planner",
   "scripts": {
     "build": "python3 build.py && python3 scripts/build_www.py",
     "sync": "npm run build && npx cap sync ios"

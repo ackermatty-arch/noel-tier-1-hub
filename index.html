@@ -1454,7 +1454,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
       <div class="brand-logo" aria-hidden="true">🎄</div>
       <div class="brand-text">
         <h1 class="brand-title">Noël Tier 1 Hub</h1>
-        <div class="brand-sub">by Earth &amp; Wonder</div> <!-- ✏️ Your shop name -->
+        <div class="brand-sub">by Jenn</div> <!-- ✏️ maker name -->
       </div>
     </div>
     <div class="header-actions">
@@ -2258,7 +2258,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
       <p class="review-sub">A quick review helps my small shop more than you know. Thank you for making Noël part of your Christmas!</p>
       <div class="review-stars" aria-hidden="true">★ ★ ★ ★ ★</div>
       <a class="btn btn-gold btn-block" id="etsyReview" target="_blank" rel="noopener">⭐ Leave a review on Etsy</a>
-      <a class="btn btn-ghost btn-block" id="etsyShop" target="_blank" rel="noopener" style="margin-top:8px">🛍️ Visit Earth &amp; Wonder</a>
+      <a class="btn btn-ghost btn-block" id="etsyShop" target="_blank" rel="noopener" style="margin-top:8px">🛍️ Visit the shop</a>
     </div>
 
     <!-- 💡 Ideas for next year's Hub -->
@@ -2282,7 +2282,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
   </section>
 
   <!-- ✏️ BRANDING: footer text (shown under every page) -->
-  <footer class="app-footer">Made with ❤️ by Earth &amp; Wonder</footer>
+  <footer class="app-footer">Made with ❤️ by Jenn</footer>
 </main>
 
 <!-- ============================================================
@@ -8000,7 +8000,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       return;
     }
     const { first, end, hubUrl } = calRange(), stop = new Date(first.getTime() + 15 * 60000);
-    const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Earth & Wonder//Noel Tier 1 Hub//EN", "BEGIN:VEVENT",
+    const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Noel Tier 1 Hub//EN", "BEGIN:VEVENT",
       "UID:holidayhub-checkin-" + first.getFullYear() + "@earthandwonder", "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z",
       "DTSTART:" + icsDate(first), "DTEND:" + icsDate(stop), "RRULE:FREQ=WEEKLY;UNTIL=" + icsDate(end),
       "SUMMARY:🎄 Time to check in!", "DESCRIPTION:Open your Noël Tier 1 Hub to check your list\\, gifts and budget: " + hubUrl, "URL:" + hubUrl,
@@ -8249,7 +8249,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function applyFamily() {
     const t = familyTitle(family);
     $(".brand-title").textContent = t || "Noël Tier 1 Hub";          // ✏️ default title
-    $(".brand-sub").textContent = t ? "Noël Tier 1 Hub" : "by Earth & Wonder";  // ✏️ default subtitle
+    $(".brand-sub").textContent = t ? "Noël Tier 1 Hub" : "by Jenn";  // ✏️ default subtitle
     document.title = t ? `${t} · Noël Tier 1 Hub` : "Noël Tier 1 Hub";
     $("#navMeals").hidden = hubMode === "company";   // 🍽️ the big-dinner planner is for families
     $("#hostBanner").hidden = $("#orgBanner").hidden = hubMode === "company";   // 🏡 hosting is for families too
@@ -8434,8 +8434,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const body = "Ideas for next year's Noël Tier 1 Hub:\n" + picks.map(p => "• " + p).join("\n") + (own ? (picks.length ? "\n\n" : "") + own : "");
     if (FEEDBACK_EMAIL) { location.href = INVITE.mailHref(FEEDBACK_EMAIL, "Noël Tier 1 Hub ideas 💡", body); }
     else {
-      try { await navigator.clipboard.writeText(body); toast("📋 Ideas copied! Paste them in a message to the shop on Etsy."); } catch (err) { toast("Send your ideas to the shop through Etsy messages"); }
-      setTimeout(() => window.open(SHOP_URL !== "#" ? SHOP_URL : "https://www.etsy.com/messages", "_blank"), 600);
+      try { await navigator.clipboard.writeText(body); toast("📋 Ideas copied! Thank you for helping make Noël better."); } catch (err) { toast("Thank you! Your ideas are ready to send."); }
+      if (SHOP_URL !== "#") setTimeout(() => window.open(SHOP_URL, "_blank"), 600);
     }
     $$("#ideaChips .chip.on").forEach(c => c.classList.remove("on")); $("#ideaText").value = "";
   });
@@ -9157,13 +9157,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       <h2>Menu</h2>${allMenu(m).map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v.join(", "))}</p>`).join("")}
       ${m.drinks.map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v)}</p>`).join("")}
       <h2>Recipes</h2>${allRecipesHtml(m, f, p, true)}
-      <p class="pm-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p>`;
+      <p class="pm-foot">Made with Noël Tier 1 Hub</p>`;
     return { title: m.name + (m.addon ? "" : " plan"), css: PRINT_CSS, html, margin: 0.5, file: m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Plan" };
   }
   function shopDoc(m) {   // just the shopping list, to take to the store
     const c = cfgFor(m.id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
     const html = `<h1>🛒 ${esc(m.name)}: shopping list</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · estimated total ${cad0(ps.total)} ${currency}</p>` +
-      ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join("") + `<p class="pm-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p>`;
+      ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join("") + `<p class="pm-foot">Made with Noël Tier 1 Hub</p>`;
     return { title: m.name + " shopping list", css: PRINT_CSS, html, margin: 0.5, file: m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Shopping-List" };
   }
   const PRINT_CSS = `body{font:12pt/1.45 Georgia,serif;color:#222} h1{font-size:22pt;margin:0} h2{font-size:15pt;border-bottom:1.5px solid #B8935A;margin:22px 0 8px;padding-bottom:3px} h3{font-size:12pt;margin:12px 0 4px}
@@ -10070,7 +10070,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const html = `<div class="ch"><h1>📋 Holiday Chore Chart</h1><p class="ch-sub">Many hands make light work · dinner ${esc(hostFmt(D))}</p>
       <h2>Deep-clean countdown</h2><table>${head}${HOST_CLEAN.map(([id, days, text]) => row(text, days ? day(atDay(D, days, 10)) : "Dinner day", "c:" + id, host.clean[id])).join("")}</table>
       <h2>Jobs on the big day</h2><table>${head}${HOST_JOBS.map(([id, text, when]) => row(text, when, "j:" + id, host.jobDone[id])).join("")}${host.jobs.map(j => row(j.text, j.when || "", "j:" + j.id, host.jobDone[j.id])).join("")}</table>
-      <p class="ch-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p></div>`;
+      <p class="ch-foot">Made with Noël Tier 1 Hub</p></div>`;
     return { title: "Holiday chore chart", css, html, margin: 0.5, file: "Holiday-Chore-Chart" };
   }
   function hostSuppliesHtml() {
@@ -10117,7 +10117,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         <div><h2>Deep-clean countdown</h2><table class="fr-clean">${Object.entries(cleanByDay).map(([k, l]) => `<tr><td>${esc(k)}</td><td>${l.join("<br>")}</td></tr>`).join("")}</table></div></div>
       <h2>Still to get</h2>${need.length ? `<ul class="fr-need">${need.map(i => `<li>☐ ${esc(i)}</li>`).join("")}</ul>` : "<p>Everything's ready! ✨</p>"}
       ${house.length ? `<h2>House info</h2><table>${house.map(([k, v]) => `<tr><td style="width:90px"><b>${k}</b></td><td>${esc(v)}</td></tr>`).join("")}</table>` : ""}
-      <p class="fr-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p></div>`;
+      <p class="fr-foot">Made with Noël Tier 1 Hub</p></div>`;
     return { title: "Hosting fridge sheet", css, html, margin: 0.45, file: "Hosting-Fridge-Sheet" };
   }
   // ---------- house info card as a picture ----------
@@ -10644,7 +10644,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       <h2>Music</h2><ul>${t.music.map(d => `<li>• ${esc(d)}</li>`).join("")}</ul><p>Search your music app for: ${esc(t.search)}</p>
       <h2>Games</h2>${t.games.map(([n, how]) => `<h3>${esc(n)}</h3><p>${esc(how)}</p>`).join("")}
       <h2>Photo booth</h2><p>Tinsel fringe backdrop with fairy lights · a basket of props · instant cameras and a guestbook · a big clock set to 11:59</p>
-      <p class="pm-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p>`;
+      <p class="pm-foot">Made with Noël Tier 1 Hub</p>`;
     return { title: t.name + " party plan", css: PRINT_CSS, html, margin: 0.5, file: t.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Party-Plan" };
   }
 
@@ -10882,7 +10882,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         <tr><td><b>Total</b></td><td class="num"><b>${money(T.spent)}</b></td><td class="num"><b>${T.limit ? money(T.limit) : "—"}</b></td><td class="num"><b>${T.limit ? money(T.limit - T.spent) : "—"}</b></td></tr></table></div>
       ${T.rows.length ? `<h2>Spending over time</h2>${budLine(T.limit, 680, 200)}` : ""}
       <h2>Every purchase</h2><table><tr><th>Date</th><th>Category</th><th>Item</th><th class="num">Amount</th></tr>${T.rows.slice().sort((a, b) => (a.date || "0").localeCompare(b.date || "0")).map(r => `<tr><td>${r.date || "—"}</td><td>${budCat(r.cat)[2]}</td><td>${esc(r.name)}</td><td class="num">${money(r.amt)}</td></tr>`).join("")}</table>
-      <p class="bd-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p></div>`;
+      <p class="bd-foot">Made with Noël Tier 1 Hub</p></div>`;
     return { title: "Budget report", css, html, margin: 0.5, file: "Holiday-Budget-Report" };
   }
   // keep last year's total when the season is saved (called from Start fresh)

@@ -211,7 +211,7 @@
     const html = `<div class="ch"><h1>📋 Holiday Chore Chart</h1><p class="ch-sub">Many hands make light work · dinner ${esc(hostFmt(D))}</p>
       <h2>Deep-clean countdown</h2><table>${head}${HOST_CLEAN.map(([id, days, text]) => row(text, days ? day(atDay(D, days, 10)) : "Dinner day", "c:" + id, host.clean[id])).join("")}</table>
       <h2>Jobs on the big day</h2><table>${head}${HOST_JOBS.map(([id, text, when]) => row(text, when, "j:" + id, host.jobDone[id])).join("")}${host.jobs.map(j => row(j.text, j.when || "", "j:" + j.id, host.jobDone[j.id])).join("")}</table>
-      <p class="ch-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p></div>`;
+      <p class="ch-foot">Made with Noël Tier 1 Hub</p></div>`;
     return { title: "Holiday chore chart", css, html, margin: 0.5, file: "Holiday-Chore-Chart" };
   }
   function hostSuppliesHtml() {
@@ -258,7 +258,7 @@
         <div><h2>Deep-clean countdown</h2><table class="fr-clean">${Object.entries(cleanByDay).map(([k, l]) => `<tr><td>${esc(k)}</td><td>${l.join("<br>")}</td></tr>`).join("")}</table></div></div>
       <h2>Still to get</h2>${need.length ? `<ul class="fr-need">${need.map(i => `<li>☐ ${esc(i)}</li>`).join("")}</ul>` : "<p>Everything's ready! ✨</p>"}
       ${house.length ? `<h2>House info</h2><table>${house.map(([k, v]) => `<tr><td style="width:90px"><b>${k}</b></td><td>${esc(v)}</td></tr>`).join("")}</table>` : ""}
-      <p class="fr-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p></div>`;
+      <p class="fr-foot">Made with Noël Tier 1 Hub</p></div>`;
     return { title: "Hosting fridge sheet", css, html, margin: 0.45, file: "Hosting-Fridge-Sheet" };
   }
   // ---------- house info card as a picture ----------
