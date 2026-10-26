@@ -2306,6 +2306,72 @@ window.NOEL_MEALS = (function () {
       ];
     }
   };
+  const mousse = {
+    id: "mousse", tab: "dietary", addon: true,
+    name: "Dark Chocolate Avocado Mousse with Raspberry Coulis", icon: "🍫",
+    blurb: "Silky, decadent chocolate mousse with a bright raspberry sauce. Vegan, gluten-free and dairy-free.",
+    tags: "Vegan · Gluten-free · Dairy-free dessert",
+    menu: [["Dietary dessert", ["Dark Chocolate Avocado Mousse with Raspberry Coulis (vegan, gluten-free, dairy-free)"]]],
+    drinks: [["Pairing", "A ruby port, a glass of sparkling rosé, or an espresso."]],
+    recipes: [{
+      id: "mousse", course: "Dietary dessert", name: "Dark Chocolate Avocado Mousse with Raspberry Coulis",
+      prep: "20 min", cook: "7 min (coulis)", rest: "chill at least 2 hours", yieldText: (f, p) => p.g + (p.g === 1 ? " serving" : " servings"),
+      note: () => "Vegan, gluten-free and dairy-free. Check that the chocolate chips are labelled dairy-free.",
+      ing: [
+        { head: "Chocolate mousse" },
+        { q: 3, u: "", up: true, t: ["large ripe Hass avocado, pitted and scooped", "large ripe Hass avocados, pitted and scooped"] },
+        { q: 0.5, u: "cup", t: "unsweetened high-quality cocoa powder" },
+        { q: 0.33, u: "cup", t: "dairy-free dark chocolate chips, melted and slightly cooled" },
+        { q: 0.5, u: "cup", t: "canned coconut cream (or the thick top of a chilled can of full-fat coconut milk)" },
+        { q: 0.5, u: "cup", t: "pure maple syrup (or agave nectar)" },
+        { q: 2, u: "tsp", t: "pure vanilla extract" },
+        { q: null, u: "", s: "n", t: "Pinch of sea salt" },
+        { head: "Raspberry coulis" },
+        { q: 12, u: "oz", t: "fresh or frozen raspberries" },
+        { q: 0.25, u: "cup", t: "coconut sugar or regular sugar" },
+        { q: 1, u: "tbsp", t: "fresh lemon juice" },
+        { q: 1, u: "tbsp", t: "water" },
+        { q: null, u: "", s: "n", t: "Fresh raspberries or mint sprigs, to garnish" }
+      ],
+      steps: [
+        "Melt the chocolate chips in a heatproof bowl set over a pot of simmering water (or microwave in 15-second bursts, stirring between each). Let it cool slightly.",
+        "In a high-speed blender or food processor, blend the avocados, cocoa, melted chocolate, coconut cream, maple syrup, vanilla and salt on high for 2–3 minutes. Scrape down the sides as needed, until completely smooth and silky with no green flecks.",
+        "Divide among dessert glasses or ramekins. Cover and refrigerate at least 2 hours to set and let the flavour deepen.",
+        "Coulis: simmer the raspberries, sugar, lemon juice and water in a small saucepan over medium heat for 5–7 minutes, until the berries break down.",
+        "Press through a fine sieve to remove the seeds. Cool completely, then refrigerate.",
+        "Just before serving, pour a generous layer of chilled coulis over each mousse and garnish with a fresh raspberry or a sprig of mint."
+      ],
+      tip: "Choosing avocados: buy them firm 3–4 days ahead and ripen on the counter. They're ready when they yield to gentle pressure and the little stem cap flicks off to show green underneath (brown means overripe). The mousse keeps up to 2 days, covered tightly, in the fridge."
+    }],
+    timeline(p) {
+      return [
+        { m: -240, icon: "🍫", text: "Chocolate mousse: melt the chocolate, blend the mousse and chill (at least 2 hours)", alarm: true },
+        { m: -220, icon: "🍫", text: "Chocolate mousse: make the raspberry coulis, then cool and chill it", alarm: true },
+        { m: 40, icon: "🍫", text: "Chocolate mousse: pour on the coulis, garnish and serve", alarm: true }
+      ];
+    },
+    ahead: () => [],
+    shop(f, p) {
+      const n = x => Math.max(1, Math.ceil(x - 1e-9)), pl = (k, a, b) => k > 1 ? b : a;
+      const av = Math.ceil(3 * f - 1e-9), rasp = n(12 * f / 21), choc = n(0.33 * f / 1.6), coco = n(0.5 * f / 1.6), maple = n(0.5 * f / 2.25);
+      return [
+        ["Produce", [
+          [`${av}`, pl(av, "large ripe Hass avocado", "large ripe Hass avocados"), av * 1.75],
+          ["1", "lemon", 1],
+          ["1", "container fresh raspberries, to garnish (optional)", 5],
+          ["", "fresh mint, to garnish (optional)", null]
+        ]],
+        ["Pantry & Frozen", [
+          [`${rasp} × 600 g`, pl(rasp, "bag frozen raspberries (or fresh)", "bags frozen raspberries (or fresh)"), rasp * 6],
+          ["1", "tin unsweetened cocoa powder", 6],
+          [`${choc}`, pl(choc, "bag dairy-free dark chocolate chips", "bags dairy-free dark chocolate chips"), choc * 6],
+          [`${coco} × 160 ml`, pl(coco, "can coconut cream", "cans coconut cream"), coco * 3],
+          [`${maple} × 540 ml`, pl(maple, "bottle pure maple syrup", "bottles pure maple syrup"), maple * 12],
+          ["", "vanilla extract, coconut or regular sugar, sea salt", null]
+        ]]
+      ];
+    }
+  };
   // add-on sizes: 1–5 people
   const addonPlan = base => guests => { const g = Math.min(5, Math.max(1, guests | 0)); return { g, f: g / base, pies: 1, dishes: 1, batches: 1 }; };
 
@@ -2345,9 +2411,10 @@ window.NOEL_MEALS = (function () {
       porkcrown,
       vegan,
       squash,
-      shepherd
+      shepherd,
+      mousse
     ],
-    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5) },
+    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4) },
     doneness: DONENESS,
     frac, hm, fmtNum
   };
