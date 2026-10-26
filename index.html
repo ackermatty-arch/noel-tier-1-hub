@@ -1265,6 +1265,22 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .gi-addbtn { margin-top: 10px; padding: 9px; min-height: 0; font-size: 13.5px; }
 .gi-add { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px; } .gi-add .input { width: 100%; margin: 0; } .gi-add [data-ginew] { grid-column: 1; }
 .gi-add .btn { grid-column: 2; grid-row: 1 / span 2; align-self: start; }
+
+/* ---------- 🎅 Santa's secret list ---------- */
+.seg.seg4#giftTabs button { font-size: 12px; }
+.santa-lock { text-align: center; padding: 22px 18px; background: linear-gradient(170deg, #fff, #fbeeee); }
+.santa-hat { font-size: 54px; } .santa-lock h3 { font-family: var(--font-display); font-size: 22px; margin: 4px 0; color: var(--red-dark); }
+.santa-pin { width: 100%; text-align: center; font-size: 22px; letter-spacing: .3em; margin: 8px 0 10px; }
+.santa-forgot { margin-top: 14px; font-size: 13px; color: var(--muted); }
+.santa-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; }
+.santa-head b { display: block; font-size: 16px; color: var(--red-dark); } .santa-head small { font-size: 12.5px; color: var(--muted); }
+.santa-head .btn { padding: 8px 12px; min-height: 0; font-size: 13px; }
+.santa-note { font-size: 12.5px; color: var(--muted); margin: 6px 2px 10px; }
+.santa-spot { display: block; font-size: 12px; color: var(--muted); }
+.santa-add { display: grid; grid-template-columns: 1fr 70px; gap: 6px; margin-top: 8px; }
+.santa-add .input { width: 100%; margin: 0; } .santa-add [name=spot] { grid-column: 1; } .santa-add .btn { grid-column: 2; }
+.santa-kid { padding: 14px; } .santa-kid h3 { margin: 0 0 8px; font-size: 16px; }
+.santa-kid-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; } .santa-kid-row .input { width: 100%; margin: 0; }
 #printArea { display: none; }
 @media print {
   body > *:not(#printArea) { display: none !important; }
@@ -1760,10 +1776,11 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
     <h2 class="view-title" id="giftsTitle">Gifts</h2>
     <p class="view-intro">Jot down wishes as you hear them, then track what you buy against your budget.</p>
 
-    <div class="seg seg3 sub-tabs" id="giftTabs" role="group" aria-label="Wish list, gift tracker or gift ideas">
+    <div class="seg seg4 sub-tabs" id="giftTabs" role="group" aria-label="Wish list, gift tracker, gift ideas or Santa's secret list">
       <button type="button" data-gpane="wish" aria-pressed="true">📝 Wishes</button>
       <button type="button" data-gpane="track" aria-pressed="false">🎁 Tracker</button>
       <button type="button" data-gpane="ideas" aria-pressed="false">💡 Ideas</button>
+      <button type="button" data-gpane="santa" aria-pressed="false">🎅 Santa</button>
     </div>
 
     <!-- 📝 WISH LIST: quick notes of what family & friends would love -->
@@ -1790,6 +1807,9 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
     </div>
 
     <!-- 🎁 GIFT TRACKER -->
+    <!-- 🎅 SANTA'S SECRET LIST: behind its own PIN so little ones can't peek -->
+    <div id="paneSanta" hidden></div>
+
     <!-- 💡 GIFT IDEAS: by age, with one-tap store searches -->
     <div id="paneIdeas" hidden>
       <div class="card gi-intro">
@@ -6137,6 +6157,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (slide) $("#view-" + name).classList.add("slide-" + slide);
     if (name === "inspire" && typeof buildInspire === "function") buildInspire();
     if (name === "nye") renderNye();
+    if (name !== "gifts") santaLock();   // 🎅 leaving Gifts always locks Santa's list
     if (name === "meals") renderMeals();
     $$(".nav-btn").forEach(b => {
       const on = b.dataset.view === name;
@@ -7444,8 +7465,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const isSpent = g => g.status !== "idea";
   const sum = (list, f) => list.reduce((a, g) => a + (f(g) ? (+g.price || 0) : 0), 0);
   function giftTotals() {
-    const all = gifts.people.flatMap(p => p.gifts);
-    const budget = +gifts.budget || 0, spent = sum(all, isSpent), planned = sum(all, () => true);
+    const all = gifts.people.flatMap(p => p.gifts), withSanta = all.concat(santaGifts());   // 🎅 Santa's amounts count, quietly
+    const budget = +gifts.budget || 0, spent = sum(withSanta, isSpent), planned = sum(withSanta, () => true);
     return { all, budget, spent, planned, left: budget - spent };
   }
   function renderGifts() {
@@ -7651,6 +7672,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     gifts.people.forEach(p => { p.gifts = []; });
     save("gifts", gifts);
     wishes = []; save("wishes", wishes);
+    santa2.kids.forEach(k => { k.gifts = []; }); save("santaList", santa2);   // 🎅 keep the kids, clear last year's Santa gifts
     moments = []; save("moments", moments);                   // notes for next Christmas stay
     acts.mark = {}; save("acts", acts);
                           // your own traditions stay on the list
@@ -7892,8 +7914,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     catch (err) { location.href = INVITE.smsHref("", text); }
   });
   function showGiftPane(p) {
-    $("#paneWish").hidden = p !== "wish"; $("#paneTrack").hidden = p !== "track"; $("#paneIdeas").hidden = p !== "ideas";
+    $("#paneWish").hidden = p !== "wish"; $("#paneTrack").hidden = p !== "track"; $("#paneIdeas").hidden = p !== "ideas"; $("#paneSanta").hidden = p !== "santa";
     if (p === "ideas") renderIdeas();
+    if (p === "santa") renderSanta2(); else santaLock();
     $$("#giftTabs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.gpane === p ? "true" : "false"));
     save("giftPane", p);
     if (p === "wish") renderWishes();
@@ -9462,6 +9485,121 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     sel.parentElement.querySelector("[data-ginew]").hidden = sel.value !== "__new";
   });
   /* @gideas-end */
+
+  /* @santa-start */
+  /* ============================================================
+     🎅 SANTA'S SECRET LIST (Gifts → Santa)
+     Gifts "from Santa" behind their own grown-ups-only PIN, so little
+     ones can't peek. Locks again when you leave the tab, when the phone
+     goes to the background, or after 3 minutes. The amounts still count
+     in the gift budget, but no names or items show anywhere else.
+     The PIN is never stored, only a salted fingerprint of it.
+     ============================================================ */
+  let santa2 = load("santaList", { pin: null, kids: [] });
+  let santaOpen = false, santaTimer = null, santaSetFirst = "";
+  const santaGifts = () => santa2.kids.flatMap(k => k.gifts);
+  async function santaHash(pin, saltB64) {
+    const salt = Uint8Array.from(atob(saltB64), c => c.charCodeAt(0));
+    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: 150000 }, base, 256);
+    return btoa(String.fromCharCode(...new Uint8Array(bits)));
+  }
+  function santaLock() { santaOpen = false; clearTimeout(santaTimer); santaSetFirst = ""; if (!$("#paneSanta").hidden) renderSanta2(); }
+  function santaPoke() { clearTimeout(santaTimer); santaTimer = setTimeout(santaLock, 180000); }
+  document.addEventListener("visibilitychange", () => { if (document.hidden) santaLock(); });
+
+  function renderSanta2() {
+    const el = $("#paneSanta");
+    if (!santaOpen) {
+      const setting = !santa2.pin;
+      el.innerHTML = `<div class="card santa-lock">
+        <div class="santa-hat">🎅</div>
+        <h3>Santa's Secret List</h3>
+        <p class="review-sub">${setting ? "Grown-ups only! Choose a Santa PIN (4–8 numbers) that the kids don't know. Keep it different from your phone's passcode." : "Grown-ups only. Enter the Santa PIN to open the list."}</p>
+        <form id="santaPinForm" autocomplete="off">
+          <input class="input santa-pin" id="santaPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="${setting ? (santaSetFirst ? "Type it again" : "New Santa PIN") : "Santa PIN"}" aria-label="Santa PIN">
+          <button class="btn btn-red btn-block" type="submit">${setting ? (santaSetFirst ? "Save PIN" : "Next") : "🔓 Open Santa's list"}</button>
+        </form>
+        ${setting ? "" : `<button type="button" class="classy-link santa-forgot" id="santaForgot">Forgot the PIN?</button>`}
+      </div>`;
+      setTimeout(() => { const i = $("#santaPin"); if (i) i.focus(); }, 100);
+      return;
+    }
+    const all = santaGifts(), spent = sum(all, isSpent), planned = sum(all, () => true);
+    el.innerHTML = `<div class="card santa-head"><div><b>🎅 Santa's Secret List</b><small>${all.length} ${all.length === 1 ? "gift" : "gifts"} · ${money(spent)} spent · ${money(planned)} planned</small></div>
+        <button type="button" class="btn btn-ghost" id="santaLockBtn">🔒 Lock</button></div>
+      <p class="santa-note">These amounts count in your gift budget, but nothing here shows anywhere else in the app.</p>
+      ${santa2.kids.map(k => `<div class="card person" data-skid="${k.id}">
+        <div class="person-head"><span class="p-avatar">🎁</span><div class="p-name">${esc(k.name)}<small>${money(sum(k.gifts, () => true))} from Santa</small></div>
+          <button class="icon-btn" data-sact="delkid" aria-label="Remove ${esc(k.name)}">✕</button></div>
+        <ul class="gift-items">${k.gifts.map(g => { const s = STATUSES.find(x => x.key === g.status) || STATUSES[0];
+          return `<li class="gift-item ${s.key}" data-sgid="${g.id}"><button class="status-chip s-${s.key}" data-sact="status">${s.icon} ${s.label}</button>
+            <span class="g-name">${esc(g.name)}${g.spot ? `<small class="santa-spot">📍 Hidden: ${esc(g.spot)}</small>` : ""}</span><span class="g-price">${money(+g.price || 0)}</span>
+            <button class="icon-btn" data-sact="delgift" aria-label="Remove">✕</button></li>`; }).join("")}</ul>
+        <form class="santa-add" data-skadd autocomplete="off">
+          <input class="input" name="name" maxlength="60" placeholder="Gift from Santa" aria-label="Gift">
+          <input class="input" name="price" type="number" inputmode="decimal" min="0" placeholder="$" aria-label="Price">
+          <input class="input" name="spot" maxlength="40" placeholder="Hiding spot (optional)" aria-label="Hiding spot">
+          <button class="btn btn-green" type="submit">Add</button>
+        </form></div>`).join("")}
+      <form class="card add-task santa-kid" id="santaKidForm" autocomplete="off">
+        <h3>➕ Add a child</h3>
+        <div class="santa-kid-row"><input class="input" name="kid" maxlength="30" placeholder="Child's name" aria-label="Child's name"><button class="btn btn-green" type="submit">Add</button></div>
+      </form>
+      <button type="button" class="btn btn-ghost btn-block" id="santaChangePin">Change the Santa PIN</button>`;
+  }
+
+  $("#paneSanta").addEventListener("submit", async e => {
+    e.preventDefault(); const f = e.target;
+    if (f.id === "santaPinForm") {
+      const pin = $("#santaPin").value.trim();
+      if (!santa2.pin) {
+        if (!/^\d{4,8}$/.test(pin)) { toast("🎅 Use 4 to 8 numbers"); return; }
+        if (!santaSetFirst) { santaSetFirst = pin; renderSanta2(); return; }
+        if (pin !== santaSetFirst) { santaSetFirst = ""; toast("Those didn't match. Let's try again"); renderSanta2(); return; }
+        const salt = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))));
+        santa2.pin = { salt, hash: await santaHash(pin, salt) }; save("santaList", santa2);
+        santaSetFirst = ""; santaOpen = true; santaPoke(); renderSanta2(); toast("🎅 Santa PIN saved. Remember it!"); return;
+      }
+      if (await santaHash(pin, santa2.pin.salt) === santa2.pin.hash) { santaOpen = true; santaPoke(); renderSanta2(); }
+      else { toast("🎅 That's not the Santa PIN"); $("#santaPin").value = ""; if (navigator.vibrate) navigator.vibrate([30, 40, 30]); }
+      return;
+    }
+    if (!santaOpen) return;
+    santaPoke();
+    if (f.id === "santaKidForm") {
+      const n = f.kid.value.trim(); if (!n) return;
+      santa2.kids.push({ id: uid(), name: n, gifts: [] }); save("santaList", santa2); renderSanta2(); renderGifts(); return;
+    }
+    if (f.hasAttribute("data-skadd")) {
+      const k = santa2.kids.find(x => x.id === f.closest("[data-skid]").dataset.skid), name = f.name.value.trim(); if (!k || !name) return;
+      k.gifts.push({ id: uid(), name, price: parseFloat(f.price.value) || 0, status: "idea", spot: f.spot.value.trim() });
+      save("santaList", santa2); renderSanta2(); renderGifts(); toast("🎅 Added to Santa's list");
+    }
+  });
+  $("#paneSanta").addEventListener("click", e => {
+    const t = e.target;
+    if (t.closest("#santaForgot")) {
+      if (!confirm("Forgot the Santa PIN? The only way back in is to erase Santa's list and start over.")) return;
+      if (!confirm("Erase Santa's secret list and PIN? This can't be undone.")) return;
+      santa2 = { pin: null, kids: [] }; save("santaList", santa2); renderSanta2(); renderGifts(); return;
+    }
+    if (!santaOpen) return;
+    santaPoke();
+    if (t.closest("#santaLockBtn")) { santaLock(); toast("🔒 Santa's list is locked"); return; }
+    if (t.closest("#santaChangePin")) { santa2.pin = null; save("santaList", santa2); santaOpen = false; renderSanta2(); toast("🎅 Choose a new Santa PIN"); return; }
+    const b = t.closest("[data-sact]"); if (!b) return;
+    const k = santa2.kids.find(x => x.id === b.closest("[data-skid]").dataset.skid); if (!k) return;
+    const act = b.dataset.sact;
+    if (act === "delkid") { if (!confirm(`Remove ${k.name} and their Santa gifts?`)) return; santa2.kids = santa2.kids.filter(x => x !== k); }
+    else {
+      const g = k.gifts.find(x => x.id === b.closest("[data-sgid]").dataset.sgid); if (!g) return;
+      if (act === "status") { const i = STATUSES.findIndex(s => s.key === g.status); g.status = STATUSES[(i + 1) % STATUSES.length].key; }
+      if (act === "delgift") k.gifts = k.gifts.filter(x => x !== g);
+    }
+    save("santaList", santa2); renderSanta2(); renderGifts();
+  });
+  /* @santa-end */
 
   /* ============================================================
      START THE APP
