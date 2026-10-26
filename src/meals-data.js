@@ -2637,6 +2637,7 @@ window.NOEL_MEALS = (function () {
     },
     plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8), nyeparty: nyePartyPlan },
     doneness: DONENESS,
+    appShop: APP_SHOP, drinkApps: DRINK_APPS,   // 🏢 the office food planner uses the same appetizer shopping data
     frac, hm, fmtNum
   };
 })();

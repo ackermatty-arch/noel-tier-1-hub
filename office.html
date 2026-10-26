@@ -1317,6 +1317,10 @@ body.co .fam-only { display: none !important; } body.co #giftTabs { grid-templat
 .who-pick { display: grid; gap: 10px; } .who-tile { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; text-align: left; padding: 14px; border-radius: 16px; border: 2px solid var(--line); background: var(--card); font: inherit; color: inherit; cursor: pointer; }
 .who-tile .wt-ico { font-size: 30px; } .who-tile b { display: block; color: var(--pine-dark); font-size: 16px; } .who-tile small { color: var(--muted); font-size: 13px; } .who-tile.on { border-color: var(--gold); background: #fbf5e6; }
 .who-pill { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; border-radius: 14px; background: #fbf5e6; border: 1px solid rgba(201,162,39,.4); margin-bottom: 12px; font-size: 14px; }
+.where-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .where-pick .who-tile { grid-template-columns: 1fr; padding: 12px; } .where-pick .wt-ico { font-size: 24px; }
+.where-tip { background: #f6f0e2; border-radius: 12px; padding: 10px 12px; font-size: 14px; margin: 10px 0 0; } .where-ask { margin-top: 10px; } .where-ask summary { font-weight: 700; color: var(--pine-dark); cursor: pointer; }
+.cat-list { list-style: none; padding: 0; margin: 6px 0 10px; } .cat-list li { display: grid; grid-template-columns: 1fr; gap: 2px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+.cat-list li b { color: var(--pine-dark); } .cat-list small { display: block; color: var(--muted); font-size: 12.5px; } .app-sum { background: #f6f0e2; border-radius: 12px; padding: 10px 12px; font-size: 14.5px; margin: 8px 0 0; }
 .ss-ok { font-size: 12px; color: #2f8a4f; font-weight: 800; white-space: nowrap; } .ss-avoid { margin: 4px 0; font-size: 14px; }
 .ss-tools { display: flex; justify-content: space-between; margin-top: 12px; } .ss-mail { margin-top: 10px; } .ss-mail summary { font-weight: 700; color: var(--pine-dark); cursor: pointer; } .ss-mail .chip { margin: 4px 4px 0 0; }
 .ss-swap summary { font-weight: 700; color: var(--pine-dark); cursor: pointer; } .ss-swap ol { padding-left: 20px; font-size: 14px; } .ss-swap li { margin: 5px 0; }
@@ -6137,6 +6141,7 @@ window.NOEL_MEALS = (function () {
     },
     plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8), nyeparty: nyePartyPlan },
     doneness: DONENESS,
+    appShop: APP_SHOP, drinkApps: DRINK_APPS,   // 🏢 the office food planner uses the same appetizer shopping data
     frac, hm, fmtNum
   };
 })();
@@ -11285,9 +11290,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
 
   function renderOffice() {
     const tab = off.tab || "event";
-    $("#offTabs").innerHTML = [["event", "📋 Event"], ["approval", "📨 Approval"], ["potluck", "🥘 Potluck"], ["santa", "🎅 Secret Santa"], ["awards", "🏆 Awards"], ["auction", "🔨 Auction"], ["charity", "💛 Charity"], ["handover", "📦 Handover"]].map(([k, l]) =>
+    $("#offTabs").innerHTML = [["event", "📋 Event"], ["food", "🍽️ Food"], ["approval", "📨 Approval"], ["potluck", "🥘 Potluck"], ["santa", "🎅 Secret Santa"], ["awards", "🏆 Awards"], ["auction", "🔨 Auction"], ["charity", "💛 Charity"], ["handover", "📦 Handover"]].map(([k, l]) =>
       `<button type="button" class="chip${k === tab ? " on" : ""}" data-oftab="${k}">${l}${k === "approval" ? ` <span class="ap-dot ${off.appr.status}"></span>` : ""}</button>`).join("");
-    $("#offBody").innerHTML = ({ event: offEventHtml, approval: offApprovalHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml })[tab]();
+    $("#offBody").innerHTML = ({ event: offEventHtml, food: offFoodHtml, approval: offApprovalHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml })[tab]();
   }
   const fld = (k, label, type, ph, extra) => `<label class="off-f${extra === "wide" ? " wide" : ""}"><span class="meal-lab">${label}</span>${type === "area" ? `<textarea class="input" rows="2" data-ev="${k}" maxlength="300" placeholder="${ph || ""}">${esc(off.ev[k] || "")}</textarea>` : `<input class="input" type="${type || "text"}" data-ev="${k}" value="${esc(off.ev[k] ?? "")}" placeholder="${ph || ""}" ${type === "number" ? 'inputmode="decimal" min="0"' : 'maxlength="80"'}>`}</label>`;
   function offEventHtml() {
@@ -11299,8 +11304,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${last.worked ? `<p>👍 <b>What worked:</b> ${esc(last.worked)}</p>` : ""}${last.change ? `<p>✏️ <b>Change next time:</b> ${esc(last.change)}</p>` : ""}
         ${last.vendors && last.vendors.length ? `<p class="host-rem">Vendors used: ${last.vendors.map(v => esc(v.name) + (v.type ? ` (${esc(v.type)})` : "")).join(", ")}</p>` : ""}</div>` : ""}
       <div class="who-pill"><span>${W[1]} <b>${W[2]}</b></span><button type="button" class="classy-link" data-ofwho="">Change</button></div>
+      ${offWhereHtml()}
       <div class="card pt-card"><h3>🎉 The event</h3><div class="off-grid">
-        ${fld("name", "Event name", "text", "e.g. Holiday Party", "wide")}${fld("date", "Date", "date")}${fld("headcount", "Guests (about)", "number")}${fld("start", "Starts", "time")}${fld("end", "Ends", "time")}
+        ${fld("name", "Event name", "text", "e.g. Holiday Party", "wide")}${fld("date", "Date", "date")}${fld("headcount", off.ev.who === "family" ? "Adults (about)" : "Guests (about)", "number")}${off.ev.who === "family" ? fld("kids", "Kids (about)", "number") : ""}${fld("start", "Starts", "time")}${fld("end", "Ends", "time")}
         ${fld("venue", "Venue", "text", "e.g. Boardroom, The Keg", "wide")}${fld("address", "Address", "text", "", "wide")}${fld("theme", "Theme", "text", "e.g. Ugly sweater")}${fld("dress", "Dress code", "text", "e.g. Festive casual")}
         ${fld("organizer", "Organized by", "text", "Your name")}${fld("budget", "Approved budget", "number", "$")}</div></div>
       <div class="card pt-card"><h3>✨ What's planned</h3><div class="apps-filters">${offActList().map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div>
@@ -11323,8 +11329,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       update ? `I've updated the plan for our ${e.name || "holiday party"} based on your feedback. Here's the new version for your approval.` : `I've put together the plan for our ${e.name || "holiday party"} and would love your approval before I book anything.`, "",
       "THE EVENT",
       `• Date: ${e.date ? offDate(e.date) : "to be confirmed"}${e.start ? `, ${offTime(e.start)}${e.end ? ` to ${offTime(e.end)}` : ""}` : ""}`,
-      `• Where: ${e.venue || "to be confirmed"}${e.address ? ` (${e.address})` : ""}`,
-      `• Guests: about ${hc} people${offWho() ? ` (${{ staff: "staff only", partners: "staff and their partners", family: "staff and their families, kids welcome" }[off.ev.who]})` : ""}`];
+      `• Where: ${e.venue || "to be confirmed"}${e.address ? ` (${e.address})` : ""}${e.where ? ` · ${{ office: "in the office", venue: "rented venue", outing: "team outing", home: "at a home" }[e.where]}` : ""}`,
+      `• Guests: about ${hc}${e.who === "family" && +e.kids ? ` adults and ${+e.kids} kids` : " people"}${offWho() ? ` (${{ staff: "staff only", partners: "staff and their partners", family: "staff and their families, kids welcome" }[off.ev.who]})` : ""}`];
+    const fd = (off.food || {}).style; if (fd) lines.push(`• Food: ${{ apps: "appetizers we'll make ourselves", catered: "catered / ordered in", potluck: "potluck (everyone brings a dish)", venue: "provided by the venue" }[fd]}`);
     if (e.theme || e.dress) lines.push(`• ${[e.theme && `Theme: ${e.theme}`, e.dress && `Dress code: ${e.dress}`].filter(Boolean).join(" · ")}`);
     const acts = offActs(); if (acts.length) lines.push("", "WHAT'S PLANNED", ...acts.map(a => "• " + a.replace(/^\S+\s/, "")));
     lines.push("", "BUDGET");
@@ -11525,7 +11532,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   });
   $("#view-office").addEventListener("change", async e => {
     const t = e.target;
-    if (t.dataset.ev) { const k = t.dataset.ev; off.ev[k] = t.type === "number" ? Math.max(0, parseFloat(t.value) || 0) : t.value.trim(); saveOff(); if (["date", "headcount", "budget", "giftLimit"].includes(k) || off.tab === "approval") renderOffice(); return; }
+    if (t.dataset.ev) { const k = t.dataset.ev; off.ev[k] = t.type === "number" ? Math.max(0, parseFloat(t.value) || 0) : t.value.trim(); saveOff(); if (["date", "headcount", "kids", "budget", "giftLimit"].includes(k) || off.tab === "approval") renderOffice(); return; }
     if (t.dataset.wrap) { off.wrap[t.dataset.wrap] = t.value.trim(); saveOff(); return; }
     if (t.dataset.aww != null) { const a = off.awards.find(x => x.id === t.closest("[data-oa]").dataset.oa); if (a) { a.w = t.value.trim(); saveOff(); } return; }
     if (t.id === "apFollow") { off.appr.followDays = +t.value; saveOff(); offSync(); renderOffice(); return; }
@@ -11724,6 +11731,97 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (f.id === "chOptForm") { e.preventDefault(); e.stopImmediatePropagation(); const n = f.name.value.trim(); if (!n) return; C.options.push({ id: uid(), name: n, url: f.url.value.trim(), votes: 0 }); if (C.options.length === 1) C.chosen = C.options[0].id; saveOff(); renderOffice(); return; }
     if (f.id === "chDonForm") { e.preventDefault(); e.stopImmediatePropagation(); const a = parseFloat(f.amt.value) || 0; if (!a) return; C.donations.push({ id: uid(), who: f.who.value.trim(), amt: a }); saveOff(); renderOffice(); toast(`💛 ${money(a)} added`); return; }
   }, true);
+
+  /* ---------- 📍 WHERE: in the office, a rented venue, an outing or a home ---------- */
+  const OFF_WHERE = [
+    ["office", "🏢", "In the office", "Cozy and personal, no venue costs.", [["🪑 Boardroom or meeting room", "Book the room, push the table to the wall for a buffet, and check how many people it holds."], ["🖥️ Around our desks", "Keep it relaxed: snacks on a shared table, each team decorates their pod, and a desk-hop for treats."], ["☕ Break room or kitchen", "Handy for food and fridge space. Plan a plug-in spot for slow cookers and a garbage station."], ["🛋️ Lobby or reception", "Great for mingling and photos. Put a sign on the door if clients might drop in."], ["🏬 The whole floor", "Spread out stations: food in one spot, games in another, a quiet corner for chatting."]]],
+    ["venue", "🏛️", "Rent a venue", "More room, less clean-up. Best for bigger or family parties.", [["🍽️ Restaurant private room", "Ask about a set menu or appetizer package and the minimum spend."], ["🏛️ Banquet or community hall", "Lots of space for families. Check if outside food and decorations are allowed."], ["🏨 Hotel event room", "Catering, tables and clean-up are usually included."], ["🍺 Brewery, winery or café", "Relaxed and festive. Ask about non-alcoholic options and parking."]]],
+    ["outing", "⛸️", "Team outing", "Get out of the office and do something together.", [["🎳 Bowling", "Book lanes and ask about a food package."], ["⛸️ Skating", "Check public skate times or rent the rink for an hour."], ["🔐 Escape room", "Split into teams of 4–6 and book back-to-back rooms."], ["🍳 Cooking or craft class", "Many studios host private group classes in December."], ["🍽️ Lunch or dinner out", "Reserve early. December fills up fast!"]]],
+    ["home", "🏡", "Someone's home", "Warm and personal for small teams.", [["🏡 The boss's home", "Agree on parking, coats, kids and pets, and who helps clean up."], ["🏡 A team member's home", "Offer to cover food and supplies so it's not on the host."]]]
+  ];
+  const OFF_ASK = ["How many people does it hold (seated and standing)?", "Deposit, payment and cancellation policy?", "Is food included, or can we bring our own?", "Music, screen or microphone available?", "Parking and accessibility?", "Set-up and clean-up times?", "Is it kid-friendly? (family parties)"];
+  function offWhereHtml() {
+    const w = OFF_WHERE.find(x => x[0] === off.ev.where), hc = (+off.ev.headcount || 0) + (off.ev.who === "family" ? +off.ev.kids || 0 : 0);
+    const hint = (!w || w[0] === "office" || w[0] === "home") && (hc > 25 || (off.ev.who === "family" && hc > 15)) ? `<p class="org-warn">With about ${hc} people${off.ev.who === "family" ? " including kids" : ""}, a rented room may be more comfortable. Most offices are snug past 25.</p>` : "";
+    const spot = w && w[4].find(x => x[0] === off.ev.spot);
+    return `<div class="card pt-card"><h3>📍 Where's the party?</h3>
+        <div class="where-pick">${OFF_WHERE.map(([k, i, l, d]) => `<button type="button" class="who-tile${off.ev.where === k ? " on" : ""}" data-ofwhere="${k}"><span class="wt-ico">${i}</span><span><b>${l}</b><small>${d}</small></span></button>`).join("")}</div>
+        ${hint}
+        ${w ? `<p class="fill-lab">${w[0] === "office" ? "Where in the office?" : "What kind?"}</p><div class="apps-filters">${w[4].map(([l]) => `<button type="button" class="chip${off.ev.spot === l ? " on" : ""}" data-ofspot="${esc(l)}">${l}</button>`).join("")}</div>
+          ${spot ? `<p class="where-tip">💡 ${spot[1]}</p>` : ""}
+          ${w[0] === "venue" || w[0] === "outing" ? `<p class="host-rem">📍 Find nearby: ${(w[0] === "venue" ? ["event venue", "banquet hall", "restaurant private room"] : ["bowling", "skating rink", "escape room", "cooking class"]).map(q => `<button type="button" class="chip" data-amap="${q}">${q}</button>`).join(" ")}</p>
+            <details class="where-ask"><summary>✅ Questions to ask the venue</summary><ul class="host-list">${OFF_ASK.map((q, i) => `<li><label class="${(off.ask || {})[i] ? "on" : ""}"><input type="checkbox" data-ofask="${i}" ${(off.ask || {})[i] ? "checked" : ""}><span>${q}</span></label></li>`).join("")}</ul></details>` : ""}` : ""}</div>`;
+  }
+
+  /* ---------- 🍽️ FOOD: appetizers we make, catered, potluck or the venue ---------- */
+  const OFF_FOOD = [["apps", "🍢", "Appetizers we make", "Pick the bites. Noël works out how many, the cost and the shopping list."], ["catered", "🍽️", "Catered or ordered in", "How much to order for your group."], ["potluck", "🥘", "Potluck", "Everyone brings something."], ["venue", "🍴", "The venue provides it", "Just note the menu and cost."]];
+  const KID_APPS = ["Pigs in a Blanket", "Pinwheel Roll-Ups", "Veggie Cups", "Mini Sliders", "Cookie Platter", "Party Snack Mix", "Chocolate-Dipped Strawberries"];
+  const offFoodCfg = () => (off.food = off.food || { style: "", mode: "meal", picks: null, got: {} });
+  function offPeople() { const a = Math.max(1, +off.ev.headcount || 1), k = off.ev.who === "family" ? Math.max(0, +off.ev.kids || 0) : 0; return { a, k, eq: a + k * 0.6, all: a + k }; }
+  function offFoodPlan() {
+    const F = offFoodCfg(), MD2 = window.NOEL_MEALS || {}, SHOP = MD2.appShop || {}, DR = MD2.drinkApps || [], P = offPeople();
+    const all = (window.NOEL_APPS || []).map(r => r[1]);
+    let picks = F.picks || (off.ev.who === "family" ? ["Pigs in a Blanket", "Pinwheel Roll-Ups", "Veggie Cups", "Mini Sliders", "Charcuterie Board", "Cookie Platter", "Sparkling Punch"] : ["Caprese Skewers", "Charcuterie Board", "Mini Sliders", "Spinach Artichoke Dip", "Pinwheel Roll-Ups", "Mini Cheesecake Bites"]);
+    picks = picks.filter(n => all.includes(n));
+    const food = picks.filter(n => !DR.includes(n)), drinks = picks.filter(n => DR.includes(n));
+    const per = F.mode === "meal" ? 12 : 5, total = Math.ceil(P.eq * per), each = food.length ? Math.ceil(total / food.length) : 0;
+    const cost = (n, batches) => ((SHOP[n] || [0, []])[1].reduce((t, x) => t + (x[1] || 0), 0)) * batches * fx();
+    const items = food.map(n => { const batch = (SHOP[n] || [24])[0], b = Math.max(1, Math.ceil(each / batch - 1e-9)); return { n, row: (window.NOEL_APPS || []).find(r => r[1] === n), pieces: each, b, cost: cost(n, b) }; });
+    const dItems = drinks.map(n => { const batch = (SHOP[n] || [16])[0], b = Math.max(1, Math.ceil(P.all * 1.5 / batch - 1e-9)); return { n, row: (window.NOEL_APPS || []).find(r => r[1] === n), b, cost: cost(n, b) }; });
+    return { P, picks, items, dItems, total, each, all, sum: items.concat(dItems).reduce((t, i) => t + i.cost, 0) };
+  }
+  function offFoodHtml() {
+    const F = offFoodCfg(), P = offPeople();
+    const pick = `<div class="card pt-card"><h3>🍽️ How are you feeding everyone?</h3><div class="who-pick">${OFF_FOOD.map(([k, i, l, d]) => `<button type="button" class="who-tile${F.style === k ? " on" : ""}" data-offood="${k}"><span class="wt-ico">${i}</span><span><b>${l}</b><small>${d}</small></span></button>`).join("")}</div></div>`;
+    const ppl = `<p class="host-rem">For <b>${P.a} ${P.a === 1 ? "adult" : "adults"}</b>${P.k ? ` and <b>${P.k} kids</b> (kids count as a little over half a portion)` : ""}. Change the numbers on the 📋 Event tab.</p>`;
+    if (!F.style) return pick;
+    if (F.style === "potluck") return pick + `<div class="card pt-card">${ppl}<button type="button" class="btn btn-red btn-block" data-oftab="potluck">🥘 Open the potluck sign-ups ›</button></div>` + offSuppliesHtml(P);
+    if (F.style === "venue") return pick + `<div class="card pt-card">${ppl}<p>Note the menu and price on the 📋 Event tab under <b>Costs &amp; vendors</b> (choose "Catering"), so it shows in the approval request.</p><p class="host-rem">💡 Ask about dietary options (vegetarian, gluten-free, nut allergies) and kids' meals${off.ev.who === "family" ? ", since kids are coming" : ""}.</p></div>`;
+    if (F.style === "catered") {
+      const A = P.a, K = P.k, pizzas = Math.ceil((A * 3 + K * 2) / 8), wraps = Math.ceil(A * 1.5 + K), salads = Math.max(1, Math.ceil(P.all / 12)), dessert = Math.ceil(P.all * 1.5), drinks = Math.ceil(P.all * 2.5);
+      return pick + `<div class="card pt-card"><h3>📋 How much to order</h3>${ppl}<ul class="cat-list">
+          <li><b>🍕 Pizza</b><span>${pizzas} large pizzas <small>(about 3 slices per adult, 2 per child)</small></span></li>
+          <li><b>🥪 Sandwich or wrap platters</b><span>${wraps} pieces <small>(1½ per adult, 1 per child)</small></span></li>
+          <li><b>🥗 Salads</b><span>${salads} large ${salads === 1 ? "bowl" : "bowls"} <small>(one per 12 people)</small></span></li>
+          <li><b>🍰 Desserts</b><span>${dessert} pieces <small>(cookies, squares or cupcakes)</small></span></li>
+          <li><b>🥤 Drinks</b><span>${drinks} drinks <small>(2–3 per person; add coffee and tea)</small></span></li></ul>
+        <p class="host-rem">Choose one main (pizza or platters), not both, unless it's a long party. Order 1–2 weeks ahead in December, and ask for vegetarian and gluten-free portions.</p>
+        <button type="button" class="btn btn-ghost btn-block" data-oftab="event">💵 Add the quote to Costs &amp; vendors ›</button></div>` + offSuppliesHtml(P);
+    }
+    // 🍢 appetizers we make ourselves
+    const X = offFoodPlan();
+    return pick + `<div class="card pt-card"><div class="seg sub-tabs" role="group"><button type="button" data-offmode="light" aria-pressed="${F.mode !== "meal"}">Light bites (~5 each)</button><button type="button" data-offmode="meal" aria-pressed="${F.mode === "meal"}">Appetizers are the meal (~12)</button></div>${ppl}
+        <p class="app-sum">🍢 <b>${X.items.length} appetizers</b> · about <b>${X.total} bites</b>${X.items.length ? ` (${X.each} of each)` : ""} · about <b>${cad0(X.sum)} ${currency}</b>, roughly ${cad(X.sum / Math.max(1, X.P.all))} per person</p></div>
+      <div class="card pt-card"><h3>✨ Tap to choose</h3><p class="host-rem">${off.ev.who === "family" ? "⭐ marks kid favourites." : "Mix warm, cold and one sweet bite."}</p>
+        <div class="apps-filters">${(window.NOEL_APPS || []).map(r => `<button type="button" class="chip${X.picks.includes(r[1]) ? " on" : ""}" data-offapp="${esc(r[1])}">${X.picks.includes(r[1]) ? "✓ " : ""}${r[0]} ${esc(r[1])}${off.ev.who === "family" && KID_APPS.includes(r[1]) ? " ⭐" : ""}</button>`).join("")}</div></div>
+      ${X.items.length || X.dItems.length ? `<div class="card pt-card"><h3>🧾 Your menu</h3><ul class="cat-list">${X.items.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.pieces} pieces · ${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}<small>💡 ${esc(i.row[3])}</small></span></li>`).join("")}${X.dItems.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}</span></li>`).join("")}</ul>
+        <div class="send-btns"><button type="button" class="btn btn-red" data-print="offfood">🖨️ Menu &amp; shopping list</button><button type="button" class="btn btn-ghost" id="offFoodCost">💵 Add ${cad0(X.sum)} to costs</button></div></div>` : ""}` + offSuppliesHtml(X.P);
+  }
+  function offSuppliesHtml(P) {
+    const n = P.all;
+    return `<div class="card pt-card"><h3>🍽️ Plates, cups &amp; extras</h3><ul class="cat-list"><li><b>Plates</b><span>${Math.ceil(n * 1.5)} <small>(1½ per person)</small></span></li><li><b>Napkins</b><span>${n * 3}</span></li><li><b>Cups</b><span>${n * 3}</span></li><li><b>Cutlery sets</b><span>${n}</span></li><li><b>Ice</b><span>${Math.ceil(n / 8)} ${Math.ceil(n / 8) === 1 ? "bag" : "bags"}</span></li><li><b>Garbage &amp; recycling bags</b><span>a few, plus a labelled recycling bin</span></li></ul></div>`;
+  }
+  function offFoodDoc() {
+    const X = offFoodPlan(), SHOP = (window.NOEL_MEALS || {}).appShop || {};
+    if (!X.items.length && !X.dItems.length) return { error: "🍢 Pick some appetizers first" };
+    const css = `.of{font:10.5pt/1.45 Georgia,serif;color:#222} .of h1{font-size:20pt;margin:0;color:#1E3A2F} .of .of-s{color:#8a6d3b;font:600 8.5pt sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:2px 0 12px}
+      .of h2{font-size:12.5pt;color:#1E3A2F;border-bottom:1.5px solid #B8935A;margin:14px 0 5px;padding-bottom:2px} .of table{width:100%;border-collapse:collapse} .of td,.of th{padding:4px 6px;border-bottom:1px solid #e6e0d2;text-align:left;font-size:10pt;vertical-align:top} .of th{background:#f4efe3;font:600 8pt sans-serif;text-transform:uppercase} .of ul{list-style:none;margin:0;padding:0;columns:2;column-gap:18px} .of li{margin:2px 0;break-inside:avoid}`;
+    const html = `<div class="of"><h1>🍢 ${esc(off.ev.name || "Office Party")} Menu</h1><p class="of-s">${X.P.a} adults${X.P.k ? ` + ${X.P.k} kids` : ""} · about ${X.total} bites · about ${cad0(X.sum)} ${currency}</p>
+      <h2>The menu</h2><table><tr><th>Appetizer</th><th>How many</th><th>Make ahead</th></tr>${X.items.map(i => `<tr><td><b>${esc(i.n)}</b></td><td>${i.pieces} pieces (${i.b} ${i.b === 1 ? "batch" : "batches"})</td><td>${esc(i.row[3])}</td></tr>`).join("")}${X.dItems.map(i => `<tr><td><b>${esc(i.n)}</b></td><td>${i.b} ${i.b === 1 ? "batch" : "batches"}</td><td>${esc(i.row[3])}</td></tr>`).join("")}</table>
+      <h2>Shopping list</h2><ul>${X.items.concat(X.dItems).flatMap(i => (SHOP[i.n] || [0, []])[1].map(([t, pr]) => `<li>☐ ${i.b > 1 ? `<b>${i.b} ×</b> ` : ""}${esc(t)}${pr ? ` · ${cad(pr * i.b * fx())}` : ""} <small style="color:#999">(${esc(i.n)})</small></li>`)).join("")}</ul>
+      <h2>Plates, cups &amp; extras</h2><ul><li>☐ ${Math.ceil(X.P.all * 1.5)} plates</li><li>☐ ${X.P.all * 3} napkins</li><li>☐ ${X.P.all * 3} cups</li><li>☐ ${X.P.all} cutlery sets</li><li>☐ ${Math.ceil(X.P.all / 8)} bags of ice</li><li>☐ Garbage &amp; recycling bags</li></ul></div>`;
+    return { title: "Office party menu & shopping list", css, html, margin: 0.5, file: "Office-Party-Menu" };
+  }
+  $("#view-office").addEventListener("click", e => {
+    const t = e.target, F = offFoodCfg();
+    const wh = t.closest("[data-ofwhere]"); if (wh) { off.ev.where = wh.dataset.ofwhere; off.ev.spot = ""; saveOff(); renderOffice(); return; }
+    const sp = t.closest("[data-ofspot]"); if (sp) { off.ev.spot = sp.dataset.ofspot; const clean = sp.dataset.ofspot.replace(/^\S+\s/, ""); if (!off.ev.venue || OFF_WHERE.some(w => w[4].some(x => x[0].replace(/^\S+\s/, "") === off.ev.venue))) off.ev.venue = clean; saveOff(); renderOffice(); return; }
+    const fs = t.closest("[data-offood]"); if (fs) { F.style = fs.dataset.offood; if (F.style === "potluck") off.acts.potluck = 1; if (F.style === "catered") off.acts.catered = 1; saveOff(); renderOffice(); return; }
+    const fm = t.closest("[data-offmode]"); if (fm) { F.mode = fm.dataset.offmode; saveOff(); renderOffice(); return; }
+    const fa = t.closest("[data-offapp]"); if (fa) { const X = offFoodPlan(), n = fa.dataset.offapp; F.picks = X.picks.includes(n) ? X.picks.filter(x => x !== n) : X.picks.concat(n); saveOff(); renderOffice(); return; }
+    if (t.closest("#offFoodCost")) { const X = offFoodPlan(), ex = off.costs.find(c => c.auto === "food"); if (ex) ex.cost = Math.round(X.sum); else off.costs.push({ id: uid(), type: "Catering", name: "Homemade appetizers", contact: "", cost: Math.round(X.sum), auto: "food" }); saveOff(); toast(`💵 ${cad0(X.sum)} added to Costs & vendors`); return; }
+  });
+  $("#view-office").addEventListener("change", e => { const t = e.target; if (t.dataset.ofask != null) { off.ask = off.ask || {}; off.ask[t.dataset.ofask] = t.checked; saveOff(); t.closest("label").classList.toggle("on", t.checked); } });
   if (SPACE === "office") document.body.classList.toggle("co-kids", off.ev.who === "family");
   offSync();
   /* @office-end */
@@ -11759,6 +11857,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     else if (key === "yearend") d = yearEndDoc();
     else if (key === "reimburse") d = reimburseDoc();
     else if (key === "ssslips") d = ssSlipsDoc();
+    else if (key === "offfood") d = offFoodDoc();
     else if (key === "bidsheets") d = bidSheetsDoc();
     else if (key === "aucwinners") d = aucWinnersDoc();
     else if (key === "labels" || key === "return") d = labelDoc(key);
