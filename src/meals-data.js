@@ -2640,6 +2640,201 @@ window.NOEL_MEALS = (function () {
       return groups;
     }
   });
+
+  // 🦐 CHRISTMAS EVE SEAFOOD SUPPER (Feast of the Seven Fishes-inspired). Written for 8, scales 1–20.
+  function seafoodPlan(guests) {
+    const g = Math.min(20, Math.max(1, guests | 0)), f = g / 8;
+    return { g, f, pies: 1, dishes: 1, pots: g > 10 ? 2 : 1 };
+  }
+  const seafood = {
+    id: "seafood", tab: "eve",
+    name: "Christmas Eve Seafood Supper", icon: "🦐",
+    blurb: "Seafood cioppino with garlic bread, a cranberry-rosemary spritz and vanilla bean panna cotta.",
+    defaultTime: "18:00", defaultDate: eveDate,
+    menu: [
+      ["Main", ["Classic Seafood Cioppino", "Toasted Garlic Bread"]],
+      ["Dessert", ["Vanilla Bean Panna Cotta with Raspberry Coulis"]],
+      ["Drinks", ["Cranberry Rosemary Holiday Spritz"]]
+    ],
+    drinks: [
+      ["With dinner", "A crisp white such as Pinot Grigio or Sauvignon Blanc (the same wine you cook with), or a dry sparkling wine."],
+      ["Non-alcoholic", "The Cranberry Rosemary Spritz topped with sparkling water (recipe included)."],
+      ["With dessert", "Coffee, or a small glass of Prosecco with the panna cotta."]
+    ],
+    recipes: [
+      {
+        id: "cioppino", course: "Main", name: "Classic Seafood Cioppino",
+        prep: "20 min", cook: "30 min", yieldText: f => servings(f),
+        note: (f, p) => p.pots > 1 ? "For this many guests, split it between 2 large pots (or use one very large stockpot)." : "Use a large Dutch oven or soup pot.",
+        ing: [
+          { q: 3, u: "tbsp", t: "unsalted butter" },
+          { q: 3, u: "tbsp", t: "olive oil" },
+          { q: 1, u: "", t: ["large fennel bulb, thinly sliced", "large fennel bulbs, thinly sliced"] },
+          { q: 1, u: "", t: ["large yellow onion, chopped", "large yellow onions, chopped"] },
+          { q: 6, u: "", t: ["garlic clove, minced", "garlic cloves, minced"] },
+          { q: 0.33, u: "tsp", t: "red pepper flakes" },
+          { q: 1.5, u: "cup", t: "dry white wine (Pinot Grigio or Sauvignon Blanc)" },
+          { q: 1, u: "", t: ["can (28 oz) crushed tomatoes", "cans (28 oz) crushed tomatoes"] },
+          { q: 2, u: "", t: ["can (14 oz) diced tomatoes", "cans (14 oz) diced tomatoes"] },
+          { q: 4, u: "cup", t: "seafood stock or clam juice" },
+          { q: 1.5, u: "lb", t: "firm white fish (cod or halibut), cut into 2-inch chunks" },
+          { q: 1.5, u: "lb", t: "mussels, scrubbed and debearded" },
+          { q: 0.75, u: "lb", t: "sea scallops" },
+          { q: 1.5, u: "lb", t: "large shrimp, peeled and deveined" },
+          { q: null, u: "", s: "n", t: "Kosher salt and black pepper, to taste" },
+          { q: 0.5, u: "cup", t: "fresh flat-leaf parsley, chopped" }
+        ],
+        steps: [
+          "Melt the butter with the olive oil in a large Dutch oven over medium heat. Add the fennel and onion and sauté for 7 minutes, until soft.",
+          "Add the garlic and red pepper flakes and cook for 1 minute.",
+          "Pour in the wine, scraping up any browned bits. Simmer until it reduces by half, about 5 minutes.",
+          "Stir in the crushed tomatoes, diced tomatoes and stock. Bring to a boil, then turn the heat to low, cover and simmer for 15 minutes so the flavours marry.",
+          "Season the broth with salt and pepper. Add the fish, mussels and scallops, cover and cook for 3 minutes.",
+          "Add the shrimp, cover again and cook 3 minutes more, until the shrimp are pink and the mussels have opened. Throw away any mussels that stay closed.",
+          "Sprinkle with parsley and serve right away in warm bowls, with the garlic bread for dipping."
+        ],
+        tip: "Make the broth (steps 1–4) earlier in the day and keep it in the fridge. At dinner time, bring it back to a simmer and the seafood is done in 6 minutes."
+      },
+      {
+        id: "garlicbread", course: "Main", name: "Toasted Garlic Bread",
+        prep: "5 min", cook: "5 min", yieldText: f => `${Math.max(1, Math.ceil(f - 1e-9))} ${Math.ceil(f - 1e-9) > 1 ? "loaves" : "loaf"}`,
+        ing: [
+          { q: 1, u: "", t: ["loaf crusty sourdough bread, sliced", "loaves crusty sourdough bread, sliced"] },
+          { q: 4, u: "tbsp", t: "unsalted butter, softened" },
+          { q: 2, u: "", t: ["garlic clove, finely grated", "garlic cloves, finely grated"] },
+          { q: 1, u: "tbsp", t: "fresh parsley, finely chopped" }
+        ],
+        steps: [
+          "Mash the butter, garlic and parsley together.",
+          "Spread on the bread slices and lay them on a baking sheet.",
+          "Toast under the broiler for 2–3 minutes, watching closely, until golden at the edges."
+        ],
+        tip: "Toast the bread while the shrimp cook, so everything is hot at the same time."
+      },
+      {
+        id: "pannacotta", course: "Dessert", name: "Vanilla Bean Panna Cotta with Raspberry Coulis",
+        prep: "15 min", cook: "5 min", rest: "chill at least 4 hours", yieldText: f => `${Math.round(8 * f)} small glasses or ramekins`,
+        ing: [
+          { q: 3.75, u: "tsp", t: "unflavoured gelatin powder (one envelope holds about 2½ tsp)" },
+          { q: 5, u: "tbsp", t: "cold water" },
+          { q: 3, u: "cup", t: "heavy cream" },
+          { q: 1.5, u: "cup", t: "whole milk" },
+          { q: 0.75, u: "cup", t: "granulated sugar" },
+          { q: 1.5, u: "", t: ["vanilla bean, split (or 3 tsp vanilla bean paste)", "vanilla beans, split (or vanilla bean paste)"] },
+          { head: "Raspberry coulis" },
+          { q: 15, u: "oz", t: "frozen raspberries" },
+          { q: 3, u: "tbsp", t: "water" },
+          { q: 1.5, u: "tbsp", t: "granulated sugar" }
+        ],
+        steps: [
+          "Sprinkle the gelatin over the cold water in a small bowl and let it sit 5 minutes to soften.",
+          "In a saucepan, combine the cream, milk and sugar. Scrape in the vanilla seeds and add the pod. Warm over medium heat just until bubbles form around the edges. Do not boil.",
+          "Take it off the heat and remove the pod. Stir in the softened gelatin until completely dissolved.",
+          "Pour into small glasses or ramekins and refrigerate at least 4 hours, until set.",
+          "For the coulis, simmer the raspberries with the water and sugar for 5 minutes. Blend, then press through a sieve to remove the seeds. Chill.",
+          "Just before serving, spoon the coulis over each panna cotta."
+        ],
+        tip: "Panna cotta is happiest made the day before. Cover the glasses and they'll keep perfectly for 2 days."
+      },
+      {
+        id: "spritz", course: "Drinks", name: "Cranberry Rosemary Holiday Spritz",
+        prep: "10 min", cook: "10 min, plus cooling", yieldText: f => `${Math.round(8 * f)} drinks`,
+        ing: [
+          { head: "Cranberry-rosemary syrup" },
+          { q: 1, u: "cup", t: "fresh cranberries, plus extra to garnish" },
+          { q: 0.5, u: "cup", t: "granulated sugar" },
+          { q: 0.5, u: "cup", t: "water" },
+          { q: 2, u: "", t: ["sprig fresh rosemary, plus extra to garnish", "sprigs fresh rosemary, plus extra to garnish"] },
+          { head: "To serve" },
+          { q: 2, u: "", t: ["lime", "limes"] },
+          { q: 6, u: "cup", t: "sparkling water, club soda or Prosecco" },
+          { q: null, u: "", s: "n", t: "Ice" }
+        ],
+        steps: [
+          "Combine the cranberries, sugar, water and rosemary in a small saucepan.",
+          "Bring to a simmer over medium heat, lightly mashing the cranberries as they burst. Simmer 5 minutes.",
+          "Let it cool completely, then strain through a fine sieve and refrigerate.",
+          "To serve, fill glasses with ice. Add 2 tbsp syrup and a squeeze of lime.",
+          "Top with sparkling water for a mocktail, or Prosecco for grown-ups. Garnish with a rosemary sprig and a few cranberries."
+        ],
+        tip: "Set out the syrup, limes and both toppers and let guests make their own, mocktail or cocktail."
+      }
+    ],
+    timeline(p) {
+      const out = [], add = (m, icon, text, alarm = true, main = false) => out.push({ m, icon, text, alarm, main });
+      add(-300, "🍮", "Make the panna cotta (15 min), pour into glasses and chill for 4 hours");
+      add(-240, "🍒", "Simmer the cranberry-rosemary syrup (10 min), then let it cool");
+      add(-180, "🧊", "Chill the sparkling water and Prosecco");
+      add(-120, "🍒", "Strain the syrup and put it in the fridge");
+      add(-60, "🦪", "Scrub and debeard the mussels. Throw away any that are cracked or stay open when tapped");
+      add(-45, "🥬", "Start the broth: sauté the fennel, onion and garlic (10 min)");
+      add(-35, "🍷", "Add the wine and let it reduce by half (5 min)");
+      add(-30, "🍅", "Add the tomatoes and stock. Cover and simmer 15 minutes");
+      add(-25, "🍓", "Make the raspberry coulis (5 min), then blend and strain");
+      add(-15, "🥖", "Make the garlic butter and spread it on the bread");
+      add(-10, "🐟", "Broth back to a gentle simmer. Add the fish, scallops and mussels. Cover for 3 minutes", true, true);
+      add(-7, "🦐", "Add the shrimp. Cover for 3 more minutes. Garlic bread under the broiler");
+      add(-4, "🥂", "Pour the spritzes: ice, syrup, a squeeze of lime, then the bubbles");
+      add(0, "🍽️", "Dinner is served! Ladle the cioppino and pass the garlic bread");
+      add(45, "🍮", "Spoon the coulis over the panna cotta and serve dessert");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) {
+      return [
+        [2, 11, "🛒", "Shop for the pantry items, dairy and produce today (the list is in the Meal Planner)"],
+        [0, 10, "🐟", "Pick up the fresh seafood this morning and keep it in the coldest part of the fridge"]
+      ];
+    },
+    shop(f, p) {
+      const up = (x, step = 1) => Math.ceil(x / step - 1e-9) * step, n = x => Math.max(1, Math.ceil(x - 1e-9)), pl = (k, one, many) => k > 1 ? many : one;
+      const fish = up(1.5 * f, 0.25), shrimp = up(1.5 * f, 0.25), mussels = up(1.5 * f, 0.5), scallops = up(0.75 * f, 0.25);
+      const fennel = n(f), onion = n(f), garlic = n(8 * f / 10), limes = n(2 * f), cran = n(f), loaves = n(f);
+      const butterTbsp = 7 * f, sticks = n(butterTbsp / 8), creamCups = 3 * f, cream = n(creamCups / 2), milk = n(1.5 * f / 4);
+      const wine = n(1.5 * f / 3), crushed = n(f), diced = n(2 * f), stock = n(4 * f / 4), gel = n(1.5 * f / 4), van = n(1.5 * f), rasp = n(15 * f / 21), bubbly = n(6 * f / 4);
+      return [
+        ["Seafood", [
+          [`${fmtNum(fish)} lb`, "firm white fish (cod or halibut)", fish * 14],
+          [`${fmtNum(shrimp)} lb`, "large shrimp, peeled and deveined", shrimp * 18],
+          [`${fmtNum(mussels)} lb`, "fresh mussels", mussels * 5],
+          [`${fmtNum(scallops)} lb`, "sea scallops", scallops * 30]
+        ]],
+        ["Produce", [
+          [`${fennel}`, pl(fennel, "large fennel bulb", "large fennel bulbs"), fennel * 3],
+          [`${onion}`, pl(onion, "large yellow onion", "large yellow onions"), onion * 1],
+          [`${garlic}`, pl(garlic, "head garlic", "heads garlic"), garlic * 1],
+          ["1", "bunch fresh flat-leaf parsley", 2],
+          ["1", "bunch fresh rosemary", 3],
+          [`${cran} × 12 oz`, pl(cran, "bag fresh cranberries", "bags fresh cranberries"), cran * 4],
+          [`${limes}`, pl(limes, "lime", "limes"), limes * 0.75]
+        ]],
+        ["Dairy & Refrigerated", [
+          [`${sticks} ${pl(sticks, "stick", "sticks")}`, "unsalted butter", sticks * 1.75],
+          [cupsT(up(creamCups, 0.5)), `heavy cream (${cream} × 500 ml)`, cream * 4.5],
+          ["1 L", "whole milk", milk * 2.8]
+        ]],
+        ["Pantry & Bakery", [
+          [`${wine}`, pl(wine, "bottle dry white wine (Pinot Grigio or Sauvignon Blanc)", "bottles dry white wine"), wine * 15],
+          [`${crushed} × 28 oz`, pl(crushed, "can crushed tomatoes", "cans crushed tomatoes"), crushed * 2.5],
+          [`${diced} × 14 oz`, pl(diced, "can diced tomatoes", "cans diced tomatoes"), diced * 1.5],
+          [`${stock} × 1 L`, "seafood stock (or bottles of clam juice)", stock * 4],
+          [`${gel}`, "box unflavoured gelatin", gel * 3],
+          [`${van}`, pl(van, "vanilla bean (or vanilla bean paste)", "vanilla beans (or vanilla bean paste)"), van * 5],
+          [`${rasp} × 600 g`, pl(rasp, "bag frozen raspberries", "bags frozen raspberries"), rasp * 6],
+          [`${loaves}`, pl(loaves, "loaf crusty sourdough bread", "loaves crusty sourdough bread"), loaves * 5],
+          ["", "olive oil, red pepper flakes, granulated sugar", null],
+          ["", "kosher salt and black pepper", null]
+        ]],
+        ["Drinks", [
+          [`${bubbly} × 1 L`, "sparkling water or club soda", bubbly * 2],
+          ["", "optional: Prosecco for grown-ups, ice", null]
+        ]],
+        ["Kitchen Supplies", [
+          [`${p.pots}`, pl(p.pots, "large Dutch oven or soup pot", "large pots"), null],
+          ["", `${Math.round(8 * f)} small glasses or ramekins, fine sieve, blender`, null]
+        ]]
+      ];
+    }
+  };
   // add-on sizes: 1–5 people
   const addonPlan = base => guests => { const g = Math.min(5, Math.max(1, guests | 0)); return { g, f: g / base, pies: 1, dishes: 1, batches: 1 }; };
 
@@ -2684,7 +2879,8 @@ window.NOEL_MEALS = (function () {
       mousse,
       pecanAddon,
       nyeparty,
-      eveparty
+      eveparty,
+      seafood
     ],
     eveDate,
     // approximate cost of one appetizer for a party plan (if it's not picked yet: the cost of adding it)
@@ -2696,7 +2892,7 @@ window.NOEL_MEALS = (function () {
       const each = picked ? picked.pieces : Math.ceil(p.total / (p.items.length + 1));
       return perBatch * Math.max(1, Math.ceil(each / batch - 1e-9));
     },
-    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8), nyeparty: nyePartyPlan, eveparty: evePartyPlan },
+    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8), nyeparty: nyePartyPlan, eveparty: evePartyPlan, seafood: seafoodPlan },
     doneness: DONENESS,
     appShop: APP_SHOP, drinkApps: DRINK_APPS,   // 🏢 the office food planner uses the same appetizer shopping data
     frac, hm, fmtNum

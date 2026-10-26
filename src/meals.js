@@ -157,7 +157,7 @@
     const list = MD.meals.filter(m => m.tab === mealSel.tab).map(m => mealCardHtml(m)).join("");
     if (mealSel.tab === "eve") {
       const mains = MD.meals.filter(m => ["traditional", "elegant", "vegan"].includes(m.tab) && !m.soon);
-      $("#mealList").innerHTML = nightsHtml() + `<p class="eve-intro">Many families celebrate on Christmas Eve. Make it a cozy appetizer night, or have a full dinner, then plan Christmas Day too.</p>` + list +
+      $("#mealList").innerHTML = nightsHtml() + `<p class="eve-intro">Many families celebrate on Christmas Eve. Make it a cozy appetizer night or a seafood supper, or have a full dinner, then plan Christmas Day too.</p>` + list +
         `<h4 class="eve-sub">🍽️ Or a sit-down dinner on Christmas Eve</h4><p class="host-rem">Tap any dinner to plan it for Christmas Eve. You can pick a different one for Christmas Day.</p>` + mains.map(m => mealCardHtml(m, true)).join("") + svcHtml();
     } else $("#mealList").innerHTML = (mealSel.tab === "dietary" ? "" : nightsHtml()) + list;
   }
