@@ -1219,6 +1219,11 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .wish-wait { font-size: 13.5px; color: var(--muted); }
 .party-picks { margin: 6px 0 12px; }
 .party-picks .chip { font-size: 12.5px; }
+.chip-price { font-weight: 800; color: var(--gold); margin-left: 2px; }
+.chip.on .chip-price { color: var(--gold-light); }
+.party-total { font-size: 15px; margin: 4px 0 8px; padding: 10px 12px; background: #f3f1fa; border-radius: 12px; }
+.party-total b { font: 600 22px "Lora", Georgia, serif; color: var(--pine-dark); }
+.party-total small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
 .nye-show { position: fixed; inset: 0; z-index: 400; background: radial-gradient(circle at 50% 20%, #1f2b5c, #05081a 75%); display: none; align-items: center; justify-content: center; color: #fff; text-align: center; }
 .nye-show.show { display: flex; }
 .nye-show canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -5736,6 +5741,15 @@ window.NOEL_MEALS = (function () {
       pecanAddon,
       nyeparty
     ],
+    // approximate cost of one appetizer for a party plan (if it's not picked yet: the cost of adding it)
+    appCost(name, p) {
+      const sh = APP_SHOP[name]; if (!sh) return 0;
+      const [batch, items] = sh, perBatch = items.reduce((t, x) => t + (x[1] || 0), 0);
+      if (DRINK_APPS.includes(name)) return perBatch * Math.max(1, Math.ceil(p.g * 1.5 / batch - 1e-9));
+      const picked = p.items.find(i => i.name === name);
+      const each = picked ? picked.pieces : Math.ceil(p.total / (p.items.length + 1));
+      return perBatch * Math.max(1, Math.ceil(each / batch - 1e-9));
+    },
     plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8), nyeparty: nyePartyPlan },
     doneness: DONENESS,
     frac, hm, fmtNum
@@ -8731,7 +8745,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const picked = new Set(p.items.concat(p.drinkItems).map(i => i.name));
     return `<span class="meal-lab">Party style</span><div class="seg sub-tabs meal-done" role="group" aria-label="Party style">
       <button type="button" data-pmode="meal" aria-pressed="${c.mode !== "before"}">Appetizers are the meal</button><button type="button" data-pmode="before" aria-pressed="${c.mode === "before"}">Before dinner</button></div>
-      <span class="meal-lab">Pick your appetizers (${picked.size})</span><div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])}</button>`).join("")}</div>`;
+      <span class="meal-lab">Pick your appetizers (${picked.size})</span>
+      <p class="party-total">Estimated total <b>${cad0(pricedShop(mealById("nyeparty"), p.f, p).total)}</b> · about ${cad(pricedShop(mealById("nyeparty"), p.f, p).total / c.guests)} per guest<small>Includes the midnight toast. Prices beside each appetizer are for ${c.guests} guests; tap to add or remove.</small></p>
+      <div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])} <span class="chip-price">${picked.has(a[1]) ? "" : "+"}${cad0(MD.appCost(a[1], p))}</span></button>`).join("")}</div>`;
   }
   // 🌱 the "dietary guests" picker shown on every main dinner
   function addonPickerHtml() {

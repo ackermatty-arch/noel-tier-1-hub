@@ -182,7 +182,9 @@
     const picked = new Set(p.items.concat(p.drinkItems).map(i => i.name));
     return `<span class="meal-lab">Party style</span><div class="seg sub-tabs meal-done" role="group" aria-label="Party style">
       <button type="button" data-pmode="meal" aria-pressed="${c.mode !== "before"}">Appetizers are the meal</button><button type="button" data-pmode="before" aria-pressed="${c.mode === "before"}">Before dinner</button></div>
-      <span class="meal-lab">Pick your appetizers (${picked.size})</span><div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])}</button>`).join("")}</div>`;
+      <span class="meal-lab">Pick your appetizers (${picked.size})</span>
+      <p class="party-total">Estimated total <b>${cad0(pricedShop(mealById("nyeparty"), p.f, p).total)}</b> · about ${cad(pricedShop(mealById("nyeparty"), p.f, p).total / c.guests)} per guest<small>Includes the midnight toast. Prices beside each appetizer are for ${c.guests} guests; tap to add or remove.</small></p>
+      <div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])} <span class="chip-price">${picked.has(a[1]) ? "" : "+"}${cad0(MD.appCost(a[1], p))}</span></button>`).join("")}</div>`;
   }
   // 🌱 the "dietary guests" picker shown on every main dinner
   function addonPickerHtml() {

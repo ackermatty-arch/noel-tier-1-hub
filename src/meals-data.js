@@ -2626,6 +2626,15 @@ window.NOEL_MEALS = (function () {
       pecanAddon,
       nyeparty
     ],
+    // approximate cost of one appetizer for a party plan (if it's not picked yet: the cost of adding it)
+    appCost(name, p) {
+      const sh = APP_SHOP[name]; if (!sh) return 0;
+      const [batch, items] = sh, perBatch = items.reduce((t, x) => t + (x[1] || 0), 0);
+      if (DRINK_APPS.includes(name)) return perBatch * Math.max(1, Math.ceil(p.g * 1.5 / batch - 1e-9));
+      const picked = p.items.find(i => i.name === name);
+      const each = picked ? picked.pieces : Math.ceil(p.total / (p.items.length + 1));
+      return perBatch * Math.max(1, Math.ceil(each / batch - 1e-9));
+    },
     plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8), nyeparty: nyePartyPlan },
     doneness: DONENESS,
     frac, hm, fmtNum
