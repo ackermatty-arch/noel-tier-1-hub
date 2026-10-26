@@ -23,5 +23,8 @@ s = s[:a] + "  /* @host-start */\n" + code + s[b:]
 code = open("src/org.js").read()
 a, b = s.index("  /* @org-start */"), s.index("  /* @org-end */\n") + len("  /* @org-end */\n")
 s = s[:a] + "  /* @org-start */\n" + code + s[b:]
+code = open("src/print.js").read()
+a, b = s.index("  /* @print-start */"), s.index("  /* @print-end */\n") + len("  /* @print-end */\n")
+s = s[:a] + "  /* @print-start */\n" + code + s[b:]
 open("index.html", "w").write(s)
 print("index.html updated")

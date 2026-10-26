@@ -126,7 +126,7 @@
     $("#mealDietList").innerHTML = MD.meals.filter(a => a.addon).map(a => { const g = cfgFor(a.id).guests;
       return `<div class="diet-row"><div class="diet-head"><span class="meal-ico">${a.icon}</span><span><b>${esc(a.name)}</b><small>${esc(a.tags || "")}</small></span></div>
         <div class="diet-acts"><div class="stepper sm" title="People"><button type="button" data-dg="${a.id}:-1" aria-label="Fewer people">−</button><output aria-label="People">${g}</output><button type="button" data-dg="${a.id}:1" aria-label="More people">+</button></div>
-        <button type="button" class="btn btn-ghost" data-dopen="${a.id}">📖 Open</button><button type="button" class="btn btn-green" data-dprint="${a.id}">🖨️ Print</button></div></div>`; }).join("");
+        <button type="button" class="btn btn-ghost" data-dopen="${a.id}">📖 Open</button><button type="button" class="btn btn-green" data-print="meal:${a.id}">🖨️ Print</button></div></div>`; }).join("");
   }
   function renderMeals() {
     renderDietBottom();
@@ -185,7 +185,7 @@
         ${p.w || p.mainLabel ? `<p class="meal-sum">${p.icon} <b>${p.w ? `${p.w} lb ${p.meat}` : p.mainLabel}</b> · ${p.verb} about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.bigNote ? `<br><small>${p.bigNote}</small>` : ""}</p>` : ""}
         <div class="send-btns">
           ${active ? `<button type="button" class="btn btn-ghost" id="mealStop">⏹ Stop dinner alarms</button>` : `<button type="button" class="btn btn-red" id="mealStart">⏰ Start my dinner alarms</button>`}
-          <button type="button" class="btn btn-green" id="mealPrint">🖨️ Print everything</button>
+          <button type="button" class="btn btn-green" id="mealPrint" data-print="meal:${m.id}">🖨️ Print</button>
         </div>
         ${active ? `<p class="meal-on">✅ Alarms are set. Noël will ring for every step${NoelNative.isNative() ? ", even when the app is closed" : ". Keep Noël open on this device"}.</p>` : ""}
       </div>
@@ -295,7 +295,7 @@
   setInterval(() => { if ($("#view-meals").classList.contains("active")) renderMaster(); }, 1000);
 
   // ---- print (paper backup) ----
-  function printMeal(m) {
+  function mealDoc(m) {
     const c = cfgFor(m.id), p = mealSizes(m, c), f = p.f, steps = buildSteps(m, c);
     let lastDay = "";
     const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · ${m.party ? "party starts" : "dinner"} ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
@@ -305,15 +305,15 @@
       ${m.drinks.map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v)}</p>`).join("")}
       <h2>Recipes</h2>${allRecipesHtml(m, f, p, true)}
       <p class="pm-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p>`;
-    $("#printArea").innerHTML = html;
-    if (NoelNative.isNative()) {   // 📱 iPhone: open the print-ready page in the share sheet (Print is in the list)
-      const doc = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${PRINT_CSS}</style></head><body><div id="printArea">${html}</div></body></html>`;
-      NoelMedia.share(new Blob([doc], { type: "text/html" }), m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Plan.html", m.name).catch(() => {});
-      return;
-    }
-    setTimeout(() => window.print(), 50);
+    return { title: m.name + (m.addon ? "" : " plan"), css: PRINT_CSS, html, margin: 0.5, file: m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Plan" };
   }
-  const PRINT_CSS = `body{font:12pt/1.45 Georgia,serif;color:#222;margin:24px} h1{font-size:22pt;margin:0} h2{font-size:15pt;border-bottom:1.5px solid #B8935A;margin:22px 0 8px;padding-bottom:3px} h3{font-size:12pt;margin:12px 0 4px}
+  function shopDoc(m) {   // just the shopping list, to take to the store
+    const c = cfgFor(m.id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
+    const html = `<h1>🛒 ${esc(m.name)}: shopping list</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · estimated total ${cad0(ps.total)} ${currency}</p>` +
+      ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join("") + `<p class="pm-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p>`;
+    return { title: m.name + " shopping list", css: PRINT_CSS, html, margin: 0.5, file: m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Shopping-List" };
+  }
+  const PRINT_CSS = `body{font:12pt/1.45 Georgia,serif;color:#222} h1{font-size:22pt;margin:0} h2{font-size:15pt;border-bottom:1.5px solid #B8935A;margin:22px 0 8px;padding-bottom:3px} h3{font-size:12pt;margin:12px 0 4px}
     .pm-sub{color:#555;margin:4px 0 0} table{border-collapse:collapse;width:100%} td,th{text-align:left;padding:3px 6px;vertical-align:top;border-bottom:1px solid #eee} th{background:#f4efe3} td:first-child{white-space:nowrap;width:80px}
     ul{margin:0;padding-left:0;list-style:none} details{margin:14px 0;break-inside:avoid-page} summary{font-weight:bold;font-size:13pt;list-style:none} .r-course{display:block;font-size:9pt;letter-spacing:.15em;text-transform:uppercase;color:#8a6d3b}
     .r-meta,.r-note{color:#555;font-size:10.5pt;margin:4px 0} .r-ing li{margin:1px 0} .r-head{font-weight:bold;margin-top:6px!important} .r-steps{padding-left:20px} .r-tip{font-style:italic} .pm-foot{margin-top:24px;color:#888;font-size:9pt;text-align:center}`;
@@ -345,7 +345,6 @@
     const dg = t.closest("[data-dg]");
     if (dg) { const [aid, d] = dg.dataset.dg.split(":"), ac = cfgFor(aid); ac.guests = Math.min(5, Math.max(1, ac.guests + +d)); mealCfg[aid] = ac; save("mealCfg", mealCfg); renderMeals(); return; }
     const dop = t.closest("[data-dopen]"); if (dop) { openMeal(dop.dataset.dopen); return; }
-    const dpr = t.closest("[data-dprint]"); if (dpr) { printMeal(mealById(dpr.dataset.dprint)); return; }
     if (t.closest("#mealBack")) { const wasNye = mealSel.id && (mealById(mealSel.id) || {}).tab === "nye"; mealSel.id = null; save("mealSel", mealSel); renderMeals(); if (wasNye) showView("nye"); return; }
     const m = mealSel.id && mealById(mealSel.id); if (!m) return;
     const ag = t.closest("[data-ag]");
@@ -366,7 +365,6 @@
     const pn = t.closest("[data-mpane]"); if (pn) { mealSel.pane = pn.dataset.mpane; save("mealSel", mealSel); renderMealDetail(m); return; }
     if (t.closest("#mealStart")) { startMealPlan(m); return; }
     if (t.closest("#mealStop")) { if (confirm("Stop all the dinner alarms for this meal?")) stopMealPlan(); return; }
-    if (t.closest("#mealPrint")) { printMeal(m); return; }
     if (t.closest("#shopToBudget")) {
       const c = cfgFor(m.id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
       const amt = Math.round(ps.total * 100) / 100, name = `${m.name} (${c.guests} guests)`;

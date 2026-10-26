@@ -45,7 +45,7 @@
     const forgot = org.contacts.filter(c => (c.recv || {})[y] && !(c.sent || {})[y]);
     return `<div class="card org-card"><div class="org-stats"><span><b>${on.length}</b> on the list</span><span><b>${sent}</b> sent</span><span><b>${got}</b> received</span></div>
         ${forgot.length ? `<p class="org-warn">📬 Sent you a card, but not on your sent list yet: ${forgot.map(c => esc(c.name)).join(", ")}</p>` : ""}
-        <div class="send-btns"><button type="button" class="btn btn-red" id="orgLabels">🖨️ Mailing labels</button><button type="button" class="btn btn-ghost" id="orgReturn">🏠 Return labels</button><button type="button" class="btn btn-ghost" id="orgCsv">📄 Spreadsheet</button></div>
+        <div class="send-btns"><button type="button" class="btn btn-red" id="orgLabels" data-print="labels">🖨️ Mailing labels</button><button type="button" class="btn btn-ghost" id="orgReturn" data-print="return">🏠 Return labels</button><button type="button" class="btn btn-ghost" id="orgCsv">📄 Spreadsheet</button></div>
         <p class="host-rem">Labels print on Avery 5160 sheets (30 per page). Print at 100% scale ("actual size"). A reminder comes on December 10 to get your cards in the mail.</p></div>
       ${org.contacts.map(c => { const s = (c.sent || {})[y], r = (c.recv || {})[y], ls = (c.sent || {})[y - 1], lr = (c.recv || {})[y - 1];
         return `<div class="card org-item" data-oc="${c.id}"><div class="host-row"><b>${esc(c.name)}</b><button class="icon-btn" data-odel aria-label="Remove">✕</button></div>
@@ -62,14 +62,14 @@
       <div class="org-addr-row"><input class="input" data-oa="city" maxlength="40" placeholder="City" value="${esc(c.city || "")}"><input class="input" data-oa="region" maxlength="20" placeholder="${currency === "USD" ? "State" : "Province"}" value="${esc(c.region || "")}"><input class="input" data-oa="postal" maxlength="12" placeholder="${currency === "USD" ? "ZIP" : "Postal code"}" value="${esc(c.postal || "")}"></div>
       ${kind === "oc" ? `<button type="button" class="btn btn-green btn-block" data-odone>Done</button>` : ""}</div>`;
   function labelLines(c) { return [c.name, c.street, [c.city, c.region].filter(Boolean).join(", ") + (c.postal ? "  " + c.postal : "")].filter(s => s && s.trim()); }
-  function printLabels(list, title) {
-    if (!list.length) { toast("✉️ Add some addresses first"); return; }
-    const css = `@page{size:letter;margin:0} body{margin:0} .lblsheet{width:8.5in;padding:.5in .1875in 0;box-sizing:border-box;display:grid;grid-template-columns:repeat(3,2.625in);column-gap:.125in;grid-auto-rows:1in;break-after:page}
-      .lbl{box-sizing:border-box;padding:.1in .18in;display:flex;flex-direction:column;justify-content:center;font:10.5pt/1.25 Georgia,serif;overflow:hidden} .lbl b{font-weight:600}`;
+  function labelDoc(kind) {
+    const list = kind === "return" ? (labelLines(org.me).length < 2 ? [] : Array(30).fill(labelLines(org.me))) : org.contacts.filter(c => c.list !== false && c.street).map(labelLines);
+    if (!list.length) return { error: kind === "return" ? "🏠 Fill in your return address on the Card List first" : "✉️ Add some addresses to your Card List first" };
+    const css = `.lblsheet{width:8.5in;padding:.5in .1875in 0;box-sizing:border-box;display:grid;grid-template-columns:repeat(3,2.625in);column-gap:.125in;grid-auto-rows:1in;break-after:page;page-break-after:always}
+      .lblsheet:last-child{break-after:auto;page-break-after:auto} .lbl{box-sizing:border-box;padding:.1in .18in;display:flex;flex-direction:column;justify-content:center;font:10.5pt/1.25 Georgia,serif;overflow:hidden} .lbl b{font-weight:600}`;
     const pages = []; for (let i = 0; i < list.length; i += 30) pages.push(list.slice(i, i + 30));
-    const html = pages.map(pg => `<div class="lblsheet">${pg.map(l => `<div class="lbl">${l.map((x, i) => i ? `<span>${esc(x)}</span>` : `<b>${esc(x)}</b>`).join("")}</div>`).join("")}</div>`).join("");
-    if (NoelNative.isNative()) { NoelMedia.share(new Blob([`<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${html}</body></html>`], { type: "text/html" }), title + ".html", title).catch(() => {}); return; }
-    $("#printArea").innerHTML = `<style>${css} #printArea{font:inherit!important}</style>` + html; setTimeout(() => window.print(), 50);
+    return { title: kind === "return" ? "Return address labels" : "Christmas card mailing labels", css, margin: 0, pages: pages.length, file: kind === "return" ? "Return-Address-Labels" : "Christmas-Card-Labels", note: "Avery 5160 · print at actual size (100%)",
+      html: pages.map(pg => `<div class="lblsheet">${pg.map(l => `<div class="lbl">${l.map((x, i) => i ? `<span>${esc(x)}</span>` : `<b>${esc(x)}</b>`).join("")}</div>`).join("")}</div>`).join("") };
   }
 
   // ---------- 📅 Calendar ----------
@@ -187,8 +187,6 @@
   $("#view-org").addEventListener("click", e => {
     const t = e.target, y = orgYear();
     const tool = t.closest("[data-otool]"); if (tool) { org.view = tool.dataset.otool; org.editing = null; saveOrg(); renderOrg(); window.scrollTo({ top: 0 }); return; }
-    if (t.closest("#orgLabels")) { printLabels(org.contacts.filter(c => c.list !== false && c.street).map(labelLines), "Christmas-Card-Labels"); return; }
-    if (t.closest("#orgReturn")) { const l = labelLines(org.me); if (l.length < 2) { toast("🏠 Fill in your return address below first"); return; } printLabels(Array(30).fill(l), "Return-Address-Labels"); return; }
     if (t.closest("#orgCsv")) {
       const q = v => `"${String(v || "").replace(/"/g, '""')}"`;
       const csv = ["Name,Street,City,Province/State,Postal/ZIP,Sent " + y + ",Received " + y].concat(org.contacts.map(c => [c.name, c.street, c.city, c.region, c.postal, (c.sent || {})[y] ? "yes" : "", (c.recv || {})[y] ? "yes" : ""].map(q).join(","))).join("\r\n");

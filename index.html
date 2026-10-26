@@ -1289,6 +1289,20 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .host-switch input { width: 24px; height: 24px; accent-color: var(--pine); flex: none; margin-top: 2px; }
 .host-switch b { display: block; font-size: 16px; color: var(--pine-dark); } .host-switch small { display: block; font-size: 13px; color: var(--muted); line-height: 1.45; margin-top: 2px; }
 .host-tabs { margin-bottom: 12px; }
+.tray-btn { position: relative; }
+.tray-count { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: var(--gold); color: #1E3A2F; font: 800 11px/18px sans-serif; text-align: center; }
+.tray-btn.bump { animation: trayBump .5s; } @keyframes trayBump { 30% { transform: scale(1.25); } }
+.pa-how { font-size: 13px; opacity: .75; }
+.host-fridge { display: flex; align-items: center; gap: 12px; padding: 14px 16px; margin-top: 18px; border: 2px dashed rgba(184,147,90,.6); }
+.hf-ico { font-size: 28px; } .hf-txt { flex: 1; } .hf-txt b { display: block; color: var(--pine-dark); } .hf-txt small { font-size: 13px; color: var(--muted); }
+.tray-empty { text-align: center; padding: 28px 20px; } .tray-big { font-size: 44px; } .tray-empty h3 { margin: 6px 0; color: var(--pine-dark); } .tray-empty p { color: var(--muted); font-size: 14.5px; }
+.tray-list { padding: 4px 14px; margin-bottom: 12px; }
+.tray-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.tray-item:last-child { border-bottom: 0; } .tray-item input { width: 22px; height: 22px; accent-color: var(--pine); flex: none; }
+.ti-txt { flex: 1; } .ti-txt small { display: block; font-size: 12.5px; color: var(--muted); } .tray-item.bad { opacity: .55; }
+.tray-go { padding: 16px; display: grid; gap: 10px; margin-bottom: 12px; } .tray-total { text-align: center; margin: 0 0 2px; }
+.tray-clear { justify-self: center; } .tray-done { padding: 14px 16px; margin-bottom: 12px; background: #eef6ef; } .tray-done p { margin: 0 0 10px; }
+.tray-shop { padding: 14px 16px; } .tray-shop summary { font-weight: 700; color: var(--pine-dark); cursor: pointer; } .tray-shop ol { padding-left: 20px; margin: 10px 0; } .tray-shop li { margin: 6px 0; font-size: 14.5px; }
 .org-banner { background: linear-gradient(150deg, #2f4a3a, #1b2d23); }
 .org-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .org-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 18px 16px; border-radius: 18px; border: 1px solid rgba(0,0,0,.06); background: var(--card, #fff); box-shadow: 0 2px 10px rgba(0,0,0,.06); text-align: left; font: inherit; color: inherit; cursor: pointer; min-height: 118px; }
@@ -1383,6 +1397,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
       </div>
     </div>
     <div class="header-actions">
+      <button class="music-btn tray-btn" id="trayBtn" aria-label="Print Tray" hidden>🖨️<span class="tray-count" id="trayCount">0</span></button>
       <button class="music-btn" id="musicBtn" aria-label="Holiday music">🎵</button>
       <div class="countdown-chip" aria-live="polite">
         <strong id="xmasDays">--</strong>
@@ -1747,6 +1762,11 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
     <div class="card host-remind" id="hostRemind"></div>
     <div class="apps-filters host-tabs" id="hostTabs"></div>
     <div id="hostBody"></div>
+    <div class="card host-fridge">
+      <span class="hf-ico">🧲</span>
+      <span class="hf-txt"><b>Fridge sheet</b><small>Guests, rooms, seating, cleaning days, supplies and house info, all on one printed page.</small></span>
+      <button type="button" class="btn btn-red" data-print="fridge">🖨️ Print</button>
+    </div>
   </section>
 
   <section class="view" id="view-org" aria-labelledby="orgTitle">
@@ -2332,6 +2352,27 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
     <p class="door-text" id="printHow"></p>
     <button class="btn btn-ghost btn-block" id="printClose">Close</button>
   </div>
+</div>
+
+<!-- 🖨️ PRINT CHOICE: every print button opens this -->
+<div class="alert-overlay" id="printAsk" role="dialog" aria-modal="true" aria-labelledby="printAskTitle">
+  <div class="alert-box">
+    <div class="door-big">🖨️</div>
+    <p class="door-type" id="printAskTitle">Print</p>
+    <p class="door-text" id="printAskSub"></p>
+    <div class="print-btns" id="printAskBtns"></div>
+    <p class="door-text pa-how" id="printAskHow"></p>
+    <button class="btn btn-ghost btn-block" id="printAskClose">Close</button>
+  </div>
+</div>
+
+<!-- 🖨️ PRINT TRAY -->
+<div class="sheet" id="traySheet" role="dialog" aria-modal="true" aria-labelledby="trayTitle">
+  <div class="sheet-head">
+    <button class="back-btn" data-close="traySheet">‹ Back</button>
+    <h2 id="trayTitle">Print Tray</h2>
+  </div>
+  <div class="sheet-body"><div class="sheet-inner" id="trayBody"></div></div>
 </div>
 
 <!-- 🏆 WINNER MOMENT: shown when "End game" is tapped -->
@@ -8864,7 +8905,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#mealDietList").innerHTML = MD.meals.filter(a => a.addon).map(a => { const g = cfgFor(a.id).guests;
       return `<div class="diet-row"><div class="diet-head"><span class="meal-ico">${a.icon}</span><span><b>${esc(a.name)}</b><small>${esc(a.tags || "")}</small></span></div>
         <div class="diet-acts"><div class="stepper sm" title="People"><button type="button" data-dg="${a.id}:-1" aria-label="Fewer people">−</button><output aria-label="People">${g}</output><button type="button" data-dg="${a.id}:1" aria-label="More people">+</button></div>
-        <button type="button" class="btn btn-ghost" data-dopen="${a.id}">📖 Open</button><button type="button" class="btn btn-green" data-dprint="${a.id}">🖨️ Print</button></div></div>`; }).join("");
+        <button type="button" class="btn btn-ghost" data-dopen="${a.id}">📖 Open</button><button type="button" class="btn btn-green" data-print="meal:${a.id}">🖨️ Print</button></div></div>`; }).join("");
   }
   function renderMeals() {
     renderDietBottom();
@@ -8923,7 +8964,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${p.w || p.mainLabel ? `<p class="meal-sum">${p.icon} <b>${p.w ? `${p.w} lb ${p.meat}` : p.mainLabel}</b> · ${p.verb} about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.bigNote ? `<br><small>${p.bigNote}</small>` : ""}</p>` : ""}
         <div class="send-btns">
           ${active ? `<button type="button" class="btn btn-ghost" id="mealStop">⏹ Stop dinner alarms</button>` : `<button type="button" class="btn btn-red" id="mealStart">⏰ Start my dinner alarms</button>`}
-          <button type="button" class="btn btn-green" id="mealPrint">🖨️ Print everything</button>
+          <button type="button" class="btn btn-green" id="mealPrint" data-print="meal:${m.id}">🖨️ Print</button>
         </div>
         ${active ? `<p class="meal-on">✅ Alarms are set. Noël will ring for every step${NoelNative.isNative() ? ", even when the app is closed" : ". Keep Noël open on this device"}.</p>` : ""}
       </div>
@@ -9033,7 +9074,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   setInterval(() => { if ($("#view-meals").classList.contains("active")) renderMaster(); }, 1000);
 
   // ---- print (paper backup) ----
-  function printMeal(m) {
+  function mealDoc(m) {
     const c = cfgFor(m.id), p = mealSizes(m, c), f = p.f, steps = buildSteps(m, c);
     let lastDay = "";
     const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · ${m.party ? "party starts" : "dinner"} ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
@@ -9043,15 +9084,15 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       ${m.drinks.map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v)}</p>`).join("")}
       <h2>Recipes</h2>${allRecipesHtml(m, f, p, true)}
       <p class="pm-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p>`;
-    $("#printArea").innerHTML = html;
-    if (NoelNative.isNative()) {   // 📱 iPhone: open the print-ready page in the share sheet (Print is in the list)
-      const doc = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${PRINT_CSS}</style></head><body><div id="printArea">${html}</div></body></html>`;
-      NoelMedia.share(new Blob([doc], { type: "text/html" }), m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Plan.html", m.name).catch(() => {});
-      return;
-    }
-    setTimeout(() => window.print(), 50);
+    return { title: m.name + (m.addon ? "" : " plan"), css: PRINT_CSS, html, margin: 0.5, file: m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Plan" };
   }
-  const PRINT_CSS = `body{font:12pt/1.45 Georgia,serif;color:#222;margin:24px} h1{font-size:22pt;margin:0} h2{font-size:15pt;border-bottom:1.5px solid #B8935A;margin:22px 0 8px;padding-bottom:3px} h3{font-size:12pt;margin:12px 0 4px}
+  function shopDoc(m) {   // just the shopping list, to take to the store
+    const c = cfgFor(m.id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
+    const html = `<h1>🛒 ${esc(m.name)}: shopping list</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · estimated total ${cad0(ps.total)} ${currency}</p>` +
+      ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join("") + `<p class="pm-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p>`;
+    return { title: m.name + " shopping list", css: PRINT_CSS, html, margin: 0.5, file: m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Shopping-List" };
+  }
+  const PRINT_CSS = `body{font:12pt/1.45 Georgia,serif;color:#222} h1{font-size:22pt;margin:0} h2{font-size:15pt;border-bottom:1.5px solid #B8935A;margin:22px 0 8px;padding-bottom:3px} h3{font-size:12pt;margin:12px 0 4px}
     .pm-sub{color:#555;margin:4px 0 0} table{border-collapse:collapse;width:100%} td,th{text-align:left;padding:3px 6px;vertical-align:top;border-bottom:1px solid #eee} th{background:#f4efe3} td:first-child{white-space:nowrap;width:80px}
     ul{margin:0;padding-left:0;list-style:none} details{margin:14px 0;break-inside:avoid-page} summary{font-weight:bold;font-size:13pt;list-style:none} .r-course{display:block;font-size:9pt;letter-spacing:.15em;text-transform:uppercase;color:#8a6d3b}
     .r-meta,.r-note{color:#555;font-size:10.5pt;margin:4px 0} .r-ing li{margin:1px 0} .r-head{font-weight:bold;margin-top:6px!important} .r-steps{padding-left:20px} .r-tip{font-style:italic} .pm-foot{margin-top:24px;color:#888;font-size:9pt;text-align:center}`;
@@ -9083,7 +9124,6 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const dg = t.closest("[data-dg]");
     if (dg) { const [aid, d] = dg.dataset.dg.split(":"), ac = cfgFor(aid); ac.guests = Math.min(5, Math.max(1, ac.guests + +d)); mealCfg[aid] = ac; save("mealCfg", mealCfg); renderMeals(); return; }
     const dop = t.closest("[data-dopen]"); if (dop) { openMeal(dop.dataset.dopen); return; }
-    const dpr = t.closest("[data-dprint]"); if (dpr) { printMeal(mealById(dpr.dataset.dprint)); return; }
     if (t.closest("#mealBack")) { const wasNye = mealSel.id && (mealById(mealSel.id) || {}).tab === "nye"; mealSel.id = null; save("mealSel", mealSel); renderMeals(); if (wasNye) showView("nye"); return; }
     const m = mealSel.id && mealById(mealSel.id); if (!m) return;
     const ag = t.closest("[data-ag]");
@@ -9104,7 +9144,6 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const pn = t.closest("[data-mpane]"); if (pn) { mealSel.pane = pn.dataset.mpane; save("mealSel", mealSel); renderMealDetail(m); return; }
     if (t.closest("#mealStart")) { startMealPlan(m); return; }
     if (t.closest("#mealStop")) { if (confirm("Stop all the dinner alarms for this meal?")) stopMealPlan(); return; }
-    if (t.closest("#mealPrint")) { printMeal(m); return; }
     if (t.closest("#shopToBudget")) {
       const c = cfgFor(m.id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
       const amt = Math.round(ps.total * 100) / 100, name = `${m.name} (${c.guests} guests)`;
@@ -9862,7 +9901,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         <p class="host-rem">Tap a seat to type a name. Names from your guest list are suggested.</p>
         <label class="host-check"><input type="checkbox" id="hostKids" ${t.kids ? "checked" : ""}> Add a kids' table</label>
         ${t.kids ? `<div class="host-row"><span class="meal-lab">Kids' seats</span><div class="stepper sm"><button type="button" data-hkseats="-1">−</button><output>${t.kseats}</output><button type="button" data-hkseats="1">+</button></div></div>${seatsHtml(t.kseats, t.knames, "rect", "k")}` : ""}
-        <button type="button" class="btn btn-red btn-block" id="hostPlaceCards">🖨️ Print place cards</button>
+        <button type="button" class="btn btn-red btn-block" id="hostPlaceCards" data-print="place">🖨️ Print place cards</button>
         <datalist id="hostNameList">${all.map(n => `<option value="${esc(n)}">`).join("")}</datalist>
       </div>
       <div class="card host-card"><h3>🍴 How to set the table</h3>
@@ -9905,21 +9944,40 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       <button type="button" class="btn btn-red btn-block" id="hostShareCard">🖼️ Share as a picture</button></div>`;
   }
 
-  // ---------- print place cards ----------
-  function printPlaceCards() {
+  // ---------- print place cards (goes through the Print Tray helper) ----------
+  function placeDoc() {
     const names = host.table.names.slice(0, host.table.seats).concat(host.table.kids ? host.table.knames.slice(0, host.table.kseats) : []).filter(Boolean);
-    if (!names.length) { toast("🍽️ Add some names to the seats first"); return; }
+    if (!names.length) return { error: "🍽️ Add some names to the seats first" };
     const card = n => `<div class="pc"><div class="pc-half"></div><div class="pc-half"><div class="pc-star">✦</div><div class="pc-name">${esc(n)}</div><div class="pc-sub">Merry Christmas</div></div></div>`;
-    const css = `@page{margin:12mm} body{margin:0;font-family:Georgia,serif} .pcs{display:grid;grid-template-columns:1fr 1fr;gap:8mm} .pc{border:1px dashed #bbb;height:62mm;display:grid;grid-template-rows:1fr 1fr;break-inside:avoid}
+    const css = `.pcs{display:grid;grid-template-columns:1fr 1fr;gap:8mm;font-family:Georgia,serif} .pc{border:1px dashed #bbb;height:62mm;display:grid;grid-template-rows:1fr 1fr;break-inside:avoid}
       .pc-half:first-child{border-bottom:1px dotted #ccc} .pc-half:last-child{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
       .pc-star{color:#B8935A;font-size:14pt} .pc-name{font:400 30pt "Great Vibes",cursive;color:#1E3A2F;line-height:1.2} .pc-sub{font:500 8pt sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#B8935A} .pc-tip{font:10pt sans-serif;color:#777;margin:0 0 6mm}`;
-    const html = `<p class="pc-tip">Cut along the dashed lines and fold along the dotted line, so each card stands up like a little tent.</p><div class="pcs">${names.map(card).join("")}</div>`;
-    const fonts = (document.getElementById("embeddedFonts") || {}).textContent || "";
-    if (NoelNative.isNative()) {
-      NoelMedia.share(new Blob([`<!doctype html><html><head><meta charset="utf-8"><style>${fonts}${css}</style></head><body>${html}</body></html>`], { type: "text/html" }), "Place-Cards.html", "Place cards").catch(() => {});
-      return;
-    }
-    $("#printArea").innerHTML = `<style>${css}</style>` + html; setTimeout(() => window.print(), 50);
+    return { title: "Place cards", css, fonts: true, margin: 0.5, file: "Place-Cards",
+      html: `<p class="pc-tip">Cut along the dashed lines and fold along the dotted line, so each card stands up like a little tent.</p><div class="pcs">${names.map(card).join("")}</div>` };
+  }
+  // ---------- 🧲 the fridge sheet: the whole hosting plan on one page ----------
+  function fridgeDoc() {
+    const D = hostDinner(), day = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+    const room = id => { const r = host.rooms.find(x => x.id === id); return r ? r.name : ""; };
+    const guests = host.guests.slice().sort((a, b) => (a.arrive || "z").localeCompare(b.arrive || "z"));
+    const box = on => on ? "☑" : "☐";
+    const cleanByDay = {}; HOST_CLEAN.forEach(([id, days, text]) => { const k = days ? day(atDay(D, days, 10)) : "Dinner day"; (cleanByDay[k] = cleanByDay[k] || []).push(`${box(host.clean[id])} ${esc(text)}`); });
+    const need = HOST_SUPPLIES.flatMap(([, l]) => l).concat(host.custom).filter(i => !host.supplies[i]);
+    const t = host.table, main = t.names.slice(0, t.seats), kids = t.kids ? t.knames.slice(0, t.kseats) : [];
+    const seatList = arr => arr.map((n, i) => `<span>${i + 1}. ${n ? esc(n) : "<i>open</i>"}</span>`).join("");
+    const h = host.house, house = [["Wi-Fi", h.wifi], ["Password", h.pass], ["Parking", h.parking], ["House notes", h.rules], ["Little ones", h.kids]].filter(([, v]) => v);
+    const css = `.fr{font:10pt/1.35 Georgia,serif;color:#222} .fr h1{font-size:20pt;margin:0;color:#1E3A2F} .fr .fr-sub{margin:2px 0 10px;color:#8a6d3b;letter-spacing:.08em;text-transform:uppercase;font:600 8.5pt sans-serif}
+      .fr h2{font-size:12pt;color:#1E3A2F;border-bottom:1.5px solid #B8935A;margin:10px 0 4px;padding-bottom:2px} .fr table{border-collapse:collapse;width:100%} .fr td,.fr th{text-align:left;padding:3px 5px;border-bottom:1px solid #e6e0d2;vertical-align:top;font-size:9.5pt}
+      .fr th{background:#f4efe3;font:600 8pt sans-serif;text-transform:uppercase;letter-spacing:.06em} .fr .fr-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 18px} .fr .fr-seats{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;font-size:9.5pt}
+      .fr ul{list-style:none;margin:0;padding:0} .fr li{margin:1px 0;font-size:9.5pt} .fr .fr-day{font-weight:bold;margin-top:4px;font-size:9.5pt} .fr .fr-need{columns:3;column-gap:12px} .fr .fr-need li{font-size:8.5pt} .fr p{margin:0 0 3px} .fr .fr-clean td{font-size:8.5pt;padding:2px 4px} .fr .fr-clean td:first-child{white-space:nowrap;font-weight:bold;width:62px} .fr .fr-foot{margin-top:12px;text-align:center;color:#999;font:8pt sans-serif}`;
+    const html = `<div class="fr"><h1>🎄 Our Christmas Hosting Plan</h1><p class="fr-sub">Dinner · ${esc(hostFmt(D))}</p>
+      <h2>Guests &amp; arrivals</h2>${guests.length ? `<table><tr><th>Who</th><th>Arriving</th><th>Getting here</th><th>Sleeping</th><th>Notes</th></tr>${guests.map(g => `<tr><td><b>${esc(g.name)}</b> (${g.people || 1})</td><td>${g.arrive ? esc(hostFmt(new Date(g.arrive))) : "—"}</td><td>${g.travel === "fly" ? `✈️ ${esc(g.flight || "Flying")}` : "🚗 Driving"}${g.pickup ? "<br><b>Needs a pickup</b>" : ""}</td><td>${esc(room(g.room)) || "—"}</td><td>${esc(g.notes || "")}</td></tr>`).join("")}</table>` : `<p>No guests added yet.</p>`}
+      <div class="fr-cols"><div><h2>Seating</h2>${main.some(Boolean) ? `<div class="fr-seats">${seatList(main)}</div>` : "<p>Not set yet.</p>"}${kids.some(Boolean) ? `<p class="fr-day">Kids' table</p><div class="fr-seats">${seatList(kids)}</div>` : ""}</div>
+        <div><h2>Deep-clean countdown</h2><table class="fr-clean">${Object.entries(cleanByDay).map(([k, l]) => `<tr><td>${esc(k)}</td><td>${l.join("<br>")}</td></tr>`).join("")}</table></div></div>
+      <h2>Still to get</h2>${need.length ? `<ul class="fr-need">${need.map(i => `<li>☐ ${esc(i)}</li>`).join("")}</ul>` : "<p>Everything's ready! ✨</p>"}
+      ${house.length ? `<h2>House info</h2><table>${house.map(([k, v]) => `<tr><td style="width:90px"><b>${k}</b></td><td>${esc(v)}</td></tr>`).join("")}</table>` : ""}
+      <p class="fr-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p></div>`;
+    return { title: "Hosting fridge sheet", css, html, margin: 0.45, file: "Hosting-Fridge-Sheet" };
   }
   // ---------- house info card as a picture ----------
   async function shareHouseCard() {
@@ -9964,7 +10022,6 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       box.querySelector("button").onclick = done; inp.onkeydown = ev => { if (ev.key === "Enter") done(); };
       return;
     }
-    if (t.closest("#hostPlaceCards")) { printPlaceCards(); return; }
     if (t.closest("#hostShareCard")) { shareHouseCard(); return; }
   });
   $("#view-host").addEventListener("change", async e => {
@@ -10042,7 +10099,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const forgot = org.contacts.filter(c => (c.recv || {})[y] && !(c.sent || {})[y]);
     return `<div class="card org-card"><div class="org-stats"><span><b>${on.length}</b> on the list</span><span><b>${sent}</b> sent</span><span><b>${got}</b> received</span></div>
         ${forgot.length ? `<p class="org-warn">📬 Sent you a card, but not on your sent list yet: ${forgot.map(c => esc(c.name)).join(", ")}</p>` : ""}
-        <div class="send-btns"><button type="button" class="btn btn-red" id="orgLabels">🖨️ Mailing labels</button><button type="button" class="btn btn-ghost" id="orgReturn">🏠 Return labels</button><button type="button" class="btn btn-ghost" id="orgCsv">📄 Spreadsheet</button></div>
+        <div class="send-btns"><button type="button" class="btn btn-red" id="orgLabels" data-print="labels">🖨️ Mailing labels</button><button type="button" class="btn btn-ghost" id="orgReturn" data-print="return">🏠 Return labels</button><button type="button" class="btn btn-ghost" id="orgCsv">📄 Spreadsheet</button></div>
         <p class="host-rem">Labels print on Avery 5160 sheets (30 per page). Print at 100% scale ("actual size"). A reminder comes on December 10 to get your cards in the mail.</p></div>
       ${org.contacts.map(c => { const s = (c.sent || {})[y], r = (c.recv || {})[y], ls = (c.sent || {})[y - 1], lr = (c.recv || {})[y - 1];
         return `<div class="card org-item" data-oc="${c.id}"><div class="host-row"><b>${esc(c.name)}</b><button class="icon-btn" data-odel aria-label="Remove">✕</button></div>
@@ -10059,14 +10116,14 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       <div class="org-addr-row"><input class="input" data-oa="city" maxlength="40" placeholder="City" value="${esc(c.city || "")}"><input class="input" data-oa="region" maxlength="20" placeholder="${currency === "USD" ? "State" : "Province"}" value="${esc(c.region || "")}"><input class="input" data-oa="postal" maxlength="12" placeholder="${currency === "USD" ? "ZIP" : "Postal code"}" value="${esc(c.postal || "")}"></div>
       ${kind === "oc" ? `<button type="button" class="btn btn-green btn-block" data-odone>Done</button>` : ""}</div>`;
   function labelLines(c) { return [c.name, c.street, [c.city, c.region].filter(Boolean).join(", ") + (c.postal ? "  " + c.postal : "")].filter(s => s && s.trim()); }
-  function printLabels(list, title) {
-    if (!list.length) { toast("✉️ Add some addresses first"); return; }
-    const css = `@page{size:letter;margin:0} body{margin:0} .lblsheet{width:8.5in;padding:.5in .1875in 0;box-sizing:border-box;display:grid;grid-template-columns:repeat(3,2.625in);column-gap:.125in;grid-auto-rows:1in;break-after:page}
-      .lbl{box-sizing:border-box;padding:.1in .18in;display:flex;flex-direction:column;justify-content:center;font:10.5pt/1.25 Georgia,serif;overflow:hidden} .lbl b{font-weight:600}`;
+  function labelDoc(kind) {
+    const list = kind === "return" ? (labelLines(org.me).length < 2 ? [] : Array(30).fill(labelLines(org.me))) : org.contacts.filter(c => c.list !== false && c.street).map(labelLines);
+    if (!list.length) return { error: kind === "return" ? "🏠 Fill in your return address on the Card List first" : "✉️ Add some addresses to your Card List first" };
+    const css = `.lblsheet{width:8.5in;padding:.5in .1875in 0;box-sizing:border-box;display:grid;grid-template-columns:repeat(3,2.625in);column-gap:.125in;grid-auto-rows:1in;break-after:page;page-break-after:always}
+      .lblsheet:last-child{break-after:auto;page-break-after:auto} .lbl{box-sizing:border-box;padding:.1in .18in;display:flex;flex-direction:column;justify-content:center;font:10.5pt/1.25 Georgia,serif;overflow:hidden} .lbl b{font-weight:600}`;
     const pages = []; for (let i = 0; i < list.length; i += 30) pages.push(list.slice(i, i + 30));
-    const html = pages.map(pg => `<div class="lblsheet">${pg.map(l => `<div class="lbl">${l.map((x, i) => i ? `<span>${esc(x)}</span>` : `<b>${esc(x)}</b>`).join("")}</div>`).join("")}</div>`).join("");
-    if (NoelNative.isNative()) { NoelMedia.share(new Blob([`<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${html}</body></html>`], { type: "text/html" }), title + ".html", title).catch(() => {}); return; }
-    $("#printArea").innerHTML = `<style>${css} #printArea{font:inherit!important}</style>` + html; setTimeout(() => window.print(), 50);
+    return { title: kind === "return" ? "Return address labels" : "Christmas card mailing labels", css, margin: 0, pages: pages.length, file: kind === "return" ? "Return-Address-Labels" : "Christmas-Card-Labels", note: "Avery 5160 · print at actual size (100%)",
+      html: pages.map(pg => `<div class="lblsheet">${pg.map(l => `<div class="lbl">${l.map((x, i) => i ? `<span>${esc(x)}</span>` : `<b>${esc(x)}</b>`).join("")}</div>`).join("")}</div>`).join("") };
   }
 
   // ---------- 📅 Calendar ----------
@@ -10184,8 +10241,6 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#view-org").addEventListener("click", e => {
     const t = e.target, y = orgYear();
     const tool = t.closest("[data-otool]"); if (tool) { org.view = tool.dataset.otool; org.editing = null; saveOrg(); renderOrg(); window.scrollTo({ top: 0 }); return; }
-    if (t.closest("#orgLabels")) { printLabels(org.contacts.filter(c => c.list !== false && c.street).map(labelLines), "Christmas-Card-Labels"); return; }
-    if (t.closest("#orgReturn")) { const l = labelLines(org.me); if (l.length < 2) { toast("🏠 Fill in your return address below first"); return; } printLabels(Array(30).fill(l), "Return-Address-Labels"); return; }
     if (t.closest("#orgCsv")) {
       const q = v => `"${String(v || "").replace(/"/g, '""')}"`;
       const csv = ["Name,Street,City,Province/State,Postal/ZIP,Sent " + y + ",Received " + y].concat(org.contacts.map(c => [c.name, c.street, c.city, c.region, c.postal, (c.sent || {})[y] ? "yes" : "", (c.recv || {})[y] ? "yes" : ""].map(q).join(","))).join("\r\n");
@@ -10236,6 +10291,149 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     orgChanged();
   });
   /* @org-end */
+  /* @print-start */
+  /* ============================================================
+     🖨️ PRINTING & THE PRINT TRAY
+     Every print button (data-print="key") opens one small choice:
+       Print now · Send or save as a PDF · Add to the Print Tray
+     The tray works like a shopping cart for printing: collect pages
+     while planning, untick anything you don't need, then make ONE PDF
+     for a home printer, your computer, or a print shop (Staples etc.).
+     The tray remembers WHAT to print, not a copy, so it always prints
+     your latest plans. On iPhone a real letter-size PDF is made on the
+     phone itself (NoelPdf); nothing is uploaded anywhere.
+     ============================================================ */
+  let tray = load("printTray", []).filter(k => typeof k === "string");
+  let trayOff = {}, trayDone = false, printKey = null;
+  const saveTray = () => save("printTray", tray);
+  function printDoc(key) {
+    let d = null;
+    if (key.startsWith("meal:")) { const m = mealById(key.slice(5)); d = m ? mealDoc(m) : null; }
+    else if (key.startsWith("shop:")) { const m = mealById(key.slice(5)); d = m ? shopDoc(m) : null; }
+    else if (key === "place") d = placeDoc();
+    else if (key === "fridge") d = fridgeDoc();
+    else if (key === "labels" || key === "return") d = labelDoc(key);
+    return d || { error: "That page isn't available any more" };
+  }
+  // rough page count: lay the page out at letter width in a sealed-off box and measure it
+  function estPages(d) {
+    if (d.pages) return d.pages;
+    const host = document.createElement("div");
+    host.style.cssText = "position:fixed;left:-9999px;top:0;visibility:hidden";
+    document.body.appendChild(host);
+    const root = host.attachShadow ? host.attachShadow({ mode: "open" }) : host;
+    root.innerHTML = `<style>${d.css}</style><div style="width:${8.5 - 2 * d.margin}in;font:12pt/1.45 Georgia,serif">${d.html}</div>`;
+    const h = root.lastElementChild.scrollHeight; host.remove();
+    return Math.max(1, Math.ceil(h / ((11 - 2 * d.margin) * 96) - 0.08));
+  }
+  const pagesTxt = n => `${n} ${n === 1 ? "page" : "pages"}`;
+  const fullHtml = d => `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${d.fonts ? (document.getElementById("embeddedFonts") || {}).textContent || "" : ""}${d.css} html,body{margin:0;padding:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>${d.html}</body></html>`;
+
+  // make the PDF (iPhone) or open the print window (web) for a list of pages
+  async function runPrint(docs, how, fileName) {
+    const N = NoelNative.isNative(), pdf = N && NoelNative.plugin("NoelPdf");
+    if (N && pdf) {
+      toast("🖨️ Making your PDF…");
+      try {
+        const r = await pdf.make({ docs: docs.map(d => ({ html: fullHtml(d), margin: d.margin })), fileName: fileName + ".pdf" });
+        if (how === "print") { const p = await pdf.print({ uri: r.uri, name: fileName.replace(/-/g, " ") }); return p && p.printed ? "printed" : "cancelled"; }
+        const sh = NoelNative.plugin("Share"); await sh.share({ title: fileName + ".pdf", files: [r.uri] }); return "shared";
+      } catch (e) {
+        if (/cancel/i.test(String(e && e.message))) return "cancelled";
+        // older app build without the PDF maker: fall back to a print-ready page in the share sheet
+        const page = docs.map((d, i) => `<section style="${i ? "break-before:page;page-break-before:always;" : ""}padding:${d.margin}in">${d.html}</section>`).join("");
+        const css = [...new Set(docs.map(d => d.css))].join("\n");
+        return NoelMedia.share(new Blob([fullHtml({ css, html: page, fonts: docs.some(d => d.fonts) })], { type: "text/html" }), fileName + ".html", fileName).catch(() => "cancelled");
+      }
+    }
+    // 🌐 web: everything goes into the print area, one section per page set, then the browser's print window
+    const css = [...new Set(docs.map(d => d.css))].join("\n");
+    $("#printArea").innerHTML = `<style>@page{margin:.5in} @page zero{margin:0} ${css} #printArea .pt-zero{page:zero} #printArea .pt-sec + .pt-sec{break-before:page;page-break-before:always}</style>` +
+      docs.map(d => `<section class="pt-sec${d.margin ? "" : " pt-zero"}">${d.html}</section>`).join("");
+    setTimeout(() => window.print(), 60);
+    return "printed";
+  }
+
+  // ---------- the small choice window ----------
+  function printAsk(key) {
+    const d = printDoc(key); if (d.error) { toast(d.error); return; }
+    printKey = key;
+    const meal = key.startsWith("meal:") && mealById(key.slice(5)), inTray = tray.includes(key), N = NoelNative.isNative();
+    $("#printAskTitle").textContent = d.title;
+    $("#printAskSub").textContent = `About ${pagesTxt(estPages(d))}${d.note ? " · " + d.note : ""}`;
+    $("#printAskBtns").innerHTML = `<button type="button" class="btn btn-red btn-block" data-pa="now">🖨️ Print now</button>
+      ${N ? `<button type="button" class="btn btn-ghost btn-block" data-pa="share">📤 Send or save as a PDF</button>` : ""}
+      ${meal && !meal.addon ? `<button type="button" class="btn btn-ghost btn-block" data-pa="shop">🛒 Just the shopping list</button>` : ""}
+      <button type="button" class="btn btn-green btn-block" data-pa="tray" ${inTray ? "disabled" : ""}>${inTray ? "✓ Already in your Print Tray" : "＋ Add to Print Tray"}</button>`;
+    $("#printAskHow").textContent = N ? "Send or save lets you AirDrop it to your computer, email it, or save it to Files for a print shop." : "Tip: collect pages in the Print Tray and print them all at once.";
+    $("#printAsk").classList.add("show");
+  }
+  const closeAsk = () => $("#printAsk").classList.remove("show");
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-print]"); if (b) { e.preventDefault(); printAsk(b.dataset.print); }
+  });
+  $("#printAsk").addEventListener("click", async e => {
+    if (e.target === $("#printAsk") || e.target.closest("#printAskClose")) { closeAsk(); return; }
+    const b = e.target.closest("[data-pa]"); if (!b || !printKey) return;
+    const act = b.dataset.pa;
+    if (act === "tray") { trayAdd(printKey); closeAsk(); return; }
+    if (act === "shop") { printKey = "shop:" + printKey.slice(5); printAsk(printKey); return; }
+    const d = printDoc(printKey); if (d.error) { toast(d.error); return; }
+    closeAsk(); await runPrint([d], act === "share" ? "share" : "print", d.file || "Noel-Printable");
+  });
+
+  // ---------- the tray ----------
+  function trayAdd(key) {
+    if (!tray.includes(key)) { tray.push(key); saveTray(); }
+    trayDone = false; trayBadge();
+    toast(`🖨️ Added to your Print Tray (${tray.length})`);
+    const b = $("#trayBtn"); b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
+  }
+  function trayBadge() { const b = $("#trayBtn"); b.hidden = !tray.length; $("#trayCount").textContent = tray.length; }
+  function renderTray() {
+    const items = tray.map(k => ({ k, d: printDoc(k) }));
+    const on = items.filter(x => !x.d.error && !trayOff[x.k]), total = on.reduce((a, x) => a + estPages(x.d), 0), N = NoelNative.isNative();
+    $("#trayBody").innerHTML = !items.length ? `<div class="card tray-empty"><div class="tray-big">🖨️</div><h3>Your Print Tray is empty</h3><p>Whenever you tap a 🖨️ Print button, choose <b>＋ Add to Print Tray</b>. Collect everything you need, then print it all in one go.</p></div>` : `
+      ${trayDone ? `<div class="card tray-done"><p>✅ All done? Clear the printed pages out of your tray.</p><button type="button" class="btn btn-green btn-block" id="trayClearDone">🧹 Clear the tray</button></div>` : ""}
+      <div class="card tray-list">${items.map(({ k, d }) => `<label class="tray-item${d.error ? " bad" : ""}" data-tk="${esc(k)}">
+          <input type="checkbox" ${!d.error && !trayOff[k] ? "checked" : ""} ${d.error ? "disabled" : ""}>
+          <span class="ti-txt"><b>${esc(d.title || "Page")}</b><small>${d.error ? esc(d.error.replace(/^\W+/, "")) : `About ${pagesTxt(estPages(d))}${d.note ? " · " + esc(d.note) : ""}`}</small></span>
+          <button type="button" class="icon-btn" data-tdel aria-label="Remove from tray">✕</button></label>`).join("")}</div>
+      <div class="card tray-go"><p class="tray-total">${on.length ? `<b>${on.length}</b> ${on.length === 1 ? "item" : "items"} · about <b>${pagesTxt(total)}</b>` : "Tick at least one item"}</p>
+        <button type="button" class="btn btn-red btn-block" id="trayPrint" ${on.length ? "" : "disabled"}>🖨️ Print on my printer</button>
+        ${N ? `<button type="button" class="btn btn-ghost btn-block" id="trayShare" ${on.length ? "" : "disabled"}>📤 Send to my computer or save the PDF</button>` : `<p class="host-rem">To save a PDF instead, choose "Save as PDF" in the print window.</p>`}
+        <button type="button" class="classy-link tray-clear" id="trayClear">Empty the tray</button></div>
+      <details class="card tray-shop"><summary>🏪 No printer? Print at Staples or another print shop</summary>
+        <ol>
+          <li>Tap <b>${N ? "📤 Send to my computer or save the PDF" : "🖨️ Print"}</b>${N ? ", then <b>Save to Files</b>" : " and choose <b>Save as PDF</b>"}. You'll get one PDF with everything ticked above.</li>
+          <li>Open your print shop's website or app (most have "upload to print"), or email the PDF to the store. You can also bring it on a USB stick.</li>
+          <li>Ask for <b>letter size (8½ × 11)</b>, printed at <b>actual size / 100%</b>, not "fit to page".</li>
+          <li>Printing mailing labels? Bring your own <b>Avery 5160</b> label sheets, or ask if they stock them.</li>
+        </ol>
+        <p class="host-rem">Noël never sends your plans anywhere by itself. You choose where the PDF goes.</p></details>`;
+  }
+  function trayOpen() { renderTray(); openSheet("traySheet"); }
+  $("#trayBtn").addEventListener("click", trayOpen);
+  $("#traySheet").addEventListener("change", e => {
+    const it = e.target.closest("[data-tk]"); if (it && e.target.type === "checkbox") { trayOff[it.dataset.tk] = !e.target.checked; renderTray(); }
+  });
+  $("#traySheet").addEventListener("click", async e => {
+    const t = e.target;
+    const del = t.closest("[data-tdel]"); if (del) { e.preventDefault(); const k = del.closest("[data-tk]").dataset.tk; tray = tray.filter(x => x !== k); delete trayOff[k]; saveTray(); trayBadge(); renderTray(); return; }
+    if (t.closest("#trayClear") || t.closest("#trayClearDone")) {
+      if (t.closest("#trayClear") && !confirm("Empty the Print Tray?")) return;
+      const keep = t.closest("#trayClearDone") ? tray.filter(k => trayOff[k]) : [];
+      tray = keep; trayOff = {}; trayDone = false; saveTray(); trayBadge(); renderTray();
+      if (!tray.length) { closeSheet("traySheet"); toast("🧹 Print Tray cleared"); }
+      return;
+    }
+    const pr = t.closest("#trayPrint"), sh = t.closest("#trayShare"); if (!pr && !sh) return;
+    const docs = tray.filter(k => !trayOff[k]).map(printDoc).filter(d => !d.error); if (!docs.length) return;
+    const r = await runPrint(docs, sh ? "share" : "print", "Noel-Printables");
+    if (r !== "cancelled") { trayDone = true; renderTray(); }
+  });
+  trayBadge();
+  /* @print-end */
 
   /* ============================================================
      START THE APP

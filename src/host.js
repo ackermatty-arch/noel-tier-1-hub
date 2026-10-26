@@ -153,7 +153,7 @@
         <p class="host-rem">Tap a seat to type a name. Names from your guest list are suggested.</p>
         <label class="host-check"><input type="checkbox" id="hostKids" ${t.kids ? "checked" : ""}> Add a kids' table</label>
         ${t.kids ? `<div class="host-row"><span class="meal-lab">Kids' seats</span><div class="stepper sm"><button type="button" data-hkseats="-1">−</button><output>${t.kseats}</output><button type="button" data-hkseats="1">+</button></div></div>${seatsHtml(t.kseats, t.knames, "rect", "k")}` : ""}
-        <button type="button" class="btn btn-red btn-block" id="hostPlaceCards">🖨️ Print place cards</button>
+        <button type="button" class="btn btn-red btn-block" id="hostPlaceCards" data-print="place">🖨️ Print place cards</button>
         <datalist id="hostNameList">${all.map(n => `<option value="${esc(n)}">`).join("")}</datalist>
       </div>
       <div class="card host-card"><h3>🍴 How to set the table</h3>
@@ -196,21 +196,40 @@
       <button type="button" class="btn btn-red btn-block" id="hostShareCard">🖼️ Share as a picture</button></div>`;
   }
 
-  // ---------- print place cards ----------
-  function printPlaceCards() {
+  // ---------- print place cards (goes through the Print Tray helper) ----------
+  function placeDoc() {
     const names = host.table.names.slice(0, host.table.seats).concat(host.table.kids ? host.table.knames.slice(0, host.table.kseats) : []).filter(Boolean);
-    if (!names.length) { toast("🍽️ Add some names to the seats first"); return; }
+    if (!names.length) return { error: "🍽️ Add some names to the seats first" };
     const card = n => `<div class="pc"><div class="pc-half"></div><div class="pc-half"><div class="pc-star">✦</div><div class="pc-name">${esc(n)}</div><div class="pc-sub">Merry Christmas</div></div></div>`;
-    const css = `@page{margin:12mm} body{margin:0;font-family:Georgia,serif} .pcs{display:grid;grid-template-columns:1fr 1fr;gap:8mm} .pc{border:1px dashed #bbb;height:62mm;display:grid;grid-template-rows:1fr 1fr;break-inside:avoid}
+    const css = `.pcs{display:grid;grid-template-columns:1fr 1fr;gap:8mm;font-family:Georgia,serif} .pc{border:1px dashed #bbb;height:62mm;display:grid;grid-template-rows:1fr 1fr;break-inside:avoid}
       .pc-half:first-child{border-bottom:1px dotted #ccc} .pc-half:last-child{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
       .pc-star{color:#B8935A;font-size:14pt} .pc-name{font:400 30pt "Great Vibes",cursive;color:#1E3A2F;line-height:1.2} .pc-sub{font:500 8pt sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#B8935A} .pc-tip{font:10pt sans-serif;color:#777;margin:0 0 6mm}`;
-    const html = `<p class="pc-tip">Cut along the dashed lines and fold along the dotted line, so each card stands up like a little tent.</p><div class="pcs">${names.map(card).join("")}</div>`;
-    const fonts = (document.getElementById("embeddedFonts") || {}).textContent || "";
-    if (NoelNative.isNative()) {
-      NoelMedia.share(new Blob([`<!doctype html><html><head><meta charset="utf-8"><style>${fonts}${css}</style></head><body>${html}</body></html>`], { type: "text/html" }), "Place-Cards.html", "Place cards").catch(() => {});
-      return;
-    }
-    $("#printArea").innerHTML = `<style>${css}</style>` + html; setTimeout(() => window.print(), 50);
+    return { title: "Place cards", css, fonts: true, margin: 0.5, file: "Place-Cards",
+      html: `<p class="pc-tip">Cut along the dashed lines and fold along the dotted line, so each card stands up like a little tent.</p><div class="pcs">${names.map(card).join("")}</div>` };
+  }
+  // ---------- 🧲 the fridge sheet: the whole hosting plan on one page ----------
+  function fridgeDoc() {
+    const D = hostDinner(), day = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+    const room = id => { const r = host.rooms.find(x => x.id === id); return r ? r.name : ""; };
+    const guests = host.guests.slice().sort((a, b) => (a.arrive || "z").localeCompare(b.arrive || "z"));
+    const box = on => on ? "☑" : "☐";
+    const cleanByDay = {}; HOST_CLEAN.forEach(([id, days, text]) => { const k = days ? day(atDay(D, days, 10)) : "Dinner day"; (cleanByDay[k] = cleanByDay[k] || []).push(`${box(host.clean[id])} ${esc(text)}`); });
+    const need = HOST_SUPPLIES.flatMap(([, l]) => l).concat(host.custom).filter(i => !host.supplies[i]);
+    const t = host.table, main = t.names.slice(0, t.seats), kids = t.kids ? t.knames.slice(0, t.kseats) : [];
+    const seatList = arr => arr.map((n, i) => `<span>${i + 1}. ${n ? esc(n) : "<i>open</i>"}</span>`).join("");
+    const h = host.house, house = [["Wi-Fi", h.wifi], ["Password", h.pass], ["Parking", h.parking], ["House notes", h.rules], ["Little ones", h.kids]].filter(([, v]) => v);
+    const css = `.fr{font:10pt/1.35 Georgia,serif;color:#222} .fr h1{font-size:20pt;margin:0;color:#1E3A2F} .fr .fr-sub{margin:2px 0 10px;color:#8a6d3b;letter-spacing:.08em;text-transform:uppercase;font:600 8.5pt sans-serif}
+      .fr h2{font-size:12pt;color:#1E3A2F;border-bottom:1.5px solid #B8935A;margin:10px 0 4px;padding-bottom:2px} .fr table{border-collapse:collapse;width:100%} .fr td,.fr th{text-align:left;padding:3px 5px;border-bottom:1px solid #e6e0d2;vertical-align:top;font-size:9.5pt}
+      .fr th{background:#f4efe3;font:600 8pt sans-serif;text-transform:uppercase;letter-spacing:.06em} .fr .fr-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 18px} .fr .fr-seats{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;font-size:9.5pt}
+      .fr ul{list-style:none;margin:0;padding:0} .fr li{margin:1px 0;font-size:9.5pt} .fr .fr-day{font-weight:bold;margin-top:4px;font-size:9.5pt} .fr .fr-need{columns:3;column-gap:12px} .fr .fr-need li{font-size:8.5pt} .fr p{margin:0 0 3px} .fr .fr-clean td{font-size:8.5pt;padding:2px 4px} .fr .fr-clean td:first-child{white-space:nowrap;font-weight:bold;width:62px} .fr .fr-foot{margin-top:12px;text-align:center;color:#999;font:8pt sans-serif}`;
+    const html = `<div class="fr"><h1>🎄 Our Christmas Hosting Plan</h1><p class="fr-sub">Dinner · ${esc(hostFmt(D))}</p>
+      <h2>Guests &amp; arrivals</h2>${guests.length ? `<table><tr><th>Who</th><th>Arriving</th><th>Getting here</th><th>Sleeping</th><th>Notes</th></tr>${guests.map(g => `<tr><td><b>${esc(g.name)}</b> (${g.people || 1})</td><td>${g.arrive ? esc(hostFmt(new Date(g.arrive))) : "—"}</td><td>${g.travel === "fly" ? `✈️ ${esc(g.flight || "Flying")}` : "🚗 Driving"}${g.pickup ? "<br><b>Needs a pickup</b>" : ""}</td><td>${esc(room(g.room)) || "—"}</td><td>${esc(g.notes || "")}</td></tr>`).join("")}</table>` : `<p>No guests added yet.</p>`}
+      <div class="fr-cols"><div><h2>Seating</h2>${main.some(Boolean) ? `<div class="fr-seats">${seatList(main)}</div>` : "<p>Not set yet.</p>"}${kids.some(Boolean) ? `<p class="fr-day">Kids' table</p><div class="fr-seats">${seatList(kids)}</div>` : ""}</div>
+        <div><h2>Deep-clean countdown</h2><table class="fr-clean">${Object.entries(cleanByDay).map(([k, l]) => `<tr><td>${esc(k)}</td><td>${l.join("<br>")}</td></tr>`).join("")}</table></div></div>
+      <h2>Still to get</h2>${need.length ? `<ul class="fr-need">${need.map(i => `<li>☐ ${esc(i)}</li>`).join("")}</ul>` : "<p>Everything's ready! ✨</p>"}
+      ${house.length ? `<h2>House info</h2><table>${house.map(([k, v]) => `<tr><td style="width:90px"><b>${k}</b></td><td>${esc(v)}</td></tr>`).join("")}</table>` : ""}
+      <p class="fr-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p></div>`;
+    return { title: "Hosting fridge sheet", css, html, margin: 0.45, file: "Hosting-Fridge-Sheet" };
   }
   // ---------- house info card as a picture ----------
   async function shareHouseCard() {
@@ -255,7 +274,6 @@
       box.querySelector("button").onclick = done; inp.onkeydown = ev => { if (ev.key === "Enter") done(); };
       return;
     }
-    if (t.closest("#hostPlaceCards")) { printPlaceCards(); return; }
     if (t.closest("#hostShareCard")) { shareHouseCard(); return; }
   });
   $("#view-host").addEventListener("change", async e => {
