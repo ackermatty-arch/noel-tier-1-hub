@@ -258,4 +258,6 @@
     if (f.id === "orgOtherForm") { const n = f.name.value.trim(); if (!n) return; org.other.push({ id: uid(), name: n, amt: parseFloat(f.amt.value) || 0 }); }
     orgChanged();
   });
+  // 💌 a card sent from the Outbox ticks that person off the Christmas card list
+  window.__orgTickSent = name => { const ct = org.contacts.find(c => String(c.name || "").trim().toLowerCase() === name); if (ct) { ct.sent = ct.sent || {}; ct.sent[orgYear()] = true; orgChanged(); } };
   /* @org-end */

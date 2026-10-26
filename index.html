@@ -1098,6 +1098,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .brand-title, .brand-sub { white-space: nowrap; }
 @media (max-width: 380px) { .brand-title { font-size: 16.5px; } .brand-sub { font-size: 10px; letter-spacing: .5px; } }
 /* room for the Print Tray button: tighter header on phones */
+@media (max-width: 480px) { body.has-out .header-actions { gap: 5px; } body.has-out .music-btn { width: 35px; height: 35px; border-radius: 10px; font-size: 16px; } body.has-out .countdown-chip { padding: 4px 5px; } body.has-out .countdown-chip small { font-size: 7.5px; letter-spacing: 0; } body.has-out .countdown-chip strong { font-size: 16px; } body.has-out .brand-logo { width: 34px; height: 34px; font-size: 18px; } body.has-out .header-row { gap: 6px; } body.has-out .brand-title { font-size: 16px; } body.has-out .brand-sub { font-size: 9px; letter-spacing: .3px; } }
 .brand-title, .brand-sub { overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 480px) {
   .header-row { gap: 8px; } .header-actions { gap: 6px; }
@@ -1308,6 +1309,15 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .host-switch b { display: block; font-size: 16px; color: var(--pine-dark); } .host-switch small { display: block; font-size: 13px; color: var(--muted); line-height: 1.45; margin-top: 2px; }
 .host-tabs { margin-bottom: 12px; }
 .tray-btn { position: relative; }
+.out-peek { display: flex; gap: 8px; margin-top: 14px; width: min(92vw, 420px); } .out-peek .btn { flex: 1; } .out-peek:not([hidden]) ~ .close-prev, #invPreview:has(.out-peek:not([hidden])) .close-prev { display: none; }
+.out-later { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); display: grid; gap: 8px; } .out-later .fill-lab { margin: 0; }
+.out-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); } .out-item:last-child { border-bottom: 0; }
+.out-thumb { width: 64px; height: 47px; border-radius: 6px; object-fit: cover; flex: none; box-shadow: 0 1px 4px rgba(0,0,0,.18); background: #eee; }
+.out-txt { flex: 1; min-width: 0; } .out-txt b { display: block; } .out-txt small { display: block; color: var(--muted); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.out-item { flex-wrap: wrap; } .out-item .out-acts { width: 100%; padding-left: 76px; justify-content: flex-start; } .out-item.sent .out-acts { width: auto; padding: 0; }
+.out-item.sent { opacity: .55; } .out-acts { display: flex; gap: 6px; flex: none; }
+.out-kind { font-size: 12px; padding: 4px 8px; border-radius: 12px; border: 1px solid var(--line); background: #fff; }
+.out-run { text-align: center; } .out-run .out-thumb { width: 200px; height: 148px; margin: 4px auto 10px; display: block; }
 .pt-banner { margin-top: 12px; }
 .pt-card .host-list li[data-chd], .pt-card .host-list li[data-op], .pt-card .host-list li[data-ssp] { display: flex; align-items: center; gap: 8px; } .pt-card .host-list li[data-chd] label, .pt-card .host-list li[data-op] label, .pt-card .host-list li[data-ssp] label { flex: 1; }
 .fill-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; } .fill-chip { font-size: 12.5px !important; padding: 6px 11px !important; background: #f3ecdc !important; border-color: rgba(184,147,90,.45) !important; color: var(--pine-dark) !important; }
@@ -1503,6 +1513,7 @@ body.space-switching main { opacity: .3; }
       </div>
     </div>
     <div class="header-actions">
+      <button class="music-btn tray-btn" id="outBtn" aria-label="Outbox: cards waiting to send" hidden>💌<span class="tray-count" id="outCount">0</span></button>
       <button class="music-btn tray-btn" id="trayBtn" aria-label="Print Tray">🖨️<span class="tray-count" id="trayCount">0</span></button>
       <button class="music-btn" id="musicBtn" aria-label="Holiday music">🎵</button>
       <div class="countdown-chip" aria-live="polite">
@@ -2140,6 +2151,12 @@ body.space-switching main { opacity: .3; }
           <button type="button" class="btn btn-red" id="cardVideo">🎬 Share as a video</button>
           <button type="button" class="btn btn-green" id="cardPicture">🖼️ Share as a picture</button>
         </div>
+        <div class="out-later">
+          <p class="fill-lab">📥 <b>No internet, or making lots of cards?</b> Save each one to your Outbox and send them all later.</p>
+          <label class="calc-field"><span>Their email or phone (optional)</span><input class="input" id="cardAddr" maxlength="80" inputmode="email" placeholder="So you know where to send it"></label>
+          <button type="button" class="btn btn-gold btn-block" id="cardOut">📥 Save to Outbox, send later</button>
+          <button type="button" class="classy-link" id="cardOutOpen" hidden></button>
+        </div>
       </div>
       <!-- ✏️ Link to your Etsy shop: set SHOP_URL in the script -->
       <a class="shop-link" id="shopLink" href="#" target="_blank" rel="noopener">🎁 See more animated e-cards in my Etsy shop ›</a>
@@ -2553,6 +2570,25 @@ body.space-switching main { opacity: .3; }
 </div>
 
 <!-- 🖨️ PRINT TRAY -->
+<div class="sheet" id="outSheet" role="dialog" aria-modal="true" aria-labelledby="outTitle">
+  <div class="sheet-head">
+    <button class="back-btn" data-close="outSheet">‹ Back</button>
+    <h2 id="outTitle">💌 Outbox</h2>
+  </div>
+  <div class="sheet-body"><div class="sheet-inner" id="outBody"></div></div>
+</div>
+
+<!-- 💌 "you have mail waiting" (shown when the internet comes back) -->
+<div class="alert-overlay" id="outNudge" role="dialog" aria-modal="true" aria-labelledby="outNudgeT">
+  <div class="alert-box">
+    <div class="door-big">💌</div>
+    <p class="win-name" id="outNudgeT" style="font-size:24px">You have mail waiting to send</p>
+    <p class="door-text" id="outNudgeTxt"></p>
+    <button class="btn btn-red btn-block" id="outNudgeGo">💌 Open my Outbox</button>
+    <button class="btn btn-ghost btn-block" id="outNudgeLater">Later</button>
+  </div>
+</div>
+
 <div class="sheet" id="traySheet" role="dialog" aria-modal="true" aria-labelledby="trayTitle">
   <div class="sheet-head">
     <button class="back-btn" data-close="traySheet">‹ Back</button>
@@ -2782,6 +2818,7 @@ body.space-switching main { opacity: .3; }
 <div class="inv-preview" id="invPreview" role="dialog" aria-modal="true" aria-label="Invite preview">
   <div id="invPreviewCard" style="width:100%"></div>
   <button class="btn btn-gold close-prev" id="invPreviewClose">Close preview</button>
+  <div class="out-peek" id="outPeekBar" hidden><button type="button" class="btn btn-red" id="outPeekSend">📤 Send now</button><button type="button" class="btn btn-gold" id="outPeekBack">‹ Back to Outbox</button></div>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -8651,6 +8688,136 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     makeAndShare("picture", () => INVITE.buildCard(d, {}), null, "", d.d === "nyc" ? "New-Year-Card" : "Christmas-Card", cardMessage());
   });
 
+  // ---------- 💌 OUTBOX: make cards now (even offline), send them all later ----------
+  // Each card is saved with its words and design; the video or picture is made at send time.
+  let outbox = load("outbox", []), outRun = null;
+  const saveOut = () => { save("outbox", outbox); outBadge(); outSync(); };
+  const outWaiting = () => outbox.filter(x => !x.sent);
+  function outBadge() {
+    const n = outWaiting().length;
+    $("#outBtn").hidden = !outbox.length; document.body.classList.toggle("has-out", !!outbox.length); $("#outCount").textContent = n; $("#outCount").hidden = !n;
+    const o = $("#cardOutOpen"); o.hidden = !n; o.textContent = `💌 ${n} ${n === 1 ? "card" : "cards"} waiting in your Outbox ›`;
+  }
+  function outSync() {   // a gentle phone nudge the next morning while cards are waiting
+    const n = outWaiting().length, t = new Date(); t.setDate(t.getDate() + 1); t.setHours(10, 0, 0, 0);
+    NoelNative.scheduleList(9200, 9205, n ? [{ t: t.getTime(), title: `💌 You have ${n} ${n === 1 ? "card" : "cards"} waiting to send`, body: "Open your Outbox when you're online" }] : []);
+  }
+  async function outThumb(d) {
+    try {
+      const big = await NoelMedia.picture({ buildEl: () => INVITE.buildCard(d, {}) });
+      const img = await createImageBitmap(big), c = document.createElement("canvas"); c.width = 240; c.height = 177;
+      c.getContext("2d").drawImage(img, 0, 0, 240, 177); return c.toDataURL("image/jpeg", 0.7);
+    } catch (e) { return ""; }
+  }
+  const outIsEmail = a => /@/.test(a || "");
+  const outAddrTxt = x => x.addr ? (outIsEmail(x.addr) ? "✉️ " : "💬 ") + x.addr : "Choose who in the share window";
+  $("#cardOut").addEventListener("click", async () => {
+    if (!guardCard()) return;
+    const d = cardData(), b = $("#cardOut");
+    b.disabled = true; b.textContent = "📥 Saving…";
+    const it = { id: uid(), d, kind: NoelMedia.canVideo() ? "video" : "picture", addr: $("#cardAddr").value.trim(), at: Date.now(), sent: 0, thumb: await outThumb(d) };
+    outbox.push(it); saveOut();
+    b.disabled = false; b.textContent = "📥 Save to Outbox, send later";
+    ecard.to = ""; save("ecard", ecard); $("#cardTo").value = ""; $("#cardAddr").value = "";   // ready for the next person
+    toast(`💌 Saved to your Outbox (${outWaiting().length}). Make the next one!`);
+    const ob = $("#outBtn"); ob.classList.remove("bump"); void ob.offsetWidth; ob.classList.add("bump");
+  });
+  $("#cardOutOpen").addEventListener("click", () => outOpen());
+  function outRow(x) {
+    return `<div class="out-item${x.sent ? " sent" : ""}" data-oid="${x.id}">
+      ${x.thumb ? `<img class="out-thumb" src="${x.thumb}" alt="">` : `<span class="out-thumb"></span>`}
+      <span class="out-txt"><b>${x.sent ? "✅ " : ""}${esc(x.d.to || "Card " + (outbox.indexOf(x) + 1))}</b><small>${esc(outAddrTxt(x))}</small><small>${esc((x.d.msg || "").slice(0, 60))}${(x.d.msg || "").length > 60 ? "…" : ""}</small></span>
+      <span class="out-acts">${x.sent ? `<button type="button" class="icon-btn" data-odel aria-label="Remove">✕</button>` : `
+        <button type="button" class="out-kind" data-okind>${x.kind === "video" ? "🎬 Video" : "🖼️ Picture"}</button>
+        <button type="button" class="icon-btn" data-opeek aria-label="Look at this card">👀</button>
+        <button type="button" class="icon-btn" data-odel aria-label="Remove">✕</button>`}</span></div>`;
+  }
+  function renderOut() {
+    const wait = outWaiting(), sent = outbox.filter(x => x.sent);
+    if (outRun) {   // sending one by one
+      const x = outbox.find(y => y.id === outRun.q[outRun.i]);
+      $("#outBody").innerHTML = `<div class="card out-run" style="padding:18px">
+        <p class="fill-lab">Card ${outRun.i + 1} of ${outRun.q.length}</p>
+        ${x.thumb ? `<img class="out-thumb" src="${x.thumb}" alt="">` : ""}
+        <h3 style="margin:4px 0">${esc(x.d.to || "Your card")}</h3>
+        <p class="host-rem">${x.addr ? `${outIsEmail(x.addr) ? "✉️" : "💬"} <b>${esc(x.addr)}</b> will be copied, so you can paste it into the To line.` : "Choose who to send it to in the share window."}</p>
+        <button type="button" class="btn btn-red btn-block" id="outGo">📤 Send this card</button>
+        <button type="button" class="btn btn-ghost btn-block" id="outSkip">Skip for now</button>
+        <button type="button" class="classy-link" id="outStop">Stop sending</button></div>`;
+      return;
+    }
+    $("#outBody").innerHTML = !outbox.length ? `<div class="card tray-empty"><div class="tray-big">💌</div><h3>Your Outbox is empty</h3><p>Make cards any time, even with no internet. In <b>💌 Cards</b>, tap <b>📥 Save to Outbox</b>. When you're back online, send them all from here.</p></div>` : `
+      ${wait.length ? `<div class="card tray-go"><p class="tray-total"><b>${wait.length}</b> ${wait.length === 1 ? "card" : "cards"} waiting to send</p>
+        ${navigator.onLine === false ? `<p class="org-warn">📵 You're offline right now. Your cards are safe here. Send them when you're back online.</p>` : ""}
+        <button type="button" class="btn btn-red btn-block" id="outAll">📤 Send all, one after another</button>
+        <p class="host-rem" style="margin:0">Each card opens your share window with the card ready. Pick Messages, Mail or any app and tap Send. Then the next card comes up.</p></div>` : `<div class="card tray-done"><p>✅ All your cards are sent!</p><button type="button" class="btn btn-green btn-block" id="outClearSent">🧹 Clear sent cards</button></div>`}
+      ${wait.length ? `<div class="card tray-list">${wait.map(outRow).join("")}</div>` : ""}
+      ${sent.length ? `<details class="card tray-list"${wait.length ? "" : " open"}><summary style="padding:12px 0;font-weight:700">✅ Sent (${sent.length})</summary>${sent.map(outRow).join("")}</details>` : ""}
+      <p class="host-rem" style="text-align:center">Tap a card's 👀 to look it over, or <b>Send now</b> from there.</p>`;
+  }
+  function outOpen() { outRun = null; renderOut(); openSheet("outSheet"); }
+  function outMarkSent(x) {
+    x.sent = Date.now();
+    const nm = String(x.d.to || "").trim().toLowerCase();   // tick them off the Christmas card list too
+    if (nm && window.__orgTickSent) window.__orgTickSent(nm);
+    saveOut();
+  }
+  async function outSend(x) {
+    if (x.addr) { try { await navigator.clipboard.writeText(x.addr); toast(`📋 ${x.addr} copied. Paste it into the To line.`); } catch (e) {} }
+    const d = x.d, base = d.d === "nyc" ? "New-Year-Card" : "Christmas-Card", text = `${d.d === "nyc" ? "🥂 A New Year's card" : "🎄 A Christmas card"} for you${d.to ? ", " + d.to : ""}!`;
+    let kind = x.kind; if (kind === "video" && !NoelMedia.canVideo()) kind = "picture";
+    try {
+      let blob, ext = "jpg";
+      if (kind === "video") {
+        getAudio(); if (!music.paused) pauseMusic();
+        $("#mediaBar").style.width = "0"; $("#mediaBusy").hidden = false;
+        ({ blob, ext } = await NoelMedia.video({ buildEl: () => INVITE.buildCard(d, {}), songSrc: inviteSong(INVITE.CARD_MUSIC[d.d]), kicker: d.d === "nyc" ? "HAPPY NEW YEAR" : "A CARD FOR YOU", onProgress: p => { $("#mediaBar").style.width = Math.round(p * 100) + "%"; } }));
+        $("#mediaBusy").hidden = true;
+      } else blob = await NoelMedia.picture({ buildEl: () => INVITE.buildCard(d, {}) });
+      const how = await NoelMedia.share(blob, `${base}.${ext}`, text);
+      if (how === "cancelled") return false;
+      outMarkSent(x); return true;
+    } catch (e) {
+      $("#mediaBusy").hidden = true;
+      if (!(e && (e.name === "AbortError" || /cancel/i.test(e.message || "")))) toast(navigator.onLine === false ? "📵 You're offline. Your card is still safe in the Outbox." : "Sorry, that didn't work. Please try again.");
+      return false;
+    }
+  }
+  function outNext() { outRun.i++; if (outRun.i >= outRun.q.length) { outRun = null; toast(outWaiting().length ? "💌 Done for now. Skipped cards are still in your Outbox." : "🎉 All your cards are sent!"); } renderOut(); }
+  $("#outBtn").addEventListener("click", outOpen);
+  $("#outSheet").addEventListener("click", async e => {
+    const t = e.target;
+    if (t.closest("#outAll")) { outRun = { q: outWaiting().map(x => x.id), i: 0 }; renderOut(); return; }
+    if (t.closest("#outGo")) { const x = outbox.find(y => y.id === outRun.q[outRun.i]), b = t.closest("#outGo"); b.disabled = true; const ok = await outSend(x); b.disabled = false; if (ok) outNext(); return; }
+    if (t.closest("#outSkip")) { outNext(); return; }
+    if (t.closest("#outStop")) { outRun = null; renderOut(); return; }
+    if (t.closest("#outClearSent")) { outbox = outbox.filter(x => !x.sent); saveOut(); renderOut(); return; }
+    const row = t.closest("[data-oid]"); if (!row) return;
+    const x = outbox.find(y => y.id === row.dataset.oid); if (!x) return;
+    if (t.closest("[data-odel]")) { if (x.sent || confirm(`Remove the card${x.d.to ? " for " + x.d.to : ""}?`)) { outbox = outbox.filter(y => y !== x); saveOut(); renderOut(); } return; }
+    if (t.closest("[data-okind]")) { x.kind = x.kind === "video" ? "picture" : "video"; saveOut(); renderOut(); return; }
+    if (t.closest("[data-opeek]")) { outPeek = x; showPreview(o => INVITE.buildCard(x.d, o), INVITE.CARD_MUSIC[x.d.d]); $("#outPeekBar").hidden = false; return; }
+  });
+  // 👀 look it over, then "Send now" right from the preview
+  let outPeek = null;
+  const outPeekDone = () => { $("#outPeekBar").hidden = true; outPeek = null; $("#invPreviewClose").click(); renderOut(); };
+  $("#outPeekBack").addEventListener("click", outPeekDone);
+  $("#outPeekSend").addEventListener("click", async () => { const x = outPeek; outPeekDone(); if (x) { await outSend(x); renderOut(); } });
+  // 📶 back online with cards waiting → "You have mail waiting to send"
+  let outNudged = 0;
+  function outCheck() {
+    const n = outWaiting().length;
+    if (!n || navigator.onLine === false || Date.now() - outNudged < 6 * 3600e3 || $("#outSheet").classList.contains("open")) return;
+    outNudged = Date.now();
+    $("#outNudgeTxt").textContent = `${n} ${n === 1 ? "card is" : "cards are"} ready in your Outbox. Take a look, then send them all or one at a time.`;
+    $("#outNudge").classList.add("show");
+  }
+  $("#outNudgeGo").addEventListener("click", () => { $("#outNudge").classList.remove("show"); outOpen(); });
+  $("#outNudgeLater").addEventListener("click", () => $("#outNudge").classList.remove("show"));
+  window.addEventListener("online", () => setTimeout(outCheck, 1500));
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(outCheck, 1500); });
+  outBadge(); setTimeout(outCheck, 4000);
+
   // ---------- guest list ----------
   function renderGuests() {
     const c = k => guests.filter(g => g.s === k).length;
@@ -10626,6 +10793,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (f.id === "orgOtherForm") { const n = f.name.value.trim(); if (!n) return; org.other.push({ id: uid(), name: n, amt: parseFloat(f.amt.value) || 0 }); }
     orgChanged();
   });
+  // 💌 a card sent from the Outbox ticks that person off the Christmas card list
+  window.__orgTickSent = name => { const ct = org.contacts.find(c => String(c.name || "").trim().toLowerCase() === name); if (ct) { ct.sent = ct.sent || {}; ct.sent[orgYear()] = true; orgChanged(); } };
   /* @org-end */
   /* @themes-start */
   /* ============================================================
