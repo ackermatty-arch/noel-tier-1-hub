@@ -79,6 +79,10 @@
     });
     m.timeline(p).forEach((s, i) => out.push({ k: "s" + i, m: s.m, t: D + s.m * 60000, icon: s.icon, text: s.text, alarm: s.alarm, main: s.main }));
     activeAddons(m).forEach(({ a, p: ap }) => a.timeline(ap).forEach((s, i) => { if (s.m !== 0) out.push({ k: "x" + a.id + i, m: s.m, t: D + s.m * 60000, icon: s.icon, text: s.text, alarm: s.alarm }); }));
+    activeAddons(m).forEach(({ a, p: ap }) => a.ahead(ap).forEach(([days, hour, icon, text], i) => {
+      const d = new Date(D); d.setDate(d.getDate() - days); d.setHours(hour, 0, 0, 0);
+      out.push({ k: "y" + a.id + i, t: d.getTime(), icon, text, alarm: true, ahead: true });
+    }));
     return out.sort((a, b) => a.t - b.t);
   }
 

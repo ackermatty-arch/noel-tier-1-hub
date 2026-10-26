@@ -5451,6 +5451,39 @@ window.NOEL_MEALS = (function () {
       ];
     }
   };
+  // the vegan menu's pecan pie, also offered on its own as a dietary dessert (with a gluten-free crust)
+  const pieBase = vegan.recipes.find(r => r.id === "veganpecan");
+  const pecanAddon = {
+    id: "pecanpie", tab: "dietary", addon: true,
+    name: "Deep-Dish Vegan Pecan Pie", icon: "🥧",
+    blurb: "Custard-style maple and coconut pecan pie in a gluten-free crust. Vegan, gluten-free and dairy-free.",
+    tags: "Vegan · Gluten-free · Dairy-free dessert",
+    menu: [["Dietary dessert", ["Deep-Dish Vegan Pecan Pie (gluten-free crust)"]]],
+    drinks: [["Pairing", "Coffee, chai, or a small glass of bourbon or tawny port."]],
+    recipes: [Object.assign({}, pieBase, {
+      id: "pecanpie", course: "Dietary dessert", name: "Deep-Dish Vegan Pecan Pie (gluten-free crust)",
+      yieldText: () => "one 9-inch deep-dish pie (8 slices): plenty for up to 5, with seconds",
+      note: () => "Vegan, gluten-free and dairy-free. The crust uses a 1:1 gluten-free flour blend. Gluten-free dough is more delicate, so roll it between two sheets of parchment and press any cracks together in the pie plate. Check that the brown sugar and plant-based butter are labelled vegan.",
+      ing: pieBase.ing.map(i => i.t === "all-purpose flour" ? Object.assign({}, i, { t: "gluten-free 1:1 flour blend (with xanthan gum)" }) : i)
+    })],
+    timeline(p) { return [{ m: 45, icon: "🥧", text: "Pecan pie: slice and serve (chilled or at room temperature)", alarm: true }]; },
+    ahead: () => [[1, 11, "🥧", "Pecan pie: bake it today so it can set in the fridge overnight"]],
+    shop(f, p) {
+      return [
+        ["Pantry & Baking", [
+          ["1 × 200 g", "bag pecan halves", 7],
+          ["1 × 540 ml", "bottle pure maple syrup", 12],
+          ["1 bag", "gluten-free 1:1 flour blend (with xanthan gum)", 7],
+          ["", "brown sugar, granulated sugar, cornstarch, vanilla extract, ground cinnamon, salt", null]
+        ]],
+        ["Refrigerated", [
+          ["1 × 454 g", "block plant-based butter", 7],
+          ["1 × 400 ml", "can full-fat coconut milk", 2.5]
+        ]],
+        ["Kitchen Supplies", [["1", "deep-dish pie plate (9-inch), parchment paper, pie weights or dried beans", null]]]
+      ];
+    }
+  };
   // add-on sizes: 1–5 people
   const addonPlan = base => guests => { const g = Math.min(5, Math.max(1, guests | 0)); return { g, f: g / base, pies: 1, dishes: 1, batches: 1 }; };
 
@@ -5492,9 +5525,10 @@ window.NOEL_MEALS = (function () {
       squash,
       shepherd,
       vgravyAddon,
-      mousse
+      mousse,
+      pecanAddon
     ],
-    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5) },
+    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8) },
     doneness: DONENESS,
     frac, hm, fmtNum
   };
@@ -8381,6 +8415,10 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     });
     m.timeline(p).forEach((s, i) => out.push({ k: "s" + i, m: s.m, t: D + s.m * 60000, icon: s.icon, text: s.text, alarm: s.alarm, main: s.main }));
     activeAddons(m).forEach(({ a, p: ap }) => a.timeline(ap).forEach((s, i) => { if (s.m !== 0) out.push({ k: "x" + a.id + i, m: s.m, t: D + s.m * 60000, icon: s.icon, text: s.text, alarm: s.alarm }); }));
+    activeAddons(m).forEach(({ a, p: ap }) => a.ahead(ap).forEach(([days, hour, icon, text], i) => {
+      const d = new Date(D); d.setDate(d.getDate() - days); d.setHours(hour, 0, 0, 0);
+      out.push({ k: "y" + a.id + i, t: d.getTime(), icon, text, alarm: true, ahead: true });
+    }));
     return out.sort((a, b) => a.t - b.t);
   }
 
