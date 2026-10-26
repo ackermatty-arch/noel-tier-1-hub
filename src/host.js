@@ -35,6 +35,13 @@
     table: { shape: "rect", seats: 10, names: [], kids: false, kseats: 6, knames: [], style: "casual" },
     house: { wifi: "", pass: "", parking: "", rules: "", kids: "" }
   };
+  host.who = host.who || {}; host.jobs = host.jobs || []; host.jobDone = host.jobDone || {};
+  const HOST_JOBS = [   // jobs on the big day: [id, job, when]
+    ["greet", "Greet guests and take coats", "As guests arrive"], ["drinks", "Pour drinks and refill glasses", "All evening"], ["kids", "Keep the kids busy (games, crafts, a movie)", "All day"],
+    ["table", "Set the table", "Before dinner"], ["carve", "Carve the roast", "Dinner time"], ["serve", "Bring the dishes to the table", "Dinner time"],
+    ["clear", "Clear the plates", "After dinner"], ["dessert", "Serve dessert and coffee", "After dinner"], ["wash", "Wash the dishes", "After dinner"],
+    ["dry", "Dry and put away", "After dinner"], ["leftovers", "Pack up the leftovers", "After dinner"], ["garbage", "Take out the garbage and recycling", "End of the night"]
+  ];
   const saveHost = () => save("hosting", host);
   const hostDinner = () => {   // the Christmas dinner time the reminders are built around
     if (mealPlan && !mealPlan.party) return mealPlan.at;
@@ -97,7 +104,7 @@
   }
 
   // ---------- screens ----------
-  const HOST_TABS = [["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Clean"], ["supplies", "📦 Supplies"], ["house", "📶 House info"]];
+  const HOST_TABS = [["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["house", "📶 House info"]];
   function renderHost() {
     const tab = host.tab || "guests";
     $("#hostRemind").innerHTML = `<label class="host-switch"><input type="checkbox" id="hostRemindBox" ${host.remind ? "checked" : ""}><span><b>🔔 Helpful little reminders</b><small>${host.remind ? `On. Noël will nudge you at just the right moments, timed to your dinner on ${hostFmt(hostDinner())}.` : "Turn on for well-timed nudges for cleaning, guests and the little things that are easy to forget."}</small></span></label>`;
@@ -179,10 +186,33 @@
     if (family) n.add(familyTitle(family));
     return [...n].filter(Boolean);
   }
+  const whoIn = (key, label) => `<input class="input who-in" data-hwho="${key}" list="hostWhoList" maxlength="24" placeholder="Who?" value="${esc(host.who[key] || "")}" aria-label="Who does ${esc(label)}">`;
+  const whoNames = () => [...new Set(hostNames().concat(typeof org !== "undefined" ? org.members.map(m => m.name) : []))];
   function hostCleanHtml() {
     const D = hostDinner(), done = HOST_CLEAN.filter(([id]) => host.clean[id]).length;
-    return `<div class="card host-card"><p class="host-rem">${done} of ${HOST_CLEAN.length} done · spread over the two weeks before dinner, so it never piles up${host.remind ? ". Each one rings a reminder on its day." : "."}</p>
-      <ul class="host-list">${HOST_CLEAN.map(([id, days, text]) => `<li><label class="${host.clean[id] ? "on" : ""}"><input type="checkbox" data-hclean="${id}" ${host.clean[id] ? "checked" : ""}><span>${esc(text)}<small>${days ? new Date(atDay(D, days, 10)).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) : "The morning of"}</small></span></label></li>`).join("")}</ul></div>`;
+    const jobs = HOST_JOBS.map(([id, text, when]) => ({ id, text, when })).concat(host.jobs.map(j => Object.assign({ mine: true }, j)));
+    return `<div class="card host-card"><h3>🧽 Deep-clean countdown</h3><p class="host-rem">${done} of ${HOST_CLEAN.length} done · spread over the two weeks before dinner${host.remind ? ". Each one rings a reminder on its day." : "."} Type a name in <b>Who?</b> to share the jobs out.</p>
+      <ul class="host-list chore-list">${HOST_CLEAN.map(([id, days, text]) => `<li><label class="${host.clean[id] ? "on" : ""}"><input type="checkbox" data-hclean="${id}" ${host.clean[id] ? "checked" : ""}><span>${esc(text)}<small>${days ? new Date(atDay(D, days, 10)).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) : "The morning of"}</small></span></label>${whoIn("c:" + id, text)}</li>`).join("")}</ul></div>
+      <div class="card host-card"><h3>🙋 Jobs on the big day</h3><p class="host-rem">Many hands make light work! Leave a job blank and it prints with a line to write a name in.</p>
+      <ul class="host-list chore-list">${jobs.map(j => `<li data-hjob="${j.id}"><label class="${host.jobDone[j.id] ? "on" : ""}"><input type="checkbox" data-hjobdone="${j.id}" ${host.jobDone[j.id] ? "checked" : ""}><span>${esc(j.text)}${j.when ? `<small>${esc(j.when)}</small>` : ""}</span></label>${whoIn("j:" + j.id, j.text)}${j.mine ? `<button type="button" class="icon-btn" data-hdeljob aria-label="Remove">✕</button>` : ""}</li>`).join("")}</ul>
+      <form class="org-ev-form" id="hostJobForm" autocomplete="off"><div class="org-addr-row"><input class="input" name="job" maxlength="50" placeholder="Add a chore, e.g. Walk the dog" aria-label="Chore"><input class="input" name="when" maxlength="24" placeholder="When (optional)" aria-label="When"></div><button class="btn btn-green btn-block" type="submit">➕ Add chore</button></form></div>
+      <div class="card host-fridge"><span class="hf-ico">📋</span><span class="hf-txt"><b>Chore chart</b><small>Every chore with who's doing it and a tick box. Blank names print as a line to fill in.</small></span><button type="button" class="btn btn-red" data-print="chores">🖨️ Print</button></div>
+      <datalist id="hostWhoList">${whoNames().map(n => `<option value="${esc(n)}">`).join("")}</datalist>`;
+  }
+  function choresDoc() {
+    const D = hostDinner(), day = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+    const who = k => host.who[k] ? esc(host.who[k]) : "";
+    const row = (text, when, k, done) => `<tr><td class="ch-box">${done ? "☑" : "☐"}</td><td>${esc(text)}</td><td class="ch-when">${esc(when)}</td><td class="ch-who">${who(k)}</td></tr>`;
+    const css = `.ch{font:11pt/1.4 Georgia,serif;color:#222} .ch h1{font-size:22pt;margin:0;color:#1E3A2F} .ch .ch-sub{margin:2px 0 12px;color:#8a6d3b;font:600 8.5pt sans-serif;letter-spacing:.08em;text-transform:uppercase}
+      .ch h2{font-size:13pt;color:#1E3A2F;border-bottom:1.5px solid #B8935A;margin:16px 0 4px;padding-bottom:2px} .ch table{border-collapse:collapse;width:100%}
+      .ch th{text-align:left;background:#f4efe3;font:600 8pt sans-serif;text-transform:uppercase;letter-spacing:.06em;padding:4px 6px} .ch td{padding:7px 6px;border-bottom:1px solid #e3dccb;vertical-align:bottom}
+      .ch .ch-box{width:18px;font-size:13pt} .ch .ch-when{width:120px;color:#666;font-size:9.5pt} .ch .ch-who{width:150px;border-bottom:2px solid #555;font-weight:bold;color:#1E3A2F} .ch .ch-foot{margin-top:16px;text-align:center;color:#999;font:8pt sans-serif}`;
+    const head = `<tr><th></th><th>Chore</th><th>When</th><th>Who</th></tr>`;
+    const html = `<div class="ch"><h1>📋 Holiday Chore Chart</h1><p class="ch-sub">Many hands make light work · dinner ${esc(hostFmt(D))}</p>
+      <h2>Deep-clean countdown</h2><table>${head}${HOST_CLEAN.map(([id, days, text]) => row(text, days ? day(atDay(D, days, 10)) : "Dinner day", "c:" + id, host.clean[id])).join("")}</table>
+      <h2>Jobs on the big day</h2><table>${head}${HOST_JOBS.map(([id, text, when]) => row(text, when, "j:" + id, host.jobDone[id])).join("")}${host.jobs.map(j => row(j.text, j.when || "", "j:" + j.id, host.jobDone[j.id])).join("")}</table>
+      <p class="ch-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p></div>`;
+    return { title: "Holiday chore chart", css, html, margin: 0.5, file: "Holiday-Chore-Chart" };
   }
   function hostSuppliesHtml() {
     const all = HOST_SUPPLIES.flatMap(([, l]) => l).concat(host.custom), have = all.filter(i => host.supplies[i]).length;
@@ -213,7 +243,7 @@
     const room = id => { const r = host.rooms.find(x => x.id === id); return r ? r.name : ""; };
     const guests = host.guests.slice().sort((a, b) => (a.arrive || "z").localeCompare(b.arrive || "z"));
     const box = on => on ? "☑" : "☐";
-    const cleanByDay = {}; HOST_CLEAN.forEach(([id, days, text]) => { const k = days ? day(atDay(D, days, 10)) : "Dinner day"; (cleanByDay[k] = cleanByDay[k] || []).push(`${box(host.clean[id])} ${esc(text)}`); });
+    const cleanByDay = {}; HOST_CLEAN.forEach(([id, days, text]) => { const k = days ? day(atDay(D, days, 10)) : "Dinner day"; (cleanByDay[k] = cleanByDay[k] || []).push(`${box(host.clean[id])} ${esc(text)}${host.who["c:" + id] ? ` <b>(${esc(host.who["c:" + id])})</b>` : ""}`); });
     const need = HOST_SUPPLIES.flatMap(([, l]) => l).concat(host.custom).filter(i => !host.supplies[i]);
     const t = host.table, main = t.names.slice(0, t.seats), kids = t.kids ? t.knames.slice(0, t.kseats) : [];
     const seatList = arr => arr.map((n, i) => `<span>${i + 1}. ${n ? esc(n) : "<i>open</i>"}</span>`).join("");
@@ -275,6 +305,7 @@
       return;
     }
     if (t.closest("#hostShareCard")) { shareHouseCard(); return; }
+    const dj = t.closest("[data-hdeljob]"); if (dj) { const id = dj.closest("[data-hjob]").dataset.hjob; host.jobs = host.jobs.filter(j => j.id !== id); delete host.who["j:" + id]; delete host.jobDone[id]; saveHost(); renderHost(); return; }
   });
   $("#view-host").addEventListener("change", async e => {
     const t = e.target;
@@ -292,6 +323,8 @@
     }
     const room = t.closest("[data-hr]"); if (room && t.dataset.hrf) { host.rooms.find(x => x.id === room.dataset.hr).name = t.value.trim() || "Room"; saveHost(); return; }
     if (t.dataset.hclean) { host.clean[t.dataset.hclean] = t.checked; saveHost(); hostSync(); t.closest("label").classList.toggle("on", t.checked); return; }
+    if (t.dataset.hwho) { const v = t.value.trim(); if (v) host.who[t.dataset.hwho] = v; else delete host.who[t.dataset.hwho]; saveHost(); return; }
+    if (t.dataset.hjobdone) { host.jobDone[t.dataset.hjobdone] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hsup) { host.supplies[t.dataset.hsup] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hhouse) { host.house[t.dataset.hhouse] = t.value.trim(); saveHost(); return; }
   });
@@ -299,6 +332,7 @@
     e.preventDefault(); const f = e.target;
     if (f.id === "hostGuestForm") { const n = f.gname.value.trim(); if (!n) return; host.guests.push({ id: uid(), name: n, people: 1, travel: "drive", room: "", pickup: false }); }
     if (f.id === "hostRoomForm") { const n = f.rname.value.trim(); if (!n) return; host.rooms.push({ id: uid(), name: n, icon: "🛏️", beds: 2, ready: {} }); }
+    if (f.id === "hostJobForm") { const n = f.job.value.trim(); if (!n) return; host.jobs.push({ id: uid(), text: n, when: f.when.value.trim() }); }
     if (f.id === "hostSupForm") { const n = f.sup.value.trim(); if (!n || host.custom.includes(n)) return; host.custom.push(n); }
     saveHost(); renderHost(); hostSync();
   });
