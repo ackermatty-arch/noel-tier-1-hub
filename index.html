@@ -2223,8 +2223,6 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
     <p class="tip">💡 Tip: keep the app open on screen while timers run. Phones may silence sounds when the app is in the background or on silent mode.</p>
   </section>
 
-  <!-- ✏️ BRANDING: footer text -->
-  <footer class="app-footer">Made with ❤️ by Earth &amp; Wonder · <span id="licenseLine">Personal use for one household.</span> Please don't share your link or code.</footer>
   <!-- ============================================================
        VIEW — ✨ HOLIDAY REVIEW (sit down after New Year's)
        ============================================================ -->
@@ -2283,6 +2281,8 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
     </div>
   </section>
 
+  <!-- ✏️ BRANDING: footer text (shown under every page) -->
+  <footer class="app-footer">Made with ❤️ by Earth &amp; Wonder</footer>
 </main>
 
 <!-- ============================================================
@@ -8256,7 +8256,6 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (hubMode === "company" && load(KEYS.view, "games") === "host") showView("planner");
     applySeasonNav();                                 // 🥂 New Year button takes over from Dec 26
     if (hubMode === "company" && load(KEYS.view, "games") === "meals") showView("planner");
-    $("#licenseLine").textContent = hubMode === "company" ? "Licensed for one company." : "Personal use for one household.";   // ✏️ licence wording
   }
   function openWelcome() { $("#familyInput").value = family; pickedMode = hubMode; syncModePick(hubMode); $("#welcomeOverlay").classList.add("show"); }
   function closeWelcome() { $("#welcomeOverlay").classList.remove("show"); save("welcomed", true); }
