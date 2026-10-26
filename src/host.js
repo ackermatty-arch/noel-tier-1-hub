@@ -234,7 +234,7 @@
     const css = `.pcs{display:grid;grid-template-columns:1fr 1fr;gap:8mm;font-family:Georgia,serif} .pc{border:1px dashed #bbb;height:62mm;display:grid;grid-template-rows:1fr 1fr;break-inside:avoid}
       .pc-half:first-child{border-bottom:1px dotted #ccc} .pc-half:last-child{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
       .pc-star{color:#B8935A;font-size:14pt} .pc-name{font:400 30pt "Great Vibes",cursive;color:#1E3A2F;line-height:1.2} .pc-sub{font:500 8pt sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#B8935A} .pc-tip{font:10pt sans-serif;color:#777;margin:0 0 6mm}`;
-    return { title: "Place cards", css, fonts: true, margin: 0.5, file: "Place-Cards",
+    return { noBrand: 1, title: "Place cards", css, fonts: true, margin: 0.5, file: "Place-Cards",
       html: `<p class="pc-tip">Cut along the dashed lines and fold along the dotted line, so each card stands up like a little tent.</p><div class="pcs">${names.map(card).join("")}</div>` };
   }
   // ---------- 🧲 the fridge sheet: the whole hosting plan on one page ----------

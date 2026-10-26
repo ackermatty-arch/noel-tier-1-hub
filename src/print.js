@@ -17,6 +17,7 @@
     if (key.startsWith("meal:")) { const m = mealById(key.slice(5)); d = m ? mealDoc(m) : null; }
     else if (key.startsWith("shop:")) { const m = mealById(key.slice(5)); d = m ? shopDoc(m) : null; }
     else if (key.startsWith("theme:")) d = themeDoc(key.slice(6));
+    else if (key === "survival") d = survivalDoc();
     else if (key === "place") d = placeDoc();
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "chores") d = choresDoc();
@@ -30,7 +31,43 @@
     else if (key === "bidsheets") d = bidSheetsDoc();
     else if (key === "aucwinners") d = aucWinnersDoc();
     else if (key === "labels" || key === "return") d = labelDoc(key);
-    return d || { error: "That page isn't available any more" };
+    if (!d) return { error: "That page isn't available any more" };
+    // 🏷️ the family (or company) name across the top of every printed page set
+    const who = familyTitle(family);
+    if (who && !d.error && !d.noBrand && !d.branded) { d.html = `<div class="pt-brand">${esc(who)}</div>` + d.html; d.css += ` .pt-brand{font:600 8.5pt/1 sans-serif;letter-spacing:.28em;text-transform:uppercase;color:#a8823c;text-align:center;border-bottom:1px solid #e3d6b8;padding:0 0 6px;margin:0 0 14px}`; d.branded = 1; }
+    return d;
+  }
+  // 😅 the Holiday Survival Guide (Family) / Office Party Survival Guide (Office)
+  function survivalDoc() {
+    const O = hubMode === "company";
+    const G = O ? {
+      title: "The Office Party Survival Guide", sub: "For surviving the most wonderful (and most awkward) time of the work year",
+      kit: ["A name tag (even if everyone knows you)", "Breath mints", "Comfy shoes for the conga line", "A fully charged phone", "Your famous dip, labelled", "A polite reason to leave at 9", "A gift within the limit (really)", "Stain remover pen"],
+      rules: [["The Reply-All Rule", "Never reply-all to the party invite. Ever."], ["Potluck Law", "If you didn't bring a dish, you bring the compliments."], ["The Last Cookie Standoff", "It belongs to whoever cut it in half first."], ["Karaoke Clause", "What happens at karaoke stays at karaoke."], ["The Gift Limit Pact", "$25 means $25. The fancy candle is not \"basically $25.\""], ["Shop-Talk Ban", "First person to mention a deadline refills the punch."]],
+      safe: ["Weekend plans", "Best snack on the table", "Holiday traditions", "Pets (always pets)", "Which holiday movie is best"], avoid: ["Salaries", "Politics", "Who ate whose lunch in March", "\"Let's circle back in January\""],
+      sos: [["Forgot your Secret Santa gift?", "\"It's on back-order. From the North Pole.\""], ["Spilled the punch?", "It's festive now."], ["Stuck in a long conversation?", "\"I promised I'd help with the awards!\""], ["Boss starts a speech?", "Nod, smile, clap at the pauses."]],
+      bingo: ["Someone wears a reindeer sweater", "Boss gives a speech", "Somebody talks about work anyway", "Last-cookie standoff", "\"New year, new me\"", "Printer jams on the awards", "Someone's famous dip appears", "Out-of-office set early", "Ugly sweater photo"]
+    } : {
+      title: "The Official Holiday Survival Guide", sub: "For surviving the most wonderful (and most exhausting) time of the year",
+      kit: ["Stretchy pants (for after dinner)", "Extra tape (it always disappears)", "Batteries in every size", "A secret chocolate stash", "Phone charger (hidden from the teens)", "Earplugs for the new drum set", "Coffee", "More coffee"],
+      rules: [["The Cookie Rule", "Cookies eaten standing up don't count."], ["Leftover Law", "If it's still in the fridge on Dec 30, it's officially a snack."], ["The Thermostat Treaty", "Whoever touches the thermostat does the dishes."], ["The Wrapping Rule", "If it's a weird shape, it goes in a bag. No shame."], ["The Elf Clause", "The elf may \"forget\" to move once. He's tired too."], ["The Nap Accord", "Anyone asleep on the couch after dinner may not be disturbed (or photographed… much)."]],
+      safe: ["How good the food is", "Pets", "Favourite Christmas movie (careful…)", "The weather", "Best gift you ever got"], avoid: ["Politics", "\"So, are you seeing anyone?\"", "\"When are you having kids?\"", "Who won Monopoly in 2019"],
+      sos: [["Forgot a gift?", "\"It's being shipped from the North Pole. Delays, you know.\""], ["Burnt the rolls?", "They're \"rustic.\""], ["Out of tape?", "Bows hide everything."], ["Kids awake at 4 AM?", "\"Santa's still nearby. Back to bed!\""]],
+      bingo: ["Someone falls asleep on the couch", "A toy needs batteries you don't have", "The dog steals food", "\"It's the thought that counts\"", "Song stuck in your head", "Wrapping-paper fort", "Someone wears new PJs all day", "Lost a gift receipt", "Someone cries at a movie"]
+    };
+    const bingo = G.bingo.slice(0, 4).concat(["⭐ FREE SPACE<br>You survived!"], G.bingo.slice(4, 8));
+    const css = `.sv{font:10.5pt/1.4 Georgia,serif;color:#222} .sv h1{font-size:22pt;margin:0;text-align:center;color:#1E3A2F} .sv .sv-sub{text-align:center;font:italic 10.5pt Georgia,serif;color:#8a6d3b;margin:2px 0 12px}
+      .sv h2{font-size:12pt;margin:10px 0 4px;color:#b3262e;border-bottom:1.5px solid #e3d6b8;padding-bottom:2px} .sv .cols{display:grid;grid-template-columns:1fr 1fr;gap:4px 22px} .sv ul{margin:0;padding:0;list-style:none} .sv li{margin:2px 0}
+      .sv .rule b{color:#1E3A2F} .sv table{width:100%;border-collapse:collapse;margin-top:4px} .sv td{border:1.5px solid #c9b48a!important;width:33.3%!important;height:.62in;text-align:center!important;vertical-align:middle!important;font-size:9.5pt;padding:4px!important;line-height:1.25;white-space:normal!important}
+      .sv td.free{background:#f6efdc;font-weight:bold;color:#b3262e} .sv .cert{margin-top:12px;text-align:center;font-size:11pt} .sv .cert span{display:inline-block;border-bottom:1px solid #999;width:2.6in}`;
+    const html = `<div class="sv"><h1>😅 ${G.title}</h1><p class="sv-sub">${G.sub}</p>
+      <div class="cols"><div><h2>🧰 Your Survival Kit</h2><ul>${G.kit.map(x => `<li>☐ ${esc(x)}</li>`).join("")}</ul></div>
+        <div><h2>📜 The Official Rules</h2><ul>${G.rules.map(([a, b]) => `<li class="rule"><b>${esc(a)}:</b> ${esc(b)}</li>`).join("")}</ul></div></div>
+      <div class="cols"><div><h2>🗣️ Safe Topics</h2><ul>${G.safe.map(x => `<li>✅ ${esc(x)}</li>`).join("")}</ul><h2>🚫 Danger Zone</h2><ul>${G.avoid.map(x => `<li>⛔ ${esc(x)}</li>`).join("")}</ul></div>
+        <div><h2>🆘 Emergency Plans</h2><ul>${G.sos.map(([a, b]) => `<li><b>${esc(a)}</b> ${esc(b)}</li>`).join("")}</ul></div></div>
+      <h2>🎯 ${O ? "Office Party" : "Holiday"} Survival Bingo</h2><table>${[0, 1, 2].map(r => `<tr>${bingo.slice(r * 3, r * 3 + 3).map(x => `<td class="${/FREE/.test(x) ? "free" : ""}">${/FREE/.test(x) ? x : esc(x)}</td>`).join("")}</tr>`).join("")}</table>
+      <p class="cert">🏅 Certified ${O ? "Office Party" : "Holiday"} Survivor: <span></span></p></div>`;
+    return { title: G.title, css, html, margin: 0.5, file: O ? "Office-Party-Survival-Guide" : "Holiday-Survival-Guide" };
   }
   // rough page count: lay the page out at letter width in a sealed-off box and measure it
   function estPages(d) {

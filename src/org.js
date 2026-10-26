@@ -68,7 +68,7 @@
     const css = `.lblsheet{width:8.5in;padding:.5in .1875in 0;box-sizing:border-box;display:grid;grid-template-columns:repeat(3,2.625in);column-gap:.125in;grid-auto-rows:1in;break-after:page;page-break-after:always}
       .lblsheet:last-child{break-after:auto;page-break-after:auto} .lbl{box-sizing:border-box;padding:.1in .18in;display:flex;flex-direction:column;justify-content:center;font:10.5pt/1.25 Georgia,serif;overflow:hidden} .lbl b{font-weight:600}`;
     const pages = []; for (let i = 0; i < list.length; i += 30) pages.push(list.slice(i, i + 30));
-    return { title: kind === "return" ? "Return address labels" : "Christmas card mailing labels", css, margin: 0, pages: pages.length, file: kind === "return" ? "Return-Address-Labels" : "Christmas-Card-Labels", note: "Avery 5160 · print at actual size (100%)",
+    return { noBrand: 1, title: kind === "return" ? "Return address labels" : "Christmas card mailing labels", css, margin: 0, pages: pages.length, file: kind === "return" ? "Return-Address-Labels" : "Christmas-Card-Labels", note: "Avery 5160 · print at actual size (100%)",
       html: pages.map(pg => `<div class="lblsheet">${pg.map(l => `<div class="lbl">${l.map((x, i) => i ? `<span>${esc(x)}</span>` : `<b>${esc(x)}</b>`).join("")}</div>`).join("")}</div>`).join("") };
   }
 

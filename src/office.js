@@ -141,7 +141,7 @@
     const css = `.cert{box-sizing:border-box;height:4.8in;border:6px double #B8935A;padding:.35in;text-align:center;font-family:Georgia,serif;display:flex;flex-direction:column;justify-content:center;break-inside:avoid;margin-bottom:.3in}
       .cert .c1{font:600 9pt sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#B8935A} .cert .c2{font:400 30pt "Great Vibes",cursive;color:#1E3A2F;margin:6px 0} .cert .c3{font-size:12pt;color:#555} .cert .c4{font-size:22pt;font-weight:bold;color:#b3262e;margin:6px 0 4px;min-height:30pt;border-bottom:1px solid #ccc;display:inline-block;padding:0 30px}
       .cert .c5{font:9pt sans-serif;color:#888;margin-top:10px}`;
-    return { title: "Silly Office Awards certificates", css, fonts: true, margin: 0.5, file: "Office-Awards", html: list.map(a => `<div class="cert"><div class="c1">Silly Office Awards ${yr}</div><div class="c2">${esc(a.t)}</div><div class="c3">proudly presented to</div><div><span class="c4">${esc(a.w || "")}</span></div><div class="c5">${esc(co)} · ${esc(off.ev.name || "Holiday Party")}</div></div>`).join("") };
+    return { noBrand: 1, title: "Silly Office Awards certificates", css, fonts: true, margin: 0.5, file: "Office-Awards", html: list.map(a => `<div class="cert"><div class="c1">Silly Office Awards ${yr}</div><div class="c2">${esc(a.t)}</div><div class="c3">proudly presented to</div><div><span class="c4">${esc(a.w || "")}</span></div><div class="c5">${esc(co)} · ${esc(off.ev.name || "Holiday Party")}</div></div>`).join("") };
   }
 
   // ---------- 📦 handover ----------
@@ -323,7 +323,7 @@
     const css = `.slips{display:grid;grid-template-columns:1fr 1fr;gap:0} .slip{box-sizing:border-box;height:2.45in;border:1px dashed #aaa;display:grid;grid-template-rows:1fr 1fr;font-family:Georgia,serif;text-align:center;break-inside:avoid}
       .slip .s-out{display:flex;flex-direction:column;justify-content:center;border-bottom:1px dotted #bbb;font-size:14pt;color:#1E3A2F} .slip .s-out small{font:8pt sans-serif;color:#999}
       .slip .s-in{display:flex;flex-direction:column;justify-content:center;transform:rotate(180deg);font-size:10pt;color:#444;padding:0 10px} .slip .s-in b{font-size:15pt;color:#b3262e;display:block;margin:2px 0} .s-tip{font:9pt sans-serif;color:#777;margin:0 0 8px}`;
-    return { title: "Secret Santa slips", css, margin: 0.4, file: "Secret-Santa-Slips", html: `<p class="s-tip">Cut along the dashed lines, fold on the dotted line so the writing is inside, and hand each person their slip. 🤫</p><div class="slips">${S.people.map(p => { const r = S.people.find(x => x.id === S.pairs[p.id]) || {};
+    return { noBrand: 1, title: "Secret Santa slips", css, margin: 0.4, file: "Secret-Santa-Slips", html: `<p class="s-tip">Cut along the dashed lines, fold on the dotted line so the writing is inside, and hand each person their slip. 🤫</p><div class="slips">${S.people.map(p => { const r = S.people.find(x => x.id === S.pairs[p.id]) || {};
       return `<div class="slip"><div class="s-out">🎅 For <b>${esc(p.name)}</b><small>only! Fold here</small></div><div class="s-in">You're Secret Santa for<b>${esc(r.name || "")}</b>${r.hint ? `💡 ${esc(r.hint)}<br>` : ""}${+off.ev.giftLimit ? `Limit ${money(+off.ev.giftLimit)}` : ""}${ssDay() ? ` · ${offDate(ssDay(), { month: "short", day: "numeric" })}` : ""}</div></div>`; }).join("")}</div>` };
   }
   // pass-the-phone reveal
