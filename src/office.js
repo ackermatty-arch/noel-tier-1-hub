@@ -28,9 +28,9 @@
 
   function renderOffice() {
     const tab = off.tab || "event";
-    $("#offTabs").innerHTML = [["event", "📋 Event"], ["approval", "📨 Approval"], ["potluck", "🥘 Potluck"], ["awards", "🏆 Awards"], ["handover", "📦 Handover"]].map(([k, l]) =>
+    $("#offTabs").innerHTML = [["event", "📋 Event"], ["approval", "📨 Approval"], ["potluck", "🥘 Potluck"], ["santa", "🎅 Secret Santa"], ["awards", "🏆 Awards"], ["auction", "🔨 Auction"], ["charity", "💛 Charity"], ["handover", "📦 Handover"]].map(([k, l]) =>
       `<button type="button" class="chip${k === tab ? " on" : ""}" data-oftab="${k}">${l}${k === "approval" ? ` <span class="ap-dot ${off.appr.status}"></span>` : ""}</button>`).join("");
-    $("#offBody").innerHTML = ({ event: offEventHtml, approval: offApprovalHtml, potluck: offPotHtml, awards: offAwardsHtml, handover: offHandoverHtml })[tab]();
+    $("#offBody").innerHTML = ({ event: offEventHtml, approval: offApprovalHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml })[tab]();
   }
   const fld = (k, label, type, ph, extra) => `<label class="off-f${extra === "wide" ? " wide" : ""}"><span class="meal-lab">${label}</span>${type === "area" ? `<textarea class="input" rows="2" data-ev="${k}" maxlength="300" placeholder="${ph || ""}">${esc(off.ev[k] || "")}</textarea>` : `<input class="input" type="${type || "text"}" data-ev="${k}" value="${esc(off.ev[k] ?? "")}" placeholder="${ph || ""}" ${type === "number" ? 'inputmode="decimal" min="0"' : 'maxlength="80"'}>`}</label>`;
   function offEventHtml() {
@@ -172,6 +172,9 @@
       <h2>Costs & vendors</h2><table><tr><th>What</th><th>Vendor</th><th>Contact</th><th class="num">Planned</th></tr>${off.costs.map(c => `<tr><td>${esc(c.type)}</td><td>${esc(c.name || "")}</td><td>${esc(c.contact || "")}</td><td class="num">${money(+c.cost || 0)}</td></tr>`).join("")}<tr><td colspan="3"><b>Planned total</b> (about ${money(Math.round(total / hc * 100) / 100)} per person)</td><td class="num"><b>${money(total)}</b></td></tr></table>
       ${T.spent ? `<h2>Actual spending</h2><table>${BUD_CATS.filter(([k]) => T.by[k]).map(([k, , l]) => `<tr><td>${l}</td><td class="num">${money(T.by[k])}</td></tr>`).join("")}<tr><td><b>Total spent</b>${+e.budget ? ` (budget ${money(+e.budget)})` : ""}</td><td class="num"><b>${money(T.spent)}</b></td></tr></table>` : ""}
       ${off.pot.length ? `<h2>Potluck</h2><p>${off.pot.map(p => `${esc(p.who)}: ${esc(p.dish)}`).join(" · ")}</p>` : ""}
+      ${ssOn() && offSS().people.length ? `<h2>Secret Santa</h2><p>${offSS().people.length} people took part${+off.ev.giftLimit ? `, ${money(+off.ev.giftLimit)} limit` : ""}${ssDay() ? `, exchanged ${offDate(ssDay(), { month: "short", day: "numeric" })}` : ""}.</p>` : ""}
+      ${offAuc().items.length ? `<h2>Silent auction</h2><table>${offAuc().items.map(i => `<tr><td>${esc(i.name)}${i.donor ? ` <small>(donated by ${esc(i.donor)})</small>` : ""}</td><td>${esc(i.winner || "")}</td><td class="num">${+i.bid ? money(+i.bid) : "—"}</td></tr>`).join("")}<tr><td colspan="2"><b>Total raised</b></td><td class="num"><b>${money(aucTotal())}</b></td></tr></table>` : ""}
+      ${chRaised() ? `<h2>Charity</h2><p>Raised <b>${money(chRaised())}</b>${chChosen() ? ` for <b>${esc(chChosen().name)}</b>` : ""}${+offCh().goal ? ` (goal ${money(+offCh().goal)})` : ""}${offCh().drive.count ? ` · ${offCh().drive.count} ${esc(offCh().drive.unit || "items")} collected` : ""}.</p>` : ""}
       ${off.awards.some(x => x.w) ? `<h2>Silly Office Awards</h2><p>${off.awards.filter(x => x.w).map(x => `🏆 ${esc(x.t)}: <b>${esc(x.w)}</b>`).join("<br>")}</p>` : ""}
       <h2>Notes for next year</h2><p><b>What worked:</b> ${esc(off.wrap.worked || "—")}</p><p><b>Change next time:</b> ${esc(off.wrap.change || "—")}</p>
       <p class="ye-foot">Made with Noël Tier 1 Hub · Office Edition</p></div>`;
@@ -209,7 +212,11 @@
   }
 
   // ---------- follow-up reminder for the approval ----------
-  const offReminders = () => { const a = off.appr; return a.status === "sent" && a.sentAt ? [{ k: "follow" + a.sentAt, t: a.sentAt + a.followDays * 86400000, text: `No answer yet? Follow up with ${off.ev.approver || "your approver"} about the ${off.ev.name || "party"} plan.` }] : []; };
+  const offReminders = () => {
+    const a = off.appr, out = a.status === "sent" && a.sentAt ? [{ k: "follow" + a.sentAt, t: a.sentAt + a.followDays * 86400000, text: `No answer yet? Follow up with ${off.ev.approver || "your approver"} about the ${off.ev.name || "party"} plan.` }] : [];
+    const day = ssDay(); if (ssOn() && day) { const t = new Date(day + "T10:00"); t.setDate(t.getDate() - 3); out.push({ k: "ss" + day, t: t.getTime(), text: `Secret Santa exchange is ${offDate(day, { weekday: "long", month: "short", day: "numeric" })}${+off.ev.giftLimit ? `. Limit ${money(+off.ev.giftLimit)}` : ""}. Remind the team!` }); }
+    return out;
+  };
   function offSync() { if (SPACE === "office") NoelNative.scheduleList(9100, 9110, offReminders().map(r => ({ t: r.t, title: "📨 " + r.text, body: "Noël Tier 1 Hub · Office" }))); }
   function offAlertItem(id) { if (!String(id).startsWith("off:")) return null; const r = offReminders().find(x => "off:" + x.k === id); return r ? { icon: "📨", name: r.text } : null; }
   if (SPACE === "office") setInterval(() => {
@@ -237,7 +244,7 @@
     if (t.closest("#offNewYear")) {
       if (!confirm("Start next year's party? This year's details are saved as \"Last year\" (with the vendors and your notes), then the event, approval, potluck and award winners are cleared.")) return;
       offSnapshotPast();
-      Object.assign(off.ev, { date: "", headcount: off.ev.headcount, budget: 0, organizer: "", notes: "" }); off.costs = []; off.pot = []; off.awards.forEach(a => { a.w = ""; }); off.appr = { status: "draft", log: [], followDays: off.appr.followDays || 3 }; off.wrap = { worked: "", change: "" }; off.tab = "event";
+      Object.assign(off.ev, { date: "", headcount: off.ev.headcount, budget: 0, organizer: "", notes: "" }); off.costs = []; off.pot = []; off.awards.forEach(a => { a.w = ""; }); if (off.ss) { off.ss.pairs = null; off.ss.seen = {}; off.ss.mailed = {}; } if (off.auc) off.auc.items.forEach(i => { i.winner = ""; i.bid = 0; }); if (off.ch) { off.ch.donations = []; off.ch.options.forEach(o => { o.votes = 0; }); off.ch.drive.count = 0; } off.appr = { status: "draft", log: [], followDays: off.appr.followDays || 3 }; off.wrap = { worked: "", change: "" }; off.tab = "event";
       saveOff(); offSync(); renderOffice(); toast("🎄 Fresh start! Last year's notes are at the top"); return;
     }
     if (t.closest("#offRemove")) {
@@ -271,5 +278,182 @@
     if (f.id === "offExportForm") { const pw = f.pw.value; if (pw.length < 4) { toast("🔒 Use at least 4 characters"); return; } try { const r = await offExport(pw); if (r === "saved") toast("📦 Handover file saved to your downloads"); } catch (err) { toast("Couldn't make the file"); } f.pw.value = ""; renderOffice(); return; }
     saveOff(); renderOffice();
   });
+
+  /* ---------- 🎅 SECRET SANTA (office only) ---------- */
+  const offSS = () => (off.ss = off.ss || { on: 1, people: [], avoid: [], pairs: null, seen: {}, mailed: {}, day: "" });
+  const ssOn = () => !!off.acts.gifts && offSS().on;
+  const ssDay = () => offSS().day || off.ev.date || "";
+  const ssName = id => (offSS().people.find(p => p.id === id) || {}).name || "?";
+  function ssDraw() {
+    const S = offSS(), ids = S.people.map(p => p.id), bad = (a, b) => a === b || S.avoid.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
+    for (let tries = 0; tries < 2000; tries++) {
+      const r = ids.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; }
+      if (ids.every((g, i) => !bad(g, r[i]))) { const pairs = {}; ids.forEach((g, i) => { pairs[g] = r[i]; }); return pairs; }
+    }
+    return null;
+  }
+  const ssMsg = (g, forEmail) => { const S = offSS(), r = S.people.find(p => p.id === S.pairs[g]) || {}, giver = S.people.find(p => p.id === g) || {};
+    return `Hi ${giver.name}! 🎅\n\nYou're the Secret Santa for: ${r.name}\n${r.hint ? `\nTheir wish hint: ${r.hint}\n` : ""}\nSpending limit: ${+off.ev.giftLimit ? money(+off.ev.giftLimit) : "see the organizer"}\nGift exchange: ${ssDay() ? offDate(ssDay(), { weekday: "long", month: "long", day: "numeric" }) : "to be announced"}\n\nShh, keep it a secret! 🤫${forEmail && off.ev.organizer ? `\n\n${off.ev.organizer}` : ""}`; };
+  function offSantaHtml() {
+    const S = offSS(), N = S.people.length, drawn = !!S.pairs;
+    if (!off.acts.gifts) return `<div class="card pt-card"><p>Turn on <b>🎁 Gift exchange</b> on the 📋 Event tab to use Secret Santa.</p><button type="button" class="btn btn-green btn-block" data-ofact="gifts">🎁 Turn on the gift exchange</button></div>`;
+    return `<div class="card pt-card"><div class="off-grid"><label class="off-f"><span class="meal-lab">Spending limit</span><input class="input" type="number" inputmode="decimal" min="0" data-ev="giftLimit" value="${esc(off.ev.giftLimit || "")}" placeholder="$"></label>
+        <label class="off-f"><span class="meal-lab">Exchange day</span><input class="input" type="date" data-ss="day" value="${esc(ssDay())}"></label></div>
+        <p class="host-rem">🔔 A reminder rings 3 days before the exchange.</p></div>
+      <div class="card pt-card"><h3>👥 Who's in (${N})</h3>
+        <ul class="host-list">${S.people.map(p => `<li data-ssp="${p.id}"><label><span><b>${esc(p.name)}</b>${p.email ? `<small>${esc(p.email)}</small>` : ""}${p.hint ? `<small>💡 ${esc(p.hint)}</small>` : ""}</span></label>${drawn ? (S.seen[p.id] ? `<span class="ss-ok">✓ seen</span>` : S.mailed[p.id] ? `<span class="ss-ok">✓ emailed</span>` : "") : `<button type="button" class="icon-btn" data-ssdel aria-label="Remove">✕</button>`}</li>`).join("") || `<li class="host-rem">Add everyone taking part.</li>`}</ul>
+        ${drawn ? "" : `<form class="org-ev-form" id="ssAddForm" autocomplete="off"><div class="org-addr-row"><input class="input" name="name" maxlength="30" placeholder="Name"><input class="input" name="email" type="email" maxlength="60" placeholder="Email (optional)"></div>
+          <input class="input" name="hint" maxlength="80" placeholder="Wish hint (optional), e.g. loves coffee, no candles"><button class="btn btn-green btn-block" type="submit">➕ Add</button></form>`}</div>
+      ${!drawn && N > 2 ? `<div class="card pt-card"><h3>🚫 Don't pair these</h3><p class="host-rem">For example, a couple who both work here, or a manager and their direct report.</p>
+        ${S.avoid.map((a, i) => `<p class="ss-avoid">${esc(ssName(a[0]))} ↔ ${esc(ssName(a[1]))} <button type="button" class="chip-x" data-ssunavoid="${i}" aria-label="Remove">✕</button></p>`).join("")}
+        <div class="org-addr-row"><select class="input" id="ssA">${S.people.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select><select class="input" id="ssB">${S.people.map((p, i) => `<option value="${p.id}" ${i === 1 ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select><button type="button" class="btn btn-ghost" id="ssAvoid">Add</button></div></div>` : ""}
+      ${drawn ? `<div class="card pt-card ss-drawn"><h3>🎉 Names are drawn!</h3><p class="host-rem">The matches are hidden, even from you. Choose how everyone finds out:</p>
+          <button type="button" class="btn btn-red btn-block" id="ssPass">📱 Pass the phone: each person taps their name</button>
+          <button type="button" class="btn btn-ghost btn-block" data-print="ssslips" style="margin-top:8px">🖨️ Print folded secret slips</button>
+          <details class="ss-mail"><summary>📧 Email each person</summary><p class="host-rem">Each email opens ready to send. Heads-up: you'll see their match as you send it.</p>
+            ${S.people.map(p => `<button type="button" class="chip${S.mailed[p.id] ? " on" : ""}" data-ssmail="${p.id}" ${p.email ? "" : "disabled"}>${S.mailed[p.id] ? "✓ " : "✉️ "}${esc(p.name)}${p.email ? "" : " (no email)"}</button>`).join("")}</details>
+          <div class="ss-tools"><button type="button" class="classy-link" id="ssPeek">👀 Peek at all matches</button><button type="button" class="classy-link" id="ssRedraw">↻ Draw again</button></div></div>`
+        : `<button type="button" class="btn btn-red btn-block" id="ssDraw" ${N < 3 ? "disabled" : ""}>🎅 Draw the names${N < 3 ? " (3 or more people)" : ""}</button>`}
+      <details class="card pt-card ss-swap"><summary>🎁 Prefer a White Elephant (Yankee Swap)? No draw needed</summary><ol>
+        <li>Everyone brings one wrapped gift within the limit and puts it on the table.</li><li>Draw numbers to decide the order.</li><li>Person #1 opens a gift. Each next person either opens a new gift or <b>steals</b> one already opened.</li>
+        <li>A gift can only be stolen twice, then it's "frozen" with its owner.</li><li>When someone is stolen from, they open a new gift or steal another (no stealing straight back).</li><li>Person #1 gets one last chance to swap at the end.</li></ol></details>`;
+  }
+  function ssSlipsDoc() {
+    const S = offSS(); if (!S.pairs) return { error: "🎅 Draw the names first" };
+    const css = `.slips{display:grid;grid-template-columns:1fr 1fr;gap:0} .slip{box-sizing:border-box;height:2.45in;border:1px dashed #aaa;display:grid;grid-template-rows:1fr 1fr;font-family:Georgia,serif;text-align:center;break-inside:avoid}
+      .slip .s-out{display:flex;flex-direction:column;justify-content:center;border-bottom:1px dotted #bbb;font-size:14pt;color:#1E3A2F} .slip .s-out small{font:8pt sans-serif;color:#999}
+      .slip .s-in{display:flex;flex-direction:column;justify-content:center;transform:rotate(180deg);font-size:10pt;color:#444;padding:0 10px} .slip .s-in b{font-size:15pt;color:#b3262e;display:block;margin:2px 0} .s-tip{font:9pt sans-serif;color:#777;margin:0 0 8px}`;
+    return { title: "Secret Santa slips", css, margin: 0.4, file: "Secret-Santa-Slips", html: `<p class="s-tip">Cut along the dashed lines, fold on the dotted line so the writing is inside, and hand each person their slip. 🤫</p><div class="slips">${S.people.map(p => { const r = S.people.find(x => x.id === S.pairs[p.id]) || {};
+      return `<div class="slip"><div class="s-out">🎅 For <b>${esc(p.name)}</b><small>only! Fold here</small></div><div class="s-in">You're Secret Santa for<b>${esc(r.name || "")}</b>${r.hint ? `💡 ${esc(r.hint)}<br>` : ""}${+off.ev.giftLimit ? `Limit ${money(+off.ev.giftLimit)}` : ""}${ssDay() ? ` · ${offDate(ssDay(), { month: "short", day: "numeric" })}` : ""}</div></div>`; }).join("")}</div>` };
+  }
+  // pass-the-phone reveal
+  function ssPassOpen(step, id) {
+    const S = offSS(), box = $("#ssReveal");
+    if (step === "list") box.querySelector(".alert-box").innerHTML = `<div class="door-big">🎅</div><p class="door-type">Secret Santa</p><p class="door-text">Find your name and tap it. No peeking at anyone else's!</p>
+      <div class="ss-names">${S.people.map(p => `<button type="button" class="chip${S.seen[p.id] ? " on" : ""}" data-ssme="${p.id}">${S.seen[p.id] ? "✓ " : ""}${esc(p.name)}</button>`).join("")}</div><button type="button" class="btn btn-ghost btn-block" data-ssclose style="margin-top:12px">Done</button>`;
+    if (step === "ready") box.querySelector(".alert-box").innerHTML = `<div class="door-big">🤫</div><p class="door-text">${esc(ssName(id))}, is it really you?<br><small>Make sure nobody's looking!</small></p><button type="button" class="btn btn-red btn-block" data-ssshow="${id}">🎁 Show my match</button><button type="button" class="btn btn-ghost btn-block" data-sslist style="margin-top:8px">‹ Back</button>`;
+    if (step === "show") { const r = S.people.find(x => x.id === S.pairs[id]) || {};
+      box.querySelector(".alert-box").innerHTML = `<div class="door-big">🎅</div><p class="door-type">You're Secret Santa for</p><p class="ss-big">${esc(r.name || "")}</p>${r.hint ? `<p class="door-text" style="font-size:16px">💡 ${esc(r.hint)}</p>` : ""}<p class="host-rem">${+off.ev.giftLimit ? `Limit ${money(+off.ev.giftLimit)}` : ""}${ssDay() ? ` · Exchange ${offDate(ssDay(), { weekday: "short", month: "short", day: "numeric" })}` : ""}</p>
+        <button type="button" class="btn btn-green btn-block" data-sshide="${id}">🙈 Hide it & pass the phone</button>`; }
+    box.classList.add("show");
+  }
+  $("#ssReveal").addEventListener("click", e => {
+    const t = e.target, S = offSS();
+    const me = t.closest("[data-ssme]"); if (me) { ssPassOpen("ready", me.dataset.ssme); return; }
+    const sh = t.closest("[data-ssshow]"); if (sh) { ssPassOpen("show", sh.dataset.ssshow); return; }
+    const hd = t.closest("[data-sshide]"); if (hd) { S.seen[hd.dataset.sshide] = 1; saveOff(); ssPassOpen("list"); return; }
+    if (t.closest("[data-sslist]")) { ssPassOpen("list"); return; }
+    if (t.closest("[data-ssclose]")) { $("#ssReveal").classList.remove("show"); renderOffice(); }
+  });
+
+  /* ---------- 🔨 SILENT AUCTION ---------- */
+  const offAuc = () => (off.auc = off.auc || { items: [], toCharity: 1 });
+  const aucTotal = () => offAuc().items.reduce((a, i) => a + (+i.bid || 0), 0);
+  function offAucHtml() {
+    const A = offAuc();
+    return `<div class="card pt-card"><p class="host-rem">Add the donated items, print a bid sheet for each one to set beside it, then type in the winning bids when bidding closes.</p>
+        ${A.items.map(i => `<div class="auc-item" data-ai="${i.id}"><div class="host-row"><b>${esc(i.name)}</b><button type="button" class="icon-btn" data-aidel aria-label="Remove">✕</button></div>
+          <small>${i.donor ? `Donated by ${esc(i.donor)} · ` : ""}${+i.value ? `Value ${money(+i.value)} · ` : ""}Starts at ${money(+i.start || 0)}, raise by ${money(+i.step || 1)}</small>
+          <div class="org-addr-row"><input class="input" data-aiw="winner" maxlength="30" placeholder="Winner" value="${esc(i.winner || "")}"><input class="input" data-aiw="bid" type="number" inputmode="decimal" min="0" placeholder="Winning bid $" value="${+i.bid || ""}"></div></div>`).join("") || ""}
+        <form class="org-ev-form" id="aucForm" autocomplete="off"><input class="input" name="name" maxlength="50" placeholder="Item, e.g. Gift basket, a day off, parking spot of the month">
+          <input class="input" name="donor" maxlength="40" placeholder="Donated by (optional)">
+          <div class="org-addr-row"><input class="input" name="value" type="number" inputmode="decimal" min="0" placeholder="Value $"><input class="input" name="start" type="number" inputmode="decimal" min="0" placeholder="Start bid $"><input class="input" name="step" type="number" inputmode="decimal" min="1" placeholder="Raise by $"></div>
+          <button class="btn btn-green btn-block" type="submit">➕ Add item</button></form></div>
+      ${A.items.length ? `<div class="card pt-card"><div class="org-total"><span>Total raised</span><b>${money(aucTotal())}</b></div>
+        <label class="host-check"><input type="checkbox" id="aucToCh" ${A.toCharity ? "checked" : ""}> 💛 Add the auction total to our charity total</label>
+        <div class="send-btns" style="margin-top:10px"><button type="button" class="btn btn-red" data-print="bidsheets">🖨️ Print bid sheets</button>${A.items.some(i => i.winner) ? `<button type="button" class="btn btn-ghost" data-print="aucwinners">🏅 Winners list</button>` : ""}</div></div>` : ""}`;
+  }
+  function bidSheetsDoc() {
+    const A = offAuc(); if (!A.items.length) return { error: "🔨 Add some auction items first" };
+    const css = `.bs{break-after:page;font-family:Georgia,serif;color:#222} .bs:last-child{break-after:auto} .bs h1{font-size:26pt;margin:0;text-align:center;color:#1E3A2F} .bs .b-s{text-align:center;color:#8a6d3b;font:600 9pt sans-serif;letter-spacing:.1em;text-transform:uppercase;margin:4px 0 6px}
+      .bs .b-m{text-align:center;font-size:11pt;margin:0 0 14px} .bs table{width:100%;border-collapse:collapse} .bs th{text-align:left;font:600 8.5pt sans-serif;text-transform:uppercase;border-bottom:2px solid #1E3A2F;padding:4px} .bs td{border-bottom:1px solid #bbb;height:30px;padding:2px 6px;font-size:11pt} .bs td.amt{width:22%;color:#999}`;
+    return { title: "Silent auction bid sheets", css, margin: 0.5, file: "Bid-Sheets", html: A.items.map(i => { const st = +i.start || 0, sp = +i.step || 5;
+      return `<div class="bs"><p class="b-s">Silent Auction · ${esc(off.ev.name || "Holiday Party")}</p><h1>${esc(i.name)}</h1><p class="b-m">${i.donor ? `Donated by ${esc(i.donor)} · ` : ""}${+i.value ? `Value ${money(+i.value)} · ` : ""}Starting bid <b>${money(st)}</b> · Raise by at least <b>${money(sp)}</b></p>
+        <table><tr><th>Name</th><th>Phone or desk</th><th>Bid</th></tr>${Array.from({ length: 16 }, (_, k) => `<tr><td></td><td></td><td class="amt">${money(st + k * sp)}</td></tr>`).join("")}</table></div>`; }).join("") };
+  }
+  function aucWinnersDoc() {
+    const A = offAuc(), won = A.items.filter(i => i.winner); if (!won.length) return { error: "🔨 Add the winners first" };
+    const css = `.aw{font:11pt/1.45 Georgia,serif} .aw h1{font-size:20pt;margin:0 0 10px;color:#1E3A2F} .aw table{width:100%;border-collapse:collapse} .aw td,.aw th{padding:6px;border-bottom:1px solid #e3dccb;text-align:left} .aw .num{text-align:right}`;
+    return { title: "Auction winners", css, margin: 0.6, file: "Auction-Winners", html: `<div class="aw"><h1>🔨 Silent Auction Winners</h1><table><tr><th>Item</th><th>Winner</th><th class="num">Bid</th></tr>${won.map(i => `<tr><td>${esc(i.name)}</td><td><b>${esc(i.winner)}</b></td><td class="num">${money(+i.bid || 0)}</td></tr>`).join("")}<tr><td colspan="2"><b>Total raised</b></td><td class="num"><b>${money(aucTotal())}</b></td></tr></table><p>Thank you to everyone who donated and bid! 💛</p></div>` };
+  }
+
+  /* ---------- 💛 CHARITY & DONATION DRIVE ---------- */
+  const offCh = () => (off.ch = off.ch || { options: [], chosen: "", goal: 0, match: 0, donations: [], drive: { unit: "", count: 0, where: "" } });
+  const chChosen = () => offCh().options.find(o => o.id === offCh().chosen);
+  const chGiven = () => offCh().donations.reduce((a, d) => a + (+d.amt || 0), 0);
+  const chRaised = () => { const C = offCh(), g = chGiven(); return g + Math.min(+C.match || 0, g) + (offAuc().toCharity ? aucTotal() : 0); };
+  const offOpen = url => { if (!/^https?:\/\//.test(url)) url = "https://" + url; const br = NoelNative.plugin("Browser"); if (br) br.open({ url }).catch(() => window.open(url, "_blank")); else window.open(url, "_blank", "noopener"); };
+  function chThermo(raised, goal) {
+    const f = goal ? Math.min(1, raised / goal) : 0, H = 150, fill = Math.round((H - 20) * f);
+    return `<svg viewBox="0 0 70 ${H + 40}" class="ch-thermo" role="img" aria-label="Raised ${money(raised)} of ${money(goal)}">
+      <rect x="25" y="8" width="20" height="${H}" rx="10" fill="#f1e9d8" stroke="#d8c9a6"/><rect x="29" y="${8 + H - 14 - fill}" width="12" height="${fill + 14}" rx="6" fill="#c0392b"/>
+      <circle cx="35" cy="${H + 18}" r="17" fill="#c0392b" stroke="#d8c9a6"/>${[0.25, 0.5, 0.75, 1].map(x => `<line x1="47" x2="54" y1="${8 + H - 14 - (H - 20) * x}" y2="${8 + H - 14 - (H - 20) * x}" stroke="#bfae86"/>`).join("")}</svg>`;
+  }
+  function offCharityHtml() {
+    const C = offCh(), ch = chChosen(), raised = chRaised(), goal = +C.goal || 0, votes = C.options.reduce((a, o) => a + (o.votes || 0), 0);
+    const top = C.options.slice().sort((a, b) => (b.votes || 0) - (a.votes || 0))[0];
+    return `<div class="card pt-card ch-hero">${chThermo(raised, goal)}<div><p class="st-lab" style="margin:0">${ch ? `For ${esc(ch.name)}` : "Our charity drive"}</p><p class="ch-big">${money(raised)}</p><p class="host-rem">${goal ? `raised of our ${money(goal)} goal · ${Math.round(raised / goal * 100)}%` : "raised so far · set a goal below"}</p>
+        ${ch && ch.url ? `<button type="button" class="btn btn-red" data-chopen="${esc(ch.url)}">💛 Donate</button>` : ""}</div></div>
+      <div class="card pt-card"><h3>🗳️ Let the team choose</h3><p class="host-rem">Add 2–4 charities, email the team to vote, then tap ＋ for each vote as replies come in.</p>
+        ${C.options.map((o, i) => `<div class="ch-opt${C.chosen === o.id ? " on" : ""}" data-cho="${o.id}"><span class="ch-letter">${"ABCD"[i]}</span><div><b>${esc(o.name)}</b>${o.url ? `<small>${esc(o.url)}</small>` : ""}</div>
+          <div class="stepper sm"><button type="button" data-chv="-1">−</button><output>${o.votes || 0}</output><button type="button" data-chv="1">+</button></div><button type="button" class="icon-btn" data-chdel aria-label="Remove">✕</button></div>`).join("")}
+        ${C.options.length < 4 ? `<form class="org-ev-form" id="chOptForm" autocomplete="off"><input class="input" name="name" maxlength="50" placeholder="Charity name, e.g. Local food bank"><input class="input" name="url" maxlength="120" placeholder="Website or donation page (optional)"><button class="btn btn-green btn-block" type="submit">➕ Add charity</button></form>` : ""}
+        ${C.options.length > 1 ? `<div class="send-btns" style="margin-top:10px"><button type="button" class="btn btn-ghost" id="chVoteMail">✉️ Email the team to vote</button>${votes ? `<button type="button" class="btn btn-green" data-chpick="${top.id}">🏆 Choose ${esc(top.name)}</button>` : ""}</div>` : ""}
+        <p class="host-rem">📍 Find local causes: ${["food bank", "toy drive", "animal shelter", "winter coat drive", "women's shelter"].map(q => `<button type="button" class="chip" data-amap="${q}">${q}</button>`).join(" ")}</p>
+        <p class="host-rem">✅ Check a charity is registered: <button type="button" class="classy-link" data-chopen="${currency === "USD" ? "https://www.irs.gov/charities-non-profits/search-for-tax-exempt-organizations" : "https://www.canada.ca/en/revenue-agency/services/charities-giving/charities-listings.html"}">${currency === "USD" ? "IRS charity search" : "Canada Revenue Agency charity list"} ›</button></p></div>
+      <div class="card pt-card"><h3>💵 Donations</h3><div class="off-grid"><label class="off-f"><span class="meal-lab">Goal</span><input class="input" type="number" inputmode="decimal" min="0" data-ch="goal" value="${+C.goal || ""}" placeholder="$"></label>
+        <label class="off-f"><span class="meal-lab">Company matches up to</span><input class="input" type="number" inputmode="decimal" min="0" data-ch="match" value="${+C.match || ""}" placeholder="$"></label></div>
+        <ul class="host-list" style="margin-top:8px">${C.donations.map(d => `<li data-chd="${d.id}"><label><span>${esc(d.who || "Anonymous")} · ${money(+d.amt || 0)}</span></label><button type="button" class="icon-btn" data-chddel aria-label="Remove">✕</button></li>`).join("")}</ul>
+        <form class="org-addr-row" id="chDonForm" autocomplete="off" style="margin-top:8px"><input class="input" name="who" maxlength="30" placeholder="Name (or leave blank)"><input class="input" name="amt" type="number" inputmode="decimal" min="0" placeholder="$" style="max-width:90px"><button class="btn btn-green" type="submit">Add</button></form>
+        <p class="host-rem">${+C.match ? `Company match: ${money(Math.min(+C.match, chGiven()))}. ` : ""}${offAuc().toCharity && aucTotal() ? `Auction: ${money(aucTotal())}.` : ""}</p></div>
+      <div class="card pt-card"><h3>🥫 Food, toy or coat drive</h3><div class="off-grid"><label class="off-f"><span class="meal-lab">Collecting</span><input class="input" data-chd2="unit" maxlength="30" value="${esc(C.drive.unit || "")}" placeholder="e.g. cans, toys, coats"></label>
+        <label class="off-f"><span class="meal-lab">Drop-off</span><input class="input" data-chd2="where" maxlength="60" value="${esc(C.drive.where || "")}" placeholder="e.g. Front desk box"></label></div>
+        <div class="host-row" style="margin-top:10px"><span class="meal-lab">Collected</span><div class="stepper"><button type="button" data-chc="-1">−</button><output>${C.drive.count || 0}</output><button type="button" data-chc="1">+</button></div><button type="button" class="chip" data-chc="10">＋10</button></div></div>`;
+  }
+  function chVoteMail() {
+    const C = offCh(), to = offSS().people.map(p => p.email).filter(Boolean).join(",");
+    const body = `Hi team! 💛\n\nThis year we'd like to give back together. Please help choose our holiday charity by replying with A${C.options.length > 1 ? `, B` : ""}${C.options.length > 2 ? `, C` : ""}${C.options.length > 3 ? ` or D` : ""}:\n\n${C.options.map((o, i) => `${"ABCD"[i]}. ${o.name}${o.url ? `\n   ${o.url}` : ""}`).join("\n\n")}\n\nPlease vote by ${new Date(Date.now() + 5 * 86400000).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}. Thank you!${off.ev.organizer ? `\n\n${off.ev.organizer}` : ""}`;
+    location.href = INVITE.mailHref("", "Help choose our holiday charity 💛", body, to || undefined);
+  }
+
+  // ---------- taps for Secret Santa, Auction & Charity ----------
+  $("#view-office").addEventListener("click", e => {
+    const t = e.target, S = offSS(), A = offAuc(), C = offCh();
+    const sd = t.closest("[data-ssdel]"); if (sd) { const id = sd.closest("[data-ssp]").dataset.ssp; S.people = S.people.filter(p => p.id !== id); S.avoid = S.avoid.filter(a => !a.includes(id)); saveOff(); renderOffice(); return; }
+    const su = t.closest("[data-ssunavoid]"); if (su) { S.avoid.splice(+su.dataset.ssunavoid, 1); saveOff(); renderOffice(); return; }
+    if (t.closest("#ssAvoid")) { const a = $("#ssA").value, b = $("#ssB").value; if (a === b) { toast("Pick two different people"); return; } S.avoid.push([a, b]); saveOff(); renderOffice(); return; }
+    if (t.closest("#ssDraw") || t.closest("#ssRedraw")) {
+      if (t.closest("#ssRedraw") && !confirm("Draw again? Everyone gets a new match, so anyone who already saw theirs will need to look again.")) return;
+      const pairs = ssDraw(); if (!pairs) { toast("🎅 Those \"don't pair\" rules make a draw impossible. Remove one and try again"); return; }
+      S.pairs = pairs; S.seen = {}; S.mailed = {}; saveOff(); offSync(); renderOffice(); toast("🎅 Names drawn! The matches are hidden"); return;
+    }
+    if (t.closest("#ssPass")) { ssPassOpen("list"); return; }
+    if (t.closest("#ssPeek")) { if (!confirm("Peek at every match? It spoils the surprise for you!")) return; alert(S.people.map(p => `${p.name} → ${ssName(S.pairs[p.id])}`).join("\n")); return; }
+    const sm = t.closest("[data-ssmail]"); if (sm) { const p = S.people.find(x => x.id === sm.dataset.ssmail); if (!p || !p.email) return; location.href = INVITE.mailHref(p.email, "🎅 Your Secret Santa match", ssMsg(p.id, true)); S.mailed[p.id] = 1; saveOff(); setTimeout(renderOffice, 600); return; }
+    const ai = t.closest("[data-aidel]"); if (ai) { A.items = A.items.filter(i => i.id !== ai.closest("[data-ai]").dataset.ai); saveOff(); renderOffice(); return; }
+    const co = t.closest("[data-chopen]"); if (co) { offOpen(co.dataset.chopen); return; }
+    const mp = t.closest("[data-amap]"); if (mp) { openMapSearch(mp.dataset.amap); return; }
+    const cv = t.closest("[data-chv]"); if (cv) { const o = C.options.find(x => x.id === cv.closest("[data-cho]").dataset.cho); o.votes = Math.max(0, (o.votes || 0) + +cv.dataset.chv); saveOff(); renderOffice(); return; }
+    const cdl = t.closest("[data-chdel]"); if (cdl) { const id = cdl.closest("[data-cho]").dataset.cho; C.options = C.options.filter(o => o.id !== id); if (C.chosen === id) C.chosen = ""; saveOff(); renderOffice(); return; }
+    const cp = t.closest("[data-chpick]"); if (cp) { C.chosen = cp.dataset.chpick; saveOff(); renderOffice(); toast("💛 Charity chosen!"); return; }
+    if (t.closest("#chVoteMail")) { chVoteMail(); return; }
+    const dd = t.closest("[data-chddel]"); if (dd) { C.donations = C.donations.filter(d => d.id !== dd.closest("[data-chd]").dataset.chd); saveOff(); renderOffice(); return; }
+    const cc = t.closest("[data-chc]"); if (cc) { C.drive.count = Math.max(0, (C.drive.count || 0) + +cc.dataset.chc); saveOff(); renderOffice(); return; }
+  });
+  $("#view-office").addEventListener("change", e => {
+    const t = e.target, S = offSS(), A = offAuc(), C = offCh();
+    if (t.dataset.ss === "day") { S.day = t.value; saveOff(); offSync(); return; }
+    if (t.dataset.aiw) { const i = A.items.find(x => x.id === t.closest("[data-ai]").dataset.ai); i[t.dataset.aiw] = t.dataset.aiw === "bid" ? Math.max(0, parseFloat(t.value) || 0) : t.value.trim(); saveOff(); renderOffice(); return; }
+    if (t.id === "aucToCh") { A.toCharity = t.checked ? 1 : 0; saveOff(); renderOffice(); return; }
+    if (t.dataset.ch) { C[t.dataset.ch] = Math.max(0, parseFloat(t.value) || 0); saveOff(); renderOffice(); return; }
+    if (t.dataset.chd2) { C.drive[t.dataset.chd2] = t.value.trim(); saveOff(); return; }
+  });
+  $("#view-office").addEventListener("submit", e => {
+    const f = e.target, S = offSS(), A = offAuc(), C = offCh();
+    if (f.id === "ssAddForm") { e.preventDefault(); e.stopImmediatePropagation(); const n = f.name.value.trim(); if (!n) return; S.people.push({ id: uid(), name: n, email: f.email.value.trim(), hint: f.hint.value.trim() }); saveOff(); renderOffice(); setTimeout(() => { const i = $("#ssAddForm [name=name]"); if (i) i.focus(); }, 50); return; }
+    if (f.id === "aucForm") { e.preventDefault(); e.stopImmediatePropagation(); const n = f.name.value.trim(); if (!n) return; A.items.push({ id: uid(), name: n, donor: f.donor.value.trim(), value: parseFloat(f.value.value) || 0, start: parseFloat(f.start.value) || 0, step: parseFloat(f.step.value) || 5, winner: "", bid: 0 }); saveOff(); renderOffice(); return; }
+    if (f.id === "chOptForm") { e.preventDefault(); e.stopImmediatePropagation(); const n = f.name.value.trim(); if (!n) return; C.options.push({ id: uid(), name: n, url: f.url.value.trim(), votes: 0 }); if (C.options.length === 1) C.chosen = C.options[0].id; saveOff(); renderOffice(); return; }
+    if (f.id === "chDonForm") { e.preventDefault(); e.stopImmediatePropagation(); const a = parseFloat(f.amt.value) || 0; if (!a) return; C.donations.push({ id: uid(), who: f.who.value.trim(), amt: a }); saveOff(); renderOffice(); toast(`💛 ${money(a)} added`); return; }
+  }, true);
   offSync();
   /* @office-end */

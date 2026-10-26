@@ -26,6 +26,9 @@
     else if (key === "awards") d = awardsDoc();
     else if (key === "yearend") d = yearEndDoc();
     else if (key === "reimburse") d = reimburseDoc();
+    else if (key === "ssslips") d = ssSlipsDoc();
+    else if (key === "bidsheets") d = bidSheetsDoc();
+    else if (key === "aucwinners") d = aucWinnersDoc();
     else if (key === "labels" || key === "return") d = labelDoc(key);
     return d || { error: "That page isn't available any more" };
   }
