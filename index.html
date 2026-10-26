@@ -535,7 +535,19 @@ body.flash::before {
 .ab-go { margin-left: auto; flex: none; font-weight: 800; color: var(--gold-light); }
 .advent-banner.ready .ab-ico { animation: ring .9s ease-in-out infinite; }
 .advent-intro { color: var(--muted); text-align: center; margin: 0 0 14px; }
-.advent-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.advent-grid { display: block; }
+.adv-tree { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 0 4px; }
+.adv-tree::before { content: ""; position: absolute; left: -3%; right: -3%; top: 46px; bottom: 56px; background: linear-gradient(180deg, #2c7a4b, #14482c); clip-path: polygon(50% 0, 100% 100%, 0 100%); border-radius: 8px; z-index: 0; }
+.adv-row { position: relative; z-index: 1; display: flex; justify-content: center; gap: 6px; width: 100%; }
+.adv-row .door { width: calc((100% - 30px) / 6); max-width: 58px; font-size: 19px; border-radius: 10px; }
+.adv-tree .door.locked { opacity: 1; filter: saturate(.75) brightness(.92); } .adv-tree .door.cream.locked, .adv-tree .door.gold.locked { filter: saturate(.8) brightness(.96); }
+.adv-trunk { margin-top: 2px; } .adv-trunk .door { border-radius: 6px; }
+.door.gold { background: linear-gradient(150deg, #e2b84a, #b8862a); color: #4a2a08; }
+.door.cream { background: linear-gradient(150deg, #fffaf0, #efe2c4); color: var(--red); }
+.door.trunk { background: linear-gradient(150deg, #8a5a36, #5c3a20); }
+.adv-bow { position: relative; z-index: 2; width: 84px; height: 84px; border-radius: 50%; border: 3px solid var(--gold); background: radial-gradient(circle at 35% 30%, #fff6dc, #f3d27a); font-size: 42px; line-height: 1; display: grid; place-items: center; align-content: center; box-shadow: var(--shadow-lg); color: var(--red); }
+.adv-bow small { display: block; font: 800 10px var(--font-body, sans-serif); letter-spacing: .05em; margin-top: 2px; }
+.adv-bow.locked { opacity: .85; } .adv-bow.today { animation: glow 1s ease-in-out infinite alternate; } .adv-bow.open { background: radial-gradient(circle at 35% 30%, #ffffff, #d9efe0); }
 .door {
   position: relative; aspect-ratio: 1 / 1; max-width: 100%; border-radius: 14px; display: grid; place-items: center;
   color: #fff; font-family: var(--font-display); font-size: 26px; font-weight: 800;
@@ -547,7 +559,7 @@ body.flash::before {
 .door-lock { position: absolute; right: 6px; bottom: 4px; font-size: 12px; }
 .door.today { animation: glow 1s ease-in-out infinite alternate; }
 .door.open { background: var(--card); color: var(--pine); }
-.door-emoji { font-size: 30px; }
+.door-emoji { font-size: 22px; }
 .door-num.small { position: absolute; top: 4px; left: 7px; font-size: 12px; color: var(--gold); }
 .door:active:not(.locked) { transform: scale(.94); }
 .door-big { font-size: 64px; line-height: 1.1; }
@@ -1458,8 +1470,8 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 
     <!-- 🚪 Advent doors banner -->
     <button class="advent-banner" data-open="adventSheet" id="adventBanner">
-      <span class="ab-ico">🚪</span>
-      <span class="ab-text"><b>Advent Doors</b><small id="adventSub">A little surprise every day, December 1–24</small></span>
+      <span class="ab-ico">🎄</span>
+      <span class="ab-text"><b>Advent Calendar</b><small id="adventSub">A little surprise every day, December 1–25</small></span>
       <span class="ab-go">Open ›</span>
     </button>
 
@@ -2404,7 +2416,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 <div class="sheet" id="adventSheet" role="dialog" aria-modal="true" aria-labelledby="adventTitle">
   <div class="sheet-head">
     <button class="back-btn" data-close="adventSheet">‹ Back</button>
-    <h2 id="adventTitle">Advent Doors</h2>
+    <h2 id="adventTitle">Advent Calendar</h2>
   </div>
   <div class="sheet-body">
     <div class="sheet-inner">
@@ -8125,14 +8137,17 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     ["💃", "Activity", "Have a family dance party to your favourite Christmas songs. Tap 🎵 at the top to start the music!"],
     ["💛", "Kindness", "Tell three people something you love about them."],
     ["🐦", "Activity", "Make a treat for the winter birds, like a pine cone rolled in seeds or a string of orange slices."],
-    ["🎄", "Christmas Eve", "It's Christmas Eve! Read a story, set out cookies for Santa and carrots for the reindeer, then off to bed. Merry Christmas!"]
+    ["🎄", "Christmas Eve", "It's Christmas Eve! Read a story, set out cookies for Santa and carrots for the reindeer, then off to bed. Merry Christmas!"],
+    ["🎀", "Christmas Day", "Merry Christmas! 🎄 Today's surprise: a family photo in your pyjamas before the presents. Then give everyone the biggest hug and enjoy every moment together."]
   ];
+  // the tree: the bow (25) on top, rows of doors, and the trunk. Numbers are mixed up, like a real advent calendar.
+  const ADVENT_TREE = [[17], [5, 21], [12, 1, 9], [20, 8, 15, 3], [6, 23, 11, 18, 2], [14, 4, 22, 10, 19, 7]], ADVENT_TRUNK = [13, 24, 16];
   const adventKey = () => "advent" + new Date().getFullYear();
   let opened = load(adventKey(), {});
   function adventToday() {
-    if (ADVENT_DEMO) return 24;
     const d = new Date();
-    return d.getMonth() === 11 ? Math.min(24, d.getDate()) : 0;     // 0 = doors not open yet
+    if (ADVENT_DEMO) return 25;
+    return d.getMonth() === 11 ? Math.min(25, d.getDate()) : 0;     // 0 = doors not open yet · 25 = the bow on top
   }
   function daysToDec1() {
     const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -8141,32 +8156,38 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function updateAdventBanner() {
     const n = adventToday(), wait = daysToDec1();
     $("#adventSub").textContent = n
-      ? (opened[n] ? "Today's door is open. See you tomorrow!" : `Door ${n} is ready to open!`)
+      ? (opened[n] ? (n === 25 ? "Merry Christmas! 🎄" : "Today's door is open. See you tomorrow!") : n === 25 ? "🎀 The bow is ready to open!" : `Door ${n} is ready to open!`)
       : `Doors open daily from December 1 (${wait} day${wait === 1 ? "" : "s"} to go)`;
     $("#adventBanner").classList.toggle("ready", !!n && !opened[n]);
   }
   function renderAdvent() {
     const n = adventToday();
     $("#adventIntro").textContent = n
-      ? "Tap a door to open it. A new one unlocks every day until Christmas Eve."
-      : "The first door opens on December 1. Come back then for a little surprise every day!";
-    $("#adventGrid").innerHTML = ADVENT.map((a, i) => {
-      const d = i + 1, unlocked = d <= n, isOpen = unlocked && opened[d];
-      const cls = ["door", i % 2 ? "green" : "red", isOpen ? "open" : "", unlocked ? "" : "locked", d === n && !isOpen ? "today" : ""].join(" ");
+      ? "Tap a door to open it. A new one unlocks every day, and the bow on top opens on Christmas morning."
+      : "The first door opens on December 1. Come back then for a little surprise every day, and the bow on top opens on Christmas morning!";
+    const door = (d, shade) => {
+      const a = ADVENT[d - 1], unlocked = d <= n, isOpen = unlocked && opened[d];
+      const cls = ["door", shade, isOpen ? "open" : "", unlocked ? "" : "locked", d === n && !isOpen ? "today" : ""].join(" ");
       return `<button class="${cls}" data-door="${d}" aria-label="Door ${d}${unlocked ? "" : ", locked"}">${
         isOpen ? `<span class="door-emoji">${a[0]}</span><span class="door-num small">${d}</span>`
                : `<span class="door-num">${d}</span>${unlocked ? "" : '<span class="door-lock">🔒</span>'}`}</button>`;
-    }).join("");
+    };
+    const shades = ["red", "gold", "cream"];
+    const bowOpen = n >= 25 && opened[25];
+    $("#adventGrid").innerHTML = `<div class="adv-tree">
+      <button class="adv-bow${n >= 25 ? (bowOpen ? " open" : " today") : " locked"}" data-door="25" aria-label="The bow: opens on Christmas Day">${bowOpen ? "🎄" : "🎀"}<small>${bowOpen ? "Merry Christmas!" : "Dec 25"}</small></button>
+      ${ADVENT_TREE.map((row, r) => `<div class="adv-row">${row.map((d, i) => door(d, shades[(r + i) % 3])).join("")}</div>`).join("")}
+      <div class="adv-row adv-trunk">${ADVENT_TRUNK.map(d => door(d, "trunk")).join("")}</div></div>`;
   }
   function showDoor(d) {
     const a = ADVENT[d - 1];
-    $("#doorEmoji").textContent = a[0]; $("#doorType").textContent = `Day ${d} · ${a[1]}`; $("#doorText").textContent = a[2];
+    $("#doorEmoji").textContent = a[0]; $("#doorType").textContent = d === 25 ? "Christmas Day" : `Day ${d} · ${a[1]}`; $("#doorText").textContent = a[2];
     $("#doorOverlay").classList.add("show");
   }
   $("#adventGrid").addEventListener("click", e => {
     const b = e.target.closest("[data-door]"); if (!b) return;
     const d = +b.dataset.door;
-    if (d > adventToday()) { toast(`🔒 Door ${d} opens on December ${d}`); return; }
+    if (d > adventToday()) { toast(d === 25 ? "🎀 The bow opens on Christmas morning!" : `🔒 Door ${d} opens on December ${d}`); return; }
     opened[d] = true; save(adventKey(), opened);
     renderAdvent(); updateAdventBanner(); showDoor(d);
     if (navigator.vibrate) navigator.vibrate(20);
