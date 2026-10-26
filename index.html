@@ -795,6 +795,9 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .act-item { display: grid; grid-template-columns: 38px 1fr auto; gap: 10px; align-items: center; padding: 12px 14px; }
 .act-item .app-emo { font-size: 26px; }
 .act-map { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; padding: 6px 12px; border-radius: 99px; border: 1.5px solid rgba(47,107,74,.35); background: #eef6ef; color: var(--pine-dark); font: 700 13px var(--font-body, inherit); cursor: pointer; }
+.sa-pop { text-align: center; } .sa-box { background: #f7f1e3; border-radius: 14px; padding: 10px 12px; margin: 8px 0; text-align: left; }
+.sa-box b { color: var(--pine-dark); font-size: 14px; } .sa-box p { margin: 4px 0; font-weight: 800; font-size: 16px; line-height: 1.4; font-variant-numeric: lining-nums; letter-spacing: .3px; color: var(--red); } .sa-box small { color: var(--muted); font-size: 12.5px; }
+.sa-tips { list-style: none; padding: 0; margin: 10px 0 12px; text-align: left; font-size: 13.5px; } .sa-tips li { margin: 5px 0; }
 .act-map-note { font-size: 12.5px; color: var(--muted); text-align: center; margin: 4px 0 12px; }
 .act-item h4 { margin: 0; font-size: 16px; color: var(--pine); }
 .act-item p { margin: 2px 0 0; font-size: 13px; color: var(--ink); line-height: 1.4; }
@@ -2452,6 +2455,17 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
     <div class="print-btns" id="printBtns"></div>
     <p class="door-text" id="printHow"></p>
     <button class="btn btn-ghost btn-block" id="printClose">Close</button>
+  </div>
+</div>
+
+<!-- 📬 SANTA'S ADDRESS -->
+<div class="alert-overlay" id="santaAddr" role="dialog" aria-modal="true" aria-labelledby="santaAddrTitle">
+  <div class="alert-box sa-pop">
+    <div class="door-big">📬</div>
+    <p class="door-type" id="santaAddrTitle">Santa's mailing address</p>
+    <div id="santaAddrBody"></div>
+    <button type="button" class="btn btn-ghost btn-block" id="santaAddrMore">🔎 This year's mailing dates & details</button>
+    <button type="button" class="btn btn-red btn-block" id="santaAddrClose" style="margin-top:8px">Close</button>
   </div>
 </div>
 
@@ -7811,7 +7825,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     {"id": "a20", "w": "in", "ico": "🎬", "name": "Movie marathon", "txt": "Pick favourites from your Christmas Movie Watch List and pop the popcorn.", "tags": "kids free"},
     {"id": "a21", "w": "in", "ico": "☕", "name": "Hot cocoa bar", "txt": "Marshmallows, peppermint and whipped cream: build your own mug.", "tags": "kids"},
     {"id": "a22", "w": "in", "ico": "🎨", "name": "Ornament making", "txt": "Salt dough, felt or photo ornaments to keep for years.", "tags": "kids"},
-    {"id": "a23", "w": "in", "ico": "✉️", "name": "Letters to Santa", "txt": "Write and decorate letters. Many postal services even write back!", "tags": "kids free"},
+    {"id": "a23", "addr": 1, "w": "in", "ico": "✉️", "name": "Letters to Santa", "txt": "Write and decorate letters. Many postal services even write back!", "tags": "kids free"},
     {"id": "a24", "w": "in", "ico": "🎶", "name": "Carol & karaoke night", "txt": "Sing the classics, with bonus points for dramatic solos.", "tags": "free"},
     {"id": "a25", "w": "in", "ico": "🎲", "name": "Family game night", "txt": "Play the party games in Noël and keep score on the Scoreboard.", "tags": "kids free"},
     {"id": "a26", "w": "in", "ico": "📸", "name": "Matching pajama photos", "txt": "Cozy pajamas, the tree and a timer for this year's family photo.", "tags": "kids free"},
@@ -7827,11 +7841,23 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#actsList").innerHTML = list.length ? list.map(a => {
       const m = acts.mark[a.id];
       return `<div class="card act-item ${m === "done" ? "done" : ""}" data-aid="${a.id}"><div class="app-emo">${a.ico}</div>
-        <div><h4>${esc(a.name)}</h4><p>${esc(a.txt)}</p>${a.map ? `<button type="button" class="act-map" data-amap="${esc(a.map)}">📍 Find near me</button>` : ""}</div>
+        <div><h4>${esc(a.name)}</h4><p>${esc(a.txt)}</p>${a.map ? `<button type="button" class="act-map" data-amap="${esc(a.map)}">📍 Find near me</button>` : ""}${a.addr ? `<button type="button" class="act-map" data-saddr>📬 Santa's address</button>` : ""}</div>
         <button class="act-btn ${m || ""}" data-amark aria-label="${esc(a.name)}">${m === "done" ? "✓ Done" : m === "plan" ? "⭐ On list" : "☆ Add"}</button></div>`;
     }).join("") : `<p class="apps-empty">Tap ☆ Add on any activity to build your family's bucket list.</p>`;
   }
   $("#actsFilters").addEventListener("click", e => { const b = e.target.closest("[data-af]"); if (!b) return; actFilter = b.dataset.af; $$("#actsFilters .chip").forEach(c => c.classList.toggle("on", c === b)); renderActs(); });
+  // 📬 Santa's mailing addresses (Canada & U.S.), the country you're in shown first
+  function showSantaAddr() {
+    const ca = `<div class="sa-box"><b>🇨🇦 From Canada</b><p>Santa Claus<br>North Pole&nbsp;&nbsp;H0H 0H0<br>Canada</p><small>No stamp needed inside Canada.</small></div>`;
+    const us = `<div class="sa-box"><b>🇺🇸 From the U.S.</b><p>Santa Claus<br>123 Elf Road<br>North Pole, 88888</p><small>Add a regular first-class stamp.</small></div>`;
+    $("#santaAddrBody").innerHTML = (currency === "USD" ? us + ca : ca + us) +
+      `<ul class="sa-tips"><li>✉️ Write your full name and return address on the envelope so Santa can write back.</li><li>👧👦 Writing for a few kids? Put all the letters in one envelope.</li><li>📅 Mail by <b>early December</b> for a reply before Christmas.</li></ul>`;
+    $("#santaAddr").classList.add("show");
+  }
+  $("#santaAddr").addEventListener("click", e => {
+    if (e.target.id === "santaAddr" || e.target.closest("#santaAddrClose")) { $("#santaAddr").classList.remove("show"); return; }
+    if (e.target.closest("#santaAddrMore")) { const q = currency === "USD" ? "USPS letters to Santa mailing deadline" : "Canada Post letters to Santa deadline"; const u = "https://www.google.com/search?q=" + encodeURIComponent(q), br = NoelNative.plugin("Browser"); if (br) br.open({ url: u }).catch(() => window.open(u, "_blank")); else window.open(u, "_blank", "noopener"); }
+  });
   // 📍 opens the phone's own Maps app to search nearby. Noël never sees or stores the location.
   function openMapSearch(q) {
     if (NoelNative.isNative() && INVITE.isIOS()) { window.location.href = "maps://?q=" + encodeURIComponent(q); return; }
@@ -7840,6 +7866,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
   $("#actsList").addEventListener("click", e => {
     const mp = e.target.closest("[data-amap]"); if (mp) { openMapSearch(mp.dataset.amap); return; }
+    if (e.target.closest("[data-saddr]")) { showSantaAddr(); return; }
     const b = e.target.closest("[data-amark]"); if (!b) return;
     const id = b.closest("[data-aid]").dataset.aid, m = acts.mark[id];
     if (!m) acts.mark[id] = "plan"; else if (m === "plan") { acts.mark[id] = "done"; toast("🎉 Another happy memory!"); if (navigator.vibrate) navigator.vibrate(20); } else delete acts.mark[id];
