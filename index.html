@@ -1294,6 +1294,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .stock-box { margin: 10px 0 8px; padding: 10px 12px; border-radius: 14px; background: #f7f1e3; } .stock-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
 .stock-head b { color: var(--pine-dark); } .stock-head small { color: var(--muted); font-size: 12.5px; } .stock-box .host-list li { display: flex; align-items: center; gap: 6px; } .stock-box .host-list label { flex: 1; }
 .stock-ideas { margin: 8px 0; } .stock-ideas .chip { font-size: 12.5px; }
+.acts-banner { background: linear-gradient(150deg, #8b3a2f, #5a2119); }
 .st-banner { background: linear-gradient(150deg, #13284a, #0b1a33); }
 .st-sky { display: block; width: 100%; border-radius: 18px; box-shadow: var(--shadow-lg); margin-bottom: 12px; border: 2px solid var(--gold); }
 .st-main { padding: 18px 16px; text-align: center; margin-bottom: 12px; } .st-lab { margin: 0 0 8px; font-weight: 800; color: var(--pine-dark); }
@@ -1462,6 +1463,13 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
   <section class="view" id="view-games" aria-labelledby="gamesTitle">
     <h2 class="view-title" id="gamesTitle">Game Activities</h2>
     <p class="view-intro">Play, keep score and print festive games for the whole family.</p>
+
+    <!-- 🛷 Holiday activities (opens the Activities page) -->
+    <button class="advent-banner acts-banner" data-open="actsSheet">   <!-- ✏️ ready for Jenn's new artwork -->
+      <span class="ab-ico">⛄</span>
+      <span class="ab-text"><b>Holiday Activities</b><small>28 indoor &amp; outdoor ideas, with places near you</small></span>
+      <span class="ab-go">Open ›</span>
+    </button>
 
     <!-- 🎅 Santa Tracker -->
     <button class="advent-banner st-banner" id="stBanner">
@@ -1675,12 +1683,6 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
       <button class="btn btn-ghost" id="resetChecklist">↺ Untick all tasks</button>
     </div>
 
-    <div class="section-label">Things to Do Together</div>
-    <!-- 🛷 Holiday activities (opens the Activities page) -->
-    <button class="photo-banner" data-open="actsSheet">
-      <span class="pb-text"><b>Holiday Activities</b><small>28 indoor &amp; outdoor ideas. Make your family bucket list!</small></span>
-      <span class="ab-go">Open ›</span>
-    </button>
 
     <div class="section-label">New Year's Eve</div>
     <!-- 🥂 everything for New Year's lives on its own screen -->
