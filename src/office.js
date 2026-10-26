@@ -542,9 +542,18 @@
       ${X.items.length || X.dItems.length ? `<div class="card pt-card"><h3>🧾 Your menu</h3><ul class="cat-list">${X.items.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.pieces} pieces · ${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}<small>💡 ${esc(i.row[3])}</small></span></li>`).join("")}${X.dItems.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}</span></li>`).join("")}</ul>
         <div class="send-btns"><button type="button" class="btn btn-red" data-print="offfood">🖨️ Menu &amp; shopping list</button><button type="button" class="btn btn-ghost" id="offFoodCost">💵 Add ${cad0(X.sum)} to costs</button></div></div>` : ""}` + offSuppliesHtml(X.P);
   }
+  // 🛒 one-tap shopping: pick a store, then tap what you need (opens that store's search)
+  const OFF_SHOP = [["🍽️ Plates", "holiday party paper plates"], ["🧻 Napkins", "christmas party napkins"], ["🥤 Cups", "holiday party cups"], ["🍴 Cutlery", "disposable cutlery set"], ["🎄 Tablecloths", "christmas plastic tablecloths"], ["✨ Decorations", "christmas party decorations"], ["🎈 Balloons", "christmas balloons"], ["🏆 Prizes", "office party prizes"], ["🎁 Gift exchange gifts", "secret santa gifts under 25"], ["📸 Photo props", "christmas photo booth props"], ["🔥 Chafing dishes", "chafing dish buffet set"], ["🧊 Coolers & ice bins", "party ice bucket beverage tub"]];
+  function offShopHtml() {
+    const st = giStores(), cur = st.find(x => x[0] === off.store) || st[0];
+    return `<div class="card pt-card"><h3>🛒 Buy party supplies online</h3><p class="host-rem">Pick a store, then tap what you need. It opens that store's search, great for ordering big-party supplies in bulk.</p>
+      <div class="apps-filters">${st.map(([n]) => `<button type="button" class="chip${n === cur[0] ? " on" : ""}" data-ofstore="${esc(n)}">${esc(n)}</button>`).join("")}</div>
+      <div class="apps-filters" style="margin-top:8px">${OFF_SHOP.map(([l, q]) => `<button type="button" class="chip fill-chip" data-ofbuy="${esc(q)}">${l}</button>`).join("")}</div>
+      <p class="host-rem">Order early in December. Shipping slows down closer to the party.</p></div>`;
+  }
   function offSuppliesHtml(P) {
     const n = P.all;
-    return `<div class="card pt-card"><h3>🍽️ Plates, cups &amp; extras</h3><ul class="cat-list"><li><b>Plates</b><span>${Math.ceil(n * 1.5)} <small>(1½ per person)</small></span></li><li><b>Napkins</b><span>${n * 3}</span></li><li><b>Cups</b><span>${n * 3}</span></li><li><b>Cutlery sets</b><span>${n}</span></li><li><b>Ice</b><span>${Math.ceil(n / 8)} ${Math.ceil(n / 8) === 1 ? "bag" : "bags"}</span></li><li><b>Garbage &amp; recycling bags</b><span>a few, plus a labelled recycling bin</span></li></ul></div>`;
+    return offShopHtml() + `<div class="card pt-card"><h3>🍽️ Plates, cups &amp; extras</h3><ul class="cat-list"><li><b>Plates</b><span>${Math.ceil(n * 1.5)} <small>(1½ per person)</small></span></li><li><b>Napkins</b><span>${n * 3}</span></li><li><b>Cups</b><span>${n * 3}</span></li><li><b>Cutlery sets</b><span>${n}</span></li><li><b>Ice</b><span>${Math.ceil(n / 8)} ${Math.ceil(n / 8) === 1 ? "bag" : "bags"}</span></li><li><b>Garbage &amp; recycling bags</b><span>a few, plus a labelled recycling bin</span></li></ul></div>`;
   }
   function offFoodDoc() {
     const X = offFoodPlan(), SHOP = (window.NOEL_MEALS || {}).appShop || {};
@@ -562,6 +571,8 @@
     const wh = t.closest("[data-ofwhere]"); if (wh) { off.ev.where = wh.dataset.ofwhere; off.ev.spot = ""; saveOff(); renderOffice(); return; }
     const sp = t.closest("[data-ofspot]"); if (sp) { off.ev.spot = sp.dataset.ofspot; const clean = sp.dataset.ofspot.replace(/^\S+\s/, ""); if (!off.ev.venue || OFF_WHERE.some(w => w[4].some(x => x[0].replace(/^\S+\s/, "") === off.ev.venue))) off.ev.venue = clean; saveOff(); renderOffice(); return; }
     const fs = t.closest("[data-offood]"); if (fs) { F.style = fs.dataset.offood; if (F.style === "potluck") off.acts.potluck = 1; if (F.style === "catered") off.acts.catered = 1; saveOff(); renderOffice(); return; }
+    const so = t.closest("[data-ofstore]"); if (so) { off.store = so.dataset.ofstore; saveOff(); renderOffice(); return; }
+    const by = t.closest("[data-ofbuy]"); if (by) { const st = giStores(), cur = st.find(x => x[0] === off.store) || st[0]; openStore(cur[2](by.dataset.ofbuy)); return; }
     const fm = t.closest("[data-offmode]"); if (fm) { F.mode = fm.dataset.offmode; saveOff(); renderOffice(); return; }
     const fa = t.closest("[data-offapp]"); if (fa) { const X = offFoodPlan(), n = fa.dataset.offapp; F.picks = X.picks.includes(n) ? X.picks.filter(x => x !== n) : X.picks.concat(n); saveOff(); renderOffice(); return; }
     if (t.closest("#offFoodCost")) { const X = offFoodPlan(), ex = off.costs.find(c => c.auto === "food"); if (ex) ex.cost = Math.round(X.sum); else off.costs.push({ id: uid(), type: "Catering", name: "Homemade appetizers", contact: "", cost: Math.round(X.sum), auto: "food" }); saveOff(); toast(`💵 ${cad0(X.sum)} added to Costs & vendors`); return; }

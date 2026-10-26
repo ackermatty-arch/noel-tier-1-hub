@@ -1586,8 +1586,8 @@ body.space-switching main { opacity: .3; }
         <div class="print-thumb">🎉</div>
         <div class="print-info">
           <span class="bundle-tag">5 games in 1</span>
-          <h3>Ultimate Holiday &amp; New Year's Party Bundle</h3>
-          <p>Holiday Trivia, NYE Trivia, Emoji Pictionary, "What's On Your Phone?" and a Left/Right gift exchange story, plus answer keys.</p>
+          <h3 data-co-title="Ultimate Holiday Office Party Bundle">Ultimate Holiday &amp; New Year's Party Bundle</h3>
+          <p data-co-desc="Holiday Trivia, Office Party Trivia, Emoji Pictionary, &quot;What&#x27;s On Your Phone?&quot; and a Left/Right gift exchange story, plus answer keys.">Holiday Trivia, NYE Trivia, Emoji Pictionary, "What's On Your Phone?" and a Left/Right gift exchange story, plus answer keys.</p>
           <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
         </div>
       </article>
@@ -1604,8 +1604,8 @@ body.space-switching main { opacity: .3; }
       <article class="card print-card">
         <div class="print-thumb">🥂</div>
         <div class="print-info">
-          <h3>New Year's Eve Countdown Trivia</h3>
-          <p>20 questions on countdown traditions around the world.</p>
+          <h3 data-co-title="Office Party Trivia">New Year's Eve Countdown Trivia</h3>
+          <p data-co-desc="20 questions on holiday traditions around the world.">20 questions on countdown traditions around the world.</p>
           <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
         </div>
       </article>
@@ -1613,8 +1613,8 @@ body.space-switching main { opacity: .3; }
       <article class="card print-card">
         <div class="print-thumb">🔎</div>
         <div class="print-info">
-          <h3>New Year's Word Search</h3>
-          <p>Two puzzles: an easy one for kids and a tricky every-direction one for grown-ups, with answer keys.</p>
+          <h3 data-co-title="Office Party Word Search">New Year's Word Search</h3>
+          <p data-co-desc="Two puzzles, an easy one and a tricky every-direction one, with answer keys.">Two puzzles: an easy one for kids and a tricky every-direction one for grown-ups, with answer keys.</p>
           <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
         </div>
       </article>
@@ -1622,8 +1622,8 @@ body.space-switching main { opacity: .3; }
       <article class="card print-card">
         <div class="print-thumb">🎉</div>
         <div class="print-info">
-          <h3>New Year's Eve Bingo</h3>
-          <p>8 different bingo cards and a caller sheet. First to five in a row shouts "Happy New Year!"</p>
+          <h3 data-co-title="Office Party Bingo">New Year's Eve Bingo</h3>
+          <p data-co-desc="8 different bingo cards and a caller sheet. First to five in a row shouts &quot;Bingo!&quot;">8 different bingo cards and a caller sheet. First to five in a row shouts "Happy New Year!"</p>
           <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
         </div>
       </article>
@@ -1631,8 +1631,8 @@ body.space-switching main { opacity: .3; }
       <article class="card print-card">
         <div class="print-thumb">🧩</div>
         <div class="print-info">
-          <h3>New Year's Puzzle &amp; Party Pack</h3>
-          <p>Midnight Word Scramble, the Midnight Maze, a fill-in-the-fun story, Finish the Rhyme and 2027 predictions ballots, with answer keys.</p>
+          <h3 data-co-title="Office Party Puzzle Pack">New Year's Puzzle &amp; Party Pack</h3>
+          <p data-co-desc="A word scramble, a maze, a fill-in-the-fun story, Finish the Rhyme and next-year predictions ballots, with answer keys.">Midnight Word Scramble, the Midnight Maze, a fill-in-the-fun story, Finish the Rhyme and 2027 predictions ballots, with answer keys.</p>
           <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
         </div>
       </article>
@@ -8393,6 +8393,10 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#officeBanner").hidden = hubMode !== "company";                        // 🏢 the office party plan
     document.body.classList.toggle("co", hubMode === "company");               // 🏢 hide family-only things on the Office side
     $("#gamesIntro").textContent = hubMode === "company" ? "Play, keep score and print festive games for the whole team." : "Play, keep score and print festive games for the whole family.";
+    $$("[data-co-title],[data-co-desc]").forEach(el => {   // 🏢 office names for the printable games
+      if (el.dataset.famText == null) el.dataset.famText = el.innerHTML;
+      el.innerHTML = hubMode === "company" ? esc(el.dataset.coTitle || el.dataset.coDesc) : el.dataset.famText;
+    });
     $("#scoreTitle").textContent = hubMode === "company" ? "Team Scoreboard" : "Family Scoreboard";
     $$(".sv-title").forEach(x => { x.textContent = hubMode === "company" ? "Advanced Office & Social Survival" : "Advanced Family & Social Survival"; });
     $$(".sv-desc").forEach(x => { x.textContent = hubMode === "company" ? "Six tongue-in-cheek tips for surviving the office party." : "Six tongue-in-cheek tips for surviving the holidays."; });
@@ -11797,9 +11801,18 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       ${X.items.length || X.dItems.length ? `<div class="card pt-card"><h3>🧾 Your menu</h3><ul class="cat-list">${X.items.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.pieces} pieces · ${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}<small>💡 ${esc(i.row[3])}</small></span></li>`).join("")}${X.dItems.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}</span></li>`).join("")}</ul>
         <div class="send-btns"><button type="button" class="btn btn-red" data-print="offfood">🖨️ Menu &amp; shopping list</button><button type="button" class="btn btn-ghost" id="offFoodCost">💵 Add ${cad0(X.sum)} to costs</button></div></div>` : ""}` + offSuppliesHtml(X.P);
   }
+  // 🛒 one-tap shopping: pick a store, then tap what you need (opens that store's search)
+  const OFF_SHOP = [["🍽️ Plates", "holiday party paper plates"], ["🧻 Napkins", "christmas party napkins"], ["🥤 Cups", "holiday party cups"], ["🍴 Cutlery", "disposable cutlery set"], ["🎄 Tablecloths", "christmas plastic tablecloths"], ["✨ Decorations", "christmas party decorations"], ["🎈 Balloons", "christmas balloons"], ["🏆 Prizes", "office party prizes"], ["🎁 Gift exchange gifts", "secret santa gifts under 25"], ["📸 Photo props", "christmas photo booth props"], ["🔥 Chafing dishes", "chafing dish buffet set"], ["🧊 Coolers & ice bins", "party ice bucket beverage tub"]];
+  function offShopHtml() {
+    const st = giStores(), cur = st.find(x => x[0] === off.store) || st[0];
+    return `<div class="card pt-card"><h3>🛒 Buy party supplies online</h3><p class="host-rem">Pick a store, then tap what you need. It opens that store's search, great for ordering big-party supplies in bulk.</p>
+      <div class="apps-filters">${st.map(([n]) => `<button type="button" class="chip${n === cur[0] ? " on" : ""}" data-ofstore="${esc(n)}">${esc(n)}</button>`).join("")}</div>
+      <div class="apps-filters" style="margin-top:8px">${OFF_SHOP.map(([l, q]) => `<button type="button" class="chip fill-chip" data-ofbuy="${esc(q)}">${l}</button>`).join("")}</div>
+      <p class="host-rem">Order early in December. Shipping slows down closer to the party.</p></div>`;
+  }
   function offSuppliesHtml(P) {
     const n = P.all;
-    return `<div class="card pt-card"><h3>🍽️ Plates, cups &amp; extras</h3><ul class="cat-list"><li><b>Plates</b><span>${Math.ceil(n * 1.5)} <small>(1½ per person)</small></span></li><li><b>Napkins</b><span>${n * 3}</span></li><li><b>Cups</b><span>${n * 3}</span></li><li><b>Cutlery sets</b><span>${n}</span></li><li><b>Ice</b><span>${Math.ceil(n / 8)} ${Math.ceil(n / 8) === 1 ? "bag" : "bags"}</span></li><li><b>Garbage &amp; recycling bags</b><span>a few, plus a labelled recycling bin</span></li></ul></div>`;
+    return offShopHtml() + `<div class="card pt-card"><h3>🍽️ Plates, cups &amp; extras</h3><ul class="cat-list"><li><b>Plates</b><span>${Math.ceil(n * 1.5)} <small>(1½ per person)</small></span></li><li><b>Napkins</b><span>${n * 3}</span></li><li><b>Cups</b><span>${n * 3}</span></li><li><b>Cutlery sets</b><span>${n}</span></li><li><b>Ice</b><span>${Math.ceil(n / 8)} ${Math.ceil(n / 8) === 1 ? "bag" : "bags"}</span></li><li><b>Garbage &amp; recycling bags</b><span>a few, plus a labelled recycling bin</span></li></ul></div>`;
   }
   function offFoodDoc() {
     const X = offFoodPlan(), SHOP = (window.NOEL_MEALS || {}).appShop || {};
@@ -11817,6 +11830,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const wh = t.closest("[data-ofwhere]"); if (wh) { off.ev.where = wh.dataset.ofwhere; off.ev.spot = ""; saveOff(); renderOffice(); return; }
     const sp = t.closest("[data-ofspot]"); if (sp) { off.ev.spot = sp.dataset.ofspot; const clean = sp.dataset.ofspot.replace(/^\S+\s/, ""); if (!off.ev.venue || OFF_WHERE.some(w => w[4].some(x => x[0].replace(/^\S+\s/, "") === off.ev.venue))) off.ev.venue = clean; saveOff(); renderOffice(); return; }
     const fs = t.closest("[data-offood]"); if (fs) { F.style = fs.dataset.offood; if (F.style === "potluck") off.acts.potluck = 1; if (F.style === "catered") off.acts.catered = 1; saveOff(); renderOffice(); return; }
+    const so = t.closest("[data-ofstore]"); if (so) { off.store = so.dataset.ofstore; saveOff(); renderOffice(); return; }
+    const by = t.closest("[data-ofbuy]"); if (by) { const st = giStores(), cur = st.find(x => x[0] === off.store) || st[0]; openStore(cur[2](by.dataset.ofbuy)); return; }
     const fm = t.closest("[data-offmode]"); if (fm) { F.mode = fm.dataset.offmode; saveOff(); renderOffice(); return; }
     const fa = t.closest("[data-offapp]"); if (fa) { const X = offFoodPlan(), n = fa.dataset.offapp; F.picks = X.picks.includes(n) ? X.picks.filter(x => x !== n) : X.picks.concat(n); saveOff(); renderOffice(); return; }
     if (t.closest("#offFoodCost")) { const X = offFoodPlan(), ex = off.costs.find(c => c.auto === "food"); if (ex) ex.cost = Math.round(X.sum); else off.costs.push({ id: uid(), type: "Catering", name: "Homemade appetizers", contact: "", cost: Math.round(X.sum), auto: "food" }); saveOff(); toast(`💵 ${cad0(X.sum)} added to Costs & vendors`); return; }
