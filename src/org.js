@@ -24,7 +24,7 @@
     if (k === "thanks") { const d = org.thanks.filter(t => t.done).length; return org.thanks.length ? `${d} of ${org.thanks.length} sent` : "After Christmas"; }
     if (k === "packages") { const w = org.packages.filter(p => !p.arrived).length; return org.packages.length ? (w ? `${w} on the way` : "All arrived ✓") : "Track orders"; }
     if (k === "giving") return org.giving.length ? `${money(org.giving.reduce((a, g) => a + (+g.amt || 0), 0))} given` : "Spread kindness";
-    return "Season totals";
+    return money(budTotals().spent) + " spent";
   }
   function renderOrg() {
     const v = org.view || "home";
@@ -147,15 +147,11 @@
   }
   // ---------- 🗂️ Spending ----------
   function orgSpendHtml() {
-    const gt = giftTotals(), food = foodBudget.items.reduce((a, x) => a + (+x.amt || 0), 0), give = org.giving.reduce((a, g) => a + (+g.amt || 0), 0), other = org.other.reduce((a, x) => a + (+x.amt || 0), 0);
-    const rows = [["🎁 Gifts", gt.planned, gt.budget], ["🍽️ Food", food, +foodBudget.limit || 0], ["💛 Giving", give, 0], ["🎄 Other", other, 0]], total = rows.reduce((a, r) => a + r[1], 0), max = Math.max(1, ...rows.map(r => Math.max(r[1], r[2])));
-    return `<div class="card org-card"><div class="org-total"><span>Season total</span><b>${money(total)}</b></div>
-        ${rows.map(([l, v, b]) => `<div class="spend-row"><span>${l}</span><div class="spend-bar"><i style="width:${v / max * 100}%"></i>${b ? `<em style="left:${b / max * 100}%" title="Budget"></em>` : ""}</div><b>${money(v)}</b></div>`).join("")}
-        <p class="host-rem">Gifts and food come from your Gift Tracker and Food budget${gt.budget || foodBudget.limit ? "; the gold line marks each budget" : ""}.</p></div>
-      <div class="card org-card"><h3>🎄 Other holiday costs</h3><ul class="host-list">${org.other.map(x => `<li data-oo="${x.id}"><label><span>${esc(x.name)} · ${money(+x.amt || 0)}</span></label><button class="icon-btn" data-odel aria-label="Remove">✕</button></li>`).join("") || `<li class="host-rem">Decorations, travel, outfits, entertaining…</li>`}</ul>
-        <form id="orgOtherForm" class="org-addr-row" autocomplete="off" style="margin-top:10px"><input class="input" name="name" maxlength="40" placeholder="e.g. Decorations" aria-label="What"><input class="input" name="amt" type="number" inputmode="decimal" min="0" placeholder="$" aria-label="Amount" style="max-width:80px"><button class="btn btn-green" type="submit">Add</button></form></div>`;
+    const T = budTotals();
+    return `<div class="card org-card" style="text-align:center">${budPie(T.by, T.spent, T.limit, 180)}
+        <p class="host-rem">Your full budget, with charts, a spreadsheet and category budgets, now has its own tab at the bottom.</p>
+        <button type="button" class="btn btn-red btn-block" data-goview="budget">💰 Open the Budget tab</button></div>`;
   }
-
   // ---------- reminders (calendar events, deliveries, card mailing, order cut-off) ----------
   function orgReminders() {
     const out = [], y = orgYear(), add = (k, t, icon, text) => out.push({ k, t, icon, text });
@@ -232,7 +228,7 @@
     if (f.id === "orgMemberForm") { const n = f.mname.value.trim(); if (!n) return; org.members.push({ id: uid(), name: n, emoji: f.emoji.value }); }
     if (f.id === "orgThanksForm") { const fr = f.from.value.trim(); if (!fr) return; org.thanks.push({ id: uid(), from: fr, gift: f.gift.value.trim(), done: false }); }
     if (f.id === "orgPackageForm") { const it = f.item.value.trim(); if (!it) return; org.packages.push({ id: uid(), item: it, store: f.store.value.trim(), eta: f.eta.value, track: f.track.value.trim(), arrived: false }); }
-    if (f.id === "orgGiveForm") { const w = f.what.value.trim(); if (!w) return; org.giving.push({ id: uid(), what: w, amt: parseFloat(f.amt.value) || 0, done: false }); }
+    if (f.id === "orgGiveForm") { const w = f.what.value.trim(); if (!w) return; org.giving.push({ id: uid(), what: w, amt: parseFloat(f.amt.value) || 0, done: false, date: budToday() }); }
     if (f.id === "orgOtherForm") { const n = f.name.value.trim(); if (!n) return; org.other.push({ id: uid(), name: n, amt: parseFloat(f.amt.value) || 0 }); }
     orgChanged();
   });

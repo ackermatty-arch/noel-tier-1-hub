@@ -20,6 +20,7 @@
     else if (key === "place") d = placeDoc();
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "chores") d = choresDoc();
+    else if (key === "budget") d = budgetDoc();
     else if (key === "labels" || key === "return") d = labelDoc(key);
     return d || { error: "That page isn't available any more" };
   }

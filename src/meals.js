@@ -369,7 +369,7 @@
       const c = cfgFor(m.id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
       const amt = Math.round(ps.total * 100) / 100, name = `${m.name} (${c.guests} guests)`;
       const it = foodBudget.items.find(x => x.meal === m.id);
-      if (it) { it.name = name; it.amt = amt; } else foodBudget.items.push({ id: uid(), meal: m.id, name, amt });
+      if (it) { it.name = name; it.amt = amt; } else foodBudget.items.push({ id: uid(), meal: m.id, name, amt, date: budToday() });
       save("foodBudget", foodBudget); renderFoodBudget();
       toast(`💵 ${cad0(amt)} ${it ? "updated in" : "added to"} your food budget`); return;
     }
@@ -422,7 +422,7 @@
   $("#fbAdd").addEventListener("submit", e => {
     e.preventDefault(); const fm = e.target, name = fm.fname.value.trim(), amt = parseFloat(String(fm.famt.value).replace(/[^0-9.]/g, ""));
     if (!name || !isFinite(amt)) { toast("💵 Add a name and an amount"); return; }
-    foodBudget.items.push({ id: uid(), name: name.slice(0, 50), amt: Math.round(amt * 100) / 100 }); save("foodBudget", foodBudget);
+    foodBudget.items.push({ id: uid(), name: name.slice(0, 50), amt: Math.round(amt * 100) / 100, date: budToday() }); save("foodBudget", foodBudget);
     fm.fname.value = ""; fm.famt.value = ""; renderFoodBudget();
   });
   $("#fbList").addEventListener("click", e => {

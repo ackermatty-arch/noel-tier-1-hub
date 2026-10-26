@@ -1291,6 +1291,25 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .host-tabs { margin-bottom: 12px; }
 .tray-btn { position: relative; }
 .pt-banner { margin-top: 12px; }
+.bud-hero { padding: 18px 16px; text-align: center; margin-bottom: 12px; } .bud-hero svg { display: block; margin: 0 auto 8px; }
+.bud-legend { list-style: none; padding: 0; margin: 6px 0 0; text-align: left; }
+.bud-legend li { display: grid; grid-template-columns: 14px 1fr auto 40px; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+.bud-legend li i { width: 12px; height: 12px; border-radius: 50%; } .bud-legend li small { color: var(--muted); text-align: right; }
+.bud-legend li.host-rem { display: block; border: 0; text-align: center; }
+.bud-status { margin: 12px 0 0; padding: 10px 12px; border-radius: 12px; background: #eef6ef; font-size: 14.5px; } .bud-status.warn { background: #fbf3dc; } .bud-status.over { background: #fbe4e2; color: #8e1f1a; }
+.bud-bar { margin: 10px 0 12px; } .bb-top { display: flex; justify-content: space-between; gap: 8px; font-size: 14.5px; margin-bottom: 5px; } .bb-top b.over { color: #c0392b; } .bb-top small { font-weight: 400; color: var(--muted); }
+.bb-track { position: relative; height: 12px; border-radius: 6px; background: #efe8d8; } .bb-track i { position: absolute; inset: 0 auto 0 0; border-radius: 6px; } .bb-track em { position: absolute; top: -3px; bottom: -3px; width: 3px; border-radius: 2px; background: #1E3A2F; }
+.bb-left { display: block; text-align: right; font-size: 12px; color: var(--muted); margin-top: 3px; } .bb-left.over { color: #c0392b; font-weight: 700; }
+.bud-facts p { margin: 6px 0; }
+.bud-sheet { padding: 4px 0; margin: 10px 0 12px; overflow-x: auto; } .bud-sheet table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.bud-sheet th { text-align: left; font: 700 11px sans-serif; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 10px 12px; border-bottom: 2px solid var(--line); cursor: pointer; white-space: nowrap; }
+.bud-sheet td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; } .bud-sheet td small { display: block; font-size: 12px; color: var(--muted); }
+.bud-sheet .num { text-align: right; white-space: nowrap; } .bud-sheet tfoot td { border-bottom: 0; border-top: 2px solid var(--line); }
+.bs-date { white-space: nowrap; color: var(--muted); font-size: 13px; } .bs-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+.bs-del { border: 0; background: none; color: var(--muted); margin-left: 6px; font-size: 13px; cursor: pointer; }
+.bud-set-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+.bud-set-row small { display: block; font-size: 12px; color: var(--muted); } .bud-set-row .bud-in { flex: 0 0 110px; min-height: 42px; }
+.bottom-nav .nav-btn { font-size: 10.5px; }
 .chore-list li { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); } .chore-list li label { flex: 1; border-bottom: 0; }
 .chore-list .who-in { flex: 0 0 96px; min-height: 38px; padding: 0 10px; font-size: 14px; border-radius: 10px; }
 .host-card h3 { font-size: 16px; color: var(--pine-dark); margin: 0 0 6px; }
@@ -1996,6 +2015,16 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
   </section>
 
   <!-- ============================================================
+       VIEW — 💰 BUDGET
+       ============================================================ -->
+  <section class="view" id="view-budget" aria-labelledby="budTitle">
+    <h2 class="view-title" id="budTitle">Budget</h2>
+    <p class="view-intro">Every holiday dollar in one place, with charts that grow as the season goes.</p>
+    <div class="apps-filters host-tabs" id="budTabs"></div>
+    <div id="budBody"></div>
+  </section>
+
+  <!-- ============================================================
        VIEW — 💌 PARTY INVITES & GUEST LIST
        ============================================================ -->
   <section class="view" id="view-invites" aria-labelledby="invitesTitle">
@@ -2245,6 +2274,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
   <button class="nav-btn" data-view="meals" id="navMeals"><span class="nav-ico">🍽️</span>Meals</button>
   <button class="nav-btn" data-view="nye" id="navNye" hidden><span class="nav-ico">🥂</span>New Year</button>
   <button class="nav-btn" data-view="gifts"><span class="nav-ico">🎁</span>Gifts</button>
+  <button class="nav-btn" data-view="budget"><span class="nav-ico">💰</span>Budget</button>
   <button class="nav-btn" data-view="invites"><span class="nav-ico">💌</span>Cards</button>
   <button class="nav-btn" data-view="alarms"><span class="nav-ico">⏰</span>Alarms<span class="nav-badge" id="alarmBadge">0</span></button>
   <button class="nav-btn" data-view="review"><span class="nav-ico">✨</span>Review</button>
@@ -6344,6 +6374,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (name === "nye") renderNye();
     if (name === "host") renderHost();
     if (name === "org") renderOrg();
+    if (name === "budget") renderBudget();
     if (name !== "gifts") santaLock();   // 🎅 leaving Gifts always locks Santa's list
     if (name === "meals") renderMeals();
     $$(".nav-btn").forEach(b => {
@@ -6359,7 +6390,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   /* 👆 SWIPE between tabs (left = next tab, right = previous tab)
      Ignores up/down scrolling, edge swipes (Android "back"), text boxes,
      sliders and anything inside a pop-up or full-screen page. */
-  const VIEW_ORDER = ["inspire", "games", "planner", "host", "org", "meals", "nye", "gifts", "invites", "alarms", "review"];
+  const VIEW_ORDER = ["inspire", "games", "planner", "host", "org", "meals", "nye", "gifts", "budget", "invites", "alarms", "review"];
   let swipe = null;
   document.querySelector("main").addEventListener("touchstart", e => {
     const t = e.touches[0];
@@ -7717,6 +7748,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       if (b.dataset.act === "status") {
         const i = STATUSES.findIndex(s => s.key === g.status);
         g.status = STATUSES[(i + 1) % STATUSES.length].key;
+        if (g.status === "idea") delete g.boughtAt; else if (!g.boughtAt) g.boughtAt = budToday();   // 💰 dates the purchase for the Budget tab
         if (navigator.vibrate) navigator.vibrate(12);
       }
       if (b.dataset.act === "del-gift") p.gifts = p.gifts.filter(x => x !== g);
@@ -7854,6 +7886,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function startFresh() {
     const year = season;
     memories = memories.filter(m => m.year !== year).concat(snapshot(year)).sort((a, b) => b.year - a.year);
+    budgetArchive(year);   // 💰 remember this season's total for next year's comparison
     save("memories", memories);
     // Gifts: keep everyone on the list and the budget, clear this year's gifts
     gifts.people.forEach(p => { p.gifts = []; });
@@ -9191,7 +9224,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       const c = cfgFor(m.id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
       const amt = Math.round(ps.total * 100) / 100, name = `${m.name} (${c.guests} guests)`;
       const it = foodBudget.items.find(x => x.meal === m.id);
-      if (it) { it.name = name; it.amt = amt; } else foodBudget.items.push({ id: uid(), meal: m.id, name, amt });
+      if (it) { it.name = name; it.amt = amt; } else foodBudget.items.push({ id: uid(), meal: m.id, name, amt, date: budToday() });
       save("foodBudget", foodBudget); renderFoodBudget();
       toast(`💵 ${cad0(amt)} ${it ? "updated in" : "added to"} your food budget`); return;
     }
@@ -9244,7 +9277,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#fbAdd").addEventListener("submit", e => {
     e.preventDefault(); const fm = e.target, name = fm.fname.value.trim(), amt = parseFloat(String(fm.famt.value).replace(/[^0-9.]/g, ""));
     if (!name || !isFinite(amt)) { toast("💵 Add a name and an amount"); return; }
-    foodBudget.items.push({ id: uid(), name: name.slice(0, 50), amt: Math.round(amt * 100) / 100 }); save("foodBudget", foodBudget);
+    foodBudget.items.push({ id: uid(), name: name.slice(0, 50), amt: Math.round(amt * 100) / 100, date: budToday() }); save("foodBudget", foodBudget);
     fm.fname.value = ""; fm.famt.value = ""; renderFoodBudget();
   });
   $("#fbList").addEventListener("click", e => {
@@ -10155,7 +10188,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (k === "thanks") { const d = org.thanks.filter(t => t.done).length; return org.thanks.length ? `${d} of ${org.thanks.length} sent` : "After Christmas"; }
     if (k === "packages") { const w = org.packages.filter(p => !p.arrived).length; return org.packages.length ? (w ? `${w} on the way` : "All arrived ✓") : "Track orders"; }
     if (k === "giving") return org.giving.length ? `${money(org.giving.reduce((a, g) => a + (+g.amt || 0), 0))} given` : "Spread kindness";
-    return "Season totals";
+    return money(budTotals().spent) + " spent";
   }
   function renderOrg() {
     const v = org.view || "home";
@@ -10278,15 +10311,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
   // ---------- 🗂️ Spending ----------
   function orgSpendHtml() {
-    const gt = giftTotals(), food = foodBudget.items.reduce((a, x) => a + (+x.amt || 0), 0), give = org.giving.reduce((a, g) => a + (+g.amt || 0), 0), other = org.other.reduce((a, x) => a + (+x.amt || 0), 0);
-    const rows = [["🎁 Gifts", gt.planned, gt.budget], ["🍽️ Food", food, +foodBudget.limit || 0], ["💛 Giving", give, 0], ["🎄 Other", other, 0]], total = rows.reduce((a, r) => a + r[1], 0), max = Math.max(1, ...rows.map(r => Math.max(r[1], r[2])));
-    return `<div class="card org-card"><div class="org-total"><span>Season total</span><b>${money(total)}</b></div>
-        ${rows.map(([l, v, b]) => `<div class="spend-row"><span>${l}</span><div class="spend-bar"><i style="width:${v / max * 100}%"></i>${b ? `<em style="left:${b / max * 100}%" title="Budget"></em>` : ""}</div><b>${money(v)}</b></div>`).join("")}
-        <p class="host-rem">Gifts and food come from your Gift Tracker and Food budget${gt.budget || foodBudget.limit ? "; the gold line marks each budget" : ""}.</p></div>
-      <div class="card org-card"><h3>🎄 Other holiday costs</h3><ul class="host-list">${org.other.map(x => `<li data-oo="${x.id}"><label><span>${esc(x.name)} · ${money(+x.amt || 0)}</span></label><button class="icon-btn" data-odel aria-label="Remove">✕</button></li>`).join("") || `<li class="host-rem">Decorations, travel, outfits, entertaining…</li>`}</ul>
-        <form id="orgOtherForm" class="org-addr-row" autocomplete="off" style="margin-top:10px"><input class="input" name="name" maxlength="40" placeholder="e.g. Decorations" aria-label="What"><input class="input" name="amt" type="number" inputmode="decimal" min="0" placeholder="$" aria-label="Amount" style="max-width:80px"><button class="btn btn-green" type="submit">Add</button></form></div>`;
+    const T = budTotals();
+    return `<div class="card org-card" style="text-align:center">${budPie(T.by, T.spent, T.limit, 180)}
+        <p class="host-rem">Your full budget, with charts, a spreadsheet and category budgets, now has its own tab at the bottom.</p>
+        <button type="button" class="btn btn-red btn-block" data-goview="budget">💰 Open the Budget tab</button></div>`;
   }
-
   // ---------- reminders (calendar events, deliveries, card mailing, order cut-off) ----------
   function orgReminders() {
     const out = [], y = orgYear(), add = (k, t, icon, text) => out.push({ k, t, icon, text });
@@ -10363,7 +10392,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (f.id === "orgMemberForm") { const n = f.mname.value.trim(); if (!n) return; org.members.push({ id: uid(), name: n, emoji: f.emoji.value }); }
     if (f.id === "orgThanksForm") { const fr = f.from.value.trim(); if (!fr) return; org.thanks.push({ id: uid(), from: fr, gift: f.gift.value.trim(), done: false }); }
     if (f.id === "orgPackageForm") { const it = f.item.value.trim(); if (!it) return; org.packages.push({ id: uid(), item: it, store: f.store.value.trim(), eta: f.eta.value, track: f.track.value.trim(), arrived: false }); }
-    if (f.id === "orgGiveForm") { const w = f.what.value.trim(); if (!w) return; org.giving.push({ id: uid(), what: w, amt: parseFloat(f.amt.value) || 0, done: false }); }
+    if (f.id === "orgGiveForm") { const w = f.what.value.trim(); if (!w) return; org.giving.push({ id: uid(), what: w, amt: parseFloat(f.amt.value) || 0, done: false, date: budToday() }); }
     if (f.id === "orgOtherForm") { const n = f.name.value.trim(); if (!n) return; org.other.push({ id: uid(), name: n, amt: parseFloat(f.amt.value) || 0 }); }
     orgChanged();
   });
@@ -10649,6 +10678,208 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   });
   ptSync();
   /* @themes-end */
+  /* @budget-start */
+  /* ============================================================
+     💰 BUDGET (bottom tab)
+     One place for every holiday dollar, with pictures:
+       • a pie of where the money went, budget-vs-spent bars, and a
+         line that grows day by day as the season goes on
+       • a spreadsheet of every purchase (gifts, food, giving and your
+         own entries) that downloads as a spreadsheet file for Excel,
+         Google Sheets or Numbers on the computer
+       • budgets per category, and last year's total to compare
+     Gifts, food and giving come in automatically from the rest of the
+     app. Santa's gifts show only as one total, never by name.
+     ============================================================ */
+  const BUD_CATS = [
+    ["gifts", "🎁", "Gifts", "#b3262e"], ["food", "🍽️", "Food & drinks", "#2f6b4a"], ["decor", "🎄", "Decorations", "#c9a227"],
+    ["hosting", "🏡", "Hosting & home", "#8b4a3a"], ["party", "🎉", "Parties & outings", "#6a4c93"], ["cards", "✉️", "Cards & postage", "#3b6ea5"],
+    ["travel", "🚗", "Travel", "#4f8a8b"], ["giving", "💛", "Giving", "#d98b9b"], ["other", "📦", "Other", "#8c8c8c"]
+  ];
+  const budCat = k => BUD_CATS.find(c => c[0] === k) || BUD_CATS[BUD_CATS.length - 1];
+  let budget = load("budget", null) || { limit: 0, cats: {}, expenses: [], daily: {}, past: [], tab: "overview", sort: "date", filter: "all" };
+  // the Organizer's old "other costs" move in here once
+  if (typeof org !== "undefined" && org.other && org.other.length) { org.other.forEach(x => budget.expenses.push({ id: x.id, cat: "other", name: x.name, amt: +x.amt || 0, date: "" })); org.other = []; save("organizer", org); }
+  const saveBudget = () => save("budget", budget);
+  const budToday = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+
+  // every dollar spent, from everywhere in the app
+  function budRows() {
+    const rows = [];
+    gifts.people.forEach(p => p.gifts.forEach(g => { if (isSpent(g) && +g.price) rows.push({ src: "Gift Tracker", cat: "gifts", name: `${g.name} for ${p.name}`, amt: +g.price, date: g.boughtAt || "" }); }));
+    const santa = sum(santaGifts(), isSpent); if (santa) rows.push({ src: "Santa's list", cat: "gifts", name: "🎅 Santa's gifts (kept secret)", amt: santa, date: "" });
+    foodBudget.items.forEach(x => { if (+x.amt) rows.push({ src: "Food budget", cat: "food", name: x.name, amt: +x.amt, date: x.date || "" }); });
+    if (typeof org !== "undefined") org.giving.forEach(x => { if (+x.amt) rows.push({ src: "Giving", cat: "giving", name: x.what, amt: +x.amt, date: x.date || "" }); });
+    budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "" }));
+    return rows;
+  }
+  const catLimit = k => k === "gifts" ? +gifts.budget || 0 : k === "food" ? +foodBudget.limit || 0 : +budget.cats[k] || 0;
+  function budTotals() {
+    const rows = budRows(), by = {}; BUD_CATS.forEach(([k]) => { by[k] = 0; }); rows.forEach(r => { by[r.cat] = (by[r.cat] || 0) + r.amt; });
+    const spent = rows.reduce((a, r) => a + r.amt, 0), catSum = BUD_CATS.reduce((a, [k]) => a + catLimit(k), 0), limit = +budget.limit || catSum;
+    const plannedGifts = sum(gifts.people.flatMap(p => p.gifts).concat(santaGifts()), g => !isSpent(g));
+    return { rows, by, spent, limit, catSum, plannedGifts };
+  }
+  function budRecordDay() {
+    const t = budTotals().spent, k = budToday();
+    if (budget.daily[k] !== t) { budget.daily[k] = Math.round(t * 100) / 100; saveBudget(); }
+  }
+
+  // ---------- 📊 pictures (plain SVG, so they also print sharply) ----------
+  function budPie(by, total, limit, size) {
+    const r = 70, C = 2 * Math.PI * r; let off = 0;
+    const parts = BUD_CATS.filter(([k]) => by[k] > 0);
+    const arcs = parts.map(([k, , , col]) => { const len = by[k] / total * C, s = `<circle r="${r}" cx="100" cy="100" fill="none" stroke="${col}" stroke-width="34" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`; off += len; return s; }).join("");
+    const pct = limit ? Math.round(total / limit * 100) : 0;
+    return `<svg viewBox="0 0 200 200" width="${size}" height="${size}" role="img" aria-label="Spending by category">
+      <circle r="${r}" cx="100" cy="100" fill="none" stroke="#efe8d8" stroke-width="34"/>${total ? arcs : ""}
+      <text x="100" y="${limit ? 94 : 104}" text-anchor="middle" font-size="22" font-weight="700" fill="#1E3A2F" font-family="Georgia,serif">${money(total)}</text>
+      ${limit ? `<text x="100" y="116" text-anchor="middle" font-size="11" fill="#6b7a70" font-family="sans-serif">of ${money(limit)} · ${pct}%</text>` : ""}</svg>`;
+  }
+  function budBars(by) {
+    const cats = BUD_CATS.filter(([k]) => by[k] > 0 || catLimit(k) > 0);
+    if (!cats.length) return `<p class="host-rem">Set a budget or add spending to see your bars.</p>`;
+    return cats.map(([k, i, l, col]) => { const s = by[k], b = catLimit(k), max = Math.max(s, b, 1), over = b && s > b;
+      return `<div class="bud-bar"><div class="bb-top"><span>${i} ${l}</span><b class="${over ? "over" : ""}">${money(s)}${b ? ` <small>of ${money(b)}</small>` : ""}</b></div>
+        <div class="bb-track"><i style="width:${Math.min(100, s / max * 100)}%;background:${over ? "#c0392b" : col}"></i>${b ? `<em style="left:${Math.min(100, b / max * 100)}%"></em>` : ""}</div>
+        ${b ? `<small class="bb-left ${over ? "over" : ""}">${over ? `${money(s - b)} over` : `${money(b - s)} left`}</small>` : ""}</div>`; }).join("");
+  }
+  function budLine(limit, w, h) {
+    // running total by purchase date (purchases without a date count from the start)
+    const rows = budRows(); if (!rows.length) return "";
+    const undated = rows.filter(r => !r.date).reduce((a, r) => a + r.amt, 0), byDay = {};
+    rows.filter(r => r.date).forEach(r => { byDay[r.date] = (byDay[r.date] || 0) + r.amt; });
+    let run = undated; const pts = Object.keys(byDay).sort().map(d => [d, run += byDay[d]]);
+    if (!pts.length || undated) pts.unshift([pts.length ? pts[0][0] : budToday(), undated]);
+    const y0 = new Date().getMonth() === 0 ? new Date().getFullYear() - 1 : new Date().getFullYear();
+    const start = Math.min(new Date(y0, 10, 1).getTime(), new Date(pts[0][0] + "T00:00").getTime()), end = Math.max(new Date(y0, 11, 31).getTime(), new Date(pts[pts.length - 1][0] + "T23:00").getTime());
+    const max = Math.max(limit || 0, ...pts.map(p => p[1]), 1) * 1.1, L = 44, R = 10, T = 12, B = 26;
+    const X = t => L + (Math.min(Math.max(t, start), end) - start) / (end - start) * (w - L - R), Y = v => T + (1 - v / max) * (h - T - B);
+    const xy = []; pts.forEach(([d, v], i) => { const x = X(new Date(d + "T12:00").getTime()); if (i) xy.push([x, xy[xy.length - 1][1]]); xy.push([x, Y(v)]); });   // steps up on each purchase day
+    const today = X(Date.now()); if (xy[xy.length - 1][0] < today) xy.push([today, xy[xy.length - 1][1]]);
+    const path = xy.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+    const area = path + ` L${xy[xy.length - 1][0].toFixed(1)} ${Y(0)} L${xy[0][0].toFixed(1)} ${Y(0)} Z`;
+    const months = [[new Date(y0, 10, 1), "Nov"], [new Date(y0, 11, 1), "Dec"], [new Date(y0, 11, 25), "🎄 25"]];
+    const grid = [0, 0.5, 1].map(f => `<line x1="${L}" x2="${w - R}" y1="${Y(max / 1.1 * f)}" y2="${Y(max / 1.1 * f)}" stroke="#eee6d6"/><text x="${L - 6}" y="${Y(max / 1.1 * f) + 4}" text-anchor="end" font-size="10" fill="#8a8a8a" font-family="sans-serif">${money(Math.round(max / 1.1 * f))}</text>`).join("");
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="Spending over time">${grid}
+      ${months.map(([d, l]) => `<text x="${X(d.getTime())}" y="${h - 8}" font-size="10" fill="#8a8a8a" font-family="sans-serif" text-anchor="${l === "Nov" ? "start" : "middle"}">${l}</text>`).join("")}
+      ${limit ? `<line x1="${L}" x2="${w - R}" y1="${Y(limit)}" y2="${Y(limit)}" stroke="#c9a227" stroke-width="2" stroke-dasharray="5 4"/><text x="${w - R}" y="${Y(limit) - 5}" text-anchor="end" font-size="10" fill="#a8861c" font-family="sans-serif">Budget</text>` : ""}
+      <path d="${area}" fill="rgba(179,38,46,.12)"/><path d="${path}" fill="none" stroke="#b3262e" stroke-width="2.5" stroke-linejoin="round"/>
+      <circle cx="${xy[xy.length - 1][0]}" cy="${xy[xy.length - 1][1]}" r="4.5" fill="#b3262e"/></svg>`;
+  }
+
+  // ---------- screens ----------
+  function renderBudget() {
+    budRecordDay();
+    const T = budTotals(), tab = budget.tab || "overview";
+    $("#budTabs").innerHTML = [["overview", "📊 Overview"], ["sheet", "🧾 Spreadsheet"], ["set", "🎯 Budgets"]].map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
+    $("#budBody").innerHTML = ({ overview: budOverview, sheet: budSheet, set: budSet })[tab](T);
+  }
+  function budOverview(T) {
+    const left = T.limit - T.spent, pct = T.limit ? T.spent / T.limit : 0, now = new Date();
+    const xmas = new Date(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear(), 11, 25), days = Math.max(0, Math.ceil((xmas - now) / 86400000));
+    const status = !T.limit ? "Set a budget on the 🎯 Budgets tab to track how much is left." : pct > 1 ? `⚠️ You're ${money(-left)} over budget.` : pct >= 0.9 ? `🟡 Almost there: ${money(left)} left.` : `✅ On track: ${money(left)} left${days ? `, about ${money(Math.floor(left / days))} a day until Christmas` : ""}.`;
+    const top = T.rows.slice().sort((a, b) => b.amt - a.amt)[0];
+    const perPerson = gifts.people.map(p => [p.name, sum(p.gifts, () => true)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 6), ppMax = Math.max(1, ...perPerson.map(x => x[1]));
+    const last = budget.past[budget.past.length - 1];
+    return `<div class="card bud-hero">${budPie(T.by, T.spent, T.limit, 210)}
+        <ul class="bud-legend">${BUD_CATS.filter(([k]) => T.by[k] > 0).map(([k, i, l, col]) => `<li><i style="background:${col}"></i><span>${i} ${l}</span><b>${money(T.by[k])}</b><small>${Math.round(T.by[k] / T.spent * 100)}%</small></li>`).join("") || `<li class="host-rem">Nothing spent yet. Mark gifts as bought, or add spending on the 🧾 Spreadsheet tab.</li>`}</ul>
+        <p class="bud-status ${pct > 1 ? "over" : pct >= 0.9 ? "warn" : ""}">${status}</p></div>
+      <div class="card pt-card"><h3>📈 Spending as the season goes</h3>${budLine(T.limit, 340, 170) || ""}<p class="host-rem">${T.rows.length ? "Your running total, stepping up on each day you spent. The gold dashed line is your budget." : "Your line appears as soon as you spend something."}</p></div>
+      <div class="card pt-card"><h3>🎯 Budget vs spent</h3>${budBars(T.by)}</div>
+      ${perPerson.length ? `<div class="card pt-card"><h3>🎁 Gifts by person</h3>${perPerson.map(([n, v]) => `<div class="bud-bar"><div class="bb-top"><span>${esc(n)}</span><b>${money(v)}</b></div><div class="bb-track"><i style="width:${v / ppMax * 100}%;background:#b3262e"></i></div></div>`).join("")}<p class="host-rem">Includes gift ideas you haven't bought yet.</p></div>` : ""}
+      <div class="card pt-card bud-facts">
+        ${top ? `<p>🏷️ <b>Biggest purchase:</b> ${esc(top.name)} · ${money(top.amt)}</p>` : ""}
+        ${T.plannedGifts ? `<p>💡 <b>Gift ideas not bought yet:</b> ${money(T.plannedGifts)}${T.limit ? ` · ${T.spent + T.plannedGifts > T.limit ? "buying them all would go over budget" : "they still fit in your budget"}` : ""}</p>` : ""}
+        ${last ? `<p>🗂️ <b>Last Christmas (${last.year}):</b> ${money(last.total)} in total · ${T.spent > last.total ? `${money(T.spent - last.total)} more so far this year` : `${money(last.total - T.spent)} less so far`}</p>` : ""}
+        <p>📄 Want it on your computer? Open the <b>🧾 Spreadsheet</b> tab and tap <b>Download spreadsheet</b>.</p></div>
+      <button type="button" class="btn btn-ghost btn-block pt-print" data-print="budget">🖨️ Print my budget report</button>`;
+  }
+  function budSheet(T) {
+    const f = budget.filter || "all", s = budget.sort || "date";
+    let rows = T.rows.filter(r => f === "all" || r.cat === f);
+    rows.sort(s === "amt" ? (a, b) => b.amt - a.amt : s === "cat" ? (a, b) => a.cat.localeCompare(b.cat) || b.amt - a.amt : (a, b) => (b.date || "").localeCompare(a.date || "") || b.amt - a.amt);
+    const total = rows.reduce((a, r) => a + r.amt, 0), N = NoelNative.isNative();
+    return `<form class="card pt-card org-ev-form" id="budAddForm" autocomplete="off"><h3>➕ Add spending</h3>
+        <input class="input" name="name" maxlength="60" placeholder="What was it? e.g. Tree lights" aria-label="What">
+        <div class="org-addr-row"><select class="input" name="cat" aria-label="Category">${BUD_CATS.filter(([k]) => k !== "gifts" && k !== "food" && k !== "giving").concat(BUD_CATS.filter(([k]) => k === "food")).map(([k, i, l]) => `<option value="${k}">${i} ${l}</option>`).join("")}</select>
+          <input class="input" name="amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="$" aria-label="Amount" style="max-width:96px"></div>
+        <input class="input" name="date" type="date" value="${budToday()}" aria-label="Date">
+        <button class="btn btn-green btn-block" type="submit">Add</button>
+        <p class="host-rem">Gifts come in when you mark them Bought in the Gift Tracker. Food and giving come from their own pages too.</p></form>
+      <div class="apps-filters">${[["all", "All"]].concat(BUD_CATS.filter(([k]) => T.by[k] > 0).map(([k, i, l]) => [k, i + " " + l])).map(([k, l]) => `<button type="button" class="chip${k === f ? " on" : ""}" data-bfilter="${k}">${l}</button>`).join("")}</div>
+      <div class="card bud-sheet"><table><thead><tr><th data-bsort="date">Date${s === "date" ? " ▾" : ""}</th><th data-bsort="cat">Item${s === "cat" ? " ▾" : ""}</th><th data-bsort="amt" class="num">Amount${s === "amt" ? " ▾" : ""}</th></tr></thead>
+        <tbody>${rows.map(r => { const c = budCat(r.cat); return `<tr><td class="bs-date">${r.date ? new Date(r.date + "T12:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "—"}</td>
+          <td><span class="bs-dot" style="background:${c[3]}"></span>${esc(r.name)}<small>${c[1]} ${c[2]}${r.src ? " · from " + r.src : ""}</small></td>
+          <td class="num">${money(r.amt)}${r.id ? `<button type="button" class="bs-del" data-bdel="${r.id}" aria-label="Remove">✕</button>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="3" class="host-rem">Nothing here yet.</td></tr>`}</tbody>
+        <tfoot><tr><td></td><td><b>Total${f === "all" ? "" : " · " + budCat(f)[2]}</b></td><td class="num"><b>${money(total)}</b></td></tr></tfoot></table></div>
+      <div class="card pt-card"><button type="button" class="btn btn-red btn-block" id="budCsv">📄 Download spreadsheet</button>
+        <p class="host-rem">${N ? "Choose AirDrop, Mail or Save to Files to get it onto your computer." : "It saves to your downloads."} It opens in Excel, Google Sheets or Numbers, with every purchase and the totals by category.</p></div>`;
+  }
+  function budSet(T) {
+    const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
+    return `<div class="card pt-card"><h3>💰 Total holiday budget</h3>${inp("total", budget.limit, T.catSum ? "Total of categories: " + money(T.catSum) : "$")}
+        <p class="host-rem">Leave it empty and Noël adds up your category budgets for you.</p></div>
+      <div class="card pt-card"><h3>🎯 Budget for each category</h3>
+        ${BUD_CATS.map(([k, i, l]) => `<div class="bud-set-row"><span>${i} ${l}${k === "gifts" ? "<small>Same as the Gift Tracker budget</small>" : k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div>
+      <div class="card pt-card bud-facts"><h3>💡 Budget tips</h3><p>• A common rule of thumb: about half for gifts, a quarter for food and entertaining, and the rest for everything else.</p><p>• Set your gift budget per person first, then add it up.</p><p>• Keep a little "oops" money (about 10%) for last-minute extras.</p></div>`;
+  }
+
+  // ---------- spreadsheet file & printed report ----------
+  function budCsv() {
+    const T = budTotals(), q = v => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`, n = v => (Math.round(v * 100) / 100).toFixed(2);
+    const lines = [["Date", "Category", "Item", "Amount (" + currency + ")", "From"].map(q).join(",")]
+      .concat(T.rows.slice().sort((a, b) => (a.date || "9").localeCompare(b.date || "9")).map(r => [r.date, budCat(r.cat)[2], r.name, n(r.amt), r.src || "Added by hand"].map(q).join(",")))
+      .concat(["", ["Category", "Spent", "Budget", "Left"].map(q).join(",")])
+      .concat(BUD_CATS.map(([k, , l]) => [l, n(T.by[k]), catLimit(k) ? n(catLimit(k)) : "", catLimit(k) ? n(catLimit(k) - T.by[k]) : ""].map(q).join(",")))
+      .concat([["TOTAL", n(T.spent), T.limit ? n(T.limit) : "", T.limit ? n(T.limit - T.spent) : ""].map(q).join(",")]);
+    return "﻿" + lines.join("\r\n");
+  }
+  function budgetDoc() {
+    budRecordDay(); const T = budTotals();
+    const css = `.bd{font:11pt/1.4 Georgia,serif;color:#222} .bd h1{font-size:22pt;margin:0;color:#1E3A2F} .bd .bd-sub{color:#8a6d3b;font:600 8.5pt sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:2px 0 12px}
+      .bd h2{font-size:13pt;color:#1E3A2F;border-bottom:1.5px solid #B8935A;margin:16px 0 6px;padding-bottom:2px} .bd .bd-top{display:flex;gap:24px;align-items:center} .bd table{border-collapse:collapse;width:100%}
+      .bd td,.bd th{padding:4px 6px;border-bottom:1px solid #e6e0d2;text-align:left;font-size:10pt} .bd th{background:#f4efe3;font:600 8pt sans-serif;text-transform:uppercase} .bd .num{text-align:right;white-space:nowrap}
+      .bd .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px} .bd .bd-foot{margin-top:14px;text-align:center;color:#999;font:8pt sans-serif}`;
+    const html = `<div class="bd"><h1>💰 Holiday Budget</h1><p class="bd-sub">${new Date().toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })} · spent ${money(T.spent)}${T.limit ? ` of ${money(T.limit)}` : ""}</p>
+      <div class="bd-top">${budPie(T.by, T.spent, T.limit, 200)}<table><tr><th>Category</th><th class="num">Spent</th><th class="num">Budget</th><th class="num">Left</th></tr>
+        ${BUD_CATS.filter(([k]) => T.by[k] || catLimit(k)).map(([k, i, l, col]) => `<tr><td><span class="dot" style="background:${col}"></span>${l}</td><td class="num">${money(T.by[k])}</td><td class="num">${catLimit(k) ? money(catLimit(k)) : "—"}</td><td class="num">${catLimit(k) ? money(catLimit(k) - T.by[k]) : "—"}</td></tr>`).join("")}
+        <tr><td><b>Total</b></td><td class="num"><b>${money(T.spent)}</b></td><td class="num"><b>${T.limit ? money(T.limit) : "—"}</b></td><td class="num"><b>${T.limit ? money(T.limit - T.spent) : "—"}</b></td></tr></table></div>
+      ${T.rows.length ? `<h2>Spending over time</h2>${budLine(T.limit, 680, 200)}` : ""}
+      <h2>Every purchase</h2><table><tr><th>Date</th><th>Category</th><th>Item</th><th class="num">Amount</th></tr>${T.rows.slice().sort((a, b) => (a.date || "0").localeCompare(b.date || "0")).map(r => `<tr><td>${r.date || "—"}</td><td>${budCat(r.cat)[2]}</td><td>${esc(r.name)}</td><td class="num">${money(r.amt)}</td></tr>`).join("")}</table>
+      <p class="bd-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p></div>`;
+    return { title: "Budget report", css, html, margin: 0.5, file: "Holiday-Budget-Report" };
+  }
+  // keep last year's total when the season is saved (called from Start fresh)
+  function budgetArchive(year) {
+    const T = budTotals(); budget.past = budget.past.filter(p => p.year !== year).concat({ year, total: Math.round(T.spent * 100) / 100, by: T.by });
+    budget.expenses = []; budget.daily = {}; saveBudget();
+  }
+
+  // ---------- taps & typing ----------
+  $("#view-budget").addEventListener("click", e => {
+    const t = e.target;
+    const tb = t.closest("[data-btab]"); if (tb) { budget.tab = tb.dataset.btab; saveBudget(); renderBudget(); return; }
+    const fl = t.closest("[data-bfilter]"); if (fl) { budget.filter = fl.dataset.bfilter; saveBudget(); renderBudget(); return; }
+    const so = t.closest("[data-bsort]"); if (so) { budget.sort = so.dataset.bsort; saveBudget(); renderBudget(); return; }
+    const del = t.closest("[data-bdel]"); if (del) { budget.expenses = budget.expenses.filter(x => x.id !== del.dataset.bdel); saveBudget(); renderBudget(); return; }
+    if (t.closest("#budCsv")) { NoelMedia.share(new Blob([budCsv()], { type: "text/csv" }), "Holiday-Budget.csv", "Holiday budget").then(h => { if (h === "saved") toast("📄 Spreadsheet saved to your downloads"); }).catch(() => {}); }
+  });
+  $("#view-budget").addEventListener("change", e => {
+    const t = e.target; if (t.dataset.blim == null) return;
+    const v = Math.max(0, parseFloat(t.value) || 0), k = t.dataset.blim;
+    if (k === "total") budget.limit = v; else if (k === "gifts") { gifts.budget = v; save("gifts", gifts); } else if (k === "food") { foodBudget.limit = v; save("foodBudget", foodBudget); } else budget.cats[k] = v;
+    saveBudget(); renderBudget(); toast("💰 Budget saved");
+  });
+  $("#view-budget").addEventListener("submit", e => {
+    e.preventDefault(); const f = e.target; if (f.id !== "budAddForm") return;
+    const name = f.name.value.trim(), amt = parseFloat(f.amt.value);
+    if (!name || !(amt > 0)) { toast("💰 Add what it was and how much"); return; }
+    budget.expenses.push({ id: uid(), cat: f.cat.value, name, amt: Math.round(amt * 100) / 100, date: f.date.value || budToday() });
+    saveBudget(); renderBudget(); toast(`💰 Added ${money(amt)}`);
+  });
+  budRecordDay();
+  /* @budget-end */
   /* @print-start */
   /* ============================================================
      🖨️ PRINTING & THE PRINT TRAY
@@ -10672,6 +10903,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     else if (key === "place") d = placeDoc();
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "chores") d = choresDoc();
+    else if (key === "budget") d = budgetDoc();
     else if (key === "labels" || key === "return") d = labelDoc(key);
     return d || { error: "That page isn't available any more" };
   }

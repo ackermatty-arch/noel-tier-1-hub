@@ -1,0 +1,201 @@
+  /* ============================================================
+     💰 BUDGET (bottom tab)
+     One place for every holiday dollar, with pictures:
+       • a pie of where the money went, budget-vs-spent bars, and a
+         line that grows day by day as the season goes on
+       • a spreadsheet of every purchase (gifts, food, giving and your
+         own entries) that downloads as a spreadsheet file for Excel,
+         Google Sheets or Numbers on the computer
+       • budgets per category, and last year's total to compare
+     Gifts, food and giving come in automatically from the rest of the
+     app. Santa's gifts show only as one total, never by name.
+     ============================================================ */
+  const BUD_CATS = [
+    ["gifts", "🎁", "Gifts", "#b3262e"], ["food", "🍽️", "Food & drinks", "#2f6b4a"], ["decor", "🎄", "Decorations", "#c9a227"],
+    ["hosting", "🏡", "Hosting & home", "#8b4a3a"], ["party", "🎉", "Parties & outings", "#6a4c93"], ["cards", "✉️", "Cards & postage", "#3b6ea5"],
+    ["travel", "🚗", "Travel", "#4f8a8b"], ["giving", "💛", "Giving", "#d98b9b"], ["other", "📦", "Other", "#8c8c8c"]
+  ];
+  const budCat = k => BUD_CATS.find(c => c[0] === k) || BUD_CATS[BUD_CATS.length - 1];
+  let budget = load("budget", null) || { limit: 0, cats: {}, expenses: [], daily: {}, past: [], tab: "overview", sort: "date", filter: "all" };
+  // the Organizer's old "other costs" move in here once
+  if (typeof org !== "undefined" && org.other && org.other.length) { org.other.forEach(x => budget.expenses.push({ id: x.id, cat: "other", name: x.name, amt: +x.amt || 0, date: "" })); org.other = []; save("organizer", org); }
+  const saveBudget = () => save("budget", budget);
+  const budToday = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+
+  // every dollar spent, from everywhere in the app
+  function budRows() {
+    const rows = [];
+    gifts.people.forEach(p => p.gifts.forEach(g => { if (isSpent(g) && +g.price) rows.push({ src: "Gift Tracker", cat: "gifts", name: `${g.name} for ${p.name}`, amt: +g.price, date: g.boughtAt || "" }); }));
+    const santa = sum(santaGifts(), isSpent); if (santa) rows.push({ src: "Santa's list", cat: "gifts", name: "🎅 Santa's gifts (kept secret)", amt: santa, date: "" });
+    foodBudget.items.forEach(x => { if (+x.amt) rows.push({ src: "Food budget", cat: "food", name: x.name, amt: +x.amt, date: x.date || "" }); });
+    if (typeof org !== "undefined") org.giving.forEach(x => { if (+x.amt) rows.push({ src: "Giving", cat: "giving", name: x.what, amt: +x.amt, date: x.date || "" }); });
+    budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "" }));
+    return rows;
+  }
+  const catLimit = k => k === "gifts" ? +gifts.budget || 0 : k === "food" ? +foodBudget.limit || 0 : +budget.cats[k] || 0;
+  function budTotals() {
+    const rows = budRows(), by = {}; BUD_CATS.forEach(([k]) => { by[k] = 0; }); rows.forEach(r => { by[r.cat] = (by[r.cat] || 0) + r.amt; });
+    const spent = rows.reduce((a, r) => a + r.amt, 0), catSum = BUD_CATS.reduce((a, [k]) => a + catLimit(k), 0), limit = +budget.limit || catSum;
+    const plannedGifts = sum(gifts.people.flatMap(p => p.gifts).concat(santaGifts()), g => !isSpent(g));
+    return { rows, by, spent, limit, catSum, plannedGifts };
+  }
+  function budRecordDay() {
+    const t = budTotals().spent, k = budToday();
+    if (budget.daily[k] !== t) { budget.daily[k] = Math.round(t * 100) / 100; saveBudget(); }
+  }
+
+  // ---------- 📊 pictures (plain SVG, so they also print sharply) ----------
+  function budPie(by, total, limit, size) {
+    const r = 70, C = 2 * Math.PI * r; let off = 0;
+    const parts = BUD_CATS.filter(([k]) => by[k] > 0);
+    const arcs = parts.map(([k, , , col]) => { const len = by[k] / total * C, s = `<circle r="${r}" cx="100" cy="100" fill="none" stroke="${col}" stroke-width="34" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`; off += len; return s; }).join("");
+    const pct = limit ? Math.round(total / limit * 100) : 0;
+    return `<svg viewBox="0 0 200 200" width="${size}" height="${size}" role="img" aria-label="Spending by category">
+      <circle r="${r}" cx="100" cy="100" fill="none" stroke="#efe8d8" stroke-width="34"/>${total ? arcs : ""}
+      <text x="100" y="${limit ? 94 : 104}" text-anchor="middle" font-size="22" font-weight="700" fill="#1E3A2F" font-family="Georgia,serif">${money(total)}</text>
+      ${limit ? `<text x="100" y="116" text-anchor="middle" font-size="11" fill="#6b7a70" font-family="sans-serif">of ${money(limit)} · ${pct}%</text>` : ""}</svg>`;
+  }
+  function budBars(by) {
+    const cats = BUD_CATS.filter(([k]) => by[k] > 0 || catLimit(k) > 0);
+    if (!cats.length) return `<p class="host-rem">Set a budget or add spending to see your bars.</p>`;
+    return cats.map(([k, i, l, col]) => { const s = by[k], b = catLimit(k), max = Math.max(s, b, 1), over = b && s > b;
+      return `<div class="bud-bar"><div class="bb-top"><span>${i} ${l}</span><b class="${over ? "over" : ""}">${money(s)}${b ? ` <small>of ${money(b)}</small>` : ""}</b></div>
+        <div class="bb-track"><i style="width:${Math.min(100, s / max * 100)}%;background:${over ? "#c0392b" : col}"></i>${b ? `<em style="left:${Math.min(100, b / max * 100)}%"></em>` : ""}</div>
+        ${b ? `<small class="bb-left ${over ? "over" : ""}">${over ? `${money(s - b)} over` : `${money(b - s)} left`}</small>` : ""}</div>`; }).join("");
+  }
+  function budLine(limit, w, h) {
+    // running total by purchase date (purchases without a date count from the start)
+    const rows = budRows(); if (!rows.length) return "";
+    const undated = rows.filter(r => !r.date).reduce((a, r) => a + r.amt, 0), byDay = {};
+    rows.filter(r => r.date).forEach(r => { byDay[r.date] = (byDay[r.date] || 0) + r.amt; });
+    let run = undated; const pts = Object.keys(byDay).sort().map(d => [d, run += byDay[d]]);
+    if (!pts.length || undated) pts.unshift([pts.length ? pts[0][0] : budToday(), undated]);
+    const y0 = new Date().getMonth() === 0 ? new Date().getFullYear() - 1 : new Date().getFullYear();
+    const start = Math.min(new Date(y0, 10, 1).getTime(), new Date(pts[0][0] + "T00:00").getTime()), end = Math.max(new Date(y0, 11, 31).getTime(), new Date(pts[pts.length - 1][0] + "T23:00").getTime());
+    const max = Math.max(limit || 0, ...pts.map(p => p[1]), 1) * 1.1, L = 44, R = 10, T = 12, B = 26;
+    const X = t => L + (Math.min(Math.max(t, start), end) - start) / (end - start) * (w - L - R), Y = v => T + (1 - v / max) * (h - T - B);
+    const xy = []; pts.forEach(([d, v], i) => { const x = X(new Date(d + "T12:00").getTime()); if (i) xy.push([x, xy[xy.length - 1][1]]); xy.push([x, Y(v)]); });   // steps up on each purchase day
+    const today = X(Date.now()); if (xy[xy.length - 1][0] < today) xy.push([today, xy[xy.length - 1][1]]);
+    const path = xy.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+    const area = path + ` L${xy[xy.length - 1][0].toFixed(1)} ${Y(0)} L${xy[0][0].toFixed(1)} ${Y(0)} Z`;
+    const months = [[new Date(y0, 10, 1), "Nov"], [new Date(y0, 11, 1), "Dec"], [new Date(y0, 11, 25), "🎄 25"]];
+    const grid = [0, 0.5, 1].map(f => `<line x1="${L}" x2="${w - R}" y1="${Y(max / 1.1 * f)}" y2="${Y(max / 1.1 * f)}" stroke="#eee6d6"/><text x="${L - 6}" y="${Y(max / 1.1 * f) + 4}" text-anchor="end" font-size="10" fill="#8a8a8a" font-family="sans-serif">${money(Math.round(max / 1.1 * f))}</text>`).join("");
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="Spending over time">${grid}
+      ${months.map(([d, l]) => `<text x="${X(d.getTime())}" y="${h - 8}" font-size="10" fill="#8a8a8a" font-family="sans-serif" text-anchor="${l === "Nov" ? "start" : "middle"}">${l}</text>`).join("")}
+      ${limit ? `<line x1="${L}" x2="${w - R}" y1="${Y(limit)}" y2="${Y(limit)}" stroke="#c9a227" stroke-width="2" stroke-dasharray="5 4"/><text x="${w - R}" y="${Y(limit) - 5}" text-anchor="end" font-size="10" fill="#a8861c" font-family="sans-serif">Budget</text>` : ""}
+      <path d="${area}" fill="rgba(179,38,46,.12)"/><path d="${path}" fill="none" stroke="#b3262e" stroke-width="2.5" stroke-linejoin="round"/>
+      <circle cx="${xy[xy.length - 1][0]}" cy="${xy[xy.length - 1][1]}" r="4.5" fill="#b3262e"/></svg>`;
+  }
+
+  // ---------- screens ----------
+  function renderBudget() {
+    budRecordDay();
+    const T = budTotals(), tab = budget.tab || "overview";
+    $("#budTabs").innerHTML = [["overview", "📊 Overview"], ["sheet", "🧾 Spreadsheet"], ["set", "🎯 Budgets"]].map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
+    $("#budBody").innerHTML = ({ overview: budOverview, sheet: budSheet, set: budSet })[tab](T);
+  }
+  function budOverview(T) {
+    const left = T.limit - T.spent, pct = T.limit ? T.spent / T.limit : 0, now = new Date();
+    const xmas = new Date(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear(), 11, 25), days = Math.max(0, Math.ceil((xmas - now) / 86400000));
+    const status = !T.limit ? "Set a budget on the 🎯 Budgets tab to track how much is left." : pct > 1 ? `⚠️ You're ${money(-left)} over budget.` : pct >= 0.9 ? `🟡 Almost there: ${money(left)} left.` : `✅ On track: ${money(left)} left${days ? `, about ${money(Math.floor(left / days))} a day until Christmas` : ""}.`;
+    const top = T.rows.slice().sort((a, b) => b.amt - a.amt)[0];
+    const perPerson = gifts.people.map(p => [p.name, sum(p.gifts, () => true)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 6), ppMax = Math.max(1, ...perPerson.map(x => x[1]));
+    const last = budget.past[budget.past.length - 1];
+    return `<div class="card bud-hero">${budPie(T.by, T.spent, T.limit, 210)}
+        <ul class="bud-legend">${BUD_CATS.filter(([k]) => T.by[k] > 0).map(([k, i, l, col]) => `<li><i style="background:${col}"></i><span>${i} ${l}</span><b>${money(T.by[k])}</b><small>${Math.round(T.by[k] / T.spent * 100)}%</small></li>`).join("") || `<li class="host-rem">Nothing spent yet. Mark gifts as bought, or add spending on the 🧾 Spreadsheet tab.</li>`}</ul>
+        <p class="bud-status ${pct > 1 ? "over" : pct >= 0.9 ? "warn" : ""}">${status}</p></div>
+      <div class="card pt-card"><h3>📈 Spending as the season goes</h3>${budLine(T.limit, 340, 170) || ""}<p class="host-rem">${T.rows.length ? "Your running total, stepping up on each day you spent. The gold dashed line is your budget." : "Your line appears as soon as you spend something."}</p></div>
+      <div class="card pt-card"><h3>🎯 Budget vs spent</h3>${budBars(T.by)}</div>
+      ${perPerson.length ? `<div class="card pt-card"><h3>🎁 Gifts by person</h3>${perPerson.map(([n, v]) => `<div class="bud-bar"><div class="bb-top"><span>${esc(n)}</span><b>${money(v)}</b></div><div class="bb-track"><i style="width:${v / ppMax * 100}%;background:#b3262e"></i></div></div>`).join("")}<p class="host-rem">Includes gift ideas you haven't bought yet.</p></div>` : ""}
+      <div class="card pt-card bud-facts">
+        ${top ? `<p>🏷️ <b>Biggest purchase:</b> ${esc(top.name)} · ${money(top.amt)}</p>` : ""}
+        ${T.plannedGifts ? `<p>💡 <b>Gift ideas not bought yet:</b> ${money(T.plannedGifts)}${T.limit ? ` · ${T.spent + T.plannedGifts > T.limit ? "buying them all would go over budget" : "they still fit in your budget"}` : ""}</p>` : ""}
+        ${last ? `<p>🗂️ <b>Last Christmas (${last.year}):</b> ${money(last.total)} in total · ${T.spent > last.total ? `${money(T.spent - last.total)} more so far this year` : `${money(last.total - T.spent)} less so far`}</p>` : ""}
+        <p>📄 Want it on your computer? Open the <b>🧾 Spreadsheet</b> tab and tap <b>Download spreadsheet</b>.</p></div>
+      <button type="button" class="btn btn-ghost btn-block pt-print" data-print="budget">🖨️ Print my budget report</button>`;
+  }
+  function budSheet(T) {
+    const f = budget.filter || "all", s = budget.sort || "date";
+    let rows = T.rows.filter(r => f === "all" || r.cat === f);
+    rows.sort(s === "amt" ? (a, b) => b.amt - a.amt : s === "cat" ? (a, b) => a.cat.localeCompare(b.cat) || b.amt - a.amt : (a, b) => (b.date || "").localeCompare(a.date || "") || b.amt - a.amt);
+    const total = rows.reduce((a, r) => a + r.amt, 0), N = NoelNative.isNative();
+    return `<form class="card pt-card org-ev-form" id="budAddForm" autocomplete="off"><h3>➕ Add spending</h3>
+        <input class="input" name="name" maxlength="60" placeholder="What was it? e.g. Tree lights" aria-label="What">
+        <div class="org-addr-row"><select class="input" name="cat" aria-label="Category">${BUD_CATS.filter(([k]) => k !== "gifts" && k !== "food" && k !== "giving").concat(BUD_CATS.filter(([k]) => k === "food")).map(([k, i, l]) => `<option value="${k}">${i} ${l}</option>`).join("")}</select>
+          <input class="input" name="amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="$" aria-label="Amount" style="max-width:96px"></div>
+        <input class="input" name="date" type="date" value="${budToday()}" aria-label="Date">
+        <button class="btn btn-green btn-block" type="submit">Add</button>
+        <p class="host-rem">Gifts come in when you mark them Bought in the Gift Tracker. Food and giving come from their own pages too.</p></form>
+      <div class="apps-filters">${[["all", "All"]].concat(BUD_CATS.filter(([k]) => T.by[k] > 0).map(([k, i, l]) => [k, i + " " + l])).map(([k, l]) => `<button type="button" class="chip${k === f ? " on" : ""}" data-bfilter="${k}">${l}</button>`).join("")}</div>
+      <div class="card bud-sheet"><table><thead><tr><th data-bsort="date">Date${s === "date" ? " ▾" : ""}</th><th data-bsort="cat">Item${s === "cat" ? " ▾" : ""}</th><th data-bsort="amt" class="num">Amount${s === "amt" ? " ▾" : ""}</th></tr></thead>
+        <tbody>${rows.map(r => { const c = budCat(r.cat); return `<tr><td class="bs-date">${r.date ? new Date(r.date + "T12:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "—"}</td>
+          <td><span class="bs-dot" style="background:${c[3]}"></span>${esc(r.name)}<small>${c[1]} ${c[2]}${r.src ? " · from " + r.src : ""}</small></td>
+          <td class="num">${money(r.amt)}${r.id ? `<button type="button" class="bs-del" data-bdel="${r.id}" aria-label="Remove">✕</button>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="3" class="host-rem">Nothing here yet.</td></tr>`}</tbody>
+        <tfoot><tr><td></td><td><b>Total${f === "all" ? "" : " · " + budCat(f)[2]}</b></td><td class="num"><b>${money(total)}</b></td></tr></tfoot></table></div>
+      <div class="card pt-card"><button type="button" class="btn btn-red btn-block" id="budCsv">📄 Download spreadsheet</button>
+        <p class="host-rem">${N ? "Choose AirDrop, Mail or Save to Files to get it onto your computer." : "It saves to your downloads."} It opens in Excel, Google Sheets or Numbers, with every purchase and the totals by category.</p></div>`;
+  }
+  function budSet(T) {
+    const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
+    return `<div class="card pt-card"><h3>💰 Total holiday budget</h3>${inp("total", budget.limit, T.catSum ? "Total of categories: " + money(T.catSum) : "$")}
+        <p class="host-rem">Leave it empty and Noël adds up your category budgets for you.</p></div>
+      <div class="card pt-card"><h3>🎯 Budget for each category</h3>
+        ${BUD_CATS.map(([k, i, l]) => `<div class="bud-set-row"><span>${i} ${l}${k === "gifts" ? "<small>Same as the Gift Tracker budget</small>" : k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div>
+      <div class="card pt-card bud-facts"><h3>💡 Budget tips</h3><p>• A common rule of thumb: about half for gifts, a quarter for food and entertaining, and the rest for everything else.</p><p>• Set your gift budget per person first, then add it up.</p><p>• Keep a little "oops" money (about 10%) for last-minute extras.</p></div>`;
+  }
+
+  // ---------- spreadsheet file & printed report ----------
+  function budCsv() {
+    const T = budTotals(), q = v => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`, n = v => (Math.round(v * 100) / 100).toFixed(2);
+    const lines = [["Date", "Category", "Item", "Amount (" + currency + ")", "From"].map(q).join(",")]
+      .concat(T.rows.slice().sort((a, b) => (a.date || "9").localeCompare(b.date || "9")).map(r => [r.date, budCat(r.cat)[2], r.name, n(r.amt), r.src || "Added by hand"].map(q).join(",")))
+      .concat(["", ["Category", "Spent", "Budget", "Left"].map(q).join(",")])
+      .concat(BUD_CATS.map(([k, , l]) => [l, n(T.by[k]), catLimit(k) ? n(catLimit(k)) : "", catLimit(k) ? n(catLimit(k) - T.by[k]) : ""].map(q).join(",")))
+      .concat([["TOTAL", n(T.spent), T.limit ? n(T.limit) : "", T.limit ? n(T.limit - T.spent) : ""].map(q).join(",")]);
+    return "﻿" + lines.join("\r\n");
+  }
+  function budgetDoc() {
+    budRecordDay(); const T = budTotals();
+    const css = `.bd{font:11pt/1.4 Georgia,serif;color:#222} .bd h1{font-size:22pt;margin:0;color:#1E3A2F} .bd .bd-sub{color:#8a6d3b;font:600 8.5pt sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:2px 0 12px}
+      .bd h2{font-size:13pt;color:#1E3A2F;border-bottom:1.5px solid #B8935A;margin:16px 0 6px;padding-bottom:2px} .bd .bd-top{display:flex;gap:24px;align-items:center} .bd table{border-collapse:collapse;width:100%}
+      .bd td,.bd th{padding:4px 6px;border-bottom:1px solid #e6e0d2;text-align:left;font-size:10pt} .bd th{background:#f4efe3;font:600 8pt sans-serif;text-transform:uppercase} .bd .num{text-align:right;white-space:nowrap}
+      .bd .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px} .bd .bd-foot{margin-top:14px;text-align:center;color:#999;font:8pt sans-serif}`;
+    const html = `<div class="bd"><h1>💰 Holiday Budget</h1><p class="bd-sub">${new Date().toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })} · spent ${money(T.spent)}${T.limit ? ` of ${money(T.limit)}` : ""}</p>
+      <div class="bd-top">${budPie(T.by, T.spent, T.limit, 200)}<table><tr><th>Category</th><th class="num">Spent</th><th class="num">Budget</th><th class="num">Left</th></tr>
+        ${BUD_CATS.filter(([k]) => T.by[k] || catLimit(k)).map(([k, i, l, col]) => `<tr><td><span class="dot" style="background:${col}"></span>${l}</td><td class="num">${money(T.by[k])}</td><td class="num">${catLimit(k) ? money(catLimit(k)) : "—"}</td><td class="num">${catLimit(k) ? money(catLimit(k) - T.by[k]) : "—"}</td></tr>`).join("")}
+        <tr><td><b>Total</b></td><td class="num"><b>${money(T.spent)}</b></td><td class="num"><b>${T.limit ? money(T.limit) : "—"}</b></td><td class="num"><b>${T.limit ? money(T.limit - T.spent) : "—"}</b></td></tr></table></div>
+      ${T.rows.length ? `<h2>Spending over time</h2>${budLine(T.limit, 680, 200)}` : ""}
+      <h2>Every purchase</h2><table><tr><th>Date</th><th>Category</th><th>Item</th><th class="num">Amount</th></tr>${T.rows.slice().sort((a, b) => (a.date || "0").localeCompare(b.date || "0")).map(r => `<tr><td>${r.date || "—"}</td><td>${budCat(r.cat)[2]}</td><td>${esc(r.name)}</td><td class="num">${money(r.amt)}</td></tr>`).join("")}</table>
+      <p class="bd-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p></div>`;
+    return { title: "Budget report", css, html, margin: 0.5, file: "Holiday-Budget-Report" };
+  }
+  // keep last year's total when the season is saved (called from Start fresh)
+  function budgetArchive(year) {
+    const T = budTotals(); budget.past = budget.past.filter(p => p.year !== year).concat({ year, total: Math.round(T.spent * 100) / 100, by: T.by });
+    budget.expenses = []; budget.daily = {}; saveBudget();
+  }
+
+  // ---------- taps & typing ----------
+  $("#view-budget").addEventListener("click", e => {
+    const t = e.target;
+    const tb = t.closest("[data-btab]"); if (tb) { budget.tab = tb.dataset.btab; saveBudget(); renderBudget(); return; }
+    const fl = t.closest("[data-bfilter]"); if (fl) { budget.filter = fl.dataset.bfilter; saveBudget(); renderBudget(); return; }
+    const so = t.closest("[data-bsort]"); if (so) { budget.sort = so.dataset.bsort; saveBudget(); renderBudget(); return; }
+    const del = t.closest("[data-bdel]"); if (del) { budget.expenses = budget.expenses.filter(x => x.id !== del.dataset.bdel); saveBudget(); renderBudget(); return; }
+    if (t.closest("#budCsv")) { NoelMedia.share(new Blob([budCsv()], { type: "text/csv" }), "Holiday-Budget.csv", "Holiday budget").then(h => { if (h === "saved") toast("📄 Spreadsheet saved to your downloads"); }).catch(() => {}); }
+  });
+  $("#view-budget").addEventListener("change", e => {
+    const t = e.target; if (t.dataset.blim == null) return;
+    const v = Math.max(0, parseFloat(t.value) || 0), k = t.dataset.blim;
+    if (k === "total") budget.limit = v; else if (k === "gifts") { gifts.budget = v; save("gifts", gifts); } else if (k === "food") { foodBudget.limit = v; save("foodBudget", foodBudget); } else budget.cats[k] = v;
+    saveBudget(); renderBudget(); toast("💰 Budget saved");
+  });
+  $("#view-budget").addEventListener("submit", e => {
+    e.preventDefault(); const f = e.target; if (f.id !== "budAddForm") return;
+    const name = f.name.value.trim(), amt = parseFloat(f.amt.value);
+    if (!name || !(amt > 0)) { toast("💰 Add what it was and how much"); return; }
+    budget.expenses.push({ id: uid(), cat: f.cat.value, name, amt: Math.round(amt * 100) / 100, date: f.date.value || budToday() });
+    saveBudget(); renderBudget(); toast(`💰 Added ${money(amt)}`);
+  });
+  budRecordDay();
+  /* @budget-end */
