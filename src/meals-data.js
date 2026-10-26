@@ -2146,6 +2146,169 @@ window.NOEL_MEALS = (function () {
       roast: 45, roastText: "40–45 min", rest: 10, batches, pies: Math.max(1, Math.ceil(g / 8)), dishes: Math.max(1, Math.ceil(f - 0.25)) };
   }
 
+  // 🌱 DIETARY ADD-ONS: vegan, gluten-free, dairy-free dishes for 1–5 people.
+  // They can be added to any dinner (they join its timeline, alarms and shopping list) or used on their own.
+  const squash = {
+    id: "squash", tab: "dietary", addon: true,
+    name: "Stuffed Holiday Squash", icon: "🎃",
+    blurb: "Acorn squash filled with wild rice, mushrooms, pecans and cranberries. Vegan, gluten-free and dairy-free.",
+    tags: "Vegan · Gluten-free · Dairy-free",
+    menu: [["Dietary add-on", ["Stuffed Holiday Squash (vegan, gluten-free, dairy-free)"]]],
+    drinks: [["Pairing", "A Pinot Noir, an oaked Chardonnay or sparkling apple cider. All love the nutty, earthy squash."]],
+    recipes: [{
+      id: "squash", course: "Dietary add-on", name: "Stuffed Holiday Squash",
+      prep: "20 min", cook: "50 min", yieldText: (f, p) => p.g + (p.g === 1 ? " serving" : " servings"),
+      note: () => "Vegan, gluten-free and dairy-free. Check that the vegetable broth is labelled gluten-free.",
+      ing: [
+        { head: "Squash" },
+        { q: 2, u: "", up: true, t: ["acorn squash, halved and seeds removed", "acorn squashes, halved and seeds removed"] },
+        { q: 2, u: "tbsp", t: "olive oil" },
+        { q: null, u: "", s: "n", t: "Salt and black pepper" },
+        { head: "Filling" },
+        { q: 1, u: "cup", t: "wild rice blend" },
+        { q: 2, u: "cup", t: "low-sodium vegetable broth" },
+        { q: 1, u: "tbsp", t: "olive oil" },
+        { q: 1, u: "cup", t: "yellow onion, diced" },
+        { q: 1, u: "cup", t: "celery, diced" },
+        { q: 1.5, u: "cup", t: "cremini mushrooms, chopped" },
+        { q: 3, u: "", t: ["garlic clove, minced", "garlic cloves, minced"] },
+        { q: 1, u: "tbsp", t: "fresh thyme leaves" },
+        { q: 1, u: "tbsp", t: "fresh rosemary, finely chopped" },
+        { q: 0.5, u: "cup", t: "pecans, chopped" },
+        { q: 0.5, u: "cup", t: "dried cranberries" },
+        { q: null, u: "", s: "n", t: "Salt, black pepper and fresh herbs to garnish" }
+      ],
+      steps: [
+        "Roast the squash: heat the oven to 400°F (200°C). Slice a thin sliver off the bottom of each squash half so it sits flat. Brush with olive oil, season with salt and pepper, and roast flesh-side down on parchment for 35–40 minutes, until tender.",
+        "Cook the rice: bring the wild rice and broth to a boil in a saucepan, cover, turn the heat to low and simmer 40–45 minutes, until tender.",
+        "Make the stuffing: heat the oil in a skillet over medium heat. Cook the onion and celery 5 minutes. Add the mushrooms, garlic, thyme and rosemary and cook 5–7 minutes.",
+        "Off the heat, stir in the cooked rice, pecans and cranberries. Season to taste.",
+        "Flip the squash halves flesh-side up and spoon in the stuffing.",
+        "Bake 10 minutes more to crisp the top. Garnish with fresh herbs."
+      ],
+      tip: "Sharing the oven with a main dinner? Squash is happy anywhere from 375°F to 425°F. Just check it a few minutes early or late. Half a squash per person makes a generous main."
+    }],
+    timeline(p) {
+      return [
+        { m: -75, icon: "🎃", text: "Stuffed squash: start the wild rice (simmers 40–45 minutes)", alarm: true },
+        { m: -60, icon: "🎃", text: "Stuffed squash: squash halves into the oven, cut side down (400°F, 35–40 minutes)", alarm: true },
+        { m: -28, icon: "🎃", text: "Stuffed squash: sauté the mushroom and herb stuffing", alarm: true },
+        { m: -20, icon: "🎃", text: "Stuffed squash: flip, fill with stuffing and bake 10 minutes more", alarm: true },
+        { m: -10, icon: "🎃", text: "Stuffed squash out. Garnish with fresh herbs", alarm: true },
+        { m: 0, icon: "🍽️", text: "Dinner is served!", alarm: false }
+      ];
+    },
+    ahead: () => [],
+    shop(f, p) {
+      const n = x => Math.max(1, Math.ceil(x - 1e-9)), up = (x, s = 1) => Math.ceil(x / s - 1e-9) * s, pl = (k, a, b) => k > 1 ? b : a;
+      const sq = Math.ceil(2 * f - 1e-9), on = n(f), mush = up(0.5 * f, 0.5), rice = n(f / 2.5), broth = n(2 * f / 3.8), pec = n(f / 2), cran = n(f / 3);
+      return [
+        ["Produce", [
+          [`${sq}`, pl(sq, "acorn squash", "acorn squashes"), sq * 2.5],
+          [`${on}`, pl(on, "yellow onion", "yellow onions"), on * 0.6],
+          ["1", "bunch celery", 3.5],
+          [`${fmtNum(mush)} lb`, "cremini mushrooms", mush * 5],
+          ["1", "head garlic", 1],
+          ["1", "bunch fresh rosemary", 3],
+          ["1", "bunch fresh thyme", 3]
+        ]],
+        ["Pantry", [
+          [`${rice} × 454 g`, pl(rice, "bag wild rice blend", "bags wild rice blend"), rice * 7],
+          [`${broth} × 900 ml`, "low-sodium vegetable broth (gluten-free)", broth * 3.5],
+          [`${pec} × 100 g`, pl(pec, "bag pecans", "bags pecans"), pec * 4],
+          [`${cran}`, pl(cran, "bag dried cranberries", "bags dried cranberries"), cran * 4],
+          ["", "olive oil, salt, black pepper", null]
+        ]]
+      ];
+    }
+  };
+
+  const shepherd = {
+    id: "shepherd", tab: "dietary", addon: true,
+    name: "Mushroom & Lentil Shepherd's Pie", icon: "🥧",
+    blurb: "Savoury lentil and vegetable filling under a golden mashed potato crust. Vegan, gluten-free and dairy-free.",
+    tags: "Vegan · Gluten-free · Dairy-free",
+    menu: [["Dietary add-on", ["Mushroom & Lentil Shepherd's Pie (vegan, gluten-free, dairy-free)"]]],
+    drinks: [["Pairing", "A Côtes du Rhône, a Merlot or a dark, non-alcoholic ginger beer."]],
+    recipes: [{
+      id: "shepherd", course: "Dietary add-on", name: "Mushroom & Lentil Shepherd's Pie",
+      prep: "25 min", cook: "45 min", rest: "10 min", yieldText: (f, p) => p.g + (p.g === 1 ? " serving" : " servings"),
+      note: (f, p) => (p.g <= 2 ? "For 1–2 people, bake it in individual ramekins (one each). " : p.g <= 3 ? "Use an 8×8-inch dish, or individual ramekins. " : "Use an 8×8 or 9×11-inch baking dish, or individual ramekins. ") + "Vegan, gluten-free and dairy-free. Check that the tamari and broth are labelled gluten-free.",
+      ing: [
+        { head: "Potato topping" },
+        { q: 2.5, u: "lb", t: "Russet or Yukon Gold potatoes, peeled and chopped" },
+        { q: 2, u: "tbsp", t: "olive oil" },
+        { q: 0.33, u: "cup", t: "unsweetened plant milk (almond, oat or soy)" },
+        { q: 0.5, u: "tsp", t: "garlic powder" },
+        { q: null, u: "", s: "n", t: "Salt and black pepper" },
+        { head: "Filling" },
+        { q: 1, u: "tbsp", t: "olive oil" },
+        { q: 1, u: "cup", t: "yellow onion, diced" },
+        { q: 1, u: "cup", t: "carrots, diced" },
+        { q: 2, u: "cup", t: "cremini mushrooms, chopped small" },
+        { q: 4, u: "", t: ["garlic clove, minced", "garlic cloves, minced"] },
+        { q: 1, u: "", up: true, t: ["can (15 oz) brown or green lentils, drained and rinsed", "cans (15 oz each) brown or green lentils, drained and rinsed"] },
+        { q: 1, u: "cup", t: "frozen peas" },
+        { q: 1, u: "cup", t: "frozen corn" },
+        { q: 2, u: "tbsp", t: "tomato paste" },
+        { q: 2, u: "tbsp", t: "gluten-free tamari or soy sauce" },
+        { q: 1, u: "tbsp", t: "balsamic vinegar" },
+        { q: 1, u: "tbsp", t: "fresh thyme leaves" },
+        { q: 1, u: "tsp", t: "fresh rosemary, finely chopped" },
+        { q: 2, u: "cup", t: "low-sodium vegetable broth" },
+        { q: 1, u: "tbsp", t: "cornstarch dissolved in 2 tbsp water" },
+        { q: null, u: "", s: "n", t: "Salt and black pepper, to taste" }
+      ],
+      steps: [
+        "Potato topping: boil the potatoes in salted water for 15–20 minutes, until fork-tender. Drain, then mash with the olive oil, plant milk, garlic powder, salt and pepper until smooth. Cover and set aside.",
+        "Heat the oven to 400°F (200°C). Heat the oil in a skillet over medium heat and cook the onion and carrots 6–8 minutes. Add the mushrooms and garlic and cook 5 minutes. Stir in the tomato paste and cook 1 minute.",
+        "Pour in the broth, tamari, balsamic, thyme and rosemary. Stir in the lentils, peas and corn and simmer 5 minutes.",
+        "Stir in the cornstarch mixture and keep stirring 1–2 minutes, until the gravy thickens. Remove from the heat.",
+        "Pour the filling into the baking dish (or divide among ramekins). Spread the mashed potatoes over the top, sealing them to the edges, and drag a fork across to make ridges.",
+        "Bake 20–25 minutes (15–20 for ramekins), until bubbling and the potato peaks are golden brown.",
+        "Let it cool 10 minutes before serving."
+      ],
+      tip: "Make-ahead: assemble it a day ahead, cover and refrigerate; add 10 minutes to the baking time. To freeze, wrap the unbaked pie well for up to 3 months, thaw overnight in the fridge and bake as above."
+    }],
+    timeline(p) {
+      return [
+        { m: -80, icon: "🥧", text: "Shepherd's pie: boil the potatoes (15–20 minutes)", alarm: true },
+        { m: -60, icon: "🥧", text: "Shepherd's pie: mash the potatoes, then make the lentil filling", alarm: true },
+        { m: -40, icon: "🥧", text: "Shepherd's pie: assemble and bake at 400°F (20–25 min; ramekins 15–20 min)", alarm: true },
+        { m: -15, icon: "🥧", text: "Shepherd's pie out to cool for 10 minutes", alarm: true },
+        { m: 0, icon: "🍽️", text: "Dinner is served!", alarm: false }
+      ];
+    },
+    ahead: () => [],
+    shop(f, p) {
+      const n = x => Math.max(1, Math.ceil(x - 1e-9)), up = (x, s = 1) => Math.ceil(x / s - 1e-9) * s, pl = (k, a, b) => k > 1 ? b : a;
+      const pot = up(2.5 * f, 0.5), on = n(f), car = n(2 * f), mush = up(0.5 * f, 0.5), lent = n(f), broth = n(2 * f / 3.8);
+      return [
+        ["Produce", [
+          [`${fmtNum(pot)} lb`, "Russet or Yukon Gold potatoes", pot * 1.1],
+          [`${on}`, pl(on, "yellow onion", "yellow onions"), on * 0.6],
+          [`${car}`, pl(car, "carrot", "carrots"), car * 0.4],
+          [`${fmtNum(mush)} lb`, "cremini mushrooms", mush * 5],
+          ["1", "head garlic", 1],
+          ["1", "bunch fresh thyme", 3],
+          ["1", "bunch fresh rosemary", 3]
+        ]],
+        ["Pantry & Freezer", [
+          [`${lent} × 15 oz`, pl(lent, "can brown or green lentils", "cans brown or green lentils"), lent * 2],
+          ["1", "bag frozen peas", 3],
+          ["1", "bag frozen corn", 3],
+          [`${broth} × 900 ml`, "low-sodium vegetable broth (gluten-free)", broth * 3.5],
+          ["1", "tube tomato paste", 2],
+          ["1", "bottle gluten-free tamari", 5],
+          ["1", "small carton unsweetened plant milk", 3],
+          ["", "balsamic vinegar, olive oil, cornstarch, garlic powder, salt, black pepper", null]
+        ]]
+      ];
+    }
+  };
+  // add-on sizes: 1–5 people
+  const addonPlan = base => guests => { const g = Math.min(5, Math.max(1, guests | 0)); return { g, f: g / base, pies: 1, dishes: 1, batches: 1 }; };
+
   // sizes for a turkey dinner: weight, roast time, rest, pies, dishes
   function turkeyPlan(guests) {
     const g = Math.min(20, Math.max(1, guests | 0));
@@ -2181,9 +2344,10 @@ window.NOEL_MEALS = (function () {
       lambcrown,
       porkcrown,
       vegan,
-      placeholder("diet1", "dietary", "Dietary Holiday Dinner", "🥗", "Recipes coming soon.")
+      squash,
+      shepherd
     ],
-    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan },
+    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5) },
     doneness: DONENESS,
     frac, hm, fmtNum
   };

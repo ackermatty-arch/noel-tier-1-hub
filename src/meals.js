@@ -12,16 +12,24 @@
   let mealTicks = load("mealTicks", {});             // shopping list ticks
   let mealPrices = load("mealPrices", {});           // the buyer's own prices, saved as a ratio of our estimate
   let foodBudget = load("foodBudget", { limit: 0, items: [] });   // 💵 separate from the gift budget
+  let mealAddons = load("mealAddons", {});           // 🌱 dietary add-ons switched on: { squash: true }
+  // add-ons that join a main dinner (none for an add-on viewed on its own)
+  const activeAddons = m => m.addon ? [] : MD.meals.filter(a => a.addon && mealAddons[a.id]).map(a => { const ac = cfgFor(a.id); return { a, c: ac, p: mealSizes(a, ac) }; });
+  const addonSig = m => activeAddons(m).map(x => x.a.id + ":" + x.c.guests).join(",");
   const cad = x => "$" + (Math.round(x * 100) / 100).toFixed(2);
   const cad0 = x => "$" + Math.round(x).toLocaleString();
   function pricedShop(m, f, p) {
     const pf = mealPrices[m.id] || {}, ticks = mealTicks[m.id] || {};
     let total = 0, left = 0;
-    const groups = m.shop(f, p).map(([dept, items]) => [dept, items.map(([q, name, est]) => {
-      const key = dept + "|" + name, price = est == null ? null : est * (pf[key] || 1);
+    const item = prefix => ([q, name, est], dept) => {
+      const key = prefix + dept + "|" + name, price = est == null ? null : est * (pf[key] || 1);
       if (price != null) { total += price; if (!ticks[key]) left += price; }
       return { q, name, key, est, price, on: !!ticks[key], edited: !!pf[key] };
-    })]);
+    };
+    const groups = m.shop(f, p).map(([dept, items]) => [dept, items.map(it => item("")(it, dept))]);
+    activeAddons(m).forEach(({ a, c: ac, p: ap }) => {   // 🌱 each add-on gets its own section
+      groups.push([`${a.icon} ${a.name} (${ac.guests} ${ac.guests === 1 ? "person" : "people"})`, a.shop(ap.f, ap).flatMap(([dept, items]) => items.map(it => item(a.id + "|")(it, dept)))]);
+    });
     return { groups, total, left };
   }
   const mealById = id => MD.meals.find(m => m.id === id);
@@ -33,8 +41,8 @@
     return `${y}-12-25`;
   }
   function cfgFor(id) {
-    const c = mealCfg[id] || {};
-    return { guests: Math.min(20, Math.max(1, +c.guests || 12)), date: c.date || nextXmasDate(), time: c.time || "17:00", doneness: c.doneness || "mediumrare", gf: !!c.gf };
+    const c = mealCfg[id] || {}, ad = (mealById(id) || {}).addon, mx = ad ? 5 : 20;
+    return { guests: Math.min(mx, Math.max(1, +c.guests || (ad ? 2 : 12))), date: c.date || nextXmasDate(), time: c.time || "17:00", doneness: c.doneness || "mediumrare", gf: !!c.gf };
   }
   const dinnerAt = c => { const [y, mo, d] = c.date.split("-").map(Number), [h, mi] = c.time.split(":").map(Number); return new Date(y, mo - 1, d, h, mi).getTime(); };
   const mclock = t => new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
@@ -70,16 +78,18 @@
       out.push({ k: "a" + i, t: d.getTime(), icon, text, alarm: true, ahead: true });
     });
     m.timeline(p).forEach((s, i) => out.push({ k: "s" + i, m: s.m, t: D + s.m * 60000, icon: s.icon, text: s.text, alarm: s.alarm, main: s.main }));
+    activeAddons(m).forEach(({ a, p: ap }) => a.timeline(ap).forEach((s, i) => { if (s.m !== 0) out.push({ k: "x" + a.id + i, m: s.m, t: D + s.m * 60000, icon: s.icon, text: s.text, alarm: s.alarm }); }));
     return out.sort((a, b) => a.t - b.t);
   }
 
   // ---- screens ----
   function renderMealHome() {
+    $("#mealDietNote").hidden = mealSel.tab !== "dietary";
     $("#mealTabs").innerHTML = MD.tabs.map(([k, l]) => `<button type="button" data-mtab="${k}" aria-pressed="${mealSel.tab === k}">${l}</button>`).join("");
     $("#mealList").innerHTML = MD.meals.filter(m => m.tab === mealSel.tab).map(m => `
       <button type="button" class="card meal-card${m.soon ? " soon" : ""}" data-meal="${m.id}">
         <span class="meal-ico">${m.icon}</span>
-        <span class="meal-txt"><b>${esc(m.name)}</b><small>${esc(m.blurb)}</small></span>
+        <span class="meal-txt"><b>${esc(m.name)}</b><small>${esc(m.blurb)}</small>${m.addon ? `<span class="addon-tag">${mealAddons[m.id] ? "✓ Added to your dinner" : "Add-on for 1–5 people"}</span>` : ""}</span>
         <span class="meal-go">${m.soon ? "Soon" : "›"}</span>
       </button>`).join("");
   }
@@ -121,22 +131,24 @@
         ).join("") + `</ul>`).join("") +
         `<div class="send-btns"><button type="button" class="btn btn-ghost" id="shopClear">Untick everything</button><button type="button" class="btn btn-ghost" id="priceReset">Reset prices</button></div>`;
     } else if (pane === "recipes") {
-      body = m.recipes.map(r => recipeHtml(r, f, p)).join("");
+      body = allRecipesHtml(m, f, p, false);
     } else {
-      body = m.menu.map(([course, items]) => `<h4 class="shop-dept">${esc(course)}</h4><ul class="menu-list">${items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`).join("") +
+      body = allMenu(m).map(([course, items]) => `<h4 class="shop-dept">${esc(course)}</h4><ul class="menu-list">${items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`).join("") +
         `<h4 class="shop-dept">Drink pairings</h4>` + m.drinks.map(([k, v]) => `<p class="drink"><b>${esc(k)}:</b> ${esc(v)}</p>`).join("");
     }
     $("#mealDetail").innerHTML = `
       <button type="button" class="meal-back" id="mealBack">‹ All meals</button>
       <h3 class="meal-title">${m.icon} ${esc(m.name)}</h3>
       <div class="card meal-setup">
-        <div class="meal-row"><span class="meal-lab">Guests</span>
+        <div class="meal-row"><span class="meal-lab">${m.addon ? "People (1–5)" : "Guests"}</span>
           <div class="stepper"><button type="button" data-g="-1" aria-label="Fewer guests">−</button><output id="mealGuests">${c.guests}</output><button type="button" data-g="1" aria-label="More guests">+</button></div></div>
         <div class="meal-row two">
           <label><span class="meal-lab">Dinner date</span><input class="input" type="date" id="mealDate" value="${c.date}"></label>
           <label><span class="meal-lab">Dinner time</span><input class="input" type="time" id="mealTime" value="${c.time}"></label></div>
         ${m.options && m.options.doneness ? `<span class="meal-lab">How do you like it?</span><div class="seg seg4 sub-tabs meal-done" role="group" aria-label="Doneness">${(Array.isArray(m.options.doneness) ? m.options.doneness : MD.doneness).map(([k, l]) => `<button type="button" data-done="${k}" aria-pressed="${c.doneness === k}">${l}</button>`).join("")}</div>` : ""}
         ${m.options && m.options.gf ? `<label class="meal-gf"><input type="checkbox" id="mealGf" ${c.gf ? "checked" : ""}> Make it gluten-free</label>` : ""}
+        ${m.addon ? `<label class="meal-gf addon-join"><input type="checkbox" data-addon="${m.id}" ${mealAddons[m.id] ? "checked" : ""}> Add this to my main dinner</label>
+          <p class="meal-addon-sub">${m.tags}. When it's added, it joins whichever dinner you plan (its steps, alarms, shopping and recipe go right in). No main dinner? Just set a time below and start its alarms on their own.</p>` : addonPickerHtml()}
         ${p.w || p.mainLabel ? `<p class="meal-sum">${p.icon} <b>${p.w ? `${p.w} lb ${p.meat}` : p.mainLabel}</b> · ${p.verb} about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.bigNote ? `<br><small>${p.bigNote}</small>` : ""}</p>` : ""}
         <div class="send-btns">
           ${active ? `<button type="button" class="btn btn-ghost" id="mealStop">⏹ Stop dinner alarms</button>` : `<button type="button" class="btn btn-red" id="mealStart">⏰ Start my dinner alarms</button>`}
@@ -146,9 +158,28 @@
       </div>
       <div class="seg seg4 sub-tabs" id="mealPanes">${panes.map(([k, l]) => `<button type="button" data-mpane="${k}" aria-pressed="${k === pane}">${l}</button>`).join("")}</div>
       <div class="card meal-body">${body}</div>`;
-    if (active && (mealPlan.guests !== c.guests || mealPlan.at !== D || (m.options && (mealPlan.doneness !== c.doneness || !!mealPlan.gf !== c.gf)))) $("#mealDetail .meal-on").innerHTML = "⚠️ You changed your dinner details. Tap <b>Stop</b>, then <b>Start</b> again to update the alarms.";
+    if (active && (mealPlan.guests !== c.guests || mealPlan.at !== D || (mealPlan.addons || "") !== addonSig(m) || (m.options && (mealPlan.doneness !== c.doneness || !!mealPlan.gf !== c.gf)))) $("#mealDetail .meal-on").innerHTML = "⚠️ You changed your dinner details. Tap <b>Stop</b>, then <b>Start</b> again to update the alarms.";
   }
 
+  // 🌱 the "dietary guests" picker shown on every main dinner
+  function addonPickerHtml() {
+    const list = MD.meals.filter(a => a.addon);
+    if (!list.length) return "";
+    return `<div class="meal-addons"><span class="meal-lab">Dietary guests?</span>
+      <p class="meal-addon-sub">Add a vegan, gluten-free, dairy-free dish for 1–5 people. It joins this dinner's timeline, alarms and shopping list.</p>` +
+      list.map(a => { const on = !!mealAddons[a.id], g = cfgFor(a.id).guests;
+        return `<div class="addon-row"><label><input type="checkbox" data-addon="${a.id}" ${on ? "checked" : ""}> ${a.icon} ${esc(a.name)}</label>` +
+          (on ? `<div class="stepper sm"><button type="button" data-ag="${a.id}:-1" aria-label="Fewer people">−</button><output>${g}</output><button type="button" data-ag="${a.id}:1" aria-label="More people">+</button></div>` : "") + `</div>`; }).join("") + `</div>`;
+  }
+  function allMenu(m) {
+    const extra = activeAddons(m).map(({ a, c: ac }) => `${a.name} (for ${ac.guests} ${ac.guests === 1 ? "guest" : "guests"}, vegan & gluten-free)`);
+    return extra.length ? [...m.menu, ["Dietary add-ons", extra]] : m.menu;
+  }
+  function allRecipesHtml(m, f, p, open) {
+    const o = h => open ? h.replace("<details", "<details open") : h;
+    return m.recipes.map(r => o(recipeHtml(r, f, p))).join("") +
+      activeAddons(m).map(({ a, p: ap }) => a.recipes.map(r => o(recipeHtml(r, ap.f, ap))).join("")).join("");
+  }
   function shopTotalHtml(ps, guests) {
     return `<div><span>Estimated total</span><b>${cad0(ps.total)}</b><small>about ${cad(ps.total / guests)} per guest</small></div>
       <div><span>Still to buy</span><b>${cad0(ps.left)}</b><small>items not ticked off</small></div>`;
@@ -168,7 +199,7 @@
     const c = cfgFor(m.id), D = dinnerAt(c), now = Date.now();
     if (D < now) { toast("🕰️ That dinner time has passed. Pick a time in the future."); return; }
     const steps = buildSteps(m, c).map(s => ({ k: s.k, t: s.t, icon: s.icon, text: s.text, alarm: s.alarm, fired: s.t <= now }));
-    mealPlan = { id: m.id, name: m.name, guests: c.guests, at: D, doneness: c.doneness, gf: c.gf, steps };
+    mealPlan = { id: m.id, name: m.name, guests: c.guests, at: D, doneness: c.doneness, gf: c.gf, addons: addonSig(m), steps };
     save("mealPlan", mealPlan); syncMealNative(); getAudio();
     const missed = steps.filter(s => s.fired).length;
     toast(missed ? `⏰ Dinner alarms set. ${missed} earlier step${missed > 1 ? "s were" : " was"} already past.` : "⏰ Dinner alarms are set!");
@@ -226,9 +257,9 @@
     const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} guests · dinner ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
       <h2>Timeline</h2><table class="pm-tl">${steps.map(s => { const d = dayName(s.t), h = d !== lastDay ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; lastDay = d; return h + `<tr><td>${s.ahead ? "All day" : mclock(s.t)}</td><td>☐ ${esc(s.text)}</td></tr>`; }).join("")}</table>
       <h2>Shopping list</h2>${(ps => `<p><b>Estimated total: ${cad0(ps.total)} CAD</b> (about ${cad(ps.total / c.guests)} per guest)</p>` + ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join(""))(pricedShop(m, f, p))}
-      <h2>Menu</h2>${m.menu.map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v.join(", "))}</p>`).join("")}
+      <h2>Menu</h2>${allMenu(m).map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v.join(", "))}</p>`).join("")}
       ${m.drinks.map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v)}</p>`).join("")}
-      <h2>Recipes</h2>${m.recipes.map(r => recipeHtml(r, f, p).replace("<details", "<details open")).join("")}
+      <h2>Recipes</h2>${allRecipesHtml(m, f, p, true)}
       <p class="pm-foot">Made with Noël Tier 1 Hub · Earth &amp; Wonder</p>`;
     $("#printArea").innerHTML = html;
     if (NoelNative.isNative()) {   // 📱 iPhone: open the print-ready page in the share sheet (Print is in the list)
@@ -267,8 +298,10 @@
     const card = t.closest("[data-meal]"); if (card) { openMeal(card.dataset.meal); return; }
     if (t.closest("#mealBack")) { mealSel.id = null; save("mealSel", mealSel); renderMeals(); return; }
     const m = mealSel.id && mealById(mealSel.id); if (!m) return;
+    const ag = t.closest("[data-ag]");
+    if (ag) { const [aid, d] = ag.dataset.ag.split(":"), ac = cfgFor(aid); ac.guests = Math.min(5, Math.max(1, ac.guests + +d)); mealCfg[aid] = ac; save("mealCfg", mealCfg); renderMealDetail(m); return; }
     const g = t.closest("[data-g]");
-    if (g) { const c = cfgFor(m.id); c.guests = Math.min(20, Math.max(1, c.guests + +g.dataset.g)); mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
+    if (g) { const c = cfgFor(m.id); c.guests = Math.min(m.addon ? 5 : 20, Math.max(1, c.guests + +g.dataset.g)); mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
     const dn = t.closest("[data-done]");
     if (dn) { const c = cfgFor(m.id); c.doneness = dn.dataset.done; mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
     const pn = t.closest("[data-mpane]"); if (pn) { mealSel.pane = pn.dataset.mpane; save("mealSel", mealSel); renderMealDetail(m); return; }
@@ -289,6 +322,10 @@
   $("#view-meals").addEventListener("change", e => {
     const m = mealSel.id && mealById(mealSel.id); if (!m) return;
     const t = e.target;
+    if (t.dataset.addon) {
+      mealAddons[t.dataset.addon] = t.checked; save("mealAddons", mealAddons); renderMealDetail(m);
+      toast(t.checked ? "🌱 Added. It now appears in your dinner's timeline, shopping list and recipes" : "Removed from your dinner"); return;
+    }
     if (t.id === "mealGf") { const c = cfgFor(m.id); c.gf = t.checked; mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
     if (t.id === "mealDate" || t.id === "mealTime") {
       const c = cfgFor(m.id); if (t.id === "mealDate" && t.value) c.date = t.value; if (t.id === "mealTime" && t.value) c.time = t.value;
