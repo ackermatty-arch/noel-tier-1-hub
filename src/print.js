@@ -98,7 +98,7 @@
     toast(`🖨️ Added to your Print Tray (${tray.length})`);
     const b = $("#trayBtn"); b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
   }
-  function trayBadge() { const b = $("#trayBtn"); b.hidden = !tray.length; $("#trayCount").textContent = tray.length; }
+  function trayBadge() { $("#trayCount").textContent = tray.length; $("#trayCount").hidden = !tray.length; }   // the tray button always shows; the number only when there's something in it
   function renderTray() {
     const items = tray.map(k => ({ k, d: printDoc(k) }));
     const on = items.filter(x => !x.d.error && !trayOff[x.k]), total = on.reduce((a, x) => a + estPages(x.d), 0), N = NoelNative.isNative();
@@ -133,7 +133,7 @@
       if (t.closest("#trayClear") && !confirm("Empty the Print Tray?")) return;
       const keep = t.closest("#trayClearDone") ? tray.filter(k => trayOff[k]) : [];
       tray = keep; trayOff = {}; trayDone = false; saveTray(); trayBadge(); renderTray();
-      if (!tray.length) { closeSheet("traySheet"); toast("🧹 Print Tray cleared"); }
+      if (!tray.length) toast("🧹 Print Tray cleared");
       return;
     }
     const pr = t.closest("#trayPrint"), sh = t.closest("#trayShare"); if (!pr && !sh) return;
