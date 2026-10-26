@@ -18,7 +18,18 @@
   const addonSig = m => activeAddons(m).map(x => x.a.id + ":" + x.c.guests).join(",") + (m.party ? JSON.stringify([cfgFor(m.id).mode, cfgFor(m.id).picks]) : "");
   const recipesOf = (m, p) => m.recipesFor ? m.recipesFor(p) : m.recipes;
   // 💱 currency: our estimates are Canadian; US prices are roughly ¾ of the Canadian figure
-  let currency = load("currency", "CAD");
+  // first time: pick from the phone's region (en-US → USD, en-CA/fr-CA → CAD); the person's own choice always wins
+  function guessCurrency() {
+    try {
+      const langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ""];
+      for (const l of langs) { const r = (String(l).split("-")[1] || "").toUpperCase(); if (r === "US") return "USD"; if (r === "CA") return "CAD"; }
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+      if (/^America\/(Toronto|Vancouver|Edmonton|Winnipeg|Halifax|Regina|St_Johns|Moncton|Whitehorse|Yellowknife|Iqaluit|Dawson_Creek|Glace_Bay|Goose_Bay|Swift_Current|Inuvik|Rankin_Inlet|Resolute|Cambridge_Bay|Atikokan|Creston|Fort_Nelson|Dawson)$/.test(tz)) return "CAD";
+      if (/^(America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Detroit|Boise|Indiana\/|Kentucky\/|North_Dakota\/)|Pacific\/Honolulu)/.test(tz)) return "USD";
+    } catch (e) {}
+    return "CAD";
+  }
+  let currency = load("currency", null) || guessCurrency();
   const FX = { CAD: 1, USD: 0.75 }, fx = () => FX[currency] || 1;
   const curName = () => currency === "USD" ? "US" : "Canadian";
   const currencySwitchHtml = () => `<div class="cur-switch" role="group" aria-label="Currency"><button type="button" data-cur="CAD" aria-pressed="${currency === "CAD"}">🇨🇦 CAD</button><button type="button" data-cur="USD" aria-pressed="${currency === "USD"}">🇺🇸 USD</button></div>`;
