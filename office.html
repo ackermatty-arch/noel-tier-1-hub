@@ -1124,7 +1124,14 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .meal-card .meal-go { font-size: 24px; color: var(--gold); font-weight: 800; }
 .meal-card.soon { opacity: .6; }
 .meal-card.soon .meal-go { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
-.meal-back { font-weight: 800; color: var(--pine); padding: 6px 0; font-size: 15px; }
+.meal-back { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; color: #fff; background: var(--pine); padding: 9px 16px 9px 12px; border-radius: 999px; font-size: 16px; box-shadow: 0 2px 8px rgba(20,60,40,.25); margin: 4px 0 6px; }
+.meal-back:active { transform: scale(.96); }
+.near-card { margin-top: 12px; padding: 12px; border-radius: 14px; background: #f3f7f2; border: 1px solid #d6e5d8; }
+.near-t { margin: 0 0 8px; font-weight: 800; color: var(--pine-dark); }
+.near-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.near-btn { text-align: left; padding: 10px 12px; border-radius: 12px; background: #fff; border: 1px solid #cfe0d2; font-family: inherit; font-weight: 700; font-size: 13.5px; line-height: 1.25; color: var(--pine-dark); box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.near-btn::after { content: " ›"; color: var(--gold); }
+.near-btn:active { transform: scale(.97); }
 .meal-title { font-family: var(--font-display); font-size: 24px; color: var(--pine-dark); margin: 6px 0 12px; }
 .meal-setup { padding: 16px; margin-bottom: 14px; }
 .meal-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
@@ -11502,7 +11509,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${+off.ev.budget && total > +off.ev.budget ? `<p class="org-warn">⚠️ ${money(total - off.ev.budget)} over the approved budget.</p>` : ""}
         <form class="org-ev-form" id="offCostForm" autocomplete="off"><div class="org-addr-row"><select class="input" name="type">${OFF_COSTS.map(c => `<option>${c}</option>`).join("")}</select><input class="input" name="cost" type="number" inputmode="decimal" min="0" placeholder="$" style="max-width:96px"></div>
           <input class="input" name="name" maxlength="50" placeholder="Vendor or item (optional), e.g. Sunrise Catering"><input class="input" name="contact" maxlength="60" placeholder="Phone or email (optional)">
-          <button class="btn btn-green btn-block" type="submit">➕ Add cost</button></form></div>
+          <button class="btn btn-green btn-block" type="submit">➕ Add cost</button></form>
+        ${offNear("Find vendors near me", [["🎧 DJs", "DJ for parties"], ["📸 Photo booth rentals", "photo booth rental"], ["🪑 Party rentals (tables, chairs)", "party rentals"], ["💐 Florists", "florist"]].concat(off.ev.who === "family" ? [["🎅 Santa for hire", "santa claus for hire"], ["🎈 Kids' entertainers", "kids party entertainer"]] : []))}</div>
       <div class="card pt-card"><h3>📝 Notes</h3>${fld("notes", "", "area", "Anything the approver should know, e.g. half-day Friday, partners welcome")}</div>
       <button type="button" class="btn btn-red btn-block" data-oftab="approval">📨 Next: send it for approval ›</button>`;
   }
@@ -11586,7 +11594,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         <ul class="host-list">${off.awards.map(a => `<li data-oa="${a.id}" class="aw-row"><span class="aw-t">🏆 ${esc(a.t)}</span><input class="input who-in" data-aww maxlength="30" placeholder="Winner" value="${esc(a.w || "")}"><button type="button" class="icon-btn" data-awdel aria-label="Remove">✕</button></li>`).join("")}</ul>
         ${unused.length ? `<div class="apps-filters" style="margin-top:10px">${unused.slice(0, 8).map(t => `<button type="button" class="chip" data-awadd="${esc(t)}">＋ ${esc(t)}</button>`).join("")}</div>` : ""}
         <form class="santa-kid-row" id="offAwardForm" autocomplete="off" style="margin-top:10px"><input class="input" name="t" maxlength="50" placeholder="Make up your own award"><button class="btn btn-green" type="submit">Add</button></form>
-        <button type="button" class="btn btn-red btn-block" data-print="awards" style="margin-top:10px">🖨️ Print the certificates</button></div>`;
+        <button type="button" class="btn btn-red btn-block" data-print="awards" style="margin-top:10px">🖨️ Print the certificates</button>
+        ${offNear("Trophies & prizes near me", [["🏆 Trophy & engraving shops", "trophy engraving shop"], ["🖨️ Print shops (for nicer paper)", "print shop"], ["🎁 Gift card & prize stores", "gift shop"]])}</div>`;
   }
   function awardsDoc() {
     const list = off.awards; if (!list.length) return { error: "🏆 Add some awards first" };
@@ -11860,7 +11869,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
           <div class="stepper sm"><button type="button" data-chv="-1">−</button><output>${o.votes || 0}</output><button type="button" data-chv="1">+</button></div><button type="button" class="icon-btn" data-chdel aria-label="Remove">✕</button></div>`).join("")}
         ${C.options.length < 4 ? `<form class="org-ev-form" id="chOptForm" autocomplete="off"><input class="input" name="name" maxlength="50" placeholder="Charity name, e.g. Local food bank"><input class="input" name="url" maxlength="120" placeholder="Website or donation page (optional)"><button class="btn btn-green btn-block" type="submit">➕ Add charity</button></form>` : ""}
         ${C.options.length > 1 ? `<div class="send-btns" style="margin-top:10px"><button type="button" class="btn btn-ghost" id="chVoteMail">✉️ Email the team to vote</button>${votes ? `<button type="button" class="btn btn-green" data-chpick="${top.id}">🏆 Choose ${esc(top.name)}</button>` : ""}</div>` : ""}
-        <p class="host-rem">📍 Find local causes: ${["food bank", "toy drive", "animal shelter", "winter coat drive", "women's shelter"].map(q => `<button type="button" class="chip" data-amap="${q}">${q}</button>`).join(" ")}</p>
+        ${offNear("Find local causes near me", [["🥫 Food banks", "food bank"], ["🧸 Toy drives", "toy drive"], ["🐾 Animal shelters", "animal shelter"], ["🧥 Winter coat drives", "winter coat drive"], ["🏠 Women's shelters", "women's shelter"]])}
         <p class="host-rem">✅ Check a charity is registered: <button type="button" class="classy-link" data-chopen="${currency === "USD" ? "https://www.irs.gov/charities-non-profits/search-for-tax-exempt-organizations" : "https://www.canada.ca/en/revenue-agency/services/charities-giving/charities-listings.html"}">${currency === "USD" ? "IRS charity search" : "Canada Revenue Agency charity list"} ›</button></p></div>
       <div class="card pt-card"><h3>💵 Donations</h3><div class="off-grid"><label class="off-f"><span class="meal-lab">Goal</span><input class="input" type="number" inputmode="decimal" min="0" data-ch="goal" value="${+C.goal || ""}" placeholder="$"></label>
         <label class="off-f"><span class="meal-lab">Company matches up to</span><input class="input" type="number" inputmode="decimal" min="0" data-ch="match" value="${+C.match || ""}" placeholder="$"></label></div>
@@ -11918,6 +11927,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }, true);
 
   /* ---------- 📍 WHERE: in the office, a rented venue, an outing or a home ---------- */
+  // 📍 one-tap "find near me": opens the phone's own Maps app (Noël never sees the location)
+  const offNear = (title, list, note) => `<div class="near-card"><p class="near-t">📍 ${title}</p><div class="near-btns">${list.map(([l, q]) => `<button type="button" class="near-btn" data-amap="${esc(q)}">${l}</button>`).join("")}</div>${note ? `<p class="host-rem" style="margin:6px 0 0">${note}</p>` : ""}</div>`;
   const OFF_WHERE = [
     ["office", "🏢", "In the office", "Cozy and personal, no venue costs.", [["🪑 Boardroom or meeting room", "Book the room, push the table to the wall for a buffet, and check how many people it holds."], ["🖥️ Around our desks", "Keep it relaxed: snacks on a shared table, each team decorates their pod, and a desk-hop for treats."], ["☕ Break room or kitchen", "Handy for food and fridge space. Plan a plug-in spot for slow cookers and a garbage station."], ["🛋️ Lobby or reception", "Great for mingling and photos. Put a sign on the door if clients might drop in."], ["🏬 The whole floor", "Spread out stations: food in one spot, games in another, a quiet corner for chatting."]]],
     ["venue", "🏛️", "Rent a venue", "More room, less clean-up. Best for bigger or family parties.", [["🍽️ Restaurant private room", "Ask about a set menu or appetizer package and the minimum spend."], ["🏛️ Banquet or community hall", "Lots of space for families. Check if outside food and decorations are allowed."], ["🏨 Hotel event room", "Catering, tables and clean-up are usually included."], ["🍺 Brewery, winery or café", "Relaxed and festive. Ask about non-alcoholic options and parking."]]],
@@ -11934,7 +11945,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${hint}
         ${w ? `<p class="fill-lab">${w[0] === "office" ? "Where in the office?" : "What kind?"}</p><div class="apps-filters">${w[4].map(([l]) => `<button type="button" class="chip${off.ev.spot === l ? " on" : ""}" data-ofspot="${esc(l)}">${l}</button>`).join("")}</div>
           ${spot ? `<p class="where-tip">💡 ${spot[1]}</p>` : ""}
-          ${w[0] === "venue" || w[0] === "outing" ? `<p class="host-rem">📍 Find nearby: ${(w[0] === "venue" ? ["event venue", "banquet hall", "restaurant private room"] : ["bowling", "skating rink", "escape room", "cooking class"]).map(q => `<button type="button" class="chip" data-amap="${q}">${q}</button>`).join(" ")}</p>
+          ${w[0] === "venue" || w[0] === "outing" ? `${w[0] === "venue" ? offNear("Find a venue near me", [["🏛️ Event venues", "event venue"], ["🏛️ Banquet halls", "banquet hall"], ["🍽️ Restaurant private rooms", "restaurant with private room"], ["🏨 Hotel event rooms", "hotel event space"], ["🏘️ Community halls", "community hall rental"], ["🍺 Breweries & wineries", "brewery event space"]], "Opens your Maps app. Call two or three and compare using the questions below.")
+              : offNear("Find an outing near me", [["🎳 Bowling", "bowling"], ["⛸️ Skating rinks", "skating rink"], ["🔐 Escape rooms", "escape room"], ["🍳 Cooking classes", "cooking class"], ["🎨 Paint & craft studios", "paint and sip studio"], ["🍽️ Restaurants for groups", "restaurant for large groups"]], "Ask about group rates and a food package.")}
             <details class="where-ask"><summary>✅ Questions to ask the venue</summary><ul class="host-list">${OFF_ASK.map((q, i) => `<li><label class="${(off.ask || {})[i] ? "on" : ""}"><input type="checkbox" data-ofask="${i}" ${(off.ask || {})[i] ? "checked" : ""}><span>${q}</span></label></li>`).join("")}</ul></details>` : ""}` : ""}</div>`;
   }
 
@@ -11971,7 +11983,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
           <li><b>🍰 Desserts</b><span>${dessert} pieces <small>(cookies, squares or cupcakes)</small></span></li>
           <li><b>🥤 Drinks</b><span>${drinks} drinks <small>(2–3 per person; add coffee and tea)</small></span></li></ul>
         <p class="host-rem">Choose one main (pizza or platters), not both, unless it's a long party. Order 1–2 weeks ahead in December, and ask for vegetarian and gluten-free portions.</p>
-        <button type="button" class="btn btn-ghost btn-block" data-oftab="event">💵 Add the quote to Costs &amp; vendors ›</button></div>` + offSuppliesHtml(P);
+        <button type="button" class="btn btn-ghost btn-block" data-oftab="event">💵 Add the quote to Costs &amp; vendors ›</button></div>
+        <div class="card pt-card">${offNear("Order from someone local", [["🍽️ Caterers", "catering"], ["🍕 Pizza delivery", "pizza delivery"], ["🥪 Sandwich & wrap platters", "sandwich platter catering"], ["🛒 Grocery store party platters", "grocery store party platters"], ["🧁 Bakeries", "bakery"], ["☕ Coffee for groups", "coffee catering"]], "Opens your Maps app with places near you. Most have menus and phone numbers right there.")}</div>` + offSuppliesHtml(P);
     }
     // 🍢 appetizers we make ourselves
     const X = offFoodPlan();
@@ -11980,7 +11993,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       <div class="card pt-card"><h3>✨ Tap to choose</h3><p class="host-rem">${off.ev.who === "family" ? "⭐ marks kid favourites." : "Mix warm, cold and one sweet bite."}</p>
         <div class="apps-filters">${(window.NOEL_APPS || []).map(r => `<button type="button" class="chip${X.picks.includes(r[1]) ? " on" : ""}" data-offapp="${esc(r[1])}">${X.picks.includes(r[1]) ? "✓ " : ""}${r[0]} ${esc(r[1])}${off.ev.who === "family" && KID_APPS.includes(r[1]) ? " ⭐" : ""}</button>`).join("")}</div></div>
       ${X.items.length || X.dItems.length ? `<div class="card pt-card"><h3>🧾 Your menu</h3><ul class="cat-list">${X.items.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.pieces} pieces · ${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}<small>💡 ${esc(i.row[3])}</small></span></li>`).join("")}${X.dItems.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}</span></li>`).join("")}</ul>
-        <div class="send-btns"><button type="button" class="btn btn-red" data-print="offfood">🖨️ Menu &amp; shopping list</button><button type="button" class="btn btn-ghost" id="offFoodCost">💵 Add ${cad0(X.sum)} to costs</button></div></div>` : ""}` + offSuppliesHtml(X.P);
+        <div class="send-btns"><button type="button" class="btn btn-red" data-print="offfood">🖨️ Menu &amp; shopping list</button><button type="button" class="btn btn-ghost" id="offFoodCost">💵 Add ${cad0(X.sum)} to costs</button></div></div>` : ""}
+      <div class="card pt-card">${offNear("Shop for it near me", [["🛒 Grocery stores", "grocery store"], ["📦 Warehouse & bulk stores", "warehouse club store"], ["🧁 Bakeries", "bakery"], ["🥤 Party supply stores", "party supply store"]], "Short on time? Grocery stores sell ready-made party platters too.")}</div>` + offSuppliesHtml(X.P);
   }
   // 🛒 one-tap shopping: pick a store, then tap what you need (opens that store's search)
   const OFF_SHOP = [["🍽️ Plates", "holiday party paper plates"], ["🧻 Napkins", "christmas party napkins"], ["🥤 Cups", "holiday party cups"], ["🍴 Cutlery", "disposable cutlery set"], ["🎄 Tablecloths", "christmas plastic tablecloths"], ["✨ Decorations", "christmas party decorations"], ["🎈 Balloons", "christmas balloons"], ["🏆 Prizes", "office party prizes"], ["🎁 Gift exchange gifts", "secret santa gifts under 25"], ["📸 Photo props", "christmas photo booth props"], ["🔥 Chafing dishes", "chafing dish buffet set"], ["🧊 Coolers & ice bins", "party ice bucket beverage tub"]];
@@ -11989,7 +12003,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     return `<div class="card pt-card"><h3>🛒 Buy party supplies online</h3><p class="host-rem">Pick a store, then tap what you need. It opens that store's search, great for ordering big-party supplies in bulk.</p>
       <div class="apps-filters">${st.map(([n]) => `<button type="button" class="chip${n === cur[0] ? " on" : ""}" data-ofstore="${esc(n)}">${esc(n)}</button>`).join("")}</div>
       <div class="apps-filters" style="margin-top:8px">${OFF_SHOP.map(([l, q]) => `<button type="button" class="chip fill-chip" data-ofbuy="${esc(q)}">${l}</button>`).join("")}</div>
-      <p class="host-rem">Order early in December. Shipping slows down closer to the party.</p></div>`;
+      <p class="host-rem">Order early in December. Shipping slows down closer to the party.</p>
+      ${offNear("Or pick it up today", [["🎈 Party supply stores", "party supply store"], ["💲 Dollar stores", "dollar store"]])}</div>`;
   }
   function offSuppliesHtml(P) {
     const n = P.all;
