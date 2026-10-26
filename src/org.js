@@ -1,0 +1,241 @@
+  /* ============================================================
+     📒 ORGANIZER: six simple tools, each on its own clean screen
+     ✉️ Card List (address book, sent/received, Avery 5160 labels, CSV)
+     📅 Calendar (your family's events + everything Noël has planned)
+     🙏 Thank-Yous · 📦 Packages · 💛 Giving · 🗂️ Spending at a glance
+     Everything stays encrypted on the phone.
+     ============================================================ */
+  let org = load("organizer", null) || {
+    view: "home", me: { name: "", street: "", city: "", region: "", postal: "" }, contacts: [],
+    members: [], events: [], calMonth: null, calDay: null, thanks: [], packages: [], giving: [], other: [], fired: {}
+  };
+  const saveOrg = () => save("organizer", org);
+  const orgYear = () => { const n = new Date(); return n.getMonth() === 0 && n.getDate() <= 15 ? n.getFullYear() - 1 : n.getFullYear(); };
+  const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const parseYmd = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const shortDate = s => parseYmd(s).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  const MEMBER_EMOJI = ["👧", "👦", "👩", "👨", "👵", "👴", "🧒", "👶", "🐶", "⭐"];
+  const ORG_TOOLS = [["cards", "✉️", "Card List"], ["cal", "📅", "Calendar"], ["thanks", "🙏", "Thank-Yous"], ["packages", "📦", "Packages"], ["giving", "💛", "Giving"], ["spend", "🗂️", "Spending"]];
+
+  function orgStatus(k) {
+    const y = orgYear();
+    if (k === "cards") { const on = org.contacts.filter(c => c.list !== false), sent = on.filter(c => (c.sent || {})[y]).length; return org.contacts.length ? `${sent} of ${on.length} sent` : "Add your list"; }
+    if (k === "cal") { const today = ymd(new Date()), up = calEvents().filter(e => e.date >= today).length; return up ? `${up} coming up` : "Add events"; }
+    if (k === "thanks") { const d = org.thanks.filter(t => t.done).length; return org.thanks.length ? `${d} of ${org.thanks.length} sent` : "After Christmas"; }
+    if (k === "packages") { const w = org.packages.filter(p => !p.arrived).length; return org.packages.length ? (w ? `${w} on the way` : "All arrived ✓") : "Track orders"; }
+    if (k === "giving") return org.giving.length ? `${money(org.giving.reduce((a, g) => a + (+g.amt || 0), 0))} given` : "Spread kindness";
+    return "Season totals";
+  }
+  function renderOrg() {
+    const v = org.view || "home";
+    $("#orgHome").hidden = v !== "home"; $("#orgTool").hidden = v === "home"; $("#view-org").classList.toggle("in-tool", v !== "home");
+    if (v === "home") {
+      $("#orgHome").innerHTML = `<div class="org-tiles">${ORG_TOOLS.map(([k, i, l]) => `<button type="button" class="org-tile" data-otool="${k}"><span class="ot-ico">${i}</span><b>${l}</b><small>${esc(orgStatus(k))}</small></button>`).join("")}</div>`;
+      return;
+    }
+    const t = ORG_TOOLS.find(x => x[0] === v);
+    $("#orgTool").innerHTML = `<button type="button" class="meal-back" data-otool="home">‹ Organizer</button><h3 class="meal-title">${t[1]} ${t[2]}</h3>` +
+      ({ cards: orgCardsHtml, cal: orgCalHtml, thanks: orgThanksHtml, packages: orgPackagesHtml, giving: orgGivingHtml, spend: orgSpendHtml })[v]();
+  }
+
+  // ---------- ✉️ Card list ----------
+  function orgCardsHtml() {
+    const y = orgYear(), on = org.contacts.filter(c => c.list !== false);
+    const sent = on.filter(c => (c.sent || {})[y]).length, got = org.contacts.filter(c => (c.recv || {})[y]).length;
+    const forgot = org.contacts.filter(c => (c.recv || {})[y] && !(c.sent || {})[y]);
+    return `<div class="card org-card"><div class="org-stats"><span><b>${on.length}</b> on the list</span><span><b>${sent}</b> sent</span><span><b>${got}</b> received</span></div>
+        ${forgot.length ? `<p class="org-warn">📬 Sent you a card, but not on your sent list yet: ${forgot.map(c => esc(c.name)).join(", ")}</p>` : ""}
+        <div class="send-btns"><button type="button" class="btn btn-red" id="orgLabels">🖨️ Mailing labels</button><button type="button" class="btn btn-ghost" id="orgReturn">🏠 Return labels</button><button type="button" class="btn btn-ghost" id="orgCsv">📄 Spreadsheet</button></div>
+        <p class="host-rem">Labels print on Avery 5160 sheets (30 per page). Print at 100% scale ("actual size"). A reminder comes on December 10 to get your cards in the mail.</p></div>
+      ${org.contacts.map(c => { const s = (c.sent || {})[y], r = (c.recv || {})[y], ls = (c.sent || {})[y - 1], lr = (c.recv || {})[y - 1];
+        return `<div class="card org-item" data-oc="${c.id}"><div class="host-row"><b>${esc(c.name)}</b><button class="icon-btn" data-odel aria-label="Remove">✕</button></div>
+          <p class="org-addr">${esc([c.street, [c.city, c.region].filter(Boolean).join(", "), c.postal].filter(Boolean).join(" · ")) || "<i>No address yet. Tap ✏️ to add it.</i>"}</p>
+          <div class="org-toggles"><button type="button" class="chip${s ? " on" : ""}" data-osent>${s ? "✓ " : ""}We sent</button><button type="button" class="chip${r ? " on" : ""}" data-orecv>${r ? "✓ " : ""}They sent us</button>
+            <button type="button" class="chip${c.list === false ? "" : " on"}" data-olist>${c.list === false ? "Not this year" : "📮 On this year's list"}</button><button type="button" class="chip" data-oedit>✏️</button></div>
+          ${ls || lr ? `<p class="host-rem">Last year: ${[ls && "we sent", lr && "they sent"].filter(Boolean).join(" · ")}</p>` : ""}
+          ${org.editing === c.id ? orgAddrForm(c, "oc") : ""}</div>`; }).join("")}
+      <form class="card add-task host-add" id="orgContactForm" autocomplete="off"><h3>➕ Add a household</h3><div class="santa-kid-row"><input class="input" name="cname" maxlength="50" placeholder="e.g. The Patel Family" aria-label="Name"><button class="btn btn-green" type="submit">Add</button></div></form>
+      <div class="card org-card"><h3>🏠 Your return address</h3>${orgAddrForm(org.me, "me")}</div>`;
+  }
+  const orgAddrForm = (c, kind) => `<div class="org-addr-form" data-oaf="${kind}">${kind === "me" ? `<input class="input" data-oa="name" maxlength="50" placeholder="Your name (e.g. The Smith Family)" value="${esc(c.name || "")}">` : ""}
+      <input class="input" data-oa="street" maxlength="80" placeholder="Street address" value="${esc(c.street || "")}">
+      <div class="org-addr-row"><input class="input" data-oa="city" maxlength="40" placeholder="City" value="${esc(c.city || "")}"><input class="input" data-oa="region" maxlength="20" placeholder="${currency === "USD" ? "State" : "Province"}" value="${esc(c.region || "")}"><input class="input" data-oa="postal" maxlength="12" placeholder="${currency === "USD" ? "ZIP" : "Postal code"}" value="${esc(c.postal || "")}"></div>
+      ${kind === "oc" ? `<button type="button" class="btn btn-green btn-block" data-odone>Done</button>` : ""}</div>`;
+  function labelLines(c) { return [c.name, c.street, [c.city, c.region].filter(Boolean).join(", ") + (c.postal ? "  " + c.postal : "")].filter(s => s && s.trim()); }
+  function printLabels(list, title) {
+    if (!list.length) { toast("✉️ Add some addresses first"); return; }
+    const css = `@page{size:letter;margin:0} body{margin:0} .lblsheet{width:8.5in;padding:.5in .1875in 0;box-sizing:border-box;display:grid;grid-template-columns:repeat(3,2.625in);column-gap:.125in;grid-auto-rows:1in;break-after:page}
+      .lbl{box-sizing:border-box;padding:.1in .18in;display:flex;flex-direction:column;justify-content:center;font:10.5pt/1.25 Georgia,serif;overflow:hidden} .lbl b{font-weight:600}`;
+    const pages = []; for (let i = 0; i < list.length; i += 30) pages.push(list.slice(i, i + 30));
+    const html = pages.map(pg => `<div class="lblsheet">${pg.map(l => `<div class="lbl">${l.map((x, i) => i ? `<span>${esc(x)}</span>` : `<b>${esc(x)}</b>`).join("")}</div>`).join("")}</div>`).join("");
+    if (NoelNative.isNative()) { NoelMedia.share(new Blob([`<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${html}</body></html>`], { type: "text/html" }), title + ".html", title).catch(() => {}); return; }
+    $("#printArea").innerHTML = `<style>${css} #printArea{font:inherit!important}</style>` + html; setTimeout(() => window.print(), 50);
+  }
+
+  // ---------- 📅 Calendar ----------
+  function calEvents() {
+    const out = org.events.map(e => Object.assign({ mine: true }, e));
+    const add = (date, icon, title, time) => out.push({ date, icon, title, time: time || "", auto: true });
+    const D = hostDinner(), dd = new Date(D);
+    add(ymd(dd), "🍽️", mealPlan && !mealPlan.party ? mealPlan.name : "Christmas dinner", `${String(dd.getHours()).padStart(2, "0")}:${String(dd.getMinutes()).padStart(2, "0")}`);
+    add(`${orgYear()}-12-25`, "🎄", "Christmas Day"); add(`${orgYear()}-12-31`, "🥂", "New Year's Eve");
+    if (mealPlan && mealPlan.party) { const p = new Date(mealPlan.at); add(ymd(p), "🎉", "New Year's Eve party", `${String(p.getHours()).padStart(2, "0")}:${String(p.getMinutes()).padStart(2, "0")}`); }
+    host.guests.forEach(g => { if (g.arrive) { const t = new Date(g.arrive); add(ymd(t), g.pickup ? "🚗" : "🚪", (g.pickup ? "Pick up " : "") + g.name + (g.pickup ? "" : " arrive"), g.arrive.slice(11, 16)); } });
+    const cleanDays = {}; HOST_CLEAN.forEach(([id, days]) => { if (!host.clean[id] && days) { const k = ymd(new Date(atDay(D, days, 10))); cleanDays[k] = (cleanDays[k] || 0) + 1; } });
+    Object.entries(cleanDays).forEach(([k, n]) => add(k, "🧽", `Cleaning day: ${n} ${n === 1 ? "task" : "tasks"} on your Hosting list`));
+    org.packages.forEach(p => { if (p.eta && !p.arrived) add(p.eta, "📦", p.item + " arrives"); });
+    add(`${orgYear()}-12-10`, "✉️", "Mail your Christmas cards");
+    return out.sort((a, b) => (a.date + (a.time || "99")).localeCompare(b.date + (b.time || "99")));
+  }
+  function orgCalHtml() {
+    const today = new Date(), month = org.calMonth || calDefault();
+    const m0 = parseYmd(month), y = m0.getFullYear(), mo = m0.getMonth(), first = new Date(y, mo, 1).getDay(), days = new Date(y, mo + 1, 0).getDate();
+    const evs = calEvents(), byDay = {}; evs.forEach(e => { (byDay[e.date] = byDay[e.date] || []).push(e); });
+    const sel = org.calDay || ymd(today), cells = [];
+    for (let i = 0; i < first; i++) cells.push(`<span class="cal-cell blank"></span>`);
+    for (let d = 1; d <= days; d++) { const k = ymd(new Date(y, mo, d)), list = byDay[k] || [];
+      cells.push(`<button type="button" class="cal-cell${k === sel ? " sel" : ""}${k === ymd(today) ? " today" : ""}" data-oday="${k}"><span>${d}</span><i>${list.slice(0, 3).map(e => e.mine ? memberEmoji(e.who) : e.icon).join("")}</i></button>`); }
+    const dayList = byDay[sel] || [];
+    return `<div class="card org-card cal-card"><div class="cal-head"><button type="button" class="icon-btn" data-omonth="-1" aria-label="Previous month">‹</button><b>${m0.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</b><button type="button" class="icon-btn" data-omonth="1" aria-label="Next month">›</button></div>
+        <div class="cal-grid">${["S", "M", "T", "W", "T", "F", "S"].map(d => `<span class="cal-dow">${d}</span>`).join("")}${cells.join("")}</div></div>
+      <div class="card org-card"><h3>${shortDate(sel)}</h3>
+        ${dayList.length ? `<ul class="cal-list">${dayList.map(e => `<li class="${e.auto ? "auto" : ""}" ${e.mine ? `data-oev="${e.id}"` : ""}><span class="cl-time">${e.time ? mclock(parseYmd(e.date).setHours(...e.time.split(":").map(Number))) : "All day"}</span><span class="cl-txt">${e.mine ? memberEmoji(e.who) : e.icon} ${esc(e.title)}${e.notes ? `<small>${esc(e.notes)}</small>` : ""}${e.auto ? `<small>From your Noël plans</small>` : ""}</span>${e.mine ? `<button class="icon-btn" data-odelev aria-label="Remove">✕</button>` : ""}</li>`).join("")}</ul>` : `<p class="host-rem">Nothing planned yet.</p>`}
+        <form id="orgEventForm" class="org-ev-form" autocomplete="off">
+          <input class="input" name="title" maxlength="60" placeholder="e.g. School concert" aria-label="Event">
+          <div class="org-addr-row"><input class="input" name="time" type="time" aria-label="Time"><select class="input" name="who" aria-label="Who"><option value="">Everyone</option>${org.members.map(m => `<option value="${m.id}">${m.emoji} ${esc(m.name)}</option>`).join("")}</select></div>
+          <input class="input" name="notes" maxlength="80" placeholder="Notes, e.g. bring 24 cupcakes, wear red" aria-label="Notes">
+          <label class="host-check"><input type="checkbox" name="remind" checked> 🔔 Remind me the evening before${" "}and 1 hour before</label>
+          <button class="btn btn-green btn-block" type="submit">➕ Add to ${shortDate(sel)}</button></form></div>
+      <div class="card org-card"><h3>👪 Family members</h3><div class="apps-filters">${org.members.map(m => `<span class="chip on">${m.emoji} ${esc(m.name)} <button type="button" class="chip-x" data-odelmem="${m.id}" aria-label="Remove ${esc(m.name)}">✕</button></span>`).join("")}</div>
+        <form id="orgMemberForm" class="org-addr-row" autocomplete="off"><select class="input" name="emoji" aria-label="Emoji">${MEMBER_EMOJI.map(e => `<option>${e}</option>`).join("")}</select><input class="input" name="mname" maxlength="20" placeholder="Name" aria-label="Name"><button class="btn btn-green" type="submit">Add</button></form>
+        <p class="host-rem">Each person's emoji shows on their days, so you can see whose event it is at a glance.</p></div>`;
+  }
+  const calDefault = () => { const n = new Date(), m = n.getMonth(); return m === 10 || m === 11 || m === 0 ? ymd(new Date(n.getFullYear(), m, 1)) : ymd(new Date(orgYear(), 11, 1)); };
+  const memberEmoji = id => (org.members.find(m => m.id === id) || {}).emoji || "📌";
+
+  // ---------- 🙏 Thank-yous ----------
+  function orgThanksHtml() {
+    const done = org.thanks.filter(t => t.done).length;
+    return `<div class="card org-card"><p class="host-rem">${org.thanks.length ? `${done} of ${org.thanks.length} thank-yous sent${done === org.thanks.length ? " 🎉" : ""}` : "Jot down gifts as they're opened, then tick each thank-you as it's sent."}</p>
+      <ul class="host-list">${org.thanks.map(t => `<li data-ot="${t.id}"><label class="${t.done ? "on" : ""}"><input type="checkbox" data-otdone ${t.done ? "checked" : ""}><span><b>${esc(t.from)}</b>${t.gift ? ` · ${esc(t.gift)}` : ""}</span></label><button class="icon-btn" data-odel aria-label="Remove">✕</button></li>`).join("")}</ul>
+      <form id="orgThanksForm" class="org-ev-form" autocomplete="off"><div class="org-addr-row"><input class="input" name="from" list="orgNames" maxlength="40" placeholder="From" aria-label="From"><input class="input" name="gift" maxlength="50" placeholder="Gift" aria-label="Gift"></div><button class="btn btn-green btn-block" type="submit">➕ Add</button></form>
+      <datalist id="orgNames">${[...new Set(org.contacts.map(c => c.name).concat(gifts.people.map(p => p.name)))].map(n => `<option value="${esc(n)}">`).join("")}</datalist></div>`;
+  }
+  // ---------- 📦 Packages ----------
+  function orgPackagesHtml() {
+    const today = ymd(new Date());
+    return `<div class="card org-card"><p class="host-rem">Track online orders so nothing goes missing. You'll get a nudge on each delivery day, plus a reminder in mid-December to check stores' last order dates for Christmas delivery.</p></div>
+      ${org.packages.map(p => { const late = p.eta && p.eta < today && !p.arrived;
+        return `<div class="card org-item${p.arrived ? " done" : ""}" data-op="${p.id}"><div class="host-row"><b>${esc(p.item)}</b><button class="icon-btn" data-odel aria-label="Remove">✕</button></div>
+          <p class="org-addr">${esc(p.store || "")}${p.eta ? ` · expected ${shortDate(p.eta)}` : ""}${p.track ? ` · #${esc(p.track)}` : ""}</p>
+          ${late ? `<p class="org-warn">⚠️ Running late. Check the tracking or contact the store.</p>` : ""}
+          <button type="button" class="chip${p.arrived ? " on" : ""}" data-oarrived>${p.arrived ? "✓ Arrived" : "Mark as arrived"}</button></div>`; }).join("")}
+      <form class="card add-task org-ev-form" id="orgPackageForm" autocomplete="off"><h3>➕ Add an order</h3>
+        <input class="input" name="item" maxlength="60" placeholder="What did you order?" aria-label="Item">
+        <div class="org-addr-row"><input class="input" name="store" maxlength="30" placeholder="Store" aria-label="Store"><input class="input" name="eta" type="date" aria-label="Expected delivery"></div>
+        <input class="input" name="track" maxlength="40" placeholder="Tracking number (optional)" aria-label="Tracking number">
+        <button class="btn btn-green btn-block" type="submit">Add</button></form>`;
+  }
+  // ---------- 💛 Giving ----------
+  const GIVE_IDEAS = ["Food bank donation", "Toy drive", "Winter coat drive", "Animal shelter", "Volunteer shift", "Sponsor a family", "Gift for a neighbour in need"];
+  function orgGivingHtml() {
+    const total = org.giving.reduce((a, g) => a + (+g.amt || 0), 0);
+    return `<div class="card org-card"><div class="org-stats"><span><b>${org.giving.length}</b> acts of kindness</span><span><b>${money(total)}</b> given</span></div>
+        <p class="host-rem">Tap an idea to add it, or type your own.</p><div class="apps-filters">${GIVE_IDEAS.map(i => `<button type="button" class="chip" data-ogive="${esc(i)}">＋ ${esc(i)}</button>`).join("")}</div></div>
+      <div class="card org-card"><ul class="host-list">${org.giving.map(g => `<li data-og="${g.id}"><label class="${g.done ? "on" : ""}"><input type="checkbox" data-ogdone ${g.done ? "checked" : ""}><span>${esc(g.what)}${+g.amt ? ` · ${money(+g.amt)}` : ""}</span></label><button class="icon-btn" data-odel aria-label="Remove">✕</button></li>`).join("") || `<li class="host-rem">Nothing yet.</li>`}</ul>
+        <form id="orgGiveForm" class="org-addr-row" autocomplete="off" style="margin-top:10px"><input class="input" name="what" maxlength="50" placeholder="e.g. Toys for the hospital" aria-label="What"><input class="input" name="amt" type="number" inputmode="decimal" min="0" placeholder="$" aria-label="Amount" style="max-width:80px"><button class="btn btn-green" type="submit">Add</button></form></div>`;
+  }
+  // ---------- 🗂️ Spending ----------
+  function orgSpendHtml() {
+    const gt = giftTotals(), food = foodBudget.items.reduce((a, x) => a + (+x.amt || 0), 0), give = org.giving.reduce((a, g) => a + (+g.amt || 0), 0), other = org.other.reduce((a, x) => a + (+x.amt || 0), 0);
+    const rows = [["🎁 Gifts", gt.planned, gt.budget], ["🍽️ Food", food, +foodBudget.limit || 0], ["💛 Giving", give, 0], ["🎄 Other", other, 0]], total = rows.reduce((a, r) => a + r[1], 0), max = Math.max(1, ...rows.map(r => Math.max(r[1], r[2])));
+    return `<div class="card org-card"><div class="org-total"><span>Season total</span><b>${money(total)}</b></div>
+        ${rows.map(([l, v, b]) => `<div class="spend-row"><span>${l}</span><div class="spend-bar"><i style="width:${v / max * 100}%"></i>${b ? `<em style="left:${b / max * 100}%" title="Budget"></em>` : ""}</div><b>${money(v)}</b></div>`).join("")}
+        <p class="host-rem">Gifts and food come from your Gift Tracker and Food budget${gt.budget || foodBudget.limit ? "; the gold line marks each budget" : ""}.</p></div>
+      <div class="card org-card"><h3>🎄 Other holiday costs</h3><ul class="host-list">${org.other.map(x => `<li data-oo="${x.id}"><label><span>${esc(x.name)} · ${money(+x.amt || 0)}</span></label><button class="icon-btn" data-odel aria-label="Remove">✕</button></li>`).join("") || `<li class="host-rem">Decorations, travel, outfits, entertaining…</li>`}</ul>
+        <form id="orgOtherForm" class="org-addr-row" autocomplete="off" style="margin-top:10px"><input class="input" name="name" maxlength="40" placeholder="e.g. Decorations" aria-label="What"><input class="input" name="amt" type="number" inputmode="decimal" min="0" placeholder="$" aria-label="Amount" style="max-width:80px"><button class="btn btn-green" type="submit">Add</button></form></div>`;
+  }
+
+  // ---------- reminders (calendar events, deliveries, card mailing, order cut-off) ----------
+  function orgReminders() {
+    const out = [], y = orgYear(), add = (k, t, icon, text) => out.push({ k, t, icon, text });
+    org.events.forEach(e => {
+      if (!e.remind) return; const day = parseYmd(e.date);
+      const eve = new Date(day); eve.setDate(eve.getDate() - 1); eve.setHours(18, 30, 0, 0);
+      add("e1-" + e.id, eve.getTime(), memberEmoji(e.who), `Tomorrow: ${e.title}${e.notes ? ` (${e.notes})` : ""}`);
+      if (e.time) { const [h, m] = e.time.split(":").map(Number); const t = new Date(day); t.setHours(h, m, 0, 0); add("e2-" + e.id, t.getTime() - 3600000, memberEmoji(e.who), `In 1 hour: ${e.title}`); }
+    });
+    org.packages.forEach(p => { if (p.eta && !p.arrived) { const t = parseYmd(p.eta); t.setHours(9, 0, 0, 0); add("p-" + p.id, t.getTime(), "📦", `${p.item} should arrive today${p.store ? ` from ${p.store}` : ""}`); } });
+    if (org.contacts.length) add("cards-" + y, new Date(y, 11, 10, 10).getTime(), "✉️", "Time to mail your Christmas cards! Check the post office's holiday cut-off dates.");
+    if (org.packages.length) add("cutoff-" + y, new Date(y, 11, 12, 10).getTime(), "📦", "Ordering gifts online? Check each store's last order date for Christmas delivery.");
+    return out.sort((a, b) => a.t - b.t);
+  }
+  function orgSync() {
+    if (!NoelNative.isNative()) return;
+    NoelNative.scheduleList(7000, 8000, orgReminders().filter(r => !org.fired[r.k] && r.t > Date.now()).map(r => ({ t: r.t, title: `${r.icon} ${r.text}`, body: "Noël Tier 1 Hub" })));
+  }
+  function orgTick() {
+    const now = Date.now(), due = orgReminders().filter(r => !org.fired[r.k] && r.t <= now);
+    if (!due.length) return; due.forEach(r => { org.fired[r.k] = 1; }); saveOrg();
+    const fresh = due.filter(r => now - r.t < 10 * 60000); if (fresh.length) triggerAlert(fresh.map(r => ({ id: "org:" + r.k })));
+  }
+  setInterval(orgTick, 15000);
+  function orgAlertItem(id) { if (!String(id).startsWith("org:")) return null; const r = orgReminders().find(x => "org:" + x.k === id); return r ? { icon: r.icon, name: r.text } : null; }
+
+  // ---------- taps & typing ----------
+  const orgChanged = () => { saveOrg(); renderOrg(); orgSync(); };
+  $("#view-org").addEventListener("click", e => {
+    const t = e.target, y = orgYear();
+    const tool = t.closest("[data-otool]"); if (tool) { org.view = tool.dataset.otool; org.editing = null; saveOrg(); renderOrg(); window.scrollTo({ top: 0 }); return; }
+    if (t.closest("#orgLabels")) { printLabels(org.contacts.filter(c => c.list !== false && c.street).map(labelLines), "Christmas-Card-Labels"); return; }
+    if (t.closest("#orgReturn")) { const l = labelLines(org.me); if (l.length < 2) { toast("🏠 Fill in your return address below first"); return; } printLabels(Array(30).fill(l), "Return-Address-Labels"); return; }
+    if (t.closest("#orgCsv")) {
+      const q = v => `"${String(v || "").replace(/"/g, '""')}"`;
+      const csv = ["Name,Street,City,Province/State,Postal/ZIP,Sent " + y + ",Received " + y].concat(org.contacts.map(c => [c.name, c.street, c.city, c.region, c.postal, (c.sent || {})[y] ? "yes" : "", (c.recv || {})[y] ? "yes" : ""].map(q).join(","))).join("\r\n");
+      NoelMedia.share(new Blob([csv], { type: "text/csv" }), "Christmas-Card-List.csv", "Christmas card list").then(h => { if (h === "saved") toast("📄 Spreadsheet saved to your downloads"); }).catch(() => {}); return;
+    }
+    const mo = t.closest("[data-omonth]"); if (mo) { const m0 = parseYmd(org.calMonth || calDefault()); org.calMonth = ymd(new Date(m0.getFullYear(), m0.getMonth() + +mo.dataset.omonth, 1)); saveOrg(); renderOrg(); return; }
+    const day = t.closest("[data-oday]"); if (day) { org.calDay = day.dataset.oday; saveOrg(); renderOrg(); return; }
+    const dm = t.closest("[data-odelmem]"); if (dm) { org.members = org.members.filter(m => m.id !== dm.dataset.odelmem); orgChanged(); return; }
+    const dev = t.closest("[data-odelev]"); if (dev) { org.events = org.events.filter(x => x.id !== dev.closest("[data-oev]").dataset.oev); orgChanged(); return; }
+    const gi2 = t.closest("[data-ogive]"); if (gi2) { org.giving.push({ id: uid(), what: gi2.dataset.ogive, amt: 0, done: false }); orgChanged(); toast("💛 Added"); return; }
+    const c = t.closest("[data-oc]"), ct = c && org.contacts.find(x => x.id === c.dataset.oc);
+    if (ct) {
+      if (t.closest("[data-osent]")) { ct.sent = ct.sent || {}; ct.sent[y] = !ct.sent[y]; }
+      else if (t.closest("[data-orecv]")) { ct.recv = ct.recv || {}; ct.recv[y] = !ct.recv[y]; }
+      else if (t.closest("[data-olist]")) ct.list = ct.list === false;
+      else if (t.closest("[data-oedit]")) org.editing = org.editing === ct.id ? null : ct.id;
+      else if (t.closest("[data-odone]")) org.editing = null;
+      else if (t.closest("[data-odel]")) { if (!confirm(`Remove ${ct.name}?`)) return; org.contacts = org.contacts.filter(x => x !== ct); }
+      else return;
+      orgChanged(); return;
+    }
+    const pk = t.closest("[data-op]"), p = pk && org.packages.find(x => x.id === pk.dataset.op);
+    if (p) { if (t.closest("[data-oarrived]")) { p.arrived = !p.arrived; if (p.arrived) toast("📦 Arrived!"); } else if (t.closest("[data-odel]")) org.packages = org.packages.filter(x => x !== p); else return; orgChanged(); return; }
+    if (t.closest("[data-odel]")) {
+      const th = t.closest("[data-ot]"), gv = t.closest("[data-og]"), ot = t.closest("[data-oo]");
+      if (th) org.thanks = org.thanks.filter(x => x.id !== th.dataset.ot);
+      if (gv) org.giving = org.giving.filter(x => x.id !== gv.dataset.og);
+      if (ot) org.other = org.other.filter(x => x.id !== ot.dataset.oo);
+      orgChanged();
+    }
+  });
+  $("#view-org").addEventListener("change", e => {
+    const t = e.target;
+    const af = t.closest("[data-oaf]");
+    if (af && t.dataset.oa) { const tgt = af.dataset.oaf === "me" ? org.me : org.contacts.find(x => x.id === t.closest("[data-oc]").dataset.oc); if (tgt) { tgt[t.dataset.oa] = t.value.trim(); saveOrg(); } return; }
+    if (t.dataset.otdone != null) { const x = org.thanks.find(z => z.id === t.closest("[data-ot]").dataset.ot); x.done = t.checked; saveOrg(); renderOrg(); return; }
+    if (t.dataset.ogdone != null) { const x = org.giving.find(z => z.id === t.closest("[data-og]").dataset.og); x.done = t.checked; saveOrg(); renderOrg(); return; }
+  });
+  $("#view-org").addEventListener("submit", e => {
+    e.preventDefault(); const f = e.target;
+    if (f.id === "orgContactForm") { const n = f.cname.value.trim(); if (!n) return; const c = { id: uid(), name: n, sent: {}, recv: {} }; org.contacts.push(c); org.editing = c.id; }
+    if (f.id === "orgEventForm") { const ti = f.title.value.trim(); if (!ti) { toast("📅 Give the event a name"); return; } org.events.push({ id: uid(), date: org.calDay || ymd(new Date()), time: f.time.value, title: ti, who: f.who.value, notes: f.notes.value.trim(), remind: f.remind.checked }); toast("📅 Added to your calendar"); }
+    if (f.id === "orgMemberForm") { const n = f.mname.value.trim(); if (!n) return; org.members.push({ id: uid(), name: n, emoji: f.emoji.value }); }
+    if (f.id === "orgThanksForm") { const fr = f.from.value.trim(); if (!fr) return; org.thanks.push({ id: uid(), from: fr, gift: f.gift.value.trim(), done: false }); }
+    if (f.id === "orgPackageForm") { const it = f.item.value.trim(); if (!it) return; org.packages.push({ id: uid(), item: it, store: f.store.value.trim(), eta: f.eta.value, track: f.track.value.trim(), arrived: false }); }
+    if (f.id === "orgGiveForm") { const w = f.what.value.trim(); if (!w) return; org.giving.push({ id: uid(), what: w, amt: parseFloat(f.amt.value) || 0, done: false }); }
+    if (f.id === "orgOtherForm") { const n = f.name.value.trim(); if (!n) return; org.other.push({ id: uid(), name: n, amt: parseFloat(f.amt.value) || 0 }); }
+    orgChanged();
+  });
+  /* @org-end */
