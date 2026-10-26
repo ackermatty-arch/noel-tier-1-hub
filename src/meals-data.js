@@ -2498,6 +2498,7 @@ window.NOEL_MEALS = (function () {
     "Chocolate-Dipped Strawberries": [24, [["2 lb large strawberries", 8], ["bar (200 g) chocolate", 5]]],
     "Mini Cheesecake Bites": [24, [["tubs (250 g) cream cheese (2)", 9], ["box graham crumbs", 4], ["container berries", 5], ["sugar, eggs, vanilla", 1]]],
     "Cookie Platter": [30, [["box assorted cookies (or Christmas leftovers)", 8]]],
+    "Cheese Fondue": [30, [["wedge (200 g) Gruyère", 9], ["block (200 g) Swiss or Emmental", 7], ["bottle dry white wine (or apple cider)", 12], ["crusty loaf, cubed", 4.5], ["apples (2)", 2.4], ["broccoli or baby potatoes, for dipping", 4], ["garlic, cornstarch, lemon", null]]],
     "Chocolate Fondue": [30, [["bars (300 g) chocolate", 7], ["carton (250 ml) whipping cream", 3], ["lb strawberries", 5], ["bag marshmallows", 3], ["bag pretzels", 3]]],
     "Sparkling Punch": [10, [["bottles (750 ml) sparkling juice (2)", 8], ["carton (1 L) cranberry juice", 4], ["oranges (2)", 2]]]
   };
