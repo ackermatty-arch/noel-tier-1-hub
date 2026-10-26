@@ -3,11 +3,14 @@
 - invite.html is NOT included: invites are shared as videos/pictures now
 Run from the repo root:  python3 scripts/build_www.py
 """
-import os, shutil
+import os, shutil, sys
+# python3 scripts/build_www.py            → Family edition (www/)
+# python3 scripts/build_www.py office     → Office Edition (www-office/)
+EDITION = "office" if "office" in sys.argv[1:] else "family"
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-www = os.path.join(root, "www")
+www = os.path.join(root, "www" if EDITION == "family" else "www-office")
 shutil.rmtree(www, ignore_errors=True); os.makedirs(www)
-html = open(os.path.join(root, "index.html"), encoding="utf-8").read()
+html = open(os.path.join(root, "index.html" if EDITION == "family" else "office.html"), encoding="utf-8").read()
 tag = '<script src="capacitor.js"></script>\n'
 assert "<head>" in html
 html = html.replace("<head>", "<head>\n" + tag, 1)

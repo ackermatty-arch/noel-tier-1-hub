@@ -37,3 +37,12 @@ a, b = s.index("  /* @track-start */"), s.index("  /* @track-end */\n") + len(" 
 s = s[:a] + "  /* @track-start */\n" + code + s[b:]
 open("index.html", "w").write(s)
 print("index.html updated")
+code = open("src/office.js").read()
+a, b = s.index("  /* @office-start */"), s.index("  /* @office-end */\n") + len("  /* @office-end */\n")
+s = s[:a] + "  /* @office-start */\n" + code + s[b:]
+open("index.html", "w").write(s)
+# 🏢 the Office Edition is the same app with one switch flipped
+off = s.replace('window.NOEL_EDITION = "family";', 'window.NOEL_EDITION = "office";', 1)
+assert off != s
+open("office.html", "w").write(off)
+print("office.html updated")

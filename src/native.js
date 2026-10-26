@@ -28,6 +28,7 @@
   }
   async function cancelRange(lo, hi) {
     const ln = LN(); if (!ln) return;
+    lo += Native.offset; hi += Native.offset;   // 🏢 the Office space keeps its own range
     try {
       const { notifications } = await ln.getPending();
       const ids = (notifications || []).filter(n => n.id >= lo && n.id < hi).map(n => ({ id: n.id }));
@@ -37,6 +38,7 @@
 
   let dutyQueue = Promise.resolve();
   const Native = {
+    offset: 0,
     isNative,
     plugin,
     // called every time the timers are saved: phone alarms always match the app
@@ -48,7 +50,7 @@
         const running = (duties || []).map((d, i) => ({ d, i })).filter(x => x.d.status === "running" && x.d.endAt > now + 1500);
         if (!running.length || !(await allowed())) return;
         await LN().schedule({ notifications: running.map(({ d, i }) => ({
-          id: DUTY_BASE + i,
+          id: Native.offset + DUTY_BASE + i,
           title: `${d.icon || "⏰"} ${d.name || "Timer"}`,
           body: "⏰ Time's up! Tap to open Noël.",
           schedule: { at: new Date(d.endAt), allowWhileIdle: true }
@@ -62,7 +64,7 @@
       await cancelRange(CHECKIN_BASE, CHECKIN_BASE + 100);
       const now = Date.now(), future = dates.filter(d => d.getTime() > now).slice(0, 60);
       if (future.length) await LN().schedule({ notifications: future.map((d, i) => ({
-        id: CHECKIN_BASE + i, title: "🎄 Time to check in!", body: "Open Noël to check your list, gifts and budget.",
+        id: Native.offset + CHECKIN_BASE + i, title: "🎄 Time to check in!", body: "Open Noël to check your list, gifts and budget.",
         schedule: { at: d, allowWhileIdle: true }
       })) });
       return true;
@@ -75,7 +77,7 @@
         await cancelRange(lo, hi);
         const list = items.filter(x => x.t > Date.now() + 1000).slice(0, hi - lo);
         if (!list.length || !(await allowed())) return;
-        await LN().schedule({ notifications: list.map((x, i) => ({ id: lo + i, title: x.title, body: x.body || "", schedule: { at: new Date(x.t), allowWhileIdle: true } })) });
+        await LN().schedule({ notifications: list.map((x, i) => ({ id: Native.offset + lo + i, title: x.title, body: x.body || "", schedule: { at: new Date(x.t), allowWhileIdle: true } })) });
       }).catch(() => {});
     }
   };

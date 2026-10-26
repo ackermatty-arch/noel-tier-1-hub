@@ -29,7 +29,7 @@
     const santa = sum(santaGifts(), isSpent); if (santa) rows.push({ src: "Santa's list", cat: "gifts", name: "🎅 Santa's gifts (kept secret)", amt: santa, date: "" });
     foodBudget.items.forEach(x => { if (+x.amt) rows.push({ src: "Food budget", cat: "food", name: x.name, amt: +x.amt, date: x.date || "" }); });
     if (typeof org !== "undefined") org.giving.forEach(x => { if (+x.amt) rows.push({ src: "Giving", cat: "giving", name: x.what, amt: +x.amt, date: x.date || "" }); });
-    budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "" }));
+    budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "", mine: !!x.mine }));
     return rows;
   }
   const catLimit = k => k === "gifts" ? +gifts.budget || 0 : k === "food" ? +foodBudget.limit || 0 : +budget.cats[k] || 0;
@@ -124,14 +124,18 @@
         <div class="org-addr-row"><select class="input" name="cat" aria-label="Category">${BUD_CATS.filter(([k]) => k !== "gifts" && k !== "food" && k !== "giving").concat(BUD_CATS.filter(([k]) => k === "food")).map(([k, i, l]) => `<option value="${k}">${i} ${l}</option>`).join("")}</select>
           <input class="input" name="amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="$" aria-label="Amount" style="max-width:96px"></div>
         <input class="input" name="date" type="date" value="${budToday()}" aria-label="Date">
+        ${SPACE === "office" ? `<label class="host-check"><input type="checkbox" name="mine" checked> 💳 I paid for this myself (add it to my reimbursement list)</label>` : ""}
         <button class="btn btn-green btn-block" type="submit">Add</button>
         <p class="host-rem">Gifts come in when you mark them Bought in the Gift Tracker. Food and giving come from their own pages too.</p></form>
       <div class="apps-filters">${[["all", "All"]].concat(BUD_CATS.filter(([k]) => T.by[k] > 0).map(([k, i, l]) => [k, i + " " + l])).map(([k, l]) => `<button type="button" class="chip${k === f ? " on" : ""}" data-bfilter="${k}">${l}</button>`).join("")}</div>
       <div class="card bud-sheet"><table><thead><tr><th data-bsort="date">Date${s === "date" ? " ▾" : ""}</th><th data-bsort="cat">Item${s === "cat" ? " ▾" : ""}</th><th data-bsort="amt" class="num">Amount${s === "amt" ? " ▾" : ""}</th></tr></thead>
         <tbody>${rows.map(r => { const c = budCat(r.cat); return `<tr><td class="bs-date">${r.date ? new Date(r.date + "T12:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "—"}</td>
-          <td><span class="bs-dot" style="background:${c[3]}"></span>${esc(r.name)}<small>${c[1]} ${c[2]}${r.src ? " · from " + r.src : ""}</small></td>
+          <td><span class="bs-dot" style="background:${c[3]}"></span>${esc(r.name)}<small>${c[1]} ${c[2]}${r.src ? " · from " + r.src : ""}${r.mine ? " · 💳 to reimburse" : ""}</small></td>
           <td class="num">${money(r.amt)}${r.id ? `<button type="button" class="bs-del" data-bdel="${r.id}" aria-label="Remove">✕</button>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="3" class="host-rem">Nothing here yet.</td></tr>`}</tbody>
         <tfoot><tr><td></td><td><b>Total${f === "all" ? "" : " · " + budCat(f)[2]}</b></td><td class="num"><b>${money(total)}</b></td></tr></tfoot></table></div>
+      ${SPACE === "office" ? (() => { const mine = T.rows.filter(r => r.mine), tot = mine.reduce((a, r) => a + r.amt, 0);
+        return `<div class="card pt-card"><h3>💳 Reimbursement list</h3><p class="host-rem">${mine.length ? `<b>${mine.length}</b> ${mine.length === 1 ? "purchase" : "purchases"} you paid for yourself · <b>${money(tot)}</b> to be paid back.` : "Tick “I paid for this myself” when you add a purchase, and it lands here."}</p>
+          ${mine.length ? `<button type="button" class="btn btn-ghost btn-block" data-print="reimburse">🖨️ Reimbursement list for the boss</button>` : ""}</div>`; })() : ""}
       <div class="card pt-card"><button type="button" class="btn btn-red btn-block" id="budCsv">📄 Download spreadsheet</button>
         <p class="host-rem">${N ? "Choose AirDrop, Mail or Save to Files to get it onto your computer." : "It saves to your downloads."} It opens in Excel, Google Sheets or Numbers, with every purchase and the totals by category.</p></div>`;
   }
@@ -169,6 +173,21 @@
       <p class="bd-foot">Made with Noël Tier 1 Hub</p></div>`;
     return { title: "Budget report", css, html, margin: 0.5, file: "Holiday-Budget-Report" };
   }
+  // 💳 Office space: what the coordinator paid out of pocket
+  function reimburseDoc() {
+    const rows = budRows().filter(r => r.mine).sort((a, b) => (a.date || "").localeCompare(b.date || "")), tot = rows.reduce((a, r) => a + r.amt, 0);
+    if (!rows.length) return { error: "💳 Nothing to reimburse yet" };
+    const who = (typeof off !== "undefined" && off.ev.organizer) || "";
+    const css = `.rb{font:11pt/1.45 Georgia,serif;color:#222} .rb h1{font-size:20pt;margin:0;color:#1E3A2F} .rb .rb-s{color:#8a6d3b;font:600 8.5pt sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:2px 0 14px}
+      .rb table{width:100%;border-collapse:collapse} .rb td,.rb th{padding:5px 6px;border-bottom:1px solid #e3dccb;text-align:left} .rb th{background:#f4efe3;font:600 8pt sans-serif;text-transform:uppercase} .rb .num{text-align:right}
+      .rb .rb-sign{margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:30px;font-size:9.5pt;color:#555} .rb .rb-sign div{border-top:1px solid #888;padding-top:4px}`;
+    const html = `<div class="rb"><h1>Expense Reimbursement</h1><p class="rb-s">${esc(family || "")}${family ? " · " : ""}${esc((typeof off !== "undefined" && off.ev.name) || "Holiday party")}${who ? " · submitted by " + esc(who) : ""} · ${new Date().toLocaleDateString()}</p>
+      <table><tr><th>Date</th><th>Category</th><th>Item</th><th class="num">Amount</th></tr>${rows.map(r => `<tr><td>${r.date || "—"}</td><td>${budCat(r.cat)[2]}</td><td>${esc(r.name)}</td><td class="num">${money(r.amt)}</td></tr>`).join("")}
+      <tr><td colspan="3"><b>Total to reimburse</b></td><td class="num"><b>${money(tot)}</b></td></tr></table>
+      <p style="font-size:9.5pt;color:#666;margin-top:10px">Receipts attached.</p>
+      <div class="rb-sign"><div>Submitted by</div><div>Approved by &amp; date</div></div></div>`;
+    return { title: "Reimbursement list", css, html, margin: 0.6, file: "Expense-Reimbursement" };
+  }
   // keep last year's total when the season is saved (called from Start fresh)
   function budgetArchive(year) {
     const T = budTotals(); budget.past = budget.past.filter(p => p.year !== year).concat({ year, total: Math.round(T.spent * 100) / 100, by: T.by });
@@ -194,7 +213,7 @@
     e.preventDefault(); const f = e.target; if (f.id !== "budAddForm") return;
     const name = f.name.value.trim(), amt = parseFloat(f.amt.value);
     if (!name || !(amt > 0)) { toast("💰 Add what it was and how much"); return; }
-    budget.expenses.push({ id: uid(), cat: f.cat.value, name, amt: Math.round(amt * 100) / 100, date: f.date.value || budToday() });
+    budget.expenses.push({ id: uid(), cat: f.cat.value, name, amt: Math.round(amt * 100) / 100, date: f.date.value || budToday(), mine: !!(f.mine && f.mine.checked) });
     saveBudget(); renderBudget(); toast(`💰 Added ${money(amt)}`);
   });
   budRecordDay();

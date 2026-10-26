@@ -21,6 +21,11 @@
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "chores") d = choresDoc();
     else if (key === "budget") d = budgetDoc();
+    else if (key === "approval") d = approvalDoc();
+    else if (key === "potluck") d = potluckDoc();
+    else if (key === "awards") d = awardsDoc();
+    else if (key === "yearend") d = yearEndDoc();
+    else if (key === "reimburse") d = reimburseDoc();
     else if (key === "labels" || key === "return") d = labelDoc(key);
     return d || { error: "That page isn't available any more" };
   }

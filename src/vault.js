@@ -65,6 +65,7 @@
   function pump() {
     if (writing || !pending.size) return writing || Promise.resolve();
     writing = (async () => {
+      await null;   // let "writing" be set first (a delete alone finishes without waiting)
       while (pending.size) {
         const [k, v] = pending.entries().next().value; pending.delete(k);
         try {

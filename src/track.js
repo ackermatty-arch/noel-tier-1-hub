@@ -93,6 +93,7 @@
   // "time for bed" alarms
   // 🍫 surprise nudges: always on, never listed anywhere (a little helper the family discovers)
   const stSurprise = () => {
+    if (SPACE === "office") return [];   // the family side already rings these
     const y = stYear(), n = new Date(), ny = n.getMonth() === 0 ? n.getFullYear() : n.getFullYear() + 1;
     return [
       { k: y + "treats", icon: "🍫", t: new Date(y, 11, 20, 10, 0).getTime(), text: "Don't forget chocolates and treats! 🍫 Stocking stuffers too!" },
