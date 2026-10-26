@@ -17,12 +17,18 @@
   const activeAddons = m => m.addon || m.party ? [] : MD.meals.filter(a => a.addon && mealAddons[a.id]).map(a => { const ac = cfgFor(a.id); return { a, c: ac, p: mealSizes(a, ac) }; });
   const addonSig = m => activeAddons(m).map(x => x.a.id + ":" + x.c.guests).join(",") + (m.party ? JSON.stringify([cfgFor(m.id).mode, cfgFor(m.id).picks]) : "");
   const recipesOf = (m, p) => m.recipesFor ? m.recipesFor(p) : m.recipes;
+  // 💱 currency: our estimates are Canadian; US prices are roughly ¾ of the Canadian figure
+  let currency = load("currency", "CAD");
+  const FX = { CAD: 1, USD: 0.75 }, fx = () => FX[currency] || 1;
+  const curName = () => currency === "USD" ? "US" : "Canadian";
+  const currencySwitchHtml = () => `<div class="cur-switch" role="group" aria-label="Currency"><button type="button" data-cur="CAD" aria-pressed="${currency === "CAD"}">🇨🇦 CAD</button><button type="button" data-cur="USD" aria-pressed="${currency === "USD"}">🇺🇸 USD</button></div>`;
   const cad = x => "$" + (Math.round(x * 100) / 100).toFixed(2);
   const cad0 = x => "$" + Math.round(x).toLocaleString();
   function pricedShop(m, f, p) {
     const pf = mealPrices[m.id] || {}, ticks = mealTicks[m.id] || {};
     let total = 0, left = 0;
     const item = prefix => ([q, name, est], dept) => {
+      if (est != null) est = est * fx();   // estimates in the chosen currency
       const key = prefix + dept + "|" + name, price = est == null ? null : est * (pf[key] || 1);
       if (price != null) { total += price; if (!ticks[key]) left += price; }
       return { q, name, key, est, price, on: !!ticks[key], edited: !!pf[key] };
@@ -138,7 +144,7 @@
       const ps = pricedShop(m, f, p);
       body = `<div class="shop-total" id="shopTotal">${shopTotalHtml(ps, c.guests)}</div>
         <button type="button" class="btn btn-gold btn-block" id="shopToBudget">💵 Add to my food budget</button>
-        <p class="shop-note">Rough Canadian prices (CAD). Tap any price to match your store. Pantry staples you likely have aren't counted.</p>` +
+        <div class="shop-note">${currencySwitchHtml()}Rough ${curName()} prices (${currency}). Tap any price to match your store. Pantry staples you likely have aren't counted.</div>` +
         ps.groups.map(([dept, items]) => `<h4 class="shop-dept">${esc(dept)}</h4><ul class="shop-list">` + items.map(it =>
           `<li><label class="${it.on ? "on" : ""}"><input type="checkbox" data-shop="${esc(it.key)}" ${it.on ? "checked" : ""}><span>${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}</span></label>` +
           (it.price != null ? `<span class="shop-cad">$</span><input class="shop-price${it.edited ? " edited" : ""}" data-price="${esc(it.key)}" data-est="${it.est}" inputmode="decimal" value="${it.price.toFixed(2)}" aria-label="Price for ${esc(it.name)}">` : "") + `</li>`
@@ -183,8 +189,8 @@
     return `<span class="meal-lab">Party style</span><div class="seg sub-tabs meal-done" role="group" aria-label="Party style">
       <button type="button" data-pmode="meal" aria-pressed="${c.mode !== "before"}">Appetizers are the meal</button><button type="button" data-pmode="before" aria-pressed="${c.mode === "before"}">Before dinner</button></div>
       <span class="meal-lab">Pick your appetizers (${picked.size})</span>
-      <p class="party-total">Estimated total <b>${cad0(pricedShop(mealById("nyeparty"), p.f, p).total)}</b> · about ${cad(pricedShop(mealById("nyeparty"), p.f, p).total / c.guests)} per guest<small>Includes the midnight toast. Prices beside each appetizer are for ${c.guests} guests; tap to add or remove.</small></p>
-      <div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])} <span class="chip-price">${picked.has(a[1]) ? "" : "+"}${cad0(MD.appCost(a[1], p))}</span></button>`).join("")}</div>`;
+      <p class="party-total">Estimated total <b>${cad0(pricedShop(mealById("nyeparty"), p.f, p).total)}</b> · about ${cad(pricedShop(mealById("nyeparty"), p.f, p).total / c.guests)} per guest<small>${currency} · includes the midnight toast. Prices beside each appetizer are for ${c.guests} guests; tap to add or remove.</small></p>
+      <div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])} <span class="chip-price">${picked.has(a[1]) ? "" : "+"}${cad0(MD.appCost(a[1], p) * fx())}</span></button>`).join("")}</div>`;
   }
   // 🌱 the "dietary guests" picker shown on every main dinner
   function addonPickerHtml() {
@@ -283,7 +289,7 @@
     let lastDay = "";
     const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · ${m.party ? "party starts" : "dinner"} ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
       <h2>Timeline</h2><table class="pm-tl">${steps.map(s => { const d = dayName(s.t), h = d !== lastDay ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; lastDay = d; return h + `<tr><td>${s.ahead ? "All day" : mclock(s.t)}</td><td>☐ ${esc(s.text)}</td></tr>`; }).join("")}</table>
-      <h2>Shopping list</h2>${(ps => `<p><b>Estimated total: ${cad0(ps.total)} CAD</b> (about ${cad(ps.total / c.guests)} per guest)</p>` + ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join(""))(pricedShop(m, f, p))}
+      <h2>Shopping list</h2>${(ps => `<p><b>Estimated total: ${cad0(ps.total)} ${currency}</b> (about ${cad(ps.total / c.guests)} per guest)</p>` + ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join(""))(pricedShop(m, f, p))}
       <h2>Menu</h2>${allMenu(m).map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v.join(", "))}</p>`).join("")}
       ${m.drinks.map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v)}</p>`).join("")}
       <h2>Recipes</h2>${allRecipesHtml(m, f, p, true)}
@@ -323,6 +329,8 @@
     const t = e.target;
     const tab = t.closest("[data-mtab]"); if (tab) { mealSel.tab = tab.dataset.mtab; save("mealSel", mealSel); renderMealHome(); return; }
     const card = t.closest("[data-meal]"); if (card) { openMeal(card.dataset.meal); return; }
+    const cur = t.closest("[data-cur]");
+    if (cur) { currency = cur.dataset.cur; save("currency", currency); renderMeals(); renderFoodBudget(); toast(currency === "USD" ? "🇺🇸 Showing US dollar estimates" : "🇨🇦 Showing Canadian dollar estimates"); return; }
     const dg = t.closest("[data-dg]");
     if (dg) { const [aid, d] = dg.dataset.dg.split(":"), ac = cfgFor(aid); ac.guests = Math.min(5, Math.max(1, ac.guests + +d)); mealCfg[aid] = ac; save("mealCfg", mealCfg); renderMeals(); return; }
     const dop = t.closest("[data-dopen]"); if (dop) { openMeal(dop.dataset.dopen); return; }
@@ -392,6 +400,7 @@
 
   // ---- 💵 food budget (separate from gifts) ----
   function renderFoodBudget() {
+    $("#fbCurrency").innerHTML = currencySwitchHtml() + `<span>Amounts in ${curName()} dollars (${currency}).</span>`;
     const spent = foodBudget.items.reduce((a, x) => a + (+x.amt || 0), 0), lim = +foodBudget.limit || 0;
     if (document.activeElement !== $("#fbLimit")) $("#fbLimit").value = lim ? lim : "";
     const pct = lim ? Math.min(100, spent / lim * 100) : 0, over = lim && spent > lim;
