@@ -117,8 +117,8 @@
   }
 
   // ---- screens ----
-  const mealCardHtml = (m, eve) => `
-      <button type="button" class="card meal-card${m.soon ? " soon" : ""}" data-meal="${m.id}"${eve ? ` data-meve="1"` : ""}>
+  const mealCardHtml = (m, eve, day) => `
+      <button type="button" class="card meal-card${m.soon ? " soon" : ""}" data-meal="${m.id}"${eve ? ` data-meve="1"` : ""}${day ? ` data-mday="1"` : ""}>
         <span class="meal-ico">${m.icon}</span>
         <span class="meal-txt"><b>${esc(m.name)}</b><small>${esc(m.blurb)}</small>${m.addon ? `<span class="addon-tag">${mealAddons[m.id] ? "✓ Added to your dinner" : "Add-on for 1–5 people"}</span>` : ""}${nightTag(m)}</span>
         <span class="meal-go">${m.soon ? "Soon" : "›"}</span>
@@ -154,7 +154,8 @@
   function renderMealHome() {
     $("#mealDietNote").hidden = mealSel.tab !== "dietary";
     $("#mealTabs").innerHTML = MD.tabs.map(([k, l]) => `<button type="button" data-mtab="${k}" aria-pressed="${mealSel.tab === k}">${l}</button>`).join("");
-    const list = MD.meals.filter(m => m.tab === mealSel.tab).map(m => mealCardHtml(m)).join("");
+    const list = MD.meals.filter(m => m.tab === mealSel.tab).map(m => mealCardHtml(m)).join("") +
+      MD.meals.filter(m => m.alsoTab === mealSel.tab).map(m => mealCardHtml(m, false, true)).join("");
     if (mealSel.tab === "eve") {
       const mains = MD.meals.filter(m => ["traditional", "elegant", "vegan"].includes(m.tab) && !m.soon);
       $("#mealList").innerHTML = nightsHtml() + `<p class="eve-intro">Many families celebrate on Christmas Eve. Make it a cozy appetizer night or a seafood supper, or have a full dinner, then plan Christmas Day too.</p>` + list +
@@ -406,6 +407,7 @@
     const card = t.closest("[data-meal]");
     if (card) {
       const id = card.dataset.meal;
+      if (card.dataset.mday && !planOf(id)) { const c = cfgFor(id); if (c.date !== dayYmd()) { c.date = dayYmd(); mealCfg[id] = c; save("mealCfg", mealCfg); toast("🎄 Planned for Christmas Day. Change the night anytime."); } }
       if (card.dataset.meve && !planOf(id)) { const c = cfgFor(id); if (c.date !== eveYmd()) { c.date = eveYmd(); if (!mealCfg[id] || !mealCfg[id].time) c.time = "18:00"; mealCfg[id] = c; save("mealCfg", mealCfg); toast("🕯️ Planned for Christmas Eve. Change the night anytime."); } }
       openMeal(id); return;
     }

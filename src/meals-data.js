@@ -2647,9 +2647,9 @@ window.NOEL_MEALS = (function () {
     return { g, f, pies: 1, dishes: 1, pots: g > 10 ? 2 : 1 };
   }
   const seafood = {
-    id: "seafood", tab: "eve",
-    name: "Christmas Eve Seafood Supper", icon: "🦐",
-    blurb: "Seafood cioppino with garlic bread, a cranberry-rosemary spritz and vanilla bean panna cotta.",
+    id: "seafood", tab: "eve", alsoTab: "elegant",   // 🎄 also offered with the Christmas Day dinners
+    name: "Seafood Cioppino Supper", icon: "🦐",
+    blurb: "A Christmas Eve favourite: seafood cioppino with garlic bread, a cranberry-rosemary spritz and vanilla bean panna cotta.",
     defaultTime: "18:00", defaultDate: eveDate,
     menu: [
       ["Main", ["Classic Seafood Cioppino", "Toasted Garlic Bread"]],
