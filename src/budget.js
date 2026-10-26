@@ -121,6 +121,7 @@
     const total = rows.reduce((a, r) => a + r.amt, 0), N = NoelNative.isNative();
     return `<form class="card pt-card org-ev-form" id="budAddForm" autocomplete="off"><h3>➕ Add spending</h3>
         <input class="input" name="name" maxlength="60" placeholder="What was it? e.g. Tree lights" aria-label="What">
+        ${fillChips((SPACE === "office" ? [["Decorations", "decor"], ["Prizes", "party"], ["Gift cards", "other"], ["Venue deposit", "party"], ["Catering", "food"], ["Drinks", "food"], ["Plates & napkins", "hosting"], ["Charity donation", "other"]] : [["Tree", "decor"], ["Lights", "decor"], ["Wrapping paper", "other"], ["Christmas cards", "cards"], ["Stamps & postage", "cards"], ["Groceries", "food"], ["Restaurant", "food"], ["Gas", "travel"], ["Flights", "travel"], ["Outfits", "other"], ["Babysitter", "other"], ["Event tickets", "party"], ["Hosting supplies", "hosting"]]).map(([n, c]) => [n, n, { "#budAddForm [name=cat]": c }]), "#budAddForm [name=name]")}
         <div class="org-addr-row"><select class="input" name="cat" aria-label="Category">${BUD_CATS.filter(([k]) => k !== "gifts" && k !== "food" && k !== "giving").concat(BUD_CATS.filter(([k]) => k === "food")).map(([k, i, l]) => `<option value="${k}">${i} ${l}</option>`).join("")}</select>
           <input class="input" name="amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="$" aria-label="Amount" style="max-width:96px"></div>
         <input class="input" name="date" type="date" value="${budToday()}" aria-label="Date">

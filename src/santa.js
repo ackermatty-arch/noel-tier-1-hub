@@ -49,8 +49,10 @@
             <span class="g-name">${esc(g.name)}${g.spot ? `<small class="santa-spot">📍 Hidden: ${esc(g.spot)}</small>` : ""}</span><span class="g-price">${money(+g.price || 0)}</span>
             <button class="icon-btn" data-sact="delgift" aria-label="Remove">✕</button></li>`; }).join("")}</ul>
         ${stockHtml(k)}
-        <form class="santa-add" data-skadd autocomplete="off">
+        <form class="santa-add" data-skadd data-fill-scope autocomplete="off">
           <input class="input" name="name" maxlength="60" placeholder="Gift from Santa" aria-label="Gift">
+          ${(() => { const pool = (GIDEAS.little || []).concat(GIDEAS.kids || [], GIDEAS.tweens || []), at = (k.santaAt || 0) * 4 % Math.max(1, pool.length), pick = pool.slice(at, at + 4).concat(pool).slice(0, 4);
+            return `<div class="santa-ideas">${fillChips(pick.map(x => [x[0], x[0], { "^[name=price]": String(Math.round((x[2] + x[3]) / 2 * fx())) }]), "^[name=name]")}<button type="button" class="chip" data-sact="santaideas">↻ More ideas</button></div>`; })()}
           <input class="input" name="price" type="number" inputmode="decimal" min="0" placeholder="$" aria-label="Price">
           <input class="input" name="spot" maxlength="40" placeholder="Hiding spot (optional)" aria-label="Hiding spot">
           <button class="btn btn-green" type="submit">Add</button>
@@ -125,6 +127,7 @@
     const b = t.closest("[data-sact]"); if (!b) return;
     const k = santa2.kids.find(x => x.id === b.closest("[data-skid]").dataset.skid); if (!k) return;
     const act = b.dataset.sact;
+    if (act === "santaideas") { k.santaAt = (k.santaAt || 0) + 1; save("santaList", santa2); renderSanta2(); return; }
     if (act === "moreideas") { k.ideaAt = (k.ideaAt || 0) + 4; save("santaList", santa2); renderSanta2(); return; }
     if (act === "delstock") { k.stock = (k.stock || []).filter(x => x.id !== b.closest("[data-stk]").dataset.stk); save("santaList", santa2); renderSanta2(); renderGifts(); return; }
     if (act === "delkid") { if (!confirm(`Remove ${k.name} and their Santa gifts?`)) return; santa2.kids = santa2.kids.filter(x => x !== k); }

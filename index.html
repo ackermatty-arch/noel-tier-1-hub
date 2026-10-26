@@ -1296,6 +1296,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .santa-spot { display: block; font-size: 12px; color: var(--muted); }
 .santa-add { display: grid; grid-template-columns: 1fr 70px; gap: 6px; margin-top: 8px; }
 .santa-add .input { width: 100%; margin: 0; } .santa-add [name=spot] { grid-column: 1; } .santa-add .btn { grid-column: 2; }
+.santa-add .santa-ideas { order: 1; grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; } .santa-ideas .fill-chips { margin: 0; display: contents; } .santa-add [name=spot], .santa-add .btn { order: 2; }
 .santa-kid { padding: 14px; } .santa-kid h3 { margin: 0 0 8px; font-size: 16px; }
 .santa-kid-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; } .santa-kid-row .input { width: 100%; margin: 0; }
 
@@ -1309,6 +1310,9 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .tray-btn { position: relative; }
 .pt-banner { margin-top: 12px; }
 .pt-card .host-list li[data-chd], .pt-card .host-list li[data-op], .pt-card .host-list li[data-ssp] { display: flex; align-items: center; gap: 8px; } .pt-card .host-list li[data-chd] label, .pt-card .host-list li[data-op] label, .pt-card .host-list li[data-ssp] label { flex: 1; }
+.fill-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; } .fill-chip { font-size: 12.5px !important; padding: 6px 11px !important; background: #f3ecdc !important; border-color: rgba(184,147,90,.45) !important; color: var(--pine-dark) !important; }
+.fill-lab { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
+.ty-tpl { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 8px 0; text-align: left; font-size: 14px; background: #fff; } .ty-tpl p { margin: 0 0 8px; white-space: pre-wrap; } .ty-tpl .send-btns { gap: 6px; }
 .ss-ok { font-size: 12px; color: #2f8a4f; font-weight: 800; white-space: nowrap; } .ss-avoid { margin: 4px 0; font-size: 14px; }
 .ss-tools { display: flex; justify-content: space-between; margin-top: 12px; } .ss-mail { margin-top: 10px; } .ss-mail summary { font-weight: 700; color: var(--pine-dark); cursor: pointer; } .ss-mail .chip { margin: 4px 4px 0 0; }
 .ss-swap summary { font-weight: 700; color: var(--pine-dark); cursor: pointer; } .ss-swap ol { padding-left: 20px; font-size: 14px; } .ss-swap li { margin: 5px 0; }
@@ -2115,6 +2119,7 @@ body.space-switching main { opacity: .3; }
         <div class="step">2 · Write your message</div>
         <label class="calc-field"><span>To</span><input class="input" id="cardTo" maxlength="30" placeholder="e.g. Grandma Rose"></label>
         <label class="calc-field"><span>Message</span><textarea class="input" id="cardMsg" rows="4" maxlength="220"></textarea></label>
+        <div id="cardMsgIdeas"></div>
         <label class="calc-field"><span>From</span><input class="input" id="cardFrom" maxlength="40"></label>
         <button type="button" class="btn btn-gold btn-block" id="cardPreviewBtn">👀 Preview your card</button>
       </div>
@@ -2287,6 +2292,7 @@ body.space-switching main { opacity: .3; }
       <p class="review-sub">The memories you want to keep: funny, sweet, or simply perfect.</p>
       <form class="review-add" id="momentForm" autocomplete="off">
         <textarea class="input" name="text" rows="2" maxlength="280" placeholder="e.g. Grandma winning Bingo and doing a victory dance" required></textarea>
+        <div class="fill-chips"><button type="button" class="chip fill-chip" data-fill="The best moment was " data-fill-to="#momentForm textarea">Best moment was…</button><button type="button" class="chip fill-chip" data-fill="The funniest thing was " data-fill-to="#momentForm textarea">Funniest thing…</button><button type="button" class="chip fill-chip" data-fill="The kids loved " data-fill-to="#momentForm textarea">The kids loved…</button><button type="button" class="chip fill-chip" data-fill="Best gift given: " data-fill-to="#momentForm textarea">Best gift given…</button><button type="button" class="chip fill-chip" data-fill="Best gift received: " data-fill-to="#momentForm textarea">Best gift received…</button><button type="button" class="chip fill-chip" data-fill="A new tradition we started: " data-fill-to="#momentForm textarea">New tradition…</button></div>
         <button class="btn btn-red btn-block" type="submit">➕ Add a moment</button>
       </form>
       <ul class="review-list" id="momentList"></ul>
@@ -2298,6 +2304,7 @@ body.space-switching main { opacity: .3; }
       <p class="review-sub">Little reminders for next year. They'll pop up in your first check-in on November 1.</p>
       <form class="review-add" id="noteForm" autocomplete="off">
         <textarea class="input" name="text" rows="2" maxlength="200" placeholder="e.g. Buy wrapping paper in the boxing week sales" required></textarea>
+        <div class="fill-chips"><button type="button" class="chip fill-chip" data-fill="Next year, start shopping by " data-fill-to="#noteForm textarea">Start shopping by…</button><button type="button" class="chip fill-chip" data-fill="Worked great, do it again: " data-fill-to="#noteForm textarea">Do it again…</button><button type="button" class="chip fill-chip" data-fill="Skip next year: " data-fill-to="#noteForm textarea">Skip next year…</button><button type="button" class="chip fill-chip" data-fill="Buy more " data-fill-to="#noteForm textarea">Buy more…</button><button type="button" class="chip fill-chip" data-fill="Buy in the Boxing Day sales: " data-fill-to="#noteForm textarea">Boxing Day sales…</button><button type="button" class="chip fill-chip" data-fill="Book early: " data-fill-to="#noteForm textarea">Book early…</button></div>
         <button class="btn btn-green btn-block" type="submit">➕ Add a note</button>
       </form>
       <ul class="review-list" id="noteList"></ul>
@@ -2519,6 +2526,9 @@ body.space-switching main { opacity: .3; }
 
 <!-- 🎅 SECRET SANTA pass-the-phone reveal -->
 <div class="alert-overlay" id="ssReveal" role="dialog" aria-modal="true" aria-label="Secret Santa"><div class="alert-box ss-box"></div></div>
+
+<!-- 💌 THANK-YOU NOTE WORDING -->
+<div class="alert-overlay" id="tyPop" role="dialog" aria-modal="true" aria-labelledby="tyTitle"><div class="alert-box"><div class="door-big">💌</div><p class="door-type" id="tyTitle">Thank-you note</p><div id="tyBody" style="max-height:55vh;overflow:auto"></div><button type="button" class="btn btn-ghost btn-block" id="tyClose" style="margin-top:8px">Close</button></div></div>
 
 <!-- 🖨️ PRINT CHOICE: every print button opens this -->
 <div class="alert-overlay" id="printAsk" role="dialog" aria-modal="true" aria-labelledby="printAskTitle">
@@ -6420,6 +6430,23 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (key === KEYS.duties) NoelNative.syncDuties(value);   // 📱 phone alarms follow the timers
   }
 
+  /* ---------- ✨ TAP-TO-FILL: chips that fill a box for you (the box stays editable) ----------
+     fillChips([[label, value, { field: value, … }]], target)
+     target: a CSS selector, or "^selector" to look inside the nearest [data-fill-scope] */
+  function fillChips(items, to, cls) {
+    return `<div class="fill-chips${cls ? " " + cls : ""}">${items.map(([label, val, extra]) => `<button type="button" class="chip fill-chip" data-fill="${esc(val == null ? label : val)}" data-fill-to="${esc(to)}"${extra ? ` data-fill-extra="${esc(JSON.stringify(extra))}"` : ""}>${esc(label)}</button>`).join("")}</div>`;
+  }
+  function fillFind(b, sel) { if (sel[0] === "^") { const sc = b.closest("[data-fill-scope]") || document; return sc.querySelector(sel.slice(1)); } return document.querySelector(sel); }
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-fill]"); if (!b) return;
+    const t = fillFind(b, b.dataset.fillTo); if (!t) return;
+    const set = (el, v) => { el.value = v; el.dispatchEvent(new Event("input", { bubbles: true })); };
+    set(t, b.dataset.fill);
+    if (b.dataset.fillExtra) Object.entries(JSON.parse(b.dataset.fillExtra)).forEach(([sel, v]) => { const el = fillFind(b, sel); if (el) set(el, v); });
+    t.focus(); try { t.setSelectionRange(t.value.length, t.value.length); } catch (err) {}
+    if (navigator.vibrate) navigator.vibrate(8);
+  });
+
   let toastTimer;
   function toast(msg) {
     const t = $("#toast");
@@ -8566,6 +8593,12 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#cardPick").innerHTML = CARD_LIST.map(([k, ico]) =>
       `<button type="button" class="dpick d-${k}" data-card="${k}" aria-pressed="false"><span class="dp-swatch">${ico}</span><span>${INVITE.CARDS[k].name}</span></button>`).join("");
     $("#cardTo").value = ecard.to || ""; $("#cardMsg").value = ecard.msg || ""; $("#cardFrom").value = ecard.fr || "";
+    const office = [["💼 Thank you, team", "Thank you for all your hard work this year. Wishing you and your family a restful, joyful holiday season."], ["🥂 Great year ahead", "Merry Christmas to a wonderful team! Here's to a happy holiday and an even better year ahead."]];
+    const fam = [["❤️ Warm", "Wishing you a Christmas filled with warmth, laughter and the people you love most. Merry Christmas!"], ["🕊️ Peaceful", "May your home be filled with joy and your heart with peace this holiday season."],
+      ["😄 Funny", "Merry Christmas! May your coffee be strong, your cookies plentiful and your in-laws on their best behaviour. 😄"], ["🎅 Naughty list", "We tried to be good this year. Santa's still reviewing the footage. Merry Christmas! 🎅"],
+      ["✨ Faith", "Wishing you the peace, hope and joy of Christmas. May the blessings of this season stay with you all year."], ["🤗 Miss you", "Sending big hugs and Christmas wishes your way. We miss you and can't wait to see you!"],
+      ["🙏 Thank you", "Thank you for being such a wonderful part of our year. Wishing you a very Merry Christmas!"], ["🥂 New Year", "Happy New Year! Here's to fresh starts, big dreams and wonderful days ahead. 🥂"]];
+    $("#cardMsgIdeas").innerHTML = `<p class="fill-lab">✨ Tap a message, then make it yours:</p>` + fillChips(hubMode === "company" ? office.concat(fam) : fam.concat(office), "#cardMsg");
     $("#cardFrom").placeholder = defaultFrom() || "e.g. Love, the Smith Family";
     if (SHOP_URL === "#") $("#shopLink").hidden = true; else $("#shopLink").href = SHOP_URL;
     syncCards();
@@ -9878,8 +9911,10 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
             <span class="g-name">${esc(g.name)}${g.spot ? `<small class="santa-spot">📍 Hidden: ${esc(g.spot)}</small>` : ""}</span><span class="g-price">${money(+g.price || 0)}</span>
             <button class="icon-btn" data-sact="delgift" aria-label="Remove">✕</button></li>`; }).join("")}</ul>
         ${stockHtml(k)}
-        <form class="santa-add" data-skadd autocomplete="off">
+        <form class="santa-add" data-skadd data-fill-scope autocomplete="off">
           <input class="input" name="name" maxlength="60" placeholder="Gift from Santa" aria-label="Gift">
+          ${(() => { const pool = (GIDEAS.little || []).concat(GIDEAS.kids || [], GIDEAS.tweens || []), at = (k.santaAt || 0) * 4 % Math.max(1, pool.length), pick = pool.slice(at, at + 4).concat(pool).slice(0, 4);
+            return `<div class="santa-ideas">${fillChips(pick.map(x => [x[0], x[0], { "^[name=price]": String(Math.round((x[2] + x[3]) / 2 * fx())) }]), "^[name=name]")}<button type="button" class="chip" data-sact="santaideas">↻ More ideas</button></div>`; })()}
           <input class="input" name="price" type="number" inputmode="decimal" min="0" placeholder="$" aria-label="Price">
           <input class="input" name="spot" maxlength="40" placeholder="Hiding spot (optional)" aria-label="Hiding spot">
           <button class="btn btn-green" type="submit">Add</button>
@@ -9954,6 +9989,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const b = t.closest("[data-sact]"); if (!b) return;
     const k = santa2.kids.find(x => x.id === b.closest("[data-skid]").dataset.skid); if (!k) return;
     const act = b.dataset.sact;
+    if (act === "santaideas") { k.santaAt = (k.santaAt || 0) + 1; save("santaList", santa2); renderSanta2(); return; }
     if (act === "moreideas") { k.ideaAt = (k.ideaAt || 0) + 4; save("santaList", santa2); renderSanta2(); return; }
     if (act === "delstock") { k.stock = (k.stock || []).filter(x => x.id !== b.closest("[data-stk]").dataset.stk); save("santaList", santa2); renderSanta2(); renderGifts(); return; }
     if (act === "delkid") { if (!confirm(`Remove ${k.name} and their Santa gifts?`)) return; santa2.kids = santa2.kids.filter(x => x !== k); }
@@ -10411,6 +10447,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${dayList.length ? `<ul class="cal-list">${dayList.map(e => `<li class="${e.auto ? "auto" : ""}" ${e.mine ? `data-oev="${e.id}"` : ""}><span class="cl-time">${e.time ? mclock(parseYmd(e.date).setHours(...e.time.split(":").map(Number))) : "All day"}</span><span class="cl-txt">${e.mine ? memberEmoji(e.who) : e.icon} ${esc(e.title)}${e.notes ? `<small>${esc(e.notes)}</small>` : ""}${e.auto ? `<small>From your Noël plans</small>` : ""}</span>${e.mine ? `<button class="icon-btn" data-odelev aria-label="Remove">✕</button>` : ""}</li>`).join("")}</ul>` : `<p class="host-rem">Nothing planned yet.</p>`}
         <form id="orgEventForm" class="org-ev-form" autocomplete="off">
           <input class="input" name="title" maxlength="60" placeholder="e.g. School concert" aria-label="Event">
+          ${fillChips((hubMode === "company" ? ["🎉 Office party", "🎁 Gift exchange", "🥘 Potluck lunch", "📞 Client gifts go out", "🏖️ Office closed"] : ["🎶 School concert", "⭐ Christmas pageant", "🎅 Photos with Santa", "🎄 Tree lighting", "⛪ Christmas Eve service", "💼 Work party", "🏒 Hockey game", "🍪 Cookie exchange", "🎁 Gift exchange", "🛍️ Holiday shopping day", "✈️ Travel day", "🦃 Family dinner"]).map(x => [x, x.replace(/^\S+\s/, "")]), "#orgEventForm [name=title]")}
           <div class="org-addr-row"><input class="input" name="time" type="time" aria-label="Time"><select class="input" name="who" aria-label="Who"><option value="">Everyone</option>${org.members.map(m => `<option value="${m.id}">${m.emoji} ${esc(m.name)}</option>`).join("")}</select></div>
           <input class="input" name="notes" maxlength="80" placeholder="Notes, e.g. bring 24 cupcakes, wear red" aria-label="Notes">
           <label class="host-check"><input type="checkbox" name="remind" checked> 🔔 Remind me the evening before${" "}and 1 hour before</label>
@@ -10426,10 +10463,33 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function orgThanksHtml() {
     const done = org.thanks.filter(t => t.done).length;
     return `<div class="card org-card"><p class="host-rem">${org.thanks.length ? `${done} of ${org.thanks.length} thank-yous sent${done === org.thanks.length ? " 🎉" : ""}` : "Jot down gifts as they're opened, then tick each thank-you as it's sent."}</p>
-      <ul class="host-list">${org.thanks.map(t => `<li data-ot="${t.id}"><label class="${t.done ? "on" : ""}"><input type="checkbox" data-otdone ${t.done ? "checked" : ""}><span><b>${esc(t.from)}</b>${t.gift ? ` · ${esc(t.gift)}` : ""}</span></label><button class="icon-btn" data-odel aria-label="Remove">✕</button></li>`).join("")}</ul>
+      <ul class="host-list">${org.thanks.map(t => `<li data-ot="${t.id}"><label class="${t.done ? "on" : ""}"><input type="checkbox" data-otdone ${t.done ? "checked" : ""}><span><b>${esc(t.from)}</b>${t.gift ? ` · ${esc(t.gift)}` : ""}</span></label><button type="button" class="chip" data-otnote>💌 Note</button><button class="icon-btn" data-odel aria-label="Remove">✕</button></li>`).join("")}</ul>
       <form id="orgThanksForm" class="org-ev-form" autocomplete="off"><div class="org-addr-row"><input class="input" name="from" list="orgNames" maxlength="40" placeholder="From" aria-label="From"><input class="input" name="gift" maxlength="50" placeholder="Gift" aria-label="Gift"></div><button class="btn btn-green btn-block" type="submit">➕ Add</button></form>
       <datalist id="orgNames">${[...new Set(org.contacts.map(c => c.name).concat(gifts.people.map(p => p.name)))].map(n => `<option value="${esc(n)}">`).join("")}</datalist></div>`;
   }
+  // 💌 ready-to-send thank-you wording, personalised with who & what
+  const TY_TPL = [
+    ["❤️ Heartfelt", "Dear {from},\n\nThank you so much for the {gift}! It was so thoughtful of you, and we absolutely love it. Wishing you a wonderful new year!"],
+    ["😊 Friendly", "Hi {from}! Just wanted to say a big thank you for the {gift}. You always know exactly what we'll love. ❤️"],
+    ["🧒 From the kids", "Dear {from},\n\nThank you for the {gift}! I really like it and I use it every day. Thank you for thinking of me!\n\nLove, "],
+    ["💵 Money or gift card", "Dear {from},\n\nThank you for your generous gift! We're planning to put it toward something special, and we'll think of you when we do."],
+    ["💬 Quick text", "Thank you for the {gift}, {from}! Loved it. Merry Christmas! 🎄"],
+    ["💼 Work", "Thank you for the {gift}! It was such a kind surprise and really made my day. Happy holidays!"]
+  ];
+  function showTy(t) {
+    $("#tyTitle").textContent = `Thank-you for ${t.from}`;
+    $("#tyBody").innerHTML = TY_TPL.map(([l, txt], i) => { const msg = txt.replace(/\{from\}/g, t.from).replace(/\{gift\}/g, t.gift || "lovely gift");
+      return `<div class="ty-tpl"><b>${l}</b><p>${esc(msg)}</p><div class="send-btns"><button type="button" class="btn btn-ghost" data-tycopy="${i}">📋 Copy</button><button type="button" class="btn btn-green" data-tyshare="${i}">💬 Send</button></div></div>`; }).join("");
+    $("#tyPop").dataset.t = t.id; $("#tyPop").classList.add("show");
+  }
+  $("#tyPop").addEventListener("click", async e => {
+    if (e.target.id === "tyPop" || e.target.closest("#tyClose")) { $("#tyPop").classList.remove("show"); return; }
+    const c = e.target.closest("[data-tycopy],[data-tyshare]"); if (!c) return;
+    const msg = c.closest(".ty-tpl").querySelector("p").textContent, t = org.thanks.find(x => x.id === $("#tyPop").dataset.t);
+    if (c.dataset.tycopy != null) { try { await navigator.clipboard.writeText(msg); toast("📋 Copied! Paste it into a card, text or email"); } catch (err) { toast("Couldn't copy on this device"); } }
+    else { const sh = NoelNative.plugin("Share"); try { if (sh) await sh.share({ text: msg }); else if (navigator.share) await navigator.share({ text: msg }); else location.href = "sms:?&body=" + encodeURIComponent(msg); } catch (err) {} }
+    if (t && !t.done && confirm("Mark this thank-you as sent?")) { t.done = true; saveOrg(); renderOrg(); $("#tyPop").classList.remove("show"); }
+  });
   // ---------- 📦 Packages ----------
   function orgPackagesHtml() {
     const today = ymd(new Date());
@@ -10441,6 +10501,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
           <button type="button" class="chip${p.arrived ? " on" : ""}" data-oarrived>${p.arrived ? "✓ Arrived" : "Mark as arrived"}</button></div>`; }).join("")}
       <form class="card add-task org-ev-form" id="orgPackageForm" autocomplete="off"><h3>➕ Add an order</h3>
         <input class="input" name="item" maxlength="60" placeholder="What did you order?" aria-label="Item">
+        ${fillChips((currency === "USD" ? ["Amazon", "Walmart", "Target", "Best Buy", "Costco", "Etsy"] : ["Amazon", "Walmart", "Canadian Tire", "Best Buy", "Costco", "Etsy"]).map(x => [x]), "#orgPackageForm [name=store]")}
         <div class="org-addr-row"><input class="input" name="store" maxlength="30" placeholder="Store" aria-label="Store"><input class="input" name="eta" type="date" aria-label="Expected delivery"></div>
         <input class="input" name="track" maxlength="40" placeholder="Tracking number (optional)" aria-label="Tracking number">
         <button class="btn btn-green btn-block" type="submit">Add</button></form>`;
@@ -10515,6 +10576,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     }
     const pk = t.closest("[data-op]"), p = pk && org.packages.find(x => x.id === pk.dataset.op);
     if (p) { if (t.closest("[data-oarrived]")) { p.arrived = !p.arrived; if (p.arrived) toast("📦 Arrived!"); } else if (t.closest("[data-odel]")) org.packages = org.packages.filter(x => x !== p); else return; orgChanged(); return; }
+    const tn = t.closest("[data-otnote]"); if (tn) { const x = org.thanks.find(z => z.id === tn.closest("[data-ot]").dataset.ot); if (x) showTy(x); return; }
     if (t.closest("[data-odel]")) {
       const th = t.closest("[data-ot]"), gv = t.closest("[data-og]"), ot = t.closest("[data-oo]");
       if (th) org.thanks = org.thanks.filter(x => x.id !== th.dataset.ot);
@@ -10947,6 +11009,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const total = rows.reduce((a, r) => a + r.amt, 0), N = NoelNative.isNative();
     return `<form class="card pt-card org-ev-form" id="budAddForm" autocomplete="off"><h3>➕ Add spending</h3>
         <input class="input" name="name" maxlength="60" placeholder="What was it? e.g. Tree lights" aria-label="What">
+        ${fillChips((SPACE === "office" ? [["Decorations", "decor"], ["Prizes", "party"], ["Gift cards", "other"], ["Venue deposit", "party"], ["Catering", "food"], ["Drinks", "food"], ["Plates & napkins", "hosting"], ["Charity donation", "other"]] : [["Tree", "decor"], ["Lights", "decor"], ["Wrapping paper", "other"], ["Christmas cards", "cards"], ["Stamps & postage", "cards"], ["Groceries", "food"], ["Restaurant", "food"], ["Gas", "travel"], ["Flights", "travel"], ["Outfits", "other"], ["Babysitter", "other"], ["Event tickets", "party"], ["Hosting supplies", "hosting"]]).map(([n, c]) => [n, n, { "#budAddForm [name=cat]": c }]), "#budAddForm [name=name]")}
         <div class="org-addr-row"><select class="input" name="cat" aria-label="Category">${BUD_CATS.filter(([k]) => k !== "gifts" && k !== "food" && k !== "giving").concat(BUD_CATS.filter(([k]) => k === "food")).map(([k, i, l]) => `<option value="${k}">${i} ${l}</option>`).join("")}</select>
           <input class="input" name="amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="$" aria-label="Amount" style="max-width:96px"></div>
         <input class="input" name="date" type="date" value="${budToday()}" aria-label="Date">

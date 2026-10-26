@@ -102,6 +102,7 @@
         ${dayList.length ? `<ul class="cal-list">${dayList.map(e => `<li class="${e.auto ? "auto" : ""}" ${e.mine ? `data-oev="${e.id}"` : ""}><span class="cl-time">${e.time ? mclock(parseYmd(e.date).setHours(...e.time.split(":").map(Number))) : "All day"}</span><span class="cl-txt">${e.mine ? memberEmoji(e.who) : e.icon} ${esc(e.title)}${e.notes ? `<small>${esc(e.notes)}</small>` : ""}${e.auto ? `<small>From your Noël plans</small>` : ""}</span>${e.mine ? `<button class="icon-btn" data-odelev aria-label="Remove">✕</button>` : ""}</li>`).join("")}</ul>` : `<p class="host-rem">Nothing planned yet.</p>`}
         <form id="orgEventForm" class="org-ev-form" autocomplete="off">
           <input class="input" name="title" maxlength="60" placeholder="e.g. School concert" aria-label="Event">
+          ${fillChips((hubMode === "company" ? ["🎉 Office party", "🎁 Gift exchange", "🥘 Potluck lunch", "📞 Client gifts go out", "🏖️ Office closed"] : ["🎶 School concert", "⭐ Christmas pageant", "🎅 Photos with Santa", "🎄 Tree lighting", "⛪ Christmas Eve service", "💼 Work party", "🏒 Hockey game", "🍪 Cookie exchange", "🎁 Gift exchange", "🛍️ Holiday shopping day", "✈️ Travel day", "🦃 Family dinner"]).map(x => [x, x.replace(/^\S+\s/, "")]), "#orgEventForm [name=title]")}
           <div class="org-addr-row"><input class="input" name="time" type="time" aria-label="Time"><select class="input" name="who" aria-label="Who"><option value="">Everyone</option>${org.members.map(m => `<option value="${m.id}">${m.emoji} ${esc(m.name)}</option>`).join("")}</select></div>
           <input class="input" name="notes" maxlength="80" placeholder="Notes, e.g. bring 24 cupcakes, wear red" aria-label="Notes">
           <label class="host-check"><input type="checkbox" name="remind" checked> 🔔 Remind me the evening before${" "}and 1 hour before</label>
@@ -117,10 +118,33 @@
   function orgThanksHtml() {
     const done = org.thanks.filter(t => t.done).length;
     return `<div class="card org-card"><p class="host-rem">${org.thanks.length ? `${done} of ${org.thanks.length} thank-yous sent${done === org.thanks.length ? " 🎉" : ""}` : "Jot down gifts as they're opened, then tick each thank-you as it's sent."}</p>
-      <ul class="host-list">${org.thanks.map(t => `<li data-ot="${t.id}"><label class="${t.done ? "on" : ""}"><input type="checkbox" data-otdone ${t.done ? "checked" : ""}><span><b>${esc(t.from)}</b>${t.gift ? ` · ${esc(t.gift)}` : ""}</span></label><button class="icon-btn" data-odel aria-label="Remove">✕</button></li>`).join("")}</ul>
+      <ul class="host-list">${org.thanks.map(t => `<li data-ot="${t.id}"><label class="${t.done ? "on" : ""}"><input type="checkbox" data-otdone ${t.done ? "checked" : ""}><span><b>${esc(t.from)}</b>${t.gift ? ` · ${esc(t.gift)}` : ""}</span></label><button type="button" class="chip" data-otnote>💌 Note</button><button class="icon-btn" data-odel aria-label="Remove">✕</button></li>`).join("")}</ul>
       <form id="orgThanksForm" class="org-ev-form" autocomplete="off"><div class="org-addr-row"><input class="input" name="from" list="orgNames" maxlength="40" placeholder="From" aria-label="From"><input class="input" name="gift" maxlength="50" placeholder="Gift" aria-label="Gift"></div><button class="btn btn-green btn-block" type="submit">➕ Add</button></form>
       <datalist id="orgNames">${[...new Set(org.contacts.map(c => c.name).concat(gifts.people.map(p => p.name)))].map(n => `<option value="${esc(n)}">`).join("")}</datalist></div>`;
   }
+  // 💌 ready-to-send thank-you wording, personalised with who & what
+  const TY_TPL = [
+    ["❤️ Heartfelt", "Dear {from},\n\nThank you so much for the {gift}! It was so thoughtful of you, and we absolutely love it. Wishing you a wonderful new year!"],
+    ["😊 Friendly", "Hi {from}! Just wanted to say a big thank you for the {gift}. You always know exactly what we'll love. ❤️"],
+    ["🧒 From the kids", "Dear {from},\n\nThank you for the {gift}! I really like it and I use it every day. Thank you for thinking of me!\n\nLove, "],
+    ["💵 Money or gift card", "Dear {from},\n\nThank you for your generous gift! We're planning to put it toward something special, and we'll think of you when we do."],
+    ["💬 Quick text", "Thank you for the {gift}, {from}! Loved it. Merry Christmas! 🎄"],
+    ["💼 Work", "Thank you for the {gift}! It was such a kind surprise and really made my day. Happy holidays!"]
+  ];
+  function showTy(t) {
+    $("#tyTitle").textContent = `Thank-you for ${t.from}`;
+    $("#tyBody").innerHTML = TY_TPL.map(([l, txt], i) => { const msg = txt.replace(/\{from\}/g, t.from).replace(/\{gift\}/g, t.gift || "lovely gift");
+      return `<div class="ty-tpl"><b>${l}</b><p>${esc(msg)}</p><div class="send-btns"><button type="button" class="btn btn-ghost" data-tycopy="${i}">📋 Copy</button><button type="button" class="btn btn-green" data-tyshare="${i}">💬 Send</button></div></div>`; }).join("");
+    $("#tyPop").dataset.t = t.id; $("#tyPop").classList.add("show");
+  }
+  $("#tyPop").addEventListener("click", async e => {
+    if (e.target.id === "tyPop" || e.target.closest("#tyClose")) { $("#tyPop").classList.remove("show"); return; }
+    const c = e.target.closest("[data-tycopy],[data-tyshare]"); if (!c) return;
+    const msg = c.closest(".ty-tpl").querySelector("p").textContent, t = org.thanks.find(x => x.id === $("#tyPop").dataset.t);
+    if (c.dataset.tycopy != null) { try { await navigator.clipboard.writeText(msg); toast("📋 Copied! Paste it into a card, text or email"); } catch (err) { toast("Couldn't copy on this device"); } }
+    else { const sh = NoelNative.plugin("Share"); try { if (sh) await sh.share({ text: msg }); else if (navigator.share) await navigator.share({ text: msg }); else location.href = "sms:?&body=" + encodeURIComponent(msg); } catch (err) {} }
+    if (t && !t.done && confirm("Mark this thank-you as sent?")) { t.done = true; saveOrg(); renderOrg(); $("#tyPop").classList.remove("show"); }
+  });
   // ---------- 📦 Packages ----------
   function orgPackagesHtml() {
     const today = ymd(new Date());
@@ -132,6 +156,7 @@
           <button type="button" class="chip${p.arrived ? " on" : ""}" data-oarrived>${p.arrived ? "✓ Arrived" : "Mark as arrived"}</button></div>`; }).join("")}
       <form class="card add-task org-ev-form" id="orgPackageForm" autocomplete="off"><h3>➕ Add an order</h3>
         <input class="input" name="item" maxlength="60" placeholder="What did you order?" aria-label="Item">
+        ${fillChips((currency === "USD" ? ["Amazon", "Walmart", "Target", "Best Buy", "Costco", "Etsy"] : ["Amazon", "Walmart", "Canadian Tire", "Best Buy", "Costco", "Etsy"]).map(x => [x]), "#orgPackageForm [name=store]")}
         <div class="org-addr-row"><input class="input" name="store" maxlength="30" placeholder="Store" aria-label="Store"><input class="input" name="eta" type="date" aria-label="Expected delivery"></div>
         <input class="input" name="track" maxlength="40" placeholder="Tracking number (optional)" aria-label="Tracking number">
         <button class="btn btn-green btn-block" type="submit">Add</button></form>`;
@@ -206,6 +231,7 @@
     }
     const pk = t.closest("[data-op]"), p = pk && org.packages.find(x => x.id === pk.dataset.op);
     if (p) { if (t.closest("[data-oarrived]")) { p.arrived = !p.arrived; if (p.arrived) toast("📦 Arrived!"); } else if (t.closest("[data-odel]")) org.packages = org.packages.filter(x => x !== p); else return; orgChanged(); return; }
+    const tn = t.closest("[data-otnote]"); if (tn) { const x = org.thanks.find(z => z.id === tn.closest("[data-ot]").dataset.ot); if (x) showTy(x); return; }
     if (t.closest("[data-odel]")) {
       const th = t.closest("[data-ot]"), gv = t.closest("[data-og]"), ot = t.closest("[data-oo]");
       if (th) org.thanks = org.thanks.filter(x => x.id !== th.dataset.ot);
