@@ -31,6 +31,7 @@
           <input class="input santa-pin" id="santaPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="${setting ? (santaSetFirst ? "Type it again" : "New Santa PIN") : "Santa PIN"}" aria-label="Santa PIN">
           <button class="btn btn-red btn-block" type="submit">${setting ? (santaSetFirst ? "Save PIN" : "Next") : "🔓 Open Santa's list"}</button>
         </form>
+        <div class="santa-warn"><b>⚠️ Write your PIN down somewhere safe, away from this app.</b><br>There is no backup and no way to recover a lost PIN, not even for us. If it's forgotten, the only way back in is to erase Santa's list and start again.<br><small>Ideas: a note in your wallet, your password manager, or tucked inside a book only grown-ups use.</small></div>
         ${setting ? "" : `<button type="button" class="classy-link santa-forgot" id="santaForgot">Forgot the PIN?</button>`}
       </div>`;
       setTimeout(() => { const i = $("#santaPin"); if (i) i.focus(); }, 100);
@@ -70,7 +71,7 @@
         if (pin !== santaSetFirst) { santaSetFirst = ""; toast("Those didn't match. Let's try again"); renderSanta2(); return; }
         const salt = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))));
         santa2.pin = { salt, hash: await santaHash(pin, salt) }; save("santaList", santa2);
-        santaSetFirst = ""; santaOpen = true; santaPoke(); renderSanta2(); toast("🎅 Santa PIN saved. Remember it!"); return;
+        santaSetFirst = ""; santaOpen = true; santaPoke(); renderSanta2(); toast("🎅 Santa PIN saved. Write it down somewhere safe!"); return;
       }
       if (await santaHash(pin, santa2.pin.salt) === santa2.pin.hash) { santaOpen = true; santaPoke(); renderSanta2(); }
       else { toast("🎅 That's not the Santa PIN"); $("#santaPin").value = ""; if (navigator.vibrate) navigator.vibrate([30, 40, 30]); }

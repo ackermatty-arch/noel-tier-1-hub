@@ -1291,6 +1291,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .host-tabs { margin-bottom: 12px; }
 .tray-btn { position: relative; }
 .pt-banner { margin-top: 12px; }
+.santa-warn { margin: 14px 0 4px; padding: 12px 14px; border-radius: 12px; background: #fbf3dc; border: 1px solid rgba(201,162,39,.45); font-size: 13.5px; line-height: 1.45; text-align: left; } .santa-warn small { color: var(--muted); }
 .bud-hero { padding: 18px 16px; text-align: center; margin-bottom: 12px; } .bud-hero svg { display: block; margin: 0 auto 8px; }
 .bud-legend { list-style: none; padding: 0; margin: 6px 0 0; text-align: left; }
 .bud-legend li { display: grid; grid-template-columns: 14px 1fr auto 40px; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
@@ -9740,6 +9741,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
           <input class="input santa-pin" id="santaPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="${setting ? (santaSetFirst ? "Type it again" : "New Santa PIN") : "Santa PIN"}" aria-label="Santa PIN">
           <button class="btn btn-red btn-block" type="submit">${setting ? (santaSetFirst ? "Save PIN" : "Next") : "🔓 Open Santa's list"}</button>
         </form>
+        <div class="santa-warn"><b>⚠️ Write your PIN down somewhere safe, away from this app.</b><br>There is no backup and no way to recover a lost PIN, not even for us. If it's forgotten, the only way back in is to erase Santa's list and start again.<br><small>Ideas: a note in your wallet, your password manager, or tucked inside a book only grown-ups use.</small></div>
         ${setting ? "" : `<button type="button" class="classy-link santa-forgot" id="santaForgot">Forgot the PIN?</button>`}
       </div>`;
       setTimeout(() => { const i = $("#santaPin"); if (i) i.focus(); }, 100);
@@ -9779,7 +9781,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         if (pin !== santaSetFirst) { santaSetFirst = ""; toast("Those didn't match. Let's try again"); renderSanta2(); return; }
         const salt = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))));
         santa2.pin = { salt, hash: await santaHash(pin, salt) }; save("santaList", santa2);
-        santaSetFirst = ""; santaOpen = true; santaPoke(); renderSanta2(); toast("🎅 Santa PIN saved. Remember it!"); return;
+        santaSetFirst = ""; santaOpen = true; santaPoke(); renderSanta2(); toast("🎅 Santa PIN saved. Write it down somewhere safe!"); return;
       }
       if (await santaHash(pin, santa2.pin.salt) === santa2.pin.hash) { santaOpen = true; santaPoke(); renderSanta2(); }
       else { toast("🎅 That's not the Santa PIN"); $("#santaPin").value = ""; if (navigator.vibrate) navigator.vibrate([30, 40, 30]); }
