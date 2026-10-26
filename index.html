@@ -2997,7 +2997,7 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
    🍽️ MEAL PLANNER: the menus (original recipes, Earth & Wonder)
    Every recipe is written for 8 people. The app scales it for 1–20.
    Ingredient: { q: amount, u: unit, t: "text" or ["one", "many"], s: how it scales }
-     s: "f" = with guests (default) · "w" = with turkey size · "p" = per pie · "n" = never
+     s: "f" = with guests (default) · "w" = with roast size · "p" = per dessert batch · "b" = per main batch · "n" = never
      u: "cup" "tbsp" "tsp" "lb" "oz" or "" for a count
    ✏️ To add a meal, copy one block in MEALS and change it.
    ============================================================ */
@@ -4793,6 +4793,354 @@ window.NOEL_MEALS = (function () {
       ribs: racks * 8, racks, crowns, pull: d[2], final: d[3], doneLabel: d[1].replace("Med-", "Medium-") };
   }
 
+  const vegan = {
+    id: "vegan",
+    tab: "vegan",
+    name: "Vegan Wellington Dinner",
+    icon: "🌱",
+    blurb: "Mushroom & lentil Wellington, wild mushroom stuffing, maple sprouts, umami gravy and deep-dish pecan pie. 100% plant-based.",
+    menu: [
+      ["Drinks", ["Spiced Vegan Cashew Eggnog", "Festive Cranberry-Rosemary Spritzer (with gin or vodka, or alcohol-free)"]],
+      ["Appetizer", ["Pistachio & Pomegranate Vegan Cheese Ball"]],
+      ["Main", ["Classic Mushroom & Lentil Vegan Wellington", "Rich Umami Vegan Gravy"]],
+      ["Sides", ["Wild Mushroom Stuffing with Sage & Rosemary", "Maple Roasted Brussels Sprouts with Toasted Hazelnuts"]],
+      ["Dessert", ["Deep-Dish Vegan Pecan Pie"]]
+    ],
+    drinks: [
+      ["With dinner", "A vegan-friendly Pinot Noir or Gamay (Beaujolais). Light-bodied, with earthy cherry notes that echo the mushrooms and lentils without overpowering them. Look for \"vegan\" or \"unfined\" on the label: some wines are clarified with egg whites or fish products."],
+      ["Lighter option", "A dry Riesling or Grüner Veltliner. Crisp acidity cuts through the rich pastry and gravy."],
+      ["Spritzer", "The Cranberry-Rosemary Spritzer (recipe included) pairs beautifully with the cheese ball, and it's just as festive without the spirits."],
+      ["With dessert", "The spiced cashew eggnog, or coffee with oat milk."]
+    ],
+    recipes: [
+      {
+        id: "nog", course: "Drinks", name: "Spiced Vegan Cashew Eggnog",
+        prep: "10 min, plus soaking and chilling", cook: "none", yieldText: f => `about ${Math.round(6 * f)} cups`,
+        ing: [
+          { q: 1, u: "cup", t: "raw cashews, soaked 4 hours or overnight, then drained" },
+          { q: 3, u: "cup", t: "unsweetened almond or oat milk" },
+          { q: 1, u: "", t: ["can (13.5 oz) full-fat coconut milk", "cans (13.5 oz each) full-fat coconut milk"] },
+          { q: 0.5, u: "cup", t: "pure maple syrup" },
+          { q: 2, u: "tsp", t: "vanilla extract" },
+          { q: 1, u: "tsp", t: "ground cinnamon" },
+          { q: 0.5, u: "tsp", t: "ground nutmeg, plus extra to serve" },
+          { q: 0.25, u: "tsp", t: "ground cloves" },
+          { q: 0.125, u: "tsp", t: "ground turmeric (optional, for a golden colour)" },
+          { q: null, u: "", s: "n", t: "Pinch of salt" }
+        ],
+        steps: [
+          "Blend everything in a high-speed blender for 2 minutes, until completely silky.",
+          "Chill at least 2 hours. It thickens as it chills.",
+          "Shake or stir, pour into small glasses and dust with nutmeg.",
+          "For adults, add 1 oz dark rum or bourbon to each glass, if you like."
+        ],
+        tip: "Make it the day before. It keeps 3 days in the fridge."
+      },
+      {
+        id: "spritzer", course: "Drinks", name: "Festive Cranberry-Rosemary Spritzer",
+        prep: "5 min", cook: "none", yieldText: f => `${Math.round(8 * f)} drinks`,
+        ing: [
+          { q: 2, u: "cup", t: "cranberry juice, chilled" },
+          { q: 0.5, u: "cup", t: "fresh lime juice" },
+          { q: 3, u: "cup", t: "ginger beer, chilled" },
+          { q: 1.5, u: "cup", t: "gin or vodka (optional: 1½ oz per drink)" },
+          { q: null, u: "", s: "n", t: "Rosemary sprigs, lime wheels and fresh cranberries, to garnish" }
+        ],
+        steps: [
+          "Fill glasses with ice and add 1½ oz gin or vodka, if using.",
+          "Add about ¼ cup cranberry juice and a splash of lime juice to each glass.",
+          "Top with ginger beer and garnish with a rosemary sprig, lime wheel and a few cranberries."
+        ],
+        tip: "Leave out the spirits for a festive alcohol-free version that everyone can enjoy."
+      },
+      {
+        id: "veganball", course: "Appetizer", name: "Pistachio & Pomegranate Vegan Cheese Ball",
+        prep: "20 min, plus soaking and 4 hours chilling", cook: "none", yieldText: f => servings(f),
+        ing: [
+          { q: 1.5, u: "cup", t: "raw cashews, soaked 4 hours or overnight, then drained" },
+          { q: 2, u: "tbsp", t: "fresh lemon juice" },
+          { q: 2, u: "tbsp", t: "nutritional yeast" },
+          { q: 2, u: "tbsp", t: "refined coconut oil, melted (this helps it firm up)" },
+          { q: 1, u: "", t: ["small garlic clove", "small garlic cloves"] },
+          { q: 0.5, u: "tsp", t: "salt" },
+          { q: 3, u: "tbsp", t: "water, as needed" },
+          { q: 0.5, u: "cup", t: "shelled pistachios, chopped" },
+          { q: 0.33, u: "cup", t: "pomegranate seeds" },
+          { q: 1, u: "tbsp", t: "fresh chives or parsley, chopped" },
+          { q: null, u: "", s: "n", t: "Vegan crackers and apple slices, for serving" }
+        ],
+        steps: [
+          "Blend the cashews, lemon juice, nutritional yeast, coconut oil, garlic and salt until very smooth, adding water a spoonful at a time only as needed. Scrape down the sides often.",
+          "Scrape onto plastic wrap, shape into a ball, wrap tightly and chill at least 4 hours (or overnight) until firm.",
+          "Mix the pistachios, pomegranate seeds and herbs on a plate.",
+          "Unwrap the ball and roll it in the topping, pressing gently so it sticks.",
+          "Let it sit out 15 minutes before serving with crackers and apple slices."
+        ],
+        tip: "Make it the day before. The coconut oil sets it firm in the fridge."
+      },
+      {
+        id: "wellington", course: "Main", name: "Classic Mushroom & Lentil Vegan Wellington",
+        prep: "45 min, plus chilling", cook: "40–45 min", rest: "10 min",
+        yieldText: (f, p) => p.batches > 1 ? `${p.batches} Wellingtons (about 6 servings each)` : "1 Wellington (about 6 servings)",
+        note: (f, p) => (p.batches > 1 ? `Amounts below are for all ${p.batches} Wellingtons together. Bake them two to a large baking sheet, with space between. ` : "") + "Check that the puff pastry is labelled vegan. Many store brands are made with oil instead of butter.",
+        ing: [
+          { q: 1, u: "tbsp", s: "b", t: "olive oil" },
+          { q: 1, u: "", s: "b", t: ["yellow onion, finely diced", "yellow onions, finely diced"] },
+          { q: 2, u: "", s: "b", t: ["garlic clove, minced", "garlic cloves, minced"] },
+          { q: 1, u: "lb", s: "b", t: "cremini mushrooms, finely chopped" },
+          { q: 1, u: "tbsp", s: "b", t: "fresh thyme leaves" },
+          { q: 1, u: "tbsp", s: "b", t: "fresh rosemary, finely chopped" },
+          { q: 1, u: "tbsp", s: "b", t: "tomato paste" },
+          { q: 1, u: "tbsp", s: "b", t: "soy sauce or tamari" },
+          { q: 0.25, u: "cup", s: "b", t: "dry red wine or vegetable broth" },
+          { q: 1, u: "", s: "b", t: ["can (15 oz) lentils, rinsed and drained (or 1½ cups cooked)", "cans (15 oz each) lentils, rinsed and drained"] },
+          { q: 0.5, u: "cup", s: "b", t: "walnuts, toasted and finely chopped" },
+          { q: 0.75, u: "cup", s: "b", t: "panko or fresh breadcrumbs (vegan)" },
+          { q: 2, u: "tbsp", s: "b", t: "ground flaxseed mixed with 5 tbsp water (a \"flax egg\")" },
+          { q: 0.5, u: "tsp", s: "b", t: "salt" },
+          { q: 0.25, u: "tsp", s: "b", t: "black pepper" },
+          { q: 1, u: "", s: "b", t: ["sheet vegan puff pastry, thawed in the fridge", "sheets vegan puff pastry, thawed in the fridge"] },
+          { q: 2, u: "tbsp", s: "b", t: "unsweetened plant milk mixed with 1 tsp maple syrup, for brushing" }
+        ],
+        steps: [
+          "Stir the flaxseed and water together and set aside for 10 minutes to thicken.",
+          "Heat the oil in a large skillet over medium heat. Cook the onion 5 minutes until soft, then the garlic for 30 seconds.",
+          "Add the mushrooms and cook 10–12 minutes, stirring now and then, until all their liquid has cooked away and they're browned.",
+          "Stir in the thyme, rosemary, tomato paste, soy sauce and wine. Cook 2 minutes until the pan is almost dry. Cool for 10 minutes.",
+          "In a large bowl, lightly mash half the lentils. Add the rest of the lentils, the mushroom mixture, walnuts, breadcrumbs, flax egg, salt and pepper and mix well. Chill 30 minutes so it firms up.",
+          "On a sheet of parchment, roll the pastry into a rectangle about 11 × 14 inches.",
+          "Shape the filling into a firm log down the centre, about 3 inches wide, leaving 1 inch clear at each end.",
+          "Fold the pastry over the filling, pressing the seam and ends to seal. Roll it seam-side down onto the parchment and slide it onto a baking sheet. Chill 15–20 minutes.",
+          "Heat the oven to 400°F (200°C). Brush the pastry with the milk and maple glaze. Score a shallow criss-cross pattern on top and cut 2 small steam vents.",
+          "Bake 40–45 minutes, until deeply golden, puffed and crisp underneath.",
+          "Rest 10 minutes, then slice thickly with a serrated knife."
+        ],
+        tip: "Cook the mushrooms until they're truly dry. Moisture is the enemy of crisp pastry. You can make the filling the day before."
+      },
+      {
+        id: "vgravy", course: "Main", name: "Rich Umami Vegan Gravy",
+        prep: "15 min (includes soaking)", cook: "15 min", yieldText: f => `about ${fmtCups(3 * f)}`,
+        ing: [
+          { q: 0.5, u: "oz", t: "dried porcini mushrooms, soaked 10 minutes in 1 cup hot water" },
+          { q: 3, u: "tbsp", t: "plant-based butter or olive oil" },
+          { q: 1, u: "", t: ["shallot, finely minced", "shallots, finely minced"] },
+          { q: 0.25, u: "cup", t: "all-purpose flour" },
+          { q: 2, u: "cup", t: "vegetable broth" },
+          { q: 2, u: "tbsp", t: "soy sauce or tamari" },
+          { q: 1, u: "tbsp", t: "nutritional yeast" },
+          { q: 1, u: "tsp", t: "Dijon mustard" },
+          { q: 1, u: "tsp", t: "fresh thyme leaves" },
+          { q: null, u: "", s: "n", t: "Black pepper, to taste" }
+        ],
+        steps: [
+          "Lift the porcini out of their soaking water and chop finely. Save the soaking liquid, leaving any grit at the bottom of the bowl.",
+          "Melt the butter in a saucepan over medium heat. Cook the shallot and porcini for 3 minutes.",
+          "Whisk in the flour and cook 2 minutes, until golden and nutty.",
+          "Slowly whisk in the porcini liquid and the broth until smooth.",
+          "Add the soy sauce, nutritional yeast, Dijon and thyme. Simmer 8–10 minutes, whisking, until thick and glossy.",
+          "Season with pepper. Strain for a silky gravy, or leave the mushrooms in for a rustic one."
+        ],
+        tip: "The porcini and soy sauce give deep, savoury flavour. Make it the day before and rewarm, adding a splash of broth if it's too thick."
+      },
+      {
+        id: "vstuffing", course: "Sides", name: "Wild Mushroom Stuffing with Sage & Rosemary",
+        prep: "25 min, plus drying the bread", cook: "40 min", yieldText: f => servings(f),
+        note: (f, p) => (p.dishes > 1 ? `For this many guests, use ${p.dishes} baking dishes (9×13-inch). ` : "") + "Check that the bread is vegan (most crusty loaves are).",
+        ing: [
+          { q: 1, u: "lb", t: "crusty bread, cut into 1-inch cubes and dried" },
+          { q: 0.33, u: "cup", t: "plant-based butter, plus extra for the dish" },
+          { q: 1, u: "", t: ["yellow onion, diced", "yellow onions, diced"] },
+          { q: 3, u: "", t: ["celery rib, diced", "celery ribs, diced"] },
+          { q: 12, u: "oz", t: "mixed wild mushrooms (shiitake, oyster, cremini), chopped" },
+          { q: 3, u: "", t: ["garlic clove, minced", "garlic cloves, minced"] },
+          { q: 2, u: "tbsp", t: "fresh sage, chopped" },
+          { q: 1, u: "tbsp", t: "fresh rosemary, finely chopped" },
+          { q: 0.25, u: "cup", t: "fresh parsley, chopped" },
+          { q: 1, u: "tsp", t: "salt" },
+          { q: 0.5, u: "tsp", t: "black pepper" },
+          { q: 2.75, u: "cup", t: "vegetable broth (a little more or less as needed)" }
+        ],
+        steps: [
+          "Dry the bread cubes overnight on a baking sheet, or bake at 300°F for 15–20 minutes.",
+          "Melt the butter in a large skillet. Cook the onion and celery 8 minutes until soft.",
+          "Add the mushrooms and cook 8 minutes until golden, then the garlic, sage and rosemary for 1 minute.",
+          "Toss the bread with the mushroom mixture, parsley, salt and pepper.",
+          "Pour in most of the broth and toss until evenly moist, adding more if it seems dry.",
+          "Spread in a buttered baking dish and cover with foil.",
+          "Bake at 400°F for 25 minutes covered, then 15 minutes uncovered, until golden and crisp on top."
+        ],
+        tip: "Assemble it up to 4 hours ahead. It holds well, covered, while the Wellington bakes, and gets a quick rewarm at the end."
+      },
+      {
+        id: "maplesprouts", course: "Sides", name: "Maple Roasted Brussels Sprouts with Toasted Hazelnuts",
+        prep: "10 min", cook: "25–30 min", yieldText: f => servings(f),
+        ing: [
+          { q: 2, u: "lb", t: "Brussels sprouts, trimmed and halved" },
+          { q: 3, u: "tbsp", t: "olive oil" },
+          { q: 1, u: "tsp", t: "salt" },
+          { q: 0.5, u: "tsp", t: "black pepper" },
+          { q: 3, u: "tbsp", t: "pure maple syrup" },
+          { q: 0.5, u: "cup", t: "hazelnuts, toasted and roughly chopped" }
+        ],
+        steps: [
+          "Toss the sprouts with the oil, salt and pepper and spread cut side down on a large baking sheet.",
+          "Roast at 400°F for 20 minutes, until the undersides are deep golden.",
+          "Drizzle with the maple syrup, toss, and roast 5–8 minutes more until glossy and caramelized.",
+          "Scatter with the toasted hazelnuts."
+        ],
+        tip: "Add the maple syrup near the end. If it goes in at the start, it burns."
+      },
+      {
+        id: "veganpecan", course: "Dessert", name: "Deep-Dish Vegan Pecan Pie",
+        prep: "30 min, plus chilling", cook: "about 55 min", rest: "cool 3 hours, then chill overnight",
+        yieldText: (f, p) => p.pies > 1 ? `${p.pies} deep-dish pies (8 slices each)` : "one 9-inch deep-dish pie (8 slices)",
+        note: (f, p) => p.pies > 1 ? `Amounts below are for all ${p.pies} pies together.` : "",
+        ing: [
+          { head: "Crust" },
+          { q: 1.25, u: "cup", s: "p", t: "all-purpose flour" },
+          { q: 1, u: "tbsp", s: "p", t: "granulated sugar" },
+          { q: 0.25, u: "tsp", s: "p", t: "salt" },
+          { q: 0.5, u: "cup", s: "p", t: "cold plant-based butter (block style), cubed" },
+          { q: 3.5, u: "tbsp", s: "p", t: "ice water, about" },
+          { head: "Filling" },
+          { q: 1, u: "", s: "p", t: ["can (13.5 oz) full-fat coconut milk", "cans (13.5 oz each) full-fat coconut milk"] },
+          { q: 0.75, u: "cup", s: "p", t: "pure maple syrup" },
+          { q: 0.5, u: "cup", s: "p", t: "packed brown sugar" },
+          { q: 0.25, u: "cup", s: "p", t: "cornstarch" },
+          { q: 0.5, u: "tsp", s: "p", t: "salt" },
+          { q: 2, u: "tbsp", s: "p", t: "plant-based butter, melted" },
+          { q: 2, u: "tsp", s: "p", t: "vanilla extract" },
+          { q: 0.5, u: "tsp", s: "p", t: "ground cinnamon" },
+          { q: 2, u: "cup", s: "p", t: "pecan halves (1½ cups chopped for the filling, ½ cup whole for the top)" }
+        ],
+        steps: [
+          "Crust: mix the flour, sugar and salt. Cut in the cold butter until it looks like coarse crumbs. Sprinkle in ice water a spoonful at a time until the dough holds together. Shape into a disk, wrap and chill 1 hour.",
+          "Roll into a 12-inch circle and fit into a 9-inch deep-dish pie plate. Crimp the edges and chill 30 minutes.",
+          "Heat the oven to 400°F (200°C). Line the crust with parchment and pie weights. Bake 15 minutes, remove the weights, and bake 5 minutes more until pale golden.",
+          "Lower the oven to 350°F (175°C).",
+          "Filling: whisk the coconut milk, maple syrup, brown sugar, cornstarch and salt in a saucepan. Cook over medium heat, whisking constantly, 5–7 minutes, until it bubbles and thickens like pudding.",
+          "Off the heat, stir in the melted butter, vanilla, cinnamon and the chopped pecans.",
+          "Pour into the crust and arrange the whole pecan halves on top.",
+          "Bake 30–35 minutes, until bubbling at the edges and the centre looks set with only a slight wobble. Cover the crust edges with foil if they brown too fast.",
+          "Cool 3 hours at room temperature, then chill overnight so the custard sets for clean slices."
+        ],
+        tip: "This pie must be made the day before. Serve it chilled or at room temperature, with whipped coconut cream if you like."
+      }
+    ],
+
+    timeline(p) {
+      const out = [];
+      const add = (m, icon, text, alarm = true, main = false) => out.push({ m, icon, text, alarm, main });
+      add(-180, "🔪", "Chop all the vegetables and herbs. Make the Wellington filling if you didn't yesterday");
+      add(-150, "🥟", `Shape the Wellington${p.batches > 1 ? "s" : ""} in puff pastry and chill`);
+      add(-120, "🍞", "Assemble the stuffing in its baking dish");
+      add(-110, "🔥", "Heat the oven to 400°F");
+      add(-95, "🍞", "Stuffing into the oven, covered (25 minutes)");
+      add(-80, "🧀", "Take the cheese ball out of the fridge. Chill the spritzer mixers");
+      add(-70, "🍞", "Uncover the stuffing (15 minutes more)");
+      add(-60, "🥂", "Cheese ball, crackers, eggnog and spritzers out for arriving guests");
+      add(-58, "🥟", "Brush the Wellington with glaze, score the top and cut steam vents");
+      add(-55, "🥟", `Wellington${p.batches > 1 ? "s" : ""} into the oven on the middle rack (40–45 minutes). Stuffing out, keep covered`, true, true);
+      add(-40, "🥬", "Toss the Brussels sprouts with oil, salt and pepper");
+      add(-35, "🥬", "Sprouts into the oven on the top rack (20 minutes)");
+      add(-20, "🫗", "Rewarm the umami gravy");
+      add(-15, "🍁", "Drizzle maple syrup over the sprouts, toss and return to the oven");
+      add(-10, "🥟", "Wellington out to rest 10 minutes. Stuffing back in to rewarm");
+      add(-8, "🥬", "Sprouts out. Scatter with toasted hazelnuts");
+      add(-3, "🔪", "Stuffing out. Slice the Wellington with a serrated knife");
+      add(0, "🍽️", "Dinner is served!");
+      add(45, "🥧", "Slice the pecan pie and pour the eggnog");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) {
+      return [
+        [2, 18, "🥜", "Soak the cashews overnight (for the cheese ball and eggnog). Thaw the puff pastry in the fridge"],
+        [1, 10, "📋", `Prep day: blend the eggnog, make the cheese ball, bake ${p.pies > 1 ? p.pies + " pecan pies so they set" : "the pecan pie so it sets"} overnight, make the gravy, dry the bread cubes, toast the nuts and make the Wellington filling`]
+      ];
+    },
+
+    shop(f, p) {
+      const B = p.batches, P = p.pies, up = (x, step = 1) => Math.ceil(x / step - 1e-9) * step, n = x => Math.max(1, Math.ceil(x - 1e-9));
+      const pl = (k, one, many) => k > 1 ? many : one;
+      const onions = B + n(f), garlic = n((2 * B + 3 * f + f) / 10), cremini = B, wild = up(0.75 * f, 0.5), celery = n(3 * f / 8), spr = up(2 * f, 0.5);
+      const thyme = n((2 * B + f) / 8), rose = n((B + f + 2) / 6), sage = n(2 * f / 8), lemons = n(f), limes = n(4 * f), pom = n(f / 2.5), shallots = n(f);
+      const cashews = n(2.5 * f / 2.7), pist = n(f / 1.1), hazel = n(f / 0.8), walnuts = n(0.5 * B), pecans = 2 * P / 2 > 0 ? n(2 * P / 2) : 1;
+      const lentils = B, bread = n(f), crackers = n(f), porcini = n(f);
+      const mapleCups = 0.5 * f + 0.19 * f + 0.75 * P + 0.05 * B, maple = n(mapleCups / 2.25);
+      const brothCups = 2.75 * f + 2 * f + 0.25 * B, broth = n(brothCups / 3.8);
+      const pastry = n(B / 2), butterTbsp = 5.3 * f + 3 * f + 10 * P, butter = n(butterTbsp / 32);
+      const milk = n((3 * f + 0.15 * B) / 8), coconut = n(f) + P;
+      const spirit = n(1.5 * f / 3.2), cj = n(2 * f / 8), gb = n(3 * f / 6);
+      return [
+        ["Produce", [
+          [`${fmtNum(cremini)} lb`, "cremini mushrooms (for the Wellington)", cremini * 5],
+          [`${fmtNum(wild)} lb`, "mixed wild mushrooms (for the stuffing)", wild * 8],
+          [`${onions}`, "yellow onions", onions * 0.6],
+          [`${shallots}`, pl(shallots, "shallot", "shallots"), shallots * 0.75],
+          [`${garlic}`, pl(garlic, "head garlic", "heads garlic"), garlic],
+          [`${celery}`, pl(celery, "bunch celery", "bunches celery"), celery * 3.5],
+          [`${fmtNum(spr)} lb`, "Brussels sprouts", spr * 4],
+          [`${thyme}`, pl(thyme, "bunch fresh thyme", "bunches fresh thyme"), thyme * 3],
+          [`${rose}`, pl(rose, "bunch fresh rosemary (extra for the spritzers)", "bunches fresh rosemary (extra for the spritzers)"), rose * 3],
+          [`${sage}`, pl(sage, "bunch fresh sage", "bunches fresh sage"), sage * 3],
+          ["1", "bunch fresh parsley", 2],
+          ["1", "bunch fresh chives", 3],
+          [`${pom}`, pl(pom, "pomegranate", "pomegranates"), pom * 3],
+          [`${lemons}`, pl(lemons, "lemon", "lemons"), lemons],
+          [`${limes}`, "limes", limes * 0.6],
+          ["", "apples, for serving with the cheese ball (optional)", null]
+        ]],
+        ["Pantry & Baking", [
+          [`${cashews} × 400 g`, pl(cashews, "bag raw cashews", "bags raw cashews"), cashews * 12],
+          [`${pist} × 150 g`, pl(pist, "bag shelled pistachios", "bags shelled pistachios"), pist * 7],
+          [`${hazel} × 100 g`, pl(hazel, "bag hazelnuts", "bags hazelnuts"), hazel * 5],
+          [`${walnuts} × 100 g`, pl(walnuts, "bag walnuts", "bags walnuts"), walnuts * 4],
+          [`${pecans} × 200 g`, pl(pecans, "bag pecan halves", "bags pecan halves"), pecans * 7],
+          [`${lentils} × 15 oz`, pl(lentils, "can lentils", "cans lentils"), lentils * 2],
+          [`${maple} × 540 ml`, pl(maple, "bottle pure maple syrup", "bottles pure maple syrup"), maple * 12],
+          [`${broth} × 900 ml`, `vegetable broth (about ${Math.ceil(brothCups)} cups)`, broth * 3.5],
+          [`${porcini} × 14 g`, pl(porcini, "pack dried porcini mushrooms", "packs dried porcini mushrooms"), porcini * 5],
+          [`${bread} × 1 lb`, pl(bread, "loaf crusty bread (vegan)", "loaves crusty bread (vegan)"), bread * 4.5],
+          [`${crackers}`, pl(crackers, "box vegan crackers", "boxes vegan crackers"), crackers * 4],
+          ["1", "bag nutritional yeast", 8],
+          ["1", "bag ground flaxseed", 5],
+          ["1", "small jar refined coconut oil", 7],
+          ["1", "box panko breadcrumbs (vegan)", 3],
+          ["1", "tube tomato paste", 2],
+          ["", "all-purpose flour, cornstarch, granulated and brown sugar", null],
+          ["", "soy sauce or tamari, Dijon mustard, olive oil, vanilla extract", null],
+          ["", "ground cinnamon, nutmeg, cloves, turmeric (optional), salt, black pepper", null]
+        ]],
+        ["Refrigerated & Frozen", [
+          [`${pastry}`, pl(pastry, "box vegan puff pastry (2 sheets), frozen", "boxes vegan puff pastry (2 sheets each), frozen"), pastry * 6],
+          [`${butter} × 454 g`, pl(butter, "block plant-based butter", "blocks plant-based butter"), butter * 7],
+          [`${milk} × 1.89 L`, pl(milk, "carton unsweetened almond or oat milk", "cartons unsweetened almond or oat milk"), milk * 5],
+          [`${coconut} × 400 ml`, pl(coconut, "can full-fat coconut milk", "cans full-fat coconut milk"), coconut * 2.5]
+        ]],
+        ["Spirits & Beverages", [
+          [`${cj} × 1.89 L`, pl(cj, "jug cranberry juice", "jugs cranberry juice"), cj * 5],
+          [`${gb} × 4-pack`, "ginger beer", gb * 6],
+          [`${spirit} × 750 ml`, "gin or vodka (optional)", null],
+          ["", "optional: vegan Pinot Noir or Gamay, dry Riesling, dark rum for the eggnog", null]
+        ]],
+        ["Kitchen Supplies", [
+          ["", "high-speed blender (for the cheese ball and eggnog)", null],
+          ["", "2 large baking sheets, parchment paper, plastic wrap, foil", null],
+          [`${p.dishes}`, pl(p.dishes, "baking dish (9×13-inch)", "baking dishes (9×13-inch)"), null],
+          [`${P}`, pl(P, "deep-dish pie plate (9-inch)", "deep-dish pie plates (9-inch)"), null],
+          ["", "pie weights or dried beans, serrated knife", null]
+        ]]
+      ];
+    }
+  };
+
+  // sizes for the vegan dinner: 1 Wellington per 6 guests, 1 pie per 8
+  function veganPlan(guests) {
+    const g = Math.min(20, Math.max(1, guests | 0)), f = g / 8, batches = Math.max(1, Math.ceil(g / 6));
+    return { g, f, icon: "🌱", mainLabel: batches > 1 ? `${batches} Wellingtons` : "1 Wellington", verb: "bakes", bigNote: "100% plant-based: no meat, dairy or eggs.",
+      roast: 45, roastText: "40–45 min", rest: 10, batches, pies: Math.max(1, Math.ceil(g / 8)), dishes: Math.max(1, Math.ceil(f - 0.25)) };
+  }
+
   // sizes for a turkey dinner: weight, roast time, rest, pies, dishes
   function turkeyPlan(guests) {
     const g = Math.min(20, Math.max(1, guests | 0));
@@ -4827,10 +5175,10 @@ window.NOEL_MEALS = (function () {
       ham,
       lambcrown,
       porkcrown,
-      placeholder("vegan1", "vegan", "Vegan Holiday Dinner", "🌱", "Recipes coming soon."),
+      vegan,
       placeholder("diet1", "dietary", "Dietary Holiday Dinner", "🥗", "Recipes coming soon.")
     ],
-    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan },
+    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan },
     doneness: DONENESS,
     frac, hm, fmtNum
   };
@@ -7683,7 +8031,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (ing.head) return { head: ing.head };
     let t = typeof ing.t === "function" ? ing.t(p) : ing.t;
     if (ing.q == null) return { text: Array.isArray(t) ? t[0] : t };
-    const k = ing.s === "n" ? 1 : ing.s === "w" ? p.w / (p.wBase || 13) : ing.s === "p" ? p.pies : f;
+    const k = ing.s === "n" ? 1 : ing.s === "w" ? p.w / (p.wBase || 13) : ing.s === "p" ? p.pies : ing.s === "b" ? (p.batches || 1) : f;
     let v = ing.q * k, amt = "", many = v > 1.0001;
     if (UNIT_TSP[ing.u]) {
       const tsp = v * UNIT_TSP[ing.u];
@@ -7775,7 +8123,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
           <label><span class="meal-lab">Dinner time</span><input class="input" type="time" id="mealTime" value="${c.time}"></label></div>
         ${m.options && m.options.doneness ? `<span class="meal-lab">How do you like it?</span><div class="seg seg4 sub-tabs meal-done" role="group" aria-label="Doneness">${(Array.isArray(m.options.doneness) ? m.options.doneness : MD.doneness).map(([k, l]) => `<button type="button" data-done="${k}" aria-pressed="${c.doneness === k}">${l}</button>`).join("")}</div>` : ""}
         ${m.options && m.options.gf ? `<label class="meal-gf"><input type="checkbox" id="mealGf" ${c.gf ? "checked" : ""}> Make it gluten-free</label>` : ""}
-        ${p.w ? `<p class="meal-sum">${p.icon} <b>${p.w} lb ${p.meat}</b> · ${p.verb} about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.bigNote ? `<br><small>${p.bigNote}</small>` : ""}</p>` : ""}
+        ${p.w || p.mainLabel ? `<p class="meal-sum">${p.icon} <b>${p.w ? `${p.w} lb ${p.meat}` : p.mainLabel}</b> · ${p.verb} about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.bigNote ? `<br><small>${p.bigNote}</small>` : ""}</p>` : ""}
         <div class="send-btns">
           ${active ? `<button type="button" class="btn btn-ghost" id="mealStop">⏹ Stop dinner alarms</button>` : `<button type="button" class="btn btn-red" id="mealStart">⏰ Start my dinner alarms</button>`}
           <button type="button" class="btn btn-green" id="mealPrint">🖨️ Print everything</button>

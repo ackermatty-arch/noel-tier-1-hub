@@ -45,7 +45,7 @@
     if (ing.head) return { head: ing.head };
     let t = typeof ing.t === "function" ? ing.t(p) : ing.t;
     if (ing.q == null) return { text: Array.isArray(t) ? t[0] : t };
-    const k = ing.s === "n" ? 1 : ing.s === "w" ? p.w / (p.wBase || 13) : ing.s === "p" ? p.pies : f;
+    const k = ing.s === "n" ? 1 : ing.s === "w" ? p.w / (p.wBase || 13) : ing.s === "p" ? p.pies : ing.s === "b" ? (p.batches || 1) : f;
     let v = ing.q * k, amt = "", many = v > 1.0001;
     if (UNIT_TSP[ing.u]) {
       const tsp = v * UNIT_TSP[ing.u];
@@ -137,7 +137,7 @@
           <label><span class="meal-lab">Dinner time</span><input class="input" type="time" id="mealTime" value="${c.time}"></label></div>
         ${m.options && m.options.doneness ? `<span class="meal-lab">How do you like it?</span><div class="seg seg4 sub-tabs meal-done" role="group" aria-label="Doneness">${(Array.isArray(m.options.doneness) ? m.options.doneness : MD.doneness).map(([k, l]) => `<button type="button" data-done="${k}" aria-pressed="${c.doneness === k}">${l}</button>`).join("")}</div>` : ""}
         ${m.options && m.options.gf ? `<label class="meal-gf"><input type="checkbox" id="mealGf" ${c.gf ? "checked" : ""}> Make it gluten-free</label>` : ""}
-        ${p.w ? `<p class="meal-sum">${p.icon} <b>${p.w} lb ${p.meat}</b> · ${p.verb} about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.bigNote ? `<br><small>${p.bigNote}</small>` : ""}</p>` : ""}
+        ${p.w || p.mainLabel ? `<p class="meal-sum">${p.icon} <b>${p.w ? `${p.w} lb ${p.meat}` : p.mainLabel}</b> · ${p.verb} about ${p.roastText} · into the oven at <b>${tIn ? mclock(tIn.t) : ""}</b>${p.bigNote ? `<br><small>${p.bigNote}</small>` : ""}</p>` : ""}
         <div class="send-btns">
           ${active ? `<button type="button" class="btn btn-ghost" id="mealStop">⏹ Stop dinner alarms</button>` : `<button type="button" class="btn btn-red" id="mealStart">⏰ Start my dinner alarms</button>`}
           <button type="button" class="btn btn-green" id="mealPrint">🖨️ Print everything</button>
