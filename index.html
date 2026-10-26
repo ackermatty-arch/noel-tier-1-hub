@@ -10991,7 +10991,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     return [
       { k: y + "treats", icon: "🍫", t: new Date(y, 11, 20, 10, 0).getTime(), text: "Don't forget chocolates and treats! 🍫 Stocking stuffers too!" },
       { k: y + "xmas", icon: "🎄", t: new Date(y, 11, 25, 9, 0).getTime(), text: "Merry Christmas! May today be full of joy, laughter and the people you love. ✨" },
-      { k: ny + "newyear", icon: "🥂", t: new Date(ny, 0, 1, 12, 0).getTime(), text: "Happy New Year! Wishing you a year full of love, laughter and little moments of magic. ✨" }
+      { k: ny + "newyear", icon: "🥂", t: new Date(ny, 0, 1, 12, 0).getTime(), text: "Happy New Year! Wishing you a year full of love, laughter and little moments of magic. ✨" },
+      { k: ny + "review", icon: "🎄", t: new Date(ny, 0, 2, 19, 0).getTime(), text: "Close the book on this Christmas: save your memories in your Holiday Review, then your hub is all set for next season." }
     ];
   };
   const stReminders = () => { const sp = stSurprise(); if (!stAlarm.on) return sp; const y = stYear(), a = stArrive(stMyOff(), y); return sp.concat([{ k: y + "b3", t: a - 3 * 3600000, text: "Santa is 3 hours away. Time to get ready for bed!" }, { k: y + "b1", t: a - 3600000, text: "Santa is 1 hour away! Everyone into bed, quick! 🛷" }]); };
