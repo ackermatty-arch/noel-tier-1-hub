@@ -1313,6 +1313,10 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .fill-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; } .fill-chip { font-size: 12.5px !important; padding: 6px 11px !important; background: #f3ecdc !important; border-color: rgba(184,147,90,.45) !important; color: var(--pine-dark) !important; }
 .fill-lab { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
 .ty-tpl { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 8px 0; text-align: left; font-size: 14px; background: #fff; } .ty-tpl p { margin: 0 0 8px; white-space: pre-wrap; } .ty-tpl .send-btns { gap: 6px; }
+body.co .fam-only { display: none !important; } body.co #giftTabs { grid-template-columns: repeat(3, 1fr); } body.co:not(.co-kids) .kids-only { display: none !important; }
+.who-pick { display: grid; gap: 10px; } .who-tile { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; text-align: left; padding: 14px; border-radius: 16px; border: 2px solid var(--line); background: var(--card); font: inherit; color: inherit; cursor: pointer; }
+.who-tile .wt-ico { font-size: 30px; } .who-tile b { display: block; color: var(--pine-dark); font-size: 16px; } .who-tile small { color: var(--muted); font-size: 13px; } .who-tile.on { border-color: var(--gold); background: #fbf5e6; }
+.who-pill { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; border-radius: 14px; background: #fbf5e6; border: 1px solid rgba(201,162,39,.4); margin-bottom: 12px; font-size: 14px; }
 .ss-ok { font-size: 12px; color: #2f8a4f; font-weight: 800; white-space: nowrap; } .ss-avoid { margin: 4px 0; font-size: 14px; }
 .ss-tools { display: flex; justify-content: space-between; margin-top: 12px; } .ss-mail { margin-top: 10px; } .ss-mail summary { font-weight: 700; color: var(--pine-dark); cursor: pointer; } .ss-mail .chip { margin: 4px 4px 0 0; }
 .ss-swap summary { font-weight: 700; color: var(--pine-dark); cursor: pointer; } .ss-swap ol { padding-left: 20px; font-size: 14px; } .ss-swap li { margin: 5px 0; }
@@ -1517,24 +1521,24 @@ body.space-switching main { opacity: .3; }
        ============================================================ -->
   <section class="view" id="view-games" aria-labelledby="gamesTitle">
     <h2 class="view-title" id="gamesTitle">Game Activities</h2>
-    <p class="view-intro">Play, keep score and print festive games for the whole family.</p>
+    <p class="view-intro" id="gamesIntro">Play, keep score and print festive games for the whole family.</p>
 
     <!-- 🛷 Holiday activities (opens the Activities page) -->
-    <button class="advent-banner acts-banner" data-open="actsSheet">   <!-- ✏️ ready for Jenn's new artwork -->
+    <button class="advent-banner acts-banner fam-only" data-open="actsSheet">   <!-- ✏️ ready for Jenn's new artwork -->
       <span class="ab-ico">⛄</span>
       <span class="ab-text"><b>Holiday Activities</b><small>28 indoor &amp; outdoor ideas, with places near you</small></span>
       <span class="ab-go">Open ›</span>
     </button>
 
     <!-- 🎅 Santa Tracker -->
-    <button class="advent-banner st-banner" id="stBanner">
+    <button class="advent-banner st-banner fam-only" id="stBanner">
       <span class="ab-ico">🛷</span>
       <span class="ab-text"><b>Santa Tracker</b><small id="stBannerSub">Count down to Santa's big flight</small></span>
       <span class="ab-go">Track ›</span>
     </button>
 
     <!-- 🚪 Advent doors banner -->
-    <button class="advent-banner" data-open="adventSheet" id="adventBanner">
+    <button class="advent-banner fam-only" data-open="adventSheet" id="adventBanner">
       <span class="ab-ico">🎄</span>
       <span class="ab-text"><b>Advent Calendar</b><small id="adventSub">A little surprise every day, December 1–25</small></span>
       <span class="ab-go">Open ›</span>
@@ -1551,7 +1555,7 @@ body.space-switching main { opacity: .3; }
 
       <article class="game-card green">
         <div class="game-emoji">🏆</div>
-        <h3>Family Scoreboard</h3>
+        <h3 id="scoreTitle">Family Scoreboard</h3>
         <p>Add teams and track points across every party game.</p>
         <div class="game-meta"><span class="pill" id="teamCountPill">0 teams</span><span class="pill">Auto-saved</span></div>
         <button class="btn btn-gold" data-open="scoreSheet">Open Scoreboard</button>
@@ -1559,7 +1563,7 @@ body.space-switching main { opacity: .3; }
     </div>
 
     <!-- 🎆 New Year's party games (opens the Party Games page) -->
-    <button class="advent-banner nye-banner" data-goview="nye">
+    <button class="advent-banner nye-banner fam-only" data-goview="nye">
       <span class="ab-ico">🎆</span>
       <span class="ab-text"><b>New Year's Eve</b><small>Party games, midnight countdown with fireworks, and more</small></span>
       <span class="ab-go">Open ›</span>
@@ -1647,7 +1651,7 @@ body.space-switching main { opacity: .3; }
         </div>
       </article>
 
-      <article class="card print-card">
+      <article class="card print-card fam-only">
         <div class="print-thumb">🦌</div>
         <div class="print-info">
           <h3>Operation: Reindeer Rescue</h3>
@@ -1658,6 +1662,7 @@ body.space-switching main { opacity: .3; }
       <!-- ✏️ Copy any <article class="card print-card"> block above to add more printables -->
     </div>
 
+    <div class="kids-only">
     <div class="section-label">Kids' Corner</div>
 
     <!-- ✏️ KIDS' PRINTABLES: replace href="#" with your PDF links -->
@@ -1681,10 +1686,11 @@ body.space-switching main { opacity: .3; }
       </article>
     </div>
 
-    <div class="section-label">Movie Night</div>
+    </div>
+    <div class="section-label fam-only">Movie Night</div>
 
     <!-- ✏️ MOVIE LIST: replace href="#" with your PDF link -->
-    <article class="card print-card featured">
+    <article class="card print-card featured fam-only">
       <div class="print-thumb">🎬</div>
       <div class="print-info">
         <span class="bundle-tag">108 movies · 3 pages</span>
@@ -2020,7 +2026,7 @@ body.space-switching main { opacity: .3; }
       <button type="button" data-gpane="wish" aria-pressed="true">📝 Wishes</button>
       <button type="button" data-gpane="track" aria-pressed="false">🎁 Tracker</button>
       <button type="button" data-gpane="ideas" aria-pressed="false">💡 Ideas</button>
-      <button type="button" data-gpane="santa" aria-pressed="false">🎅 Santa</button>
+      <button type="button" data-gpane="santa" aria-pressed="false" class="fam-only">🎅 Santa</button>
     </div>
 
     <!-- 📝 WISH LIST: quick notes of what family & friends would love -->
@@ -2212,7 +2218,7 @@ body.space-switching main { opacity: .3; }
     <!-- ============================================================
          🦃 TURKEY & HAM CALCULATOR (guide times from USDA charts)
          ============================================================ -->
-    <details class="card calc" id="calcCard" open>
+    <details class="card calc fam-only" id="calcCard" open>
       <summary>
         <span class="calc-ico">🦃</span>
         <span><b>Turkey &amp; Ham Calculator</b><small>Thaw, cook and resting times, with timers in one tap</small></span>
@@ -6534,7 +6540,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const t = e.changedTouches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y, ms = Date.now() - swipe.at;
     swipe = null;
     if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8 || ms > 700) return;
-    const order = VIEW_ORDER.filter(v => (hubMode === "company" ? !["meals", "host", "org"].includes(v) : v !== "office"));   // meals & hosting are Family-only
+    const order = VIEW_ORDER.filter(v => (hubMode === "company" ? !["meals", "host", "org", "nye"].includes(v) : v !== "office"));   // meals & hosting are Family-only
     const cur = order.indexOf(load(KEYS.view, "games")), next = cur + (dx < 0 ? 1 : -1);
     if (next < 0 || next >= order.length) return;
     showView(order[next], dx < 0 ? "left" : "right");
@@ -8248,6 +8254,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     catch (err) { location.href = INVITE.smsHref("", text); }
   });
   function showGiftPane(p) {
+    if (p === "santa" && hubMode === "company") p = "track";   // 🎅 Santa's list is family only
     $("#paneWish").hidden = p !== "wish"; $("#paneTrack").hidden = p !== "track"; $("#paneIdeas").hidden = p !== "ideas"; $("#paneSanta").hidden = p !== "santa";
     if (p === "ideas") renderIdeas();
     if (p === "santa") renderSanta2(); else santaLock();
@@ -8379,6 +8386,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#navMeals").hidden = hubMode === "company";   // 🍽️ the big-dinner planner is for families
     $("#hostBanner").hidden = $("#orgBanner").hidden = hubMode === "company";   // 🏡 hosting is for families too
     $("#officeBanner").hidden = hubMode !== "company";                        // 🏢 the office party plan
+    document.body.classList.toggle("co", hubMode === "company");               // 🏢 hide family-only things on the Office side
+    $("#gamesIntro").textContent = hubMode === "company" ? "Play, keep score and print festive games for the whole team." : "Play, keep score and print festive games for the whole family.";
+    $("#scoreTitle").textContent = hubMode === "company" ? "Team Scoreboard" : "Family Scoreboard";
     $$(".sv-title").forEach(x => { x.textContent = hubMode === "company" ? "Advanced Office & Social Survival" : "Advanced Family & Social Survival"; });
     $$(".sv-desc").forEach(x => { x.textContent = hubMode === "company" ? "Six tongue-in-cheek tips for surviving the office party." : "Six tongue-in-cheek tips for surviving the holidays."; });
     $("#selfCareCard").hidden = hubMode === "company";   // 🕯️ self-care is family only
@@ -9448,7 +9458,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const nyeSeason = (d = new Date()) => (d.getMonth() === 11 && d.getDate() >= 26) || (d.getMonth() === 0 && d.getDate() <= 6);
   function applySeasonNav() {
     const nye = nyeSeason();
-    $("#navNye").hidden = !nye;
+    $("#navNye").hidden = !nye || hubMode === "company";   // the New Year's screen is a family thing
     $("#navMeals").hidden = hubMode === "company" || nye;
   }
   const midnightTarget = () => { const n = new Date(); return new Date(n.getFullYear() + 1, 0, 1).getTime(); };
@@ -11250,6 +11260,12 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
        next coordinator, and "remove the office plans from this phone"
      ============================================================ */
   const OFF_ACTS = [["potluck", "🥘 Potluck"], ["catered", "🍽️ Catered meal"], ["gifts", "🎁 Gift exchange"], ["awards", "🏆 Silly Office Awards"], ["games", "🎲 Games & trivia"], ["sweater", "🧶 Ugly sweater contest"], ["charity", "💛 Charity drive"], ["booth", "📸 Photo booth"], ["music", "🎶 Music / DJ"], ["outing", "⛸️ Team outing"]];
+  // 👥 who's invited shapes the whole party
+  const OFF_WHO = [["staff", "💼", "Staff only", "Just the team. Great for a lunch, an after-work party or a team outing."],
+    ["partners", "🥂", "Staff + partners", "Spouses and partners welcome. Usually an evening party, a little dressier."],
+    ["family", "👨‍👩‍👧", "Family party", "Kids welcome! Daytime fun with crafts, games and maybe a visit from Santa."]];
+  const OFF_KID_ACTS = [["santavisit", "🎅 Santa visit"], ["kidcraft", "🎨 Kids' craft table"], ["cookies", "🍪 Cookie decorating"], ["kidgames", "🧩 Kids' games corner"]];
+  const offWho = () => OFF_WHO.find(w => w[0] === off.ev.who);
   const OFF_COSTS = ["Venue", "Catering", "Drinks", "Entertainment", "Decorations", "Prizes & awards", "Gifts", "Supplies", "Transportation", "Other"];
   const OFF_POT = [["mains", "🍗 Mains", 0.2], ["sides", "🥔 Sides", 0.2], ["salads", "🥗 Salads & veggies", 0.15], ["apps", "🧀 Appetizers", 0.15], ["desserts", "🍰 Desserts", 0.2], ["drinks", "🥤 Drinks", 0.1], ["supplies", "🍽️ Plates, cups & napkins", 0]];
   const OFF_DIET = [["V", "Vegetarian"], ["VG", "Vegan"], ["GF", "Gluten-free"], ["DF", "Dairy-free"], ["N", "Contains nuts"]];
@@ -11263,7 +11279,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const offDate = (d, o) => d ? new Date(d + "T12:00").toLocaleDateString(undefined, o || { weekday: "long", month: "long", day: "numeric", year: "numeric" }) : "";
   const offTime = hm => hm ? mclock(new Date(`2026-01-01T${hm}`)) : "";
   const offTotal = () => off.costs.reduce((a, c) => a + (+c.cost || 0), 0);
-  const offActs = () => OFF_ACTS.filter(([k]) => off.acts[k]).map(([k, l]) => k === "gifts" && off.ev.giftLimit ? `${l} (${money(+off.ev.giftLimit)} limit)` : l);
+  const offActList = () => OFF_ACTS.concat(off.ev.who === "family" ? OFF_KID_ACTS : []);
+  const offActs = () => offActList().filter(([k]) => off.acts[k]).map(([k, l]) => k === "gifts" && off.ev.giftLimit ? `${l} (${money(+off.ev.giftLimit)} limit)` : l);
   const offYear = () => (off.ev.date ? +off.ev.date.slice(0, 4) : new Date().getFullYear());
 
   function renderOffice() {
@@ -11274,15 +11291,19 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
   const fld = (k, label, type, ph, extra) => `<label class="off-f${extra === "wide" ? " wide" : ""}"><span class="meal-lab">${label}</span>${type === "area" ? `<textarea class="input" rows="2" data-ev="${k}" maxlength="300" placeholder="${ph || ""}">${esc(off.ev[k] || "")}</textarea>` : `<input class="input" type="${type || "text"}" data-ev="${k}" value="${esc(off.ev[k] ?? "")}" placeholder="${ph || ""}" ${type === "number" ? 'inputmode="decimal" min="0"' : 'maxlength="80"'}>`}</label>`;
   function offEventHtml() {
+    if (!off.ev.who) return `<div class="card pt-card"><h3>👥 First, who's invited?</h3><p class="host-rem">This shapes the whole plan: the time of day, the activities, the food and the approval request.</p>
+      <div class="who-pick">${OFF_WHO.map(([k, i, l, d]) => `<button type="button" class="who-tile" data-ofwho="${k}"><span class="wt-ico">${i}</span><span><b>${l}</b><small>${d}</small></span></button>`).join("")}</div></div>`;
+    const W = offWho();
     const last = off.past[off.past.length - 1], total = offTotal(), hc = Math.max(1, +off.ev.headcount || 1);
     return `${last ? `<div class="card pt-card off-last"><h3>🗂️ Last year (${last.year})</h3><p><b>${esc(last.name || "Holiday party")}</b>${last.organizer ? `, organized by <b>${esc(last.organizer)}</b>` : ""}${last.date ? ` · ${offDate(last.date, { month: "short", day: "numeric" })}` : ""} · ${last.headcount || "?"} people · ${money(last.spent || 0)} spent</p>
         ${last.worked ? `<p>👍 <b>What worked:</b> ${esc(last.worked)}</p>` : ""}${last.change ? `<p>✏️ <b>Change next time:</b> ${esc(last.change)}</p>` : ""}
         ${last.vendors && last.vendors.length ? `<p class="host-rem">Vendors used: ${last.vendors.map(v => esc(v.name) + (v.type ? ` (${esc(v.type)})` : "")).join(", ")}</p>` : ""}</div>` : ""}
+      <div class="who-pill"><span>${W[1]} <b>${W[2]}</b></span><button type="button" class="classy-link" data-ofwho="">Change</button></div>
       <div class="card pt-card"><h3>🎉 The event</h3><div class="off-grid">
         ${fld("name", "Event name", "text", "e.g. Holiday Party", "wide")}${fld("date", "Date", "date")}${fld("headcount", "Guests (about)", "number")}${fld("start", "Starts", "time")}${fld("end", "Ends", "time")}
         ${fld("venue", "Venue", "text", "e.g. Boardroom, The Keg", "wide")}${fld("address", "Address", "text", "", "wide")}${fld("theme", "Theme", "text", "e.g. Ugly sweater")}${fld("dress", "Dress code", "text", "e.g. Festive casual")}
         ${fld("organizer", "Organized by", "text", "Your name")}${fld("budget", "Approved budget", "number", "$")}</div></div>
-      <div class="card pt-card"><h3>✨ What's planned</h3><div class="apps-filters">${OFF_ACTS.map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div>
+      <div class="card pt-card"><h3>✨ What's planned</h3><div class="apps-filters">${offActList().map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div>
         ${off.acts.gifts ? `<div class="off-grid" style="margin-top:8px">${fld("giftLimit", "Gift exchange limit", "number", "$")}</div>` : ""}</div>
       <div class="card pt-card"><h3>💵 Costs & vendors</h3>
         ${off.costs.map(c => `<div class="off-cost" data-oc="${c.id}"><div><b>${esc(c.type)}</b>${c.name ? ` · ${esc(c.name)}` : ""}${c.contact ? `<small>📞 ${esc(c.contact)}</small>` : ""}</div><span>${money(+c.cost || 0)}</span><button type="button" class="icon-btn" data-ocdel aria-label="Remove">✕</button></div>`).join("") || `<p class="host-rem">Add the venue, caterer, drinks, prizes… Vendors' names and numbers are kept for next year too.</p>`}
@@ -11303,7 +11324,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       "THE EVENT",
       `• Date: ${e.date ? offDate(e.date) : "to be confirmed"}${e.start ? `, ${offTime(e.start)}${e.end ? ` to ${offTime(e.end)}` : ""}` : ""}`,
       `• Where: ${e.venue || "to be confirmed"}${e.address ? ` (${e.address})` : ""}`,
-      `• Guests: about ${hc} people`];
+      `• Guests: about ${hc} people${offWho() ? ` (${{ staff: "staff only", partners: "staff and their partners", family: "staff and their families, kids welcome" }[off.ev.who]})` : ""}`];
     if (e.theme || e.dress) lines.push(`• ${[e.theme && `Theme: ${e.theme}`, e.dress && `Dress code: ${e.dress}`].filter(Boolean).join(" · ")}`);
     const acts = offActs(); if (acts.length) lines.push("", "WHAT'S PLANNED", ...acts.map(a => "• " + a.replace(/^\S+\s/, "")));
     lines.push("", "BUDGET");
@@ -11408,7 +11429,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       .ye .num{text-align:right} .ye .ye-foot{margin-top:14px;text-align:center;color:#999;font:8pt sans-serif}`;
     const row = (k, v) => v ? `<tr><td style="width:150px"><b>${k}</b></td><td>${v}</td></tr>` : "";
     const html = `<div class="ye"><h1>${esc(e.name || "Holiday Party")}: Year-End Report</h1><p class="ye-s">${esc(family || "")}${family ? " · " : ""}${offYear()}</p>
-      <table>${row("Organized by", esc(e.organizer))}${row("Date", e.date ? offDate(e.date) + (e.start ? `, ${offTime(e.start)}–${offTime(e.end)}` : "") : "")}${row("Venue", esc([e.venue, e.address].filter(Boolean).join(", ")))}${row("Guests", hc + " people")}${row("Theme / dress", esc([e.theme, e.dress].filter(Boolean).join(" · ")))}${row("Approval", a.status === "approved" ? `Approved by ${esc(e.approver || "")}${a.log.length ? " on " + new Date(a.log.filter(l => l.s === "approved").pop()?.at || Date.now()).toLocaleDateString() : ""}` : AP_TXT[a.status][1])}${row("What we did", esc(offActs().map(x => x.replace(/^\S+\s/, "")).join(", ")))}</table>
+      <table>${row("Organized by", esc(e.organizer))}${row("Date", e.date ? offDate(e.date) + (e.start ? `, ${offTime(e.start)}–${offTime(e.end)}` : "") : "")}${row("Venue", esc([e.venue, e.address].filter(Boolean).join(", ")))}${row("Guests", hc + " people" + (offWho() ? ` · ${offWho()[2]}` : ""))}${row("Theme / dress", esc([e.theme, e.dress].filter(Boolean).join(" · ")))}${row("Approval", a.status === "approved" ? `Approved by ${esc(e.approver || "")}${a.log.length ? " on " + new Date(a.log.filter(l => l.s === "approved").pop()?.at || Date.now()).toLocaleDateString() : ""}` : AP_TXT[a.status][1])}${row("What we did", esc(offActs().map(x => x.replace(/^\S+\s/, "")).join(", ")))}</table>
       <h2>Costs & vendors</h2><table><tr><th>What</th><th>Vendor</th><th>Contact</th><th class="num">Planned</th></tr>${off.costs.map(c => `<tr><td>${esc(c.type)}</td><td>${esc(c.name || "")}</td><td>${esc(c.contact || "")}</td><td class="num">${money(+c.cost || 0)}</td></tr>`).join("")}<tr><td colspan="3"><b>Planned total</b> (about ${money(Math.round(total / hc * 100) / 100)} per person)</td><td class="num"><b>${money(total)}</b></td></tr></table>
       ${T.spent ? `<h2>Actual spending</h2><table>${BUD_CATS.filter(([k]) => T.by[k]).map(([k, , l]) => `<tr><td>${l}</td><td class="num">${money(T.by[k])}</td></tr>`).join("")}<tr><td><b>Total spent</b>${+e.budget ? ` (budget ${money(+e.budget)})` : ""}</td><td class="num"><b>${money(T.spent)}</b></td></tr></table>` : ""}
       ${off.pot.length ? `<h2>Potluck</h2><p>${off.pot.map(p => `${esc(p.who)}: ${esc(p.dish)}`).join(" · ")}</p>` : ""}
@@ -11468,6 +11489,14 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#view-office").addEventListener("click", async e => {
     const t = e.target;
     const tb = t.closest("[data-oftab]"); if (tb) { off.tab = tb.dataset.oftab; saveOff(); renderOffice(); window.scrollTo({ top: 0 }); return; }
+    const wh = t.closest("[data-ofwho]");
+    if (wh) {
+      const k = wh.dataset.ofwho; off.ev.who = k;
+      if (k && off.ev.start === "17:00" && off.ev.end === "21:00") Object.assign(off.ev, { family: { start: "13:00", end: "16:00" }, partners: { start: "18:00", end: "23:00" }, staff: { start: "17:00", end: "21:00" } }[k]);
+      if (k === "family") { off.acts.santavisit = 1; off.acts.kidcraft = 1; if (!off.ev.dress) off.ev.dress = "Festive & comfy"; }
+      if (k === "partners" && !off.ev.dress) off.ev.dress = "Cocktail";
+      document.body.classList.toggle("co-kids", k === "family"); saveOff(); renderOffice(); window.scrollTo({ top: 0 }); return;
+    }
     const ac = t.closest("[data-ofact]"); if (ac) { off.acts[ac.dataset.ofact] = off.acts[ac.dataset.ofact] ? 0 : 1; saveOff(); renderOffice(); return; }
     const cd = t.closest("[data-ocdel]"); if (cd) { off.costs = off.costs.filter(c => c.id !== cd.closest("[data-oc]").dataset.oc); saveOff(); renderOffice(); return; }
     const pd = t.closest("[data-opdel]"); if (pd) { off.pot = off.pot.filter(p => p.id !== pd.closest("[data-op]").dataset.op); saveOff(); renderOffice(); return; }
@@ -11695,6 +11724,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (f.id === "chOptForm") { e.preventDefault(); e.stopImmediatePropagation(); const n = f.name.value.trim(); if (!n) return; C.options.push({ id: uid(), name: n, url: f.url.value.trim(), votes: 0 }); if (C.options.length === 1) C.chosen = C.options[0].id; saveOff(); renderOffice(); return; }
     if (f.id === "chDonForm") { e.preventDefault(); e.stopImmediatePropagation(); const a = parseFloat(f.amt.value) || 0; if (!a) return; C.donations.push({ id: uid(), who: f.who.value.trim(), amt: a }); saveOff(); renderOffice(); toast(`💛 ${money(a)} added`); return; }
   }, true);
+  if (SPACE === "office") document.body.classList.toggle("co-kids", off.ev.who === "family");
   offSync();
   /* @office-end */
   /* @print-start */

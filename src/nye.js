@@ -10,7 +10,7 @@
   const nyeSeason = (d = new Date()) => (d.getMonth() === 11 && d.getDate() >= 26) || (d.getMonth() === 0 && d.getDate() <= 6);
   function applySeasonNav() {
     const nye = nyeSeason();
-    $("#navNye").hidden = !nye;
+    $("#navNye").hidden = !nye || hubMode === "company";   // the New Year's screen is a family thing
     $("#navMeals").hidden = hubMode === "company" || nye;
   }
   const midnightTarget = () => { const n = new Date(); return new Date(n.getFullYear() + 1, 0, 1).getTime(); };

@@ -10,6 +10,12 @@
        next coordinator, and "remove the office plans from this phone"
      ============================================================ */
   const OFF_ACTS = [["potluck", "🥘 Potluck"], ["catered", "🍽️ Catered meal"], ["gifts", "🎁 Gift exchange"], ["awards", "🏆 Silly Office Awards"], ["games", "🎲 Games & trivia"], ["sweater", "🧶 Ugly sweater contest"], ["charity", "💛 Charity drive"], ["booth", "📸 Photo booth"], ["music", "🎶 Music / DJ"], ["outing", "⛸️ Team outing"]];
+  // 👥 who's invited shapes the whole party
+  const OFF_WHO = [["staff", "💼", "Staff only", "Just the team. Great for a lunch, an after-work party or a team outing."],
+    ["partners", "🥂", "Staff + partners", "Spouses and partners welcome. Usually an evening party, a little dressier."],
+    ["family", "👨‍👩‍👧", "Family party", "Kids welcome! Daytime fun with crafts, games and maybe a visit from Santa."]];
+  const OFF_KID_ACTS = [["santavisit", "🎅 Santa visit"], ["kidcraft", "🎨 Kids' craft table"], ["cookies", "🍪 Cookie decorating"], ["kidgames", "🧩 Kids' games corner"]];
+  const offWho = () => OFF_WHO.find(w => w[0] === off.ev.who);
   const OFF_COSTS = ["Venue", "Catering", "Drinks", "Entertainment", "Decorations", "Prizes & awards", "Gifts", "Supplies", "Transportation", "Other"];
   const OFF_POT = [["mains", "🍗 Mains", 0.2], ["sides", "🥔 Sides", 0.2], ["salads", "🥗 Salads & veggies", 0.15], ["apps", "🧀 Appetizers", 0.15], ["desserts", "🍰 Desserts", 0.2], ["drinks", "🥤 Drinks", 0.1], ["supplies", "🍽️ Plates, cups & napkins", 0]];
   const OFF_DIET = [["V", "Vegetarian"], ["VG", "Vegan"], ["GF", "Gluten-free"], ["DF", "Dairy-free"], ["N", "Contains nuts"]];
@@ -23,7 +29,8 @@
   const offDate = (d, o) => d ? new Date(d + "T12:00").toLocaleDateString(undefined, o || { weekday: "long", month: "long", day: "numeric", year: "numeric" }) : "";
   const offTime = hm => hm ? mclock(new Date(`2026-01-01T${hm}`)) : "";
   const offTotal = () => off.costs.reduce((a, c) => a + (+c.cost || 0), 0);
-  const offActs = () => OFF_ACTS.filter(([k]) => off.acts[k]).map(([k, l]) => k === "gifts" && off.ev.giftLimit ? `${l} (${money(+off.ev.giftLimit)} limit)` : l);
+  const offActList = () => OFF_ACTS.concat(off.ev.who === "family" ? OFF_KID_ACTS : []);
+  const offActs = () => offActList().filter(([k]) => off.acts[k]).map(([k, l]) => k === "gifts" && off.ev.giftLimit ? `${l} (${money(+off.ev.giftLimit)} limit)` : l);
   const offYear = () => (off.ev.date ? +off.ev.date.slice(0, 4) : new Date().getFullYear());
 
   function renderOffice() {
@@ -34,15 +41,19 @@
   }
   const fld = (k, label, type, ph, extra) => `<label class="off-f${extra === "wide" ? " wide" : ""}"><span class="meal-lab">${label}</span>${type === "area" ? `<textarea class="input" rows="2" data-ev="${k}" maxlength="300" placeholder="${ph || ""}">${esc(off.ev[k] || "")}</textarea>` : `<input class="input" type="${type || "text"}" data-ev="${k}" value="${esc(off.ev[k] ?? "")}" placeholder="${ph || ""}" ${type === "number" ? 'inputmode="decimal" min="0"' : 'maxlength="80"'}>`}</label>`;
   function offEventHtml() {
+    if (!off.ev.who) return `<div class="card pt-card"><h3>👥 First, who's invited?</h3><p class="host-rem">This shapes the whole plan: the time of day, the activities, the food and the approval request.</p>
+      <div class="who-pick">${OFF_WHO.map(([k, i, l, d]) => `<button type="button" class="who-tile" data-ofwho="${k}"><span class="wt-ico">${i}</span><span><b>${l}</b><small>${d}</small></span></button>`).join("")}</div></div>`;
+    const W = offWho();
     const last = off.past[off.past.length - 1], total = offTotal(), hc = Math.max(1, +off.ev.headcount || 1);
     return `${last ? `<div class="card pt-card off-last"><h3>🗂️ Last year (${last.year})</h3><p><b>${esc(last.name || "Holiday party")}</b>${last.organizer ? `, organized by <b>${esc(last.organizer)}</b>` : ""}${last.date ? ` · ${offDate(last.date, { month: "short", day: "numeric" })}` : ""} · ${last.headcount || "?"} people · ${money(last.spent || 0)} spent</p>
         ${last.worked ? `<p>👍 <b>What worked:</b> ${esc(last.worked)}</p>` : ""}${last.change ? `<p>✏️ <b>Change next time:</b> ${esc(last.change)}</p>` : ""}
         ${last.vendors && last.vendors.length ? `<p class="host-rem">Vendors used: ${last.vendors.map(v => esc(v.name) + (v.type ? ` (${esc(v.type)})` : "")).join(", ")}</p>` : ""}</div>` : ""}
+      <div class="who-pill"><span>${W[1]} <b>${W[2]}</b></span><button type="button" class="classy-link" data-ofwho="">Change</button></div>
       <div class="card pt-card"><h3>🎉 The event</h3><div class="off-grid">
         ${fld("name", "Event name", "text", "e.g. Holiday Party", "wide")}${fld("date", "Date", "date")}${fld("headcount", "Guests (about)", "number")}${fld("start", "Starts", "time")}${fld("end", "Ends", "time")}
         ${fld("venue", "Venue", "text", "e.g. Boardroom, The Keg", "wide")}${fld("address", "Address", "text", "", "wide")}${fld("theme", "Theme", "text", "e.g. Ugly sweater")}${fld("dress", "Dress code", "text", "e.g. Festive casual")}
         ${fld("organizer", "Organized by", "text", "Your name")}${fld("budget", "Approved budget", "number", "$")}</div></div>
-      <div class="card pt-card"><h3>✨ What's planned</h3><div class="apps-filters">${OFF_ACTS.map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div>
+      <div class="card pt-card"><h3>✨ What's planned</h3><div class="apps-filters">${offActList().map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div>
         ${off.acts.gifts ? `<div class="off-grid" style="margin-top:8px">${fld("giftLimit", "Gift exchange limit", "number", "$")}</div>` : ""}</div>
       <div class="card pt-card"><h3>💵 Costs & vendors</h3>
         ${off.costs.map(c => `<div class="off-cost" data-oc="${c.id}"><div><b>${esc(c.type)}</b>${c.name ? ` · ${esc(c.name)}` : ""}${c.contact ? `<small>📞 ${esc(c.contact)}</small>` : ""}</div><span>${money(+c.cost || 0)}</span><button type="button" class="icon-btn" data-ocdel aria-label="Remove">✕</button></div>`).join("") || `<p class="host-rem">Add the venue, caterer, drinks, prizes… Vendors' names and numbers are kept for next year too.</p>`}
@@ -63,7 +74,7 @@
       "THE EVENT",
       `• Date: ${e.date ? offDate(e.date) : "to be confirmed"}${e.start ? `, ${offTime(e.start)}${e.end ? ` to ${offTime(e.end)}` : ""}` : ""}`,
       `• Where: ${e.venue || "to be confirmed"}${e.address ? ` (${e.address})` : ""}`,
-      `• Guests: about ${hc} people`];
+      `• Guests: about ${hc} people${offWho() ? ` (${{ staff: "staff only", partners: "staff and their partners", family: "staff and their families, kids welcome" }[off.ev.who]})` : ""}`];
     if (e.theme || e.dress) lines.push(`• ${[e.theme && `Theme: ${e.theme}`, e.dress && `Dress code: ${e.dress}`].filter(Boolean).join(" · ")}`);
     const acts = offActs(); if (acts.length) lines.push("", "WHAT'S PLANNED", ...acts.map(a => "• " + a.replace(/^\S+\s/, "")));
     lines.push("", "BUDGET");
@@ -168,7 +179,7 @@
       .ye .num{text-align:right} .ye .ye-foot{margin-top:14px;text-align:center;color:#999;font:8pt sans-serif}`;
     const row = (k, v) => v ? `<tr><td style="width:150px"><b>${k}</b></td><td>${v}</td></tr>` : "";
     const html = `<div class="ye"><h1>${esc(e.name || "Holiday Party")}: Year-End Report</h1><p class="ye-s">${esc(family || "")}${family ? " · " : ""}${offYear()}</p>
-      <table>${row("Organized by", esc(e.organizer))}${row("Date", e.date ? offDate(e.date) + (e.start ? `, ${offTime(e.start)}–${offTime(e.end)}` : "") : "")}${row("Venue", esc([e.venue, e.address].filter(Boolean).join(", ")))}${row("Guests", hc + " people")}${row("Theme / dress", esc([e.theme, e.dress].filter(Boolean).join(" · ")))}${row("Approval", a.status === "approved" ? `Approved by ${esc(e.approver || "")}${a.log.length ? " on " + new Date(a.log.filter(l => l.s === "approved").pop()?.at || Date.now()).toLocaleDateString() : ""}` : AP_TXT[a.status][1])}${row("What we did", esc(offActs().map(x => x.replace(/^\S+\s/, "")).join(", ")))}</table>
+      <table>${row("Organized by", esc(e.organizer))}${row("Date", e.date ? offDate(e.date) + (e.start ? `, ${offTime(e.start)}–${offTime(e.end)}` : "") : "")}${row("Venue", esc([e.venue, e.address].filter(Boolean).join(", ")))}${row("Guests", hc + " people" + (offWho() ? ` · ${offWho()[2]}` : ""))}${row("Theme / dress", esc([e.theme, e.dress].filter(Boolean).join(" · ")))}${row("Approval", a.status === "approved" ? `Approved by ${esc(e.approver || "")}${a.log.length ? " on " + new Date(a.log.filter(l => l.s === "approved").pop()?.at || Date.now()).toLocaleDateString() : ""}` : AP_TXT[a.status][1])}${row("What we did", esc(offActs().map(x => x.replace(/^\S+\s/, "")).join(", ")))}</table>
       <h2>Costs & vendors</h2><table><tr><th>What</th><th>Vendor</th><th>Contact</th><th class="num">Planned</th></tr>${off.costs.map(c => `<tr><td>${esc(c.type)}</td><td>${esc(c.name || "")}</td><td>${esc(c.contact || "")}</td><td class="num">${money(+c.cost || 0)}</td></tr>`).join("")}<tr><td colspan="3"><b>Planned total</b> (about ${money(Math.round(total / hc * 100) / 100)} per person)</td><td class="num"><b>${money(total)}</b></td></tr></table>
       ${T.spent ? `<h2>Actual spending</h2><table>${BUD_CATS.filter(([k]) => T.by[k]).map(([k, , l]) => `<tr><td>${l}</td><td class="num">${money(T.by[k])}</td></tr>`).join("")}<tr><td><b>Total spent</b>${+e.budget ? ` (budget ${money(+e.budget)})` : ""}</td><td class="num"><b>${money(T.spent)}</b></td></tr></table>` : ""}
       ${off.pot.length ? `<h2>Potluck</h2><p>${off.pot.map(p => `${esc(p.who)}: ${esc(p.dish)}`).join(" · ")}</p>` : ""}
@@ -228,6 +239,14 @@
   $("#view-office").addEventListener("click", async e => {
     const t = e.target;
     const tb = t.closest("[data-oftab]"); if (tb) { off.tab = tb.dataset.oftab; saveOff(); renderOffice(); window.scrollTo({ top: 0 }); return; }
+    const wh = t.closest("[data-ofwho]");
+    if (wh) {
+      const k = wh.dataset.ofwho; off.ev.who = k;
+      if (k && off.ev.start === "17:00" && off.ev.end === "21:00") Object.assign(off.ev, { family: { start: "13:00", end: "16:00" }, partners: { start: "18:00", end: "23:00" }, staff: { start: "17:00", end: "21:00" } }[k]);
+      if (k === "family") { off.acts.santavisit = 1; off.acts.kidcraft = 1; if (!off.ev.dress) off.ev.dress = "Festive & comfy"; }
+      if (k === "partners" && !off.ev.dress) off.ev.dress = "Cocktail";
+      document.body.classList.toggle("co-kids", k === "family"); saveOff(); renderOffice(); window.scrollTo({ top: 0 }); return;
+    }
     const ac = t.closest("[data-ofact]"); if (ac) { off.acts[ac.dataset.ofact] = off.acts[ac.dataset.ofact] ? 0 : 1; saveOff(); renderOffice(); return; }
     const cd = t.closest("[data-ocdel]"); if (cd) { off.costs = off.costs.filter(c => c.id !== cd.closest("[data-oc]").dataset.oc); saveOff(); renderOffice(); return; }
     const pd = t.closest("[data-opdel]"); if (pd) { off.pot = off.pot.filter(p => p.id !== pd.closest("[data-op]").dataset.op); saveOff(); renderOffice(); return; }
@@ -455,5 +474,6 @@
     if (f.id === "chOptForm") { e.preventDefault(); e.stopImmediatePropagation(); const n = f.name.value.trim(); if (!n) return; C.options.push({ id: uid(), name: n, url: f.url.value.trim(), votes: 0 }); if (C.options.length === 1) C.chosen = C.options[0].id; saveOff(); renderOffice(); return; }
     if (f.id === "chDonForm") { e.preventDefault(); e.stopImmediatePropagation(); const a = parseFloat(f.amt.value) || 0; if (!a) return; C.donations.push({ id: uid(), who: f.who.value.trim(), amt: a }); saveOff(); renderOffice(); toast(`💛 ${money(a)} added`); return; }
   }, true);
+  if (SPACE === "office") document.body.classList.toggle("co-kids", off.ev.who === "family");
   offSync();
   /* @office-end */
