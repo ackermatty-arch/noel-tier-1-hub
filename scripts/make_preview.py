@@ -37,6 +37,13 @@ note = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="n
 import base64
 css = ':root{--ic-note-gold:url("data:image/svg+xml;base64,%s")}' % base64.b64encode(note.encode()).decode() + css
 s = open('index.html', encoding='utf8').read()
+def recolor(var, pairs):
+    m = re.search(var + r':\s*url\(\s*["\']?data:image/svg\+xml;base64,([A-Za-z0-9+/=]+)', s)
+    t = base64.b64decode(m.group(1)).decode()
+    for a, b in pairs: t = t.replace(a, b)
+    return '%s:url("data:image/svg+xml;base64,%s");' % (var, base64.b64encode(t.encode()).decode())
+css = ':root{' + recolor('--star', [('#D9BC7E', '#DADDE2'), ('#B08D4E', '#9AA0A9')]) + recolor('--ic-mic', [('#C9A45C', '#A9AFB8')]) + '}\n' + css
+css += 'body::after { border-color:#B9A27A !important; }\n.mic-fab { border-color:#C9CDD3 !important; }\n'
 i = s.index('</style>', s.index('--soldier'))
 open('preview.html', 'w', encoding='utf8').write(s[:i] + css + s[i:])
 print('preview.html written')
