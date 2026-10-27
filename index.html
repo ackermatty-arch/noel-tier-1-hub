@@ -1979,6 +1979,9 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .menu-top:not(.menu-top2) .menu-go span { margin-left: 2px; }
 /* Meals: the planner stops at "See my plan". Noël generates everything after that. */
 #view-meals .wz-more, #view-meals #mealSkip, #view-meals #foodBudget, #view-meals #mealOwn, #view-meals #mealDietBottom { display: none !important; }
+.wz-por { display: flex; align-items: center; gap: 8px; margin: 4px 0 0 28px; }
+.wz-por small { color: #666; font-size: 12.5px; }
+.wz-diet .addon-row { flex-wrap: wrap; }
 </style>
 </head>
 <body>
@@ -10594,7 +10597,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const wizSave = () => save("wiz", wiz);
   const wizDate = n => n === "eve" ? eveYmd() : dayYmd();
   const wizTime = n => wiz.time[n] || (n === "eve" ? "18:00" : "17:00");
-  const wizGuests = n => wiz.guests[n] || (wiz.sel[n][0] ? cfgFor(wiz.sel[n][0]).guests : 8);
+  const wizGuests = n => wiz.guests[n] || 2;
   const wizOpts = n => {
     const mains = MD.meals.filter(m => !m.soon && !m.addon && ["traditional", "elegant", "vegan"].includes(m.tab));
     return n === "eve" ? MD.meals.filter(m => !m.soon && !m.addon && m.tab === "eve").concat(mains) : mains;
@@ -10605,6 +10608,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     save("mealCfg", mealCfg);
     wiz.sel[n].forEach(id => { if (planOf(id)) startMealPlan(mealById(id), true); });
   }
+  function wizGuestHtml(n) {
+    const g = wizGuests(n);
+    return `<div class="wz-step"><span class="wz-n">3</span>How many guests, and what time?</div>
+        <div class="wz-row"><div class="stepper"><button type="button" data-wzg="-1" aria-label="Fewer guests">−</button><output>${g}</output><button type="button" data-wzg="1" aria-label="More guests">+</button></div><span class="wz-lab">guests</span>
+        <label class="wz-time"><span class="wz-lab">Dinner at</span><input class="input" type="time" id="wizTime" value="${esc(wizTime(n))}"></label></div>
+        <p class="wz-hint">Every recipe and the shopping list are sized for <b>${g}</b> guest${g > 1 ? "s" : ""}.</p>`;
+  }
   function renderWizard() {
     const box = $("#wizBox"); if (!box) return;
     const n = wiz.night, sel = n ? wiz.sel[n] : [];
@@ -10614,14 +10624,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (n) {
       h += `<div class="wz-step"><span class="wz-n">2</span>What are you cooking? <small>Tap one or more. Chosen dinners turn black.</small></div><div class="wz-opts">` +
         wizOpts(n).map(m => `<button type="button" class="wz-opt" data-wzpick="${m.id}" aria-pressed="${sel.includes(m.id)}"><span><b>${esc(m.name)}</b><small>${esc(m.blurb)}</small></span><i>${sel.includes(m.id) ? "✓" : "+"}</i></button>`).join("") + `</div>`;
-      if (sel.length) h += wizDietHtml();
+      if (sel.length) h += wizGuestHtml(n) + wizDietHtml();
     }
     if (n && sel.length) {
       const g = wizGuests(n), planned = sel.filter(id => planOf(id)).length;
-      h += `<div class="wz-step"><span class="wz-n">3</span>How many guests, and what time?</div>
-        <div class="wz-row"><div class="stepper"><button type="button" data-wzg="-1" aria-label="Fewer guests">−</button><output>${g}</output><button type="button" data-wzg="1" aria-label="More guests">+</button></div><span class="wz-lab">guests</span>
-        <label class="wz-time"><span class="wz-lab">Dinner at</span><input class="input" type="time" id="wizTime" value="${esc(wizTime(n))}"></label></div>
-        <div class="wz-step"><span class="wz-n">4</span>Ready? See your plan first</div>
+      h += `<div class="wz-step"><span class="wz-n">4</span>Ready? See your plan first</div>
         <ul class="wz-list">${sel.map(id => `<li><button type="button" data-wzopen="${id}"><b>${esc(mealById(id).name)}</b><small>Recipes, timeline and prices</small><span class="meal-go">›</span></button></li>`).join("")}</ul>
         ${planned === sel.length ? `<p class="wz-on">Alarms are on. Noël will ring at each step.</p><button type="button" class="btn btn-ghost btn-block" data-wzstop>Turn alarms off</button>` : `<button type="button" class="btn btn-gold btn-block" data-wzalarm>See my plan</button><p class="wz-hint">You will check everything first. Nothing is set until you save.</p>`}`;
     }
@@ -10794,7 +10801,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     return `<div class="wz-diet"><div class="wz-step"><span class="wz-n">+</span>Add a vegan dish <small>Optional. For vegan guests, 1–5 people, added to your plan.</small></div>` +
       list.map(a => { const on = !!mealAddons[a.id], g = cfgFor(a.id).guests;
         return `<div class="addon-row"><label><input type="checkbox" data-wzadd="${a.id}" ${on ? "checked" : ""}> ${esc(a.name)}</label>` +
-          (on ? `<div class="stepper sm"><button type="button" data-wzag="${a.id}:-1" aria-label="Fewer people">−</button><output>${g}</output><button type="button" data-wzag="${a.id}:1" aria-label="More people">+</button></div>` : "") + `</div>`; }).join("") + `</div>`;
+          (on ? `<div class="wz-por"><small>How many portions?</small><div class="stepper sm"><button type="button" data-wzag="${a.id}:-1" aria-label="Fewer portions">−</button><output>${g}</output><button type="button" data-wzag="${a.id}:1" aria-label="More portions">+</button></div></div>` : "") + `</div>`; }).join("") + `</div>`;
   }
   function cfBuild() {
     const b = msBuild(cf.ids); let total = 0, toBuy = 0, have = 0;
