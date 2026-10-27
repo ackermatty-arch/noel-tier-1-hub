@@ -183,6 +183,7 @@
     else renderMealDetail(m);
     renderMasterShop();
     renderMaster();
+    renderMealMenu();
   }
 
   function renderMealDetail(m) {
@@ -546,7 +547,7 @@
     const box = $("#wizBox"); if (!box) return;
     const n = wiz.night, sel = n ? wiz.sel[n] : [];
     const dayBtn = k => `<button type="button" class="wz-night" data-wznight="${k}" aria-pressed="${n === k}"><b>${WN[k]}</b><small>${wiz.sel[k].length ? wiz.sel[k].length + " dinner" + (wiz.sel[k].length > 1 ? "s" : "") + " chosen" : "Tap to plan"}</small></button>`;
-    let h = `<div class="card wz"><h3 class="wz-t">Plan your Christmas dinner</h3>
+    let h = `<button type="button" class="meal-back" data-wzmenu>‹ The menu</button><div class="card wz"><h3 class="wz-t">Plan your Christmas dinner</h3>
       <div class="wz-step"><span class="wz-n">1</span>Which night?</div><div class="wz-nights">${dayBtn("eve")}${dayBtn("day")}</div>`;
     if (n) {
       h += `<div class="wz-step"><span class="wz-n">2</span>What are you cooking? <small>Tap one or more. Chosen dinners turn black.</small></div><div class="wz-opts">` +
@@ -587,6 +588,40 @@
   $("#view-meals").addEventListener("change", e => {
     if (e.target.id !== "wizTime" || !wiz.night || !e.target.value) return;
     wiz.time[wiz.night] = e.target.value; wizSave(); wizApply(wiz.night); renderMeals();
+  });
+
+
+  // ---- 📖 the menu: a restaurant-style first page, then "Plan my dinner" opens the builder ----
+  let mealScreen = (mealSel.id || mealPlans.some(p => !p.svc)) ? "build" : "menu";
+  const MENU_GROUPS = [["Christmas Eve", ["eveparty", "seafood"]], ["Traditional", ["turkey", "primerib", "ham"]], ["Elegant", ["lambcrown", "porkcrown"]], ["Vegan", ["vegan"]]];
+  function renderMealMenu() {
+    const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
+    const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);
+    v.classList.toggle("on-menu", on); el.hidden = !on; if (!on) return;
+    if (el.dataset.built) return; el.dataset.built = "1";
+    const go = `<button type="button" class="menu-go" data-menugo>Plan my dinner <span>›</span></button>`;
+    el.innerHTML = `<div class="menu-top">${go}</div>
+      <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
+      MENU_GROUPS.map(([g, ids]) => `<h3 class="menu-group">${g}</h3>` + ids.map(id => {
+        const m = mealById(id); if (!m || m.soon) return "";
+        const all = (m.menuFor ? m.menuFor(mealSizes(m, cfgFor(id))) : m.menu).filter(([c]) => !/pairing/i.test(c)), clean = i => esc(String(i).replace(/\s*\(24 pieces\)/, ""));
+        const dr = all.filter(([c]) => /drink/i.test(c)), food = all.filter(([c]) => !/drink/i.test(c));
+        let drinks = dr.flatMap(([, items]) => items.map(clean));
+        if (!drinks.length) { const names = [...(m.drinks || []).map(d => d[1]).join(" ").matchAll(/((?:[A-Z][\w'’-]*\s)*[A-Z][\w'’-]*)\s*\(recipe included\)/g)].map(x => x[1]); drinks = [...names.map(esc), "wine pairings"]; }
+        return `<div class="menu-dish"><h4>${esc(m.name)}</h4><p class="menu-items">${food.flatMap(([, items]) => items.map(clean)).join(" <i>·</i> ")}</p>` +
+          `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p><p class="menu-sub2">Substitutions available</p><a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
+      }).join("")).join("") +
+      `<p class="menu-note">Substitutions available on every dinner: add a vegan, gluten-free or dairy-free dish when you plan it.</p>
+      <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}<button type="button" class="menu-own" data-menuown>Cooking your own dinner idea? Timers and dietary dishes ›</button></div>`;
+  }
+  document.addEventListener("click", e => {
+    const nav = e.target.closest && e.target.closest("[data-view=meals]");
+    if (nav && !$("#view-meals").classList.contains("active")) { mealScreen = (mealSel.id || mealPlans.some(p => !p.svc)) ? "build" : "menu"; setTimeout(renderMeals, 0); }
+  });
+  $("#view-meals").addEventListener("click", e => {
+    if (e.target.closest("[data-menugo]")) { mealScreen = "build"; renderMeals(); window.scrollTo(0, 0); }
+    if (e.target.closest("[data-menuown]")) { mealScreen = "build"; renderMeals(); setTimeout(() => { const o = $("#mealOwn"); if (o) o.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); }
+    if (e.target.closest("[data-wzmenu]")) { mealScreen = "menu"; renderMeals(); window.scrollTo(0, 0); }
   });
 
   // ---- 🛒 master shopping list: the chosen recipes merged into one list, repeats added up ----
