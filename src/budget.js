@@ -11,9 +11,9 @@
      app. Santa's gifts show only as one total, never by name.
      ============================================================ */
   const BUD_CATS = [
-    ["gifts", "🎁", "Gifts", "#b3262e"], ["food", "🍽️", "Food & drinks", "#2f6b4a"], ["decor", "🎄", "Decorations", "#c9a227"],
-    ["hosting", "🏡", "Hosting & home", "#8b4a3a"], ["party", "🎉", "Parties & outings", "#6a4c93"], ["cards", "✉️", "Cards & postage", "#3b6ea5"],
-    ["travel", "🚗", "Travel", "#4f8a8b"], ["giving", "⭐", "Giving", "#d98b9b"], ["other", "📦", "Other", "#8c8c8c"]
+    ["gifts", "🎁", "Gifts", "#151515"], ["food", "🍽️", "Food & drinks", "#B8935A"], ["decor", "🎄", "Decorations", "#8C8C8C"],
+    ["hosting", "🏡", "Hosting & home", "#D9BF8C"], ["party", "🎉", "Parties & outings", "#4A4A4A"], ["cards", "✉️", "Cards & postage", "#C4C4C4"],
+    ["travel", "🚗", "Travel", "#6B5A3A"], ["giving", "⭐", "Giving", "#A8A8A8"], ["other", "📦", "Other", "#2B2B2B"]
   ];
   const budCat = k => BUD_CATS.find(c => c[0] === k) || BUD_CATS[BUD_CATS.length - 1];
   let budget = load("budget", null) || { limit: 0, cats: {}, expenses: [], daily: {}, past: [], tab: "overview", sort: "date", filter: "all" };
@@ -51,7 +51,7 @@
     const arcs = parts.map(([k, , , col]) => { const len = by[k] / total * C, s = `<circle r="${r}" cx="100" cy="100" fill="none" stroke="${col}" stroke-width="34" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`; off += len; return s; }).join("");
     const pct = limit ? Math.round(total / limit * 100) : 0;
     return `<svg viewBox="0 0 200 200" width="${size}" height="${size}" role="img" aria-label="Spending by category">
-      <circle r="${r}" cx="100" cy="100" fill="none" stroke="#efe8d8" stroke-width="34"/>${total ? arcs : ""}
+      <circle r="${r}" cx="100" cy="100" fill="none" stroke="#EBEBEB" stroke-width="34"/>${total ? arcs : ""}
       <text x="100" y="${limit ? 94 : 104}" text-anchor="middle" font-size="22" font-weight="700" fill="#1E3A2F" font-family="Georgia,serif">${money(total)}</text>
       ${limit ? `<text x="100" y="116" text-anchor="middle" font-size="11" fill="#6b7a70" font-family="sans-serif">of ${money(limit)} · ${pct}%</text>` : ""}</svg>`;
   }
@@ -60,7 +60,7 @@
     if (!cats.length) return `<p class="host-rem">Set a budget or add spending to see your bars.</p>`;
     return cats.map(([k, i, l, col]) => { const s = by[k], b = catLimit(k), max = Math.max(s, b, 1), over = b && s > b;
       return `<div class="bud-bar"><div class="bb-top"><span>${i} ${l}</span><b class="${over ? "over" : ""}">${money(s)}${b ? ` <small>of ${money(b)}</small>` : ""}</b></div>
-        <div class="bb-track"><i style="width:${Math.min(100, s / max * 100)}%;background:${over ? "#c0392b" : col}"></i>${b ? `<em style="left:${Math.min(100, b / max * 100)}%"></em>` : ""}</div>
+        <div class="bb-track"><i style="width:${Math.min(100, s / max * 100)}%;background:${over ? "#151515" : col}"></i>${b ? `<em style="left:${Math.min(100, b / max * 100)}%"></em>` : ""}</div>
         ${b ? `<small class="bb-left ${over ? "over" : ""}">${over ? `${money(s - b)} over` : `${money(b - s)} left`}</small>` : ""}</div>`; }).join("");
   }
   function budLine(limit, w, h) {
@@ -79,12 +79,12 @@
     const path = xy.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
     const area = path + ` L${xy[xy.length - 1][0].toFixed(1)} ${Y(0)} L${xy[0][0].toFixed(1)} ${Y(0)} Z`;
     const months = [[new Date(y0, 10, 1), "Nov"], [new Date(y0, 11, 1), "Dec"], [new Date(y0, 11, 25), "🎄 25"]];
-    const grid = [0, 0.5, 1].map(f => `<line x1="${L}" x2="${w - R}" y1="${Y(max / 1.1 * f)}" y2="${Y(max / 1.1 * f)}" stroke="#eee6d6"/><text x="${L - 6}" y="${Y(max / 1.1 * f) + 4}" text-anchor="end" font-size="10" fill="#8a8a8a" font-family="sans-serif">${money(Math.round(max / 1.1 * f))}</text>`).join("");
+    const grid = [0, 0.5, 1].map(f => `<line x1="${L}" x2="${w - R}" y1="${Y(max / 1.1 * f)}" y2="${Y(max / 1.1 * f)}" stroke="#EBEBEB"/><text x="${L - 6}" y="${Y(max / 1.1 * f) + 4}" text-anchor="end" font-size="10" fill="#8a8a8a" font-family="sans-serif">${money(Math.round(max / 1.1 * f))}</text>`).join("");
     return `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="Spending over time">${grid}
       ${months.map(([d, l]) => `<text x="${X(d.getTime())}" y="${h - 8}" font-size="10" fill="#8a8a8a" font-family="sans-serif" text-anchor="${l === "Nov" ? "start" : "middle"}">${l}</text>`).join("")}
-      ${limit ? `<line x1="${L}" x2="${w - R}" y1="${Y(limit)}" y2="${Y(limit)}" stroke="#c9a227" stroke-width="2" stroke-dasharray="5 4"/><text x="${w - R}" y="${Y(limit) - 5}" text-anchor="end" font-size="10" fill="#a8861c" font-family="sans-serif">Budget</text>` : ""}
-      <path d="${area}" fill="rgba(179,38,46,.12)"/><path d="${path}" fill="none" stroke="#b3262e" stroke-width="2.5" stroke-linejoin="round"/>
-      <circle cx="${xy[xy.length - 1][0]}" cy="${xy[xy.length - 1][1]}" r="4.5" fill="#b3262e"/></svg>`;
+      ${limit ? `<line x1="${L}" x2="${w - R}" y1="${Y(limit)}" y2="${Y(limit)}" stroke="#8C8C8C" stroke-width="2" stroke-dasharray="5 4"/><text x="${w - R}" y="${Y(limit) - 5}" text-anchor="end" font-size="10" fill="#6B6B6B" font-family="sans-serif">Budget</text>` : ""}
+      <path d="${area}" fill="rgba(184,147,90,.15)"/><path d="${path}" fill="none" stroke="#B8935A" stroke-width="2.5" stroke-linejoin="round"/>
+      <circle cx="${xy[xy.length - 1][0]}" cy="${xy[xy.length - 1][1]}" r="4.5" fill="#151515"/></svg>`;
   }
 
   // ---------- screens ----------
