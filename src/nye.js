@@ -10,8 +10,8 @@
   const nyeSeason = (d = new Date()) => (d.getMonth() === 11 && d.getDate() >= 26) || (d.getMonth() === 0 && d.getDate() <= 6);
   function applySeasonNav() {
     const nye = nyeSeason();
-    $("#navNye").hidden = !nye || hubMode === "company";   // the New Year's screen is a family thing
-    $("#navMeals").hidden = hubMode === "company" || nye;
+    $("#navNye").hidden = hubMode === "company";   // New Year's has its own tab (a family thing); Meals stays put
+    $("#navMeals").hidden = hubMode === "company";
   }
   const midnightTarget = () => { const n = new Date(); return new Date(n.getFullYear() + 1, 0, 1).getTime(); };
   const isNewYearsDay = () => { const n = new Date(); return n.getMonth() === 0 && n.getDate() === 1; };
@@ -101,8 +101,13 @@
     const m = mealById("nyeparty"); if (!m) return;
     const c = cfgFor("nyeparty"), p = mealSizes(m, c), active = !!planOf("nyeparty");
     const ps = pricedShop(m, p.f, p);
-    $("#nyePartySum").innerHTML = `<b>${c.guests} guests</b> · starts ${mclock(dinnerAt(c))} · ${p.items.length} appetizers · about <b>${cad0(ps.total)}</b>` +
-      (active ? `<br><span class="nye-on">✅ Party alarms are set</span>` : "");
+    if (!mealCfg.nyeparty || !mealCfg.nyeparty.guests) { mealCfg.nyeparty = Object.assign({}, mealCfg.nyeparty, { guests: 6 }); save("mealCfg", mealCfg); return renderNyeParty(); }
+    $("#nyePartySum").innerHTML = `<div class="wz-row"><div class="stepper"><button type="button" data-nyeg="-1" aria-label="Fewer guests">−</button><output>${c.guests}</output><button type="button" data-nyeg="1" aria-label="More guests">+</button></div><span class="wz-lab">guests</span>
+      <label class="wz-time"><span class="wz-lab">Party starts</span><input class="input" type="time" id="nyeTime" value="${esc(c.time)}"></label></div>
+      <div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Will you serve dinner too?">
+        <button type="button" data-nyemode="meal" aria-pressed="${c.mode !== "before"}"><b>Appetizers are the meal</b><small>About 12 bites per guest</small></button><button type="button" data-nyemode="before" aria-pressed="${c.mode === "before"}"><b>Light bites before dinner</b><small>About 5 bites per guest</small></button></div>
+      <p class="party-total">About <b>${cad0(ps.total)}</b> · ${cad(ps.total / c.guests)} per guest<small>${currency} · our set New Year's Eve menu, includes the midnight toast.</small></p>` +
+      (active ? `<p class="nye-on">✅ Party alarms are set</p>` : "") + (savedMenus.length ? `<button type="button" class="btn btn-ghost btn-block" data-nyesaved>My saved menus (${savedMenus.length})</button>` : "");
   }
 
   // ---------- 💫 wishes jar ----------
@@ -138,7 +143,18 @@
   $("#nyeBig").addEventListener("click", () => openShow(midnightTarget(), false));
   $("#nyePractice").addEventListener("click", () => openShow(Date.now() + 10500, true));
   $("#nyeShowClose").addEventListener("click", closeShow);
-  $("#nyePlan").addEventListener("click", () => { showView("meals"); openMeal("nyeparty"); });
+  $("#nyePlan").addEventListener("click", () => { planReview(["nyeparty"], "nye"); });
+  $("#view-nye").addEventListener("click", e => {
+    const g = e.target.closest("[data-nyeg]");
+    if (g) { const c = cfgFor("nyeparty"); c.guests = Math.min(20, Math.max(1, c.guests + +g.dataset.nyeg)); mealCfg.nyeparty = c; save("mealCfg", mealCfg); if (planOf("nyeparty")) startMealPlan(mealById("nyeparty"), true); renderNyeParty(); return; }
+    const md = e.target.closest("[data-nyemode]");
+    if (md) { const c = cfgFor("nyeparty"); c.mode = md.dataset.nyemode; mealCfg.nyeparty = c; save("mealCfg", mealCfg); if (planOf("nyeparty")) startMealPlan(mealById("nyeparty"), true); renderNyeParty(); return; }
+    if (e.target.closest("[data-nyesaved]")) { mealView = "saved"; showView("meals"); window.scrollTo(0, 0); }
+  });
+  $("#view-nye").addEventListener("change", e => {
+    if (e.target.id !== "nyeTime" || !e.target.value) return;
+    const c = cfgFor("nyeparty"); c.time = e.target.value; mealCfg.nyeparty = c; save("mealCfg", mealCfg); if (planOf("nyeparty")) startMealPlan(mealById("nyeparty"), true); renderNyeParty();
+  });
   $("#nyeCard").addEventListener("click", () => { ecard.d = "nyc"; save("ecard", ecard); syncCards(); showView("invites"); showPane("cards"); toast("🥂 Midnight Champagne card selected"); });
   document.addEventListener("click", e => { const g = e.target.closest("[data-goview]"); if (g) showView(g.dataset.goview); });
 
@@ -157,14 +173,14 @@
     el.innerHTML = `<div class="menu-top">${go}</div>
       <p class="menu-star">✦</p><h2 class="menu-title">New Year's Eve</h2><p class="menu-sub">Party bites, games and a midnight countdown, all planned for you</p><p class="menu-rule"><span></span>✦<span></span></p>
       <h3 class="menu-group">The Party</h3>` +
-      blk("New Year's Eve Party", `<p class="menu-items">${food.join(dot)}</p><p class="menu-drinks"><b>Drinks</b> ${drinks.join(dot)}</p><p class="menu-sub2">Vegan dish available to add</p>`) +
+      blk("New Year's Eve Party", `<p class="menu-items">${food.join(dot)}</p><p class="menu-drinks"><b>Drinks</b> ${drinks.join(dot)}</p>`) +
       `<h3 class="menu-group">Party Themes</h3>` +
       blk("Pick your style", `<p class="menu-items">${NYE_THEMES.map(t => esc(t[0])).join(dot)}</p>`) +
       `<h3 class="menu-group">Games</h3>` +
       blk("Pass the phone and play", `<p class="menu-items">Who Wrote It?${dot}Would You Rather${dot}Who's Most Likely To${dot}Two Truths &amp; a Midnight Lie${dot}Guess the Resolution${dot}Draw the Countdown${dot}Happy New Year Categories${dot}10-Second Countdown${dot}Year-in-Review Quiz</p>`) +
       `<h3 class="menu-group">Midnight</h3>` +
       blk("The finishing touches", `<p class="menu-items">Big Countdown with fireworks${dot}Wishes Jar${dot}Midnight Champagne card${dot}Appetizer Ideas${dot}Printable Party Planner</p>`) +
-      `<p class="menu-note">Everything can be adjusted when you build: guests, theme, appetizers and start time.</p>
+      `<p class="menu-note">Choose your guests and start time, and Noël builds the rest.</p>
       <div class="menu-bottom"><p class="menu-ready">Ready to build your night?</p>${go}<button type="button" class="menu-own" data-nyecount>Just here for the countdown? Open it ›</button></div>`;
   }
   document.addEventListener("click", e => {

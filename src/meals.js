@@ -252,7 +252,7 @@
     return `<span class="meal-lab">Will you serve dinner too?</span><div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Will you serve dinner too?">
       <button type="button" data-pmode="meal" aria-pressed="${c.mode !== "before"}"><b>No, appetizers are the meal</b><small>About 12 bites per guest</small></button><button type="button" data-pmode="before" aria-pressed="${c.mode === "before"}"><b>Yes, light bites before dinner</b><small>About 5 bites per guest</small></button></div>
       <p class="host-rem" style="margin:6px 0 12px">Cooking a dinner as well? Plan it from the Meals menu, or use your own timers.</p>
-      ${m.eve ? `<p class="party-total">Estimated total <b>${cad0(pricedShop(m, p.f, p).total)}</b> · about ${cad(pricedShop(m, p.f, p).total / c.guests)} per guest<small>${currency} · our set Christmas Eve menu, includes the hot cocoa bar.</small></p>` : `<span class="meal-lab">Pick your appetizers (${picked.size})</span>
+      ${m.party ? `<p class="party-total">Estimated total <b>${cad0(pricedShop(m, p.f, p).total)}</b> · about ${cad(pricedShop(m, p.f, p).total / c.guests)} per guest<small>${currency} · our set ${m.eve ? "Christmas Eve menu, includes the hot cocoa bar" : "New Year's Eve menu, includes the midnight toast"}.</small></p>` : `<span class="meal-lab">Pick your appetizers (${picked.size})</span>
       <p class="party-total">Estimated total <b>${cad0(pricedShop(m, p.f, p).total)}</b> · about ${cad(pricedShop(m, p.f, p).total / c.guests)} per guest<small>${currency} · ${m.eve ? "includes the hot cocoa bar" : "includes the midnight toast"}. Prices beside each appetizer are for ${c.guests} guests; tap to add or remove.</small></p>
       <div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])} <span class="chip-price">${picked.has(a[1]) ? "" : "+"}${cad0(MD.appCost(a[1], p) * fx())}</span></button>`).join("")}</div>`}`;
   }
@@ -307,7 +307,7 @@
     return true;
   }
   // 🧾 the review card: see everything first, nothing is set until Confirm
-  function planReview(ids) {
+  function planReview(ids, from) {
     const old = document.getElementById("planReview"); if (old) old.remove();
     const now = Date.now(), clock = t => new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
     let allOk = true;
@@ -326,7 +326,7 @@
     el.addEventListener("click", e => {
       if (e.target === el || e.target.closest("[data-prback]")) { el.remove(); return; }
       if (e.target.closest("[data-prok]")) {
-        el.remove(); cf = { ids: ids.filter(id => mealById(id)), night: wiz.night, have: {} }; mealView = "confirm"; renderMeals(); window.scrollTo(0, 0);
+        el.remove(); cf = { ids: ids.filter(id => mealById(id)), night: from ? null : wiz.night, have: {}, from: from || "" }; mealView = "confirm"; if (from === "nye") showView("meals"); renderMeals(); window.scrollTo(0, 0);
       }
     });
   }
@@ -640,7 +640,7 @@
         let drinks = dr.flatMap(([, items]) => items.map(clean));
         if (!drinks.length) { const names = [...(m.drinks || []).map(d => d[1]).join(" ").matchAll(/((?:[A-Z][\w'’-]*\s)*[A-Z][\w'’-]*)\s*\(recipe included\)/g)].map(x => x[1]); drinks = [...names.map(esc), "wine pairings"]; }
         return `<div class="menu-dish"><h4>${esc(m.name)}</h4><p class="menu-items">${food.flatMap(([, items]) => items.map(clean)).join(" <i>·</i> ")}</p>` +
-          `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p><p class="menu-sub2">Vegan dish available to add</p><a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
+          `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p>${m.party ? "" : '<p class="menu-sub2">Vegan dish available to add</p>'}<a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
       }).join("")).join("") +
       `<p class="menu-note">Have vegan guests? Choose a vegan dish to add when you plan your dinner.</p>
       <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}</div>`;
@@ -761,7 +761,7 @@
   const whenLong = t => new Date(t).toLocaleString(undefined, { weekday: "long", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   const whenShort = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
   function wizDietHtml() {
-    const list = MD.meals.filter(a => a.addon); if (!list.length) return "";
+    const list = MD.meals.filter(a => a.addon); if (!list.length || wiz.night === "eve") return "";
     return `<div class="wz-diet"><div class="wz-step"><span class="wz-n">+</span>Add a vegan dish <small>Optional. For vegan guests, 1–5 people, added to your plan.</small></div>` +
       list.map(a => { const on = !!mealAddons[a.id], g = cfgFor(a.id).guests;
         return `<div class="addon-row"><label><input type="checkbox" data-wzadd="${a.id}" ${on ? "checked" : ""}> ${esc(a.name)}</label>` +
@@ -795,7 +795,7 @@
       <button type="button" class="btn btn-gold btn-block cf-save" data-cfsave>Save my menu and set alarms</button>`;
   }
   function cfSave() {
-    const b = cfBuild(), now = Date.now();
+    const b = cfBuild(), now = Date.now(), from = cf.from;
     let ok = 0; cf.ids.forEach(id => { if (startMealPlan(mealById(id), true)) ok++; });
     const snap = { id: "sm" + now.toString(36), savedAt: now, night: cf.night || null,
       at: Math.min(...cf.ids.map(id => dinnerAt(cfgFor(id)))), names: cf.ids.map(id => mealById(id).name),
@@ -807,12 +807,12 @@
     const el = document.createElement("div"); el.id = "planReview"; el.className = "pr-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
     el.innerHTML = `<div class="pr-card"><p class="menu-star">✦</p><h3 class="pr-title">Saved</h3>
       <p class="pr-sub">${esc(snap.names.join(" and "))}<br>${esc(whenLong(snap.at))}</p>
-      <div class="pr-meal"><p class="pr-when">Estimated cost to buy <b>${cad0(snap.toBuy)}</b><br>${ok ? `Alarms are set for ${ok} dinner${ok > 1 ? "s" : ""}.` : "The dinner time has passed, so no alarms were set."}</p></div>
+      <div class="pr-meal"><p class="pr-when">Estimated cost to buy <b>${cad0(snap.toBuy)}</b><br>${ok ? "Your alarms are set." : "That time has passed, so no alarms were set."}</p></div>
       <div class="pr-btns"><button type="button" class="btn btn-ghost" data-svlist>My saved menus</button><button type="button" class="btn btn-gold" data-svdone>Done</button></div></div>`;
     document.body.appendChild(el);
     el.addEventListener("click", e => {
       if (e.target.closest("[data-svlist]")) { el.remove(); mealView = "saved"; renderMeals(); window.scrollTo(0, 0); }
-      else if (e.target.closest("[data-svdone]") || e.target === el) { el.remove(); mealView = ""; mealScreen = "menu"; renderMeals(); window.scrollTo(0, 0); }
+      else if (e.target.closest("[data-svdone]") || e.target === el) { el.remove(); mealView = ""; mealScreen = "menu"; if (from === "nye") showView("nye"); else renderMeals(); window.scrollTo(0, 0); }
     });
     cf = null; mealView = "";
     mealScreen = "menu"; renderMeals();
@@ -856,7 +856,7 @@
     const ag = t.closest("[data-wzag]");
     if (ag) { const [aid, d] = ag.dataset.wzag.split(":"), ac = cfgFor(aid); ac.guests = Math.min(5, Math.max(1, ac.guests + +d)); mealCfg[aid] = ac; save("mealCfg", mealCfg); if (wiz.night) wizApply(wiz.night); renderMeals(); return; }
     if (t.closest("[data-menusaved]") || t.closest("[data-wzsaved]")) { mealView = "saved"; renderMeals(); window.scrollTo(0, 0); return; }
-    if (t.closest("[data-cfback]")) { mealView = ""; renderMeals(); window.scrollTo(0, 0); return; }
+    if (t.closest("[data-cfback]")) { const f = cf && cf.from; mealView = ""; cf = null; if (f === "nye") showView("nye"); else renderMeals(); window.scrollTo(0, 0); return; }
     if (t.closest("[data-cfsave]")) { cfSave(); window.scrollTo(0, 0); return; }
     if (t.closest("[data-svback]")) { mealView = ""; mealScreen = "menu"; renderMeals(); window.scrollTo(0, 0); return; }
     if (t.closest("[data-svlistback]")) { mealView = "saved"; renderMeals(); window.scrollTo(0, 0); return; }
