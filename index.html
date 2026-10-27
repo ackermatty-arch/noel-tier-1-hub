@@ -10578,9 +10578,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       ["Dog puzzle feeder toy", "Keeps clever pups busy and happy.", 15, 35, "games", 0],
       ["Cozy pet bed", "The best nap spot in the house.", 35, 80, "cozy", 0],
       ["Holiday pet sweater", "Festive photos guaranteed.", 20, 35, "cozy", 0],
-      ["Durable dog chew toys", "Built to last through serious chewing.", 15, 30, "active", 0],
+      ["Durable dog chew toys", "Built to last through serious chewing.", 15, 30, "active", 1],
       ["Cat tree with scratching post", "Climbing, scratching and lounging in one.", 40, 120, "active", 0],
-      ["Natural pet treat sampler", "Healthy goodies for good boys and girls.", 15, 30, "kitchen", 0],
+      ["Natural pet treat sampler", "Healthy goodies for good boys and girls.", 15, 30, "kitchen", 1],
       ["Personalized pet ID tag", "Safety with style.", 10, 20, "", 0],
       ["Custom pet portrait", "A keepsake painting from your favourite photo.", 40, 120, "creative", 0],
       ["Interactive cat toy", "Feathers, lights and endless pouncing.", 10, 25, "games", 0],
@@ -10660,7 +10660,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
             <button type="button" class="btn btn-green" data-giaddgo>Add</button></div>`
           : `<button type="button" class="btn btn-ghost btn-block gi-addbtn" data-giadd>➕ Add to my gift tracker</button>`}
       </div>`;
-    }).join("") : `<p class="apps-empty">${gi.cat === "saved" ? "Tap ☆ on any idea to save it here." : "No ideas match those filters. Try another price or interest."}</p>`;
+    }).join("") : `<p class="apps-empty">${gi.cat === "saved" ? "Tap ☆ on any idea to save it here." : "No ideas match the filters you have on (price, Eco picks or an interest)."}</p>${gi.cat === "saved" ? "" : `<button type="button" class="btn btn-ghost btn-block" data-giclear>Clear filters and show all</button>`}`;
     if (giAddFor) { const sel = $("#giList [data-giperson]"); if (sel && !gifts.people.length) sel.value = "__new"; }
   }
 
@@ -10669,6 +10669,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const home = t.closest("[data-gihome]"); if (home) { openStore(home.dataset.gihome); return; }
     const url = t.closest("[data-giurl]"); if (url) { openStore(url.dataset.giurl); return; }
     const c = t.closest("[data-gicat]"); if (c) { gi.cat = c.dataset.gicat; giAddFor = null; save1(); renderIdeas(); return; }
+    if (t.closest("[data-giclear]")) { gi.budget = "any"; gi.eco = false; gi.interest = ""; save1(); renderIdeas(); return; }
     const b = t.closest("[data-gibudget]"); if (b) { gi.budget = b.dataset.gibudget; save1(); renderIdeas(); return; }
     if (t.closest("[data-gieco]")) { gi.eco = !gi.eco; save1(); renderIdeas(); return; }
     const i = t.closest("[data-giint]"); if (i) { gi.interest = gi.interest === i.dataset.giint ? "" : i.dataset.giint; save1(); renderIdeas(); return; }
