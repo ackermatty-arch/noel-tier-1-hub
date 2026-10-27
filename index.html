@@ -2,6 +2,20 @@
 <html lang="en">
 <head>
 <script id="noel-edition">window.NOEL_EDITION = "family";   /* ✏️ "family" or "office" (build.py makes office.html for the Office Edition) */</script>
+<script id="noel-fresh">
+/* 👋 ?fresh on the link = try the app as a brand-new buyer. Everything is kept in this browser tab only (it is gone when the tab closes), so your real saved data is never touched. */
+(function () {
+  try {
+    if (!/[?&]fresh\b/.test(location.search)) return;
+    var ss = window.sessionStorage, id = ss.getItem("noel_fresh_id");
+    if (!id) { id = Math.random().toString(36).slice(2, 8); ss.setItem("noel_fresh_id", id); }
+    Object.defineProperty(window, "localStorage", { configurable: true, get: function () { return ss; } });
+    var open = IDBFactory.prototype.open;
+    IDBFactory.prototype.open = function (name, ver) { return open.call(this, "fresh-" + id + "-" + name, ver); };
+    window.NOEL_FRESH = true;
+  } catch (e) {}
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
