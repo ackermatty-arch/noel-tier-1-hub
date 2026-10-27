@@ -11271,6 +11271,27 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     add(`${orgYear()}-12-10`, "✉️", "Mail your Christmas cards");
     return out.sort((a, b) => (a.date + (a.time || "99")).localeCompare(b.date + (b.time || "99")));
   }
+  // 🖨️ printable month: grid with the day's plans, then the month's list
+  function calendarDoc() {
+    const m0 = parseYmd(org.calMonth || calDefault()), y = m0.getFullYear(), mo = m0.getMonth(), first = new Date(y, mo, 1).getDay(), days = new Date(y, mo + 1, 0).getDate();
+    const pre = `${y}-${String(mo + 1).padStart(2, "0")}`, evs = calEvents().filter(e => e.date.startsWith(pre)), byDay = {}; evs.forEach(e => { (byDay[e.date] = byDay[e.date] || []).push(e); });
+    const who = e => { const m = e.mine && e.who ? org.members.find(z => z.id === e.who) : null; return m ? m.name : ""; };
+    const t12 = t => t ? new Date(2000, 0, 1, +t.slice(0, 2), +t.slice(3, 5)).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "";
+    const cells = []; for (let i = 0; i < first; i++) cells.push(`<div class="cc blank"></div>`);
+    for (let d = 1; d <= days; d++) { const k = `${pre}-${String(d).padStart(2, "0")}`, list = byDay[k] || [];
+      cells.push(`<div class="cc"><b>${d}</b>${list.slice(0, 3).map(e => `<span>${e.time ? t12(e.time) + " " : ""}${esc(e.title)}${who(e) ? " · " + esc(who(e)) : ""}</span>`).join("")}${list.length > 3 ? `<em>+${list.length - 3} more</em>` : ""}</div>`); }
+    while (cells.length % 7) cells.push(`<div class="cc blank"></div>`);
+    const css = `.cp{box-sizing:border-box;border:1.5px solid #C9A45C;outline:.5px solid #C9A45C;outline-offset:-7px;padding:.3in .35in .25in;font-family:Georgia,serif;color:#151515}
+      .cp h1{text-align:center;font:600 27pt/1.1 Georgia,serif!important;letter-spacing:.2em;text-transform:uppercase;margin:0!important;color:#151515!important} .cp .cp-s{text-align:center;font:600 8pt sans-serif;letter-spacing:.35em;text-transform:uppercase;color:#B08D4E;margin:6px 0 14px}
+      .cg{display:grid;grid-template-columns:repeat(7,1fr);border-left:1px solid #C9A45C;border-top:1px solid #151515} .cdw{text-align:center;font:600 7pt sans-serif;letter-spacing:.22em;color:#B08D4E;padding:5px 0;border-right:1px solid #C9A45C;border-bottom:1px solid #151515}
+      .cc{box-sizing:border-box;min-height:.98in;max-height:.98in;overflow:hidden;padding:3px 4px;border-right:1px solid #C9A45C;border-bottom:1px solid #C9A45C} .cc.blank{background:#f4f4f4} .cc b{font:600 9.5pt Georgia,serif;color:#151515}
+      .cc span{display:block;font:6.8pt/1.2 Georgia,serif;margin-top:2px;border-left:2px solid #C9A45C;padding-left:3px} .cc em{display:block;font:italic 6.5pt Georgia,serif;color:#B08D4E;margin-top:2px}
+      .cp h2{font:600 9pt sans-serif!important;letter-spacing:.3em;text-transform:uppercase;color:#B08D4E;margin:16px 0 6px!important;border-bottom:1px solid #C9A45C;padding-bottom:4px} .cl{display:grid;grid-template-columns:.9in 0.8in 1fr;gap:2px 8px;font:9pt/1.35 Georgia,serif} .cl i{font-style:normal;color:#B08D4E}`;
+    const html = `<div class="cp"><h1>${m0.toLocaleDateString(undefined, { month: "long" })}</h1><p class="cp-s">${y}${familyTitle(family) ? " · " + esc(familyTitle(family)) : ""}</p>
+      <div class="cg">${["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map(x => `<div class="cdw">${x}</div>`).join("")}${cells.join("")}</div>
+      ${evs.length ? `<h2>This month's plans</h2><div class="cl">${evs.map(e => `<i>${parseYmd(e.date).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</i><i>${e.time ? t12(e.time) : "All day"}</i><span>${esc(e.title)}${who(e) ? " · " + esc(who(e)) : ""}</span>`).join("")}</div>` : ""}</div>`;
+    return { noBrand: 1, title: m0.toLocaleDateString(undefined, { month: "long", year: "numeric" }) + " calendar", css, html, margin: 0.5, file: "Calendar-" + pre };
+  }
   function orgCalHtml() {
     const today = new Date(), month = org.calMonth || calDefault();
     const m0 = parseYmd(month), y = m0.getFullYear(), mo = m0.getMonth(), first = new Date(y, mo, 1).getDay(), days = new Date(y, mo + 1, 0).getDate();
@@ -11281,7 +11302,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       cells.push(`<button type="button" class="cal-cell${k === sel ? " sel" : ""}${k === ymd(today) ? " today" : ""}${list.length ? " has" : ""}" data-oday="${k}"><span>${d}</span><i>${list.slice(0, 3).map(() => "●").join("")}</i></button>`); }
     const dayList = byDay[sel] || [];
     return `<div class="card org-card cal-card"><div class="cal-head"><button type="button" class="icon-btn" data-omonth="-1" aria-label="Previous month">‹</button><b>${m0.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</b><button type="button" class="icon-btn" data-omonth="1" aria-label="Next month">›</button></div>
-        <div class="cal-grid">${["S", "M", "T", "W", "T", "F", "S"].map(d => `<span class="cal-dow">${d}</span>`).join("")}${cells.join("")}</div></div>
+        <div class="cal-grid">${["S", "M", "T", "W", "T", "F", "S"].map(d => `<span class="cal-dow">${d}</span>`).join("")}${cells.join("")}</div><div class="send-btns" style="margin-top:10px"><button type="button" class="btn btn-ghost" data-print="calendar">🖨️ Print this month</button></div></div>
       <div class="card org-card"><h3>${shortDate(sel)}</h3>
         ${dayList.length ? `<ul class="cal-list">${dayList.map(e => `<li class="${e.auto ? "auto" : ""}" ${e.mine ? `data-oev="${e.id}"` : ""}><span class="cl-time">${e.time ? mclock(parseYmd(e.date).setHours(...e.time.split(":").map(Number))) : "All day"}</span><span class="cl-txt">${e.mine ? memberEmoji(e.who) : e.icon} ${esc(e.title)}${e.notes ? `<small>${esc(e.notes)}</small>` : ""}${e.auto ? `<small>From your Noël plans</small>` : ""}</span>${e.mine ? `<button class="icon-btn" data-odelev aria-label="Remove">✕</button>` : ""}</li>`).join("")}</ul>` : `<p class="host-rem">Nothing planned yet.</p>`}
         <form id="orgEventForm" class="org-ev-form" autocomplete="off">
@@ -12774,6 +12795,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     else if (key === "bidsheets") d = bidSheetsDoc();
     else if (key === "aucwinners") d = aucWinnersDoc();
     else if (key === "labels" || key === "return") d = labelDoc(key);
+    else if (key === "calendar") d = calendarDoc();
     if (!d) return { error: "That page isn't available any more" };
     // 🏷️ the family (or company) name across the top of every printed page set
     const who = familyTitle(family);
