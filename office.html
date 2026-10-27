@@ -1645,7 +1645,7 @@ input[type="checkbox"], input[type="radio"] { accent-color:#151515; }
 .gift-item.given .g-name, .meal-tl li.done, .shop-list label.on span, .host-list label.on span, .act-item.done h4 {
   text-decoration-line:line-through; text-decoration-color:var(--gold); text-decoration-thickness:2px; }
 body, .view { background:#fff; }
-.gate { background:#121212 !important; }
+.gate { background:linear-gradient(160deg,#213f33,#182f25) !important; }
 
 :root { --ic-mic: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1MCA1Mikgc2NhbGUoMy4xKSI+PHJlY3QgeD0iLTQuMiIgeT0iLTEyIiB3aWR0aD0iOC40IiBoZWlnaHQ9IjE0IiByeD0iNC4yIiBmaWxsPSIjMTExIi8+PHBhdGggZD0iTS03LjUgLTEuNWE3LjUgNy41IDAgMCAwIDE1IDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzExMSIgc3Ryb2tlLXdpZHRoPSIxLjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0wIDZ2NC41TS00IDEwLjVoOCIgc3Ryb2tlPSIjMTExIiBzdHJva2Utd2lkdGg9IjEuOCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTS0yLjIgLTguNWg0LjRNLTIuMiAtNS41aDQuNCIgc3Ryb2tlPSIjNzc3IiBzdHJva2Utd2lkdGg9Ii44Ii8+PC9nPjwvc3ZnPg=="); }
 .mic-fab { background-size: 58% !important; }
@@ -3276,7 +3276,9 @@ const INVITE = (() => {
 <div class="gate" id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle" hidden>
   <form class="gate-box classy-frame dark" id="lockForm" autocomplete="off">
     <div class="classy-brand">PRIVATE · ENCRYPTED</div>
-    <h2 id="lockTitle" style="margin-top:18px">Noël<br>Tier 1 Hub</h2>
+    <svg class="gate-star" width="54" height="54" viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="25" fill="none" stroke="#D9BF8C" stroke-width=".9"/><path d="M27 12l3.6 8.8 9.4.6-7.2 6.1 2.3 9.2L27 31.6l-8.1 5.1 2.3-9.2-7.2-6.1 9.4-.6z" fill="none" stroke="#D9BF8C" stroke-width="1.1"/></svg>
+    <h2 id="lockTitle">Noël<br>Tier 1 Hub</h2>
+    <div class="classy-kicker">YOUR PRIVATE HOLIDAY COMPANION</div>
     <p id="lockMsg">Enter your PIN to open your lists.</p>
     <input class="gate-input" id="lockInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="PIN" aria-label="PIN" autocomplete="off">
     <p class="gate-err" id="lockErr" aria-live="polite"></p>
