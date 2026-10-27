@@ -1771,6 +1771,11 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .ring .track, .ring .bar { stroke-width: 2.4px !important; }
 .ring .bar { stroke: #121212; stroke-linecap: butt; }
 .ring .track { stroke: #E3D2A8; }
+
+/* Slimmer black buttons */
+.btn, .btn-red, .btn-green, .meal-back { min-height: 32px !important; padding: 0 12px !important; font-size: 12.5px !important; letter-spacing: .06em; }
+.btn-block { min-height: 34px !important; }
+#orgEventForm .btn, .org-add .btn, .santa-add .btn, .gi-add .btn { align-self: center; }
 </style>
 </head>
 <body>
@@ -2191,7 +2196,7 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
        ============================================================ -->
   <section class="view" id="view-meals" aria-labelledby="mealsTitle">
     <h2 class="view-title" id="mealsTitle">Meal Planner</h2>
-    <p class="view-intro">Pick a dinner, choose how many guests and when you'll eat. Noël sizes every recipe, writes your shopping list and sets every alarm.</p>
+    <p class="view-intro">Pick a dinner, choose how many guests and when you'll eat. Noël sizes every recipe, estimates your grocery prices, writes your shopping list and sets every alarm.</p>
     <div class="meal-master" id="mealMaster" hidden></div>
     <a href="#mealOwn" class="meal-skip" id="mealSkip">Making your own dinner? Timers &amp; dietary dishes ↓</a>
     <div id="mealHome">
@@ -11273,8 +11278,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       <div class="card org-card"><h3>${shortDate(sel)}</h3>
         ${dayList.length ? `<ul class="cal-list">${dayList.map(e => `<li class="${e.auto ? "auto" : ""}" ${e.mine ? `data-oev="${e.id}"` : ""}><span class="cl-time">${e.time ? mclock(parseYmd(e.date).setHours(...e.time.split(":").map(Number))) : "All day"}</span><span class="cl-txt">${e.mine ? memberEmoji(e.who) : e.icon} ${esc(e.title)}${e.notes ? `<small>${esc(e.notes)}</small>` : ""}${e.auto ? `<small>From your Noël plans</small>` : ""}</span>${e.mine ? `<button class="icon-btn" data-odelev aria-label="Remove">✕</button>` : ""}</li>`).join("")}</ul>` : `<p class="host-rem">Nothing planned yet.</p>`}
         <form id="orgEventForm" class="org-ev-form" autocomplete="off">
-          <input class="input" name="title" maxlength="60" placeholder="e.g. School concert" aria-label="Event">
-          ${fillChips((hubMode === "company" ? ["🎉 Office party", "🎁 Gift exchange", "🥘 Potluck lunch", "📞 Client gifts go out", "🏖️ Office closed"] : ["🎶 School concert", "⭐ Christmas pageant", "🎅 Photos with Santa", "🎄 Tree lighting", "⛪ Christmas Eve service", "💼 Work party", "🏒 Hockey game", "🍪 Cookie exchange", "🎁 Gift exchange", "🛍️ Holiday shopping day", "✈️ Travel day", "🦃 Family dinner"]).map(x => [x, x.replace(/^\S+\s/, "")]), "#orgEventForm [name=title]")}
+          <input class="input" name="title" maxlength="60" placeholder="Type your own or pick below" aria-label="Event">
+          ${fillChips((hubMode === "company" ? ["🎉 Office party", "🎁 Gift exchange", "🥘 Potluck lunch", "📞 Client gifts go out", "🏖️ Office closed"] : ["🎶 School concert", "⭐ Christmas pageant", "🎅 Photos with Santa", "🎄 Tree lighting", "⛪ Christmas Eve service", "💼 Work party", "🏒 Hockey game", "🍪 Cookie exchange", "🎁 Gift exchange", "🛍️ Holiday shopping day", "✈️ Travel day", "🦃 Family dinner", "✏️ Other (type your own)"]).map(x => [x, /Other/.test(x) ? "" : x.replace(/^\S+\s/, "")]), "#orgEventForm [name=title]")}
           <div class="org-addr-row"><input class="input" name="time" type="time" aria-label="Time"><select class="input" name="who" aria-label="Who"><option value="">Everyone</option>${org.members.map(m => `<option value="${m.id}">${m.emoji} ${esc(m.name)}</option>`).join("")}</select></div>
           <input class="input" name="notes" maxlength="80" placeholder="Notes, e.g. bring 24 cupcakes, wear red" aria-label="Notes">
           <label class="host-check"><input type="checkbox" name="remind" checked> 🔔 Remind me the evening before${" "}and 1 hour before</label>
