@@ -1986,6 +1986,20 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .wz-nights .wz-night:last-child:nth-child(3) { grid-column: 1 / -1; }
 #nyePartySum.nye-plan-sum { background: none !important; border: 0 !important; padding: 0 !important; }
 #nyePartySum .party-total { background: none !important; border: 0 !important; padding: 8px 0 !important; margin: 0 0 8px !important; }
+
+.own-card { margin-bottom: 12px; display: grid; gap: 10px; }
+.own-row { display: grid; gap: 6px; align-items: center; }
+.own-r3 { grid-template-columns: 62px 1fr 122px; }
+.own-r2 { grid-template-columns: 1fr 1.4fr auto; }
+.own-r4 { grid-template-columns: auto 1fr 84px auto; }
+.own-r5 { grid-template-columns: 122px 1fr auto auto; }
+.own-tm { padding: 8px 10px; min-height: 0; }
+.own-row .input { min-width: 0; width: 100%; }
+.own-tot { text-align: left; margin: 0 0 4px; font-size: 14px; line-height: 1.5; }
+.own-over { color: #151515; font-weight: 800; text-decoration: underline; }
+.own-lim { margin-top: 6px; }
+.own-chips { margin-bottom: 12px; }
+.own-banner { margin-bottom: 12px; }
 </style>
 </head>
 <body>
@@ -2209,6 +2223,54 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
   <section class="view" id="view-planner" aria-labelledby="plannerTitle">
     <h2 class="view-title" id="plannerTitle">Holiday Planner</h2>
     <p class="view-intro">Tick off each task as you go. Your progress saves automatically.</p>
+
+    <button class="advent-banner own-banner fam-only" data-goview="own">
+      <span class="ab-ico">📓</span>
+      <span class="ab-text"><b>My Own Dinner</b><small>Cooking your own? Type your menu, shopping list with prices and cooking timeline</small></span>
+      <span class="ab-go">Open ›</span>
+    </button>
+
+    <div class="section-label">Printable Planner</div>
+
+    <!-- ✏️ PRINTABLE PLANNERS: replace each href="#" with your PDF link -->
+
+    <article class="card print-card featured">
+      <div class="print-thumb">🎁</div>
+      <div class="print-info">
+        <span class="bundle-tag">3 pages · low ink</span>
+        <h3>Christmas Gift List</h3>
+        <p>Gift list with budget tracker and bought, wrapped &amp; given checkboxes, plus wish-list pages, stocking stuffers and an online order tracker.</p>
+        <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
+      </div>
+    </article>
+
+    <article class="card print-card featured" style="margin-top:12px">
+      <div class="print-thumb">🍽️</div>
+      <div class="print-info">
+        <span class="bundle-tag">4 pages · low ink</span>
+        <h3>Christmas Menu Planner</h3>
+        <p>Dinner menu by course with who's bringing what, a grocery list by aisle, a Christmas Day cooking timeline, and a menu card for the table.</p>
+        <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
+      </div>
+    </article>
+
+    <article class="card print-card featured" style="margin-top:12px">
+      <div class="print-thumb">✨</div>
+      <div class="print-info">
+        <span class="bundle-tag">5 styles · 6 per page</span>
+        <h3>Christmas Place Cards</h3>
+        <p>Fold-over table cards with space to write each guest's name. Pick your style:</p>
+        <!-- ✏️ PLACE CARDS: one PDF link per style -->
+        <div class="style-links">
+          <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Elegant Collection</a>
+          <a class="btn btn-gold btn-sm pdf-link" href="#" download>⬇ Merry Moose</a>
+          <a class="btn btn-ghost btn-sm pdf-link" href="#" download>⬇ Ornament Garland</a>
+          <a class="btn btn-green btn-sm pdf-link" href="#" download>⬇ Nordic Collection</a>
+          <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Mountain Christmas</a>
+        </div>
+      </div>
+    </article>
+
     <button class="advent-banner office-banner" data-goview="office" id="officeBanner" hidden>
       <span class="ab-ico">🏢</span>
       <span class="ab-text"><b>Office Party Plan</b><small>Event details, approval request, potluck, Silly Office Awards and the handover</small></span>
@@ -2251,47 +2313,6 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
       <button class="btn btn-ghost" id="resetChecklist">↺ Untick all tasks</button>
     </div>
 
-
-    <div class="section-label">Printable Planner</div>
-
-    <!-- ✏️ PRINTABLE PLANNERS: replace each href="#" with your PDF link -->
-
-    <article class="card print-card featured">
-      <div class="print-thumb">🎁</div>
-      <div class="print-info">
-        <span class="bundle-tag">3 pages · low ink</span>
-        <h3>Christmas Gift List</h3>
-        <p>Gift list with budget tracker and bought, wrapped &amp; given checkboxes, plus wish-list pages, stocking stuffers and an online order tracker.</p>
-        <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
-      </div>
-    </article>
-
-    <article class="card print-card featured" style="margin-top:12px">
-      <div class="print-thumb">🍽️</div>
-      <div class="print-info">
-        <span class="bundle-tag">4 pages · low ink</span>
-        <h3>Christmas Menu Planner</h3>
-        <p>Dinner menu by course with who's bringing what, a grocery list by aisle, a Christmas Day cooking timeline, and a menu card for the table.</p>
-        <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Download PDF</a>
-      </div>
-    </article>
-
-    <article class="card print-card featured" style="margin-top:12px">
-      <div class="print-thumb">✨</div>
-      <div class="print-info">
-        <span class="bundle-tag">5 styles · 6 per page</span>
-        <h3>Christmas Place Cards</h3>
-        <p>Fold-over table cards with space to write each guest's name. Pick your style:</p>
-        <!-- ✏️ PLACE CARDS: one PDF link per style -->
-        <div class="style-links">
-          <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Elegant Collection</a>
-          <a class="btn btn-gold btn-sm pdf-link" href="#" download>⬇ Merry Moose</a>
-          <a class="btn btn-ghost btn-sm pdf-link" href="#" download>⬇ Ornament Garland</a>
-          <a class="btn btn-green btn-sm pdf-link" href="#" download>⬇ Nordic Collection</a>
-          <a class="btn btn-red btn-sm pdf-link" href="#" download>⬇ Mountain Christmas</a>
-        </div>
-      </div>
-    </article>
 
     <div class="section-label">Just for You</div>
 
@@ -2363,6 +2384,13 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
     <p class="view-intro">Plan it, get it approved, and leave a tidy record for next year.</p>
     <div class="apps-filters host-tabs" id="offTabs"></div>
     <div id="offBody"></div>
+  </section>
+
+  <section class="view" id="view-own" aria-labelledby="ownTitle">
+    <button type="button" class="meal-back" data-goview="planner">‹ Planner</button>
+    <h2 class="view-title" id="ownTitle">My Own Dinner</h2>
+    <p class="view-intro">Cooking your own dinner? Type in your menu, shopping list, prices and timeline. It saves as you type, only on this phone.</p>
+    <div id="ownBody"></div>
   </section>
 
   <section class="view" id="view-host" aria-labelledby="hostTitle">
@@ -7325,6 +7353,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (name === "budget") renderBudget();
     if (name !== "gifts") santaLock();   // 🎅 leaving Gifts always locks Santa's list
     if (name === "meals") renderMeals();
+    if (name === "own") renderOwn();
     $$(".nav-btn").forEach(b => {
       const on = b.dataset.view === name;
       b.classList.toggle("active", on);
@@ -7338,7 +7367,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   /* 👆 SWIPE between tabs (left = next tab, right = previous tab)
      Ignores up/down scrolling, edge swipes (Android "back"), text boxes,
      sliders and anything inside a pop-up or full-screen page. */
-  const VIEW_ORDER = ["games", "planner", "office", "host", "org", "meals", "nye", "gifts", "budget", "invites", "alarms", "review"];
+  const VIEW_ORDER = ["games", "planner", "office", "host", "org", "own", "meals", "nye", "gifts", "budget", "invites", "alarms", "review"];
   let swipe = null;
   document.querySelector("main").addEventListener("touchstart", e => {
     const t = e.touches[0];
@@ -10651,10 +10680,10 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
     const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);
     v.classList.toggle("on-menu", on); el.hidden = !on; if (!on) return;
-    const hasPlan = mealPlans.some(p => !p.svc), sig = (hasPlan ? "plan" : "none") + savedMenus.length;
+    const hasPlan = mealPlans.some(p => !p.svc), sig = (hasPlan ? "plan" : "none") + savedMenus.length + "/" + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length;
     if (el.dataset.built === sig) return; el.dataset.built = sig;
     const go = `<button type="button" class="menu-go" data-menugo>${hasPlan ? "My dinner plan" : "Plan my dinner"} <span>›</span></button>`;
-    const sv = savedMenus.length ? `<button type="button" class="menu-go menu-saved" data-menusaved>My saved menus (${savedMenus.length}) <span>›</span></button>` : "";
+    const svN = savedMenus.length + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length, sv = svN ? `<button type="button" class="menu-go menu-saved" data-menusaved>My saved menus (${svN}) <span>›</span></button>` : "";
     el.innerHTML = `<div class="menu-top"><button type="button" class="menu-go menu-skip" data-menuskip>Don't plan my dinner</button>${go}</div>${sv ? `<div class="menu-top menu-top2">${sv}</div>` : ""}
       <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
       MENU_GROUPS.map(([g, ids, band]) => (band ? `<h3 class="menu-group">${band}</h3>` : "") + (band === g ? "" : `<h3 class="menu-subgroup">${g}</h3>`) + ids.map(id => {
@@ -10850,7 +10879,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       box.innerHTML = `<button type="button" class="meal-back" data-svback>‹ The menu</button><h3 class="meal-title">My saved menus</h3>` +
         (savedMenus.length ? savedMenus.map(s => `<div class="card sv-card"><b>${esc(s.names.join(" and "))}</b><small>${esc(whenLong(s.at))}</small><small>To buy ${cad0(s.toBuy)} ${esc(s.cur || "")}</small>
           <div class="sv-acts"><button type="button" class="btn btn-gold" data-svopen="${s.id}">Open</button><button type="button" class="btn btn-ghost" data-svdel="${s.id}">Delete</button></div></div>`).join("")
-          : `<div class="card"><p class="review-sub">Nothing saved yet. Plan a dinner, tap See my plan, then Save.</p></div>`);
+          : (ownDinners.length ? "" : `<div class="card"><p class="review-sub">Nothing saved yet. Plan a dinner, tap See my plan, then Save.</p></div>`)) +
+        ownDinners.map(o => `<div class="card sv-card"><b>${esc(ownName(o))}</b><small>My own dinner${o.date ? " · " + esc(whenShort(new Date(o.date + "T12:00").getTime())) : ""}</small><small>Total ${cad(ownTotals(o).total)}</small>
+          <div class="sv-acts"><button type="button" class="btn btn-gold" data-svown="${o.id}">Open</button><button type="button" class="btn btn-ghost" data-svowndel="${o.id}">Delete</button></div></div>`).join("");
       return;
     }
     const s = savedMenus.find(x => x.id === svId); if (!s) { mealView = "saved"; renderSaved(); return; }
@@ -10884,6 +10915,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (t.closest("[data-cfsave]")) { cfSave(); window.scrollTo(0, 0); return; }
     if (t.closest("[data-svback]")) { mealView = ""; mealScreen = "menu"; renderMeals(); window.scrollTo(0, 0); return; }
     if (t.closest("[data-svlistback]")) { mealView = "saved"; renderMeals(); window.scrollTo(0, 0); return; }
+    const so = t.closest("[data-svown]"); if (so) { ownId = so.dataset.svown; saveOwn(); showView("own"); window.scrollTo(0, 0); return; }
+    const sd = t.closest("[data-svowndel]"); if (sd) { if (confirm("Delete this dinner?")) { ownDinners = ownDinners.filter(x => x.id !== sd.dataset.svowndel); foodBudget.items = foodBudget.items.filter(x => x.meal !== "own:" + sd.dataset.svowndel); save("foodBudget", foodBudget); ownId = ownDinners[0] ? ownDinners[0].id : null; saveOwn(); renderMeals(); } return; }
     const op = t.closest("[data-svopen]"); if (op) { svId = op.dataset.svopen; mealView = "savedOne"; renderMeals(); window.scrollTo(0, 0); return; }
     const dl = t.closest("[data-svdel]"); if (dl) { if (confirm("Delete this saved menu?")) { savedMenus = savedMenus.filter(x => x.id !== dl.dataset.svdel); saveSaved(); mealView = "saved"; renderMeals(); } return; }
     const cp = t.closest("[data-svcopy]"); if (cp) { const s = savedMenus.find(x => x.id === cp.dataset.svcopy); if (s) { try { await navigator.clipboard.writeText(svText(s)); toast("List copied. Paste it anywhere."); } catch (err) { toast("Couldn't copy the list"); } } return; }
@@ -10905,6 +10938,100 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       const buy = svBuyList(s), n = buy.reduce((a, [, its]) => a + its.length, 0), d = buy.reduce((a, [, its]) => a + its.filter(i => s.bought[i.key]).length, 0);
       const c = $("#svCount"); if (c) c.textContent = `${d} of ${n} in the buggy`;
     }
+  });
+
+
+  // ---- 📓 My Own Dinner: a fill-in notebook for people cooking their own dinner ----
+  let ownDinners = load("ownDinners", []), ownId = load("ownId", null);
+  const saveOwn = () => { save("ownDinners", ownDinners); save("ownId", ownId); };
+  const OWN_COURSES = [["app", "Appetizers"], ["main", "Main"], ["sides", "Sides"], ["dessert", "Dessert"], ["drinks", "Drinks"]];
+  const ownNew = () => ({ id: "od" + Date.now().toString(36), title: "", guests: "", date: dayYmd(), time: "17:00", course: {}, bring: [{ id: uid(), who: "", dish: "" }],
+    shop: [{ id: uid(), name: "", price: "", got: false }], limit: "", steps: [{ id: uid(), time: "", text: "" }], notes: "", updated: Date.now() });
+  const ownCur = () => ownDinners.find(d => d.id === ownId);
+  const ownNum = v => { const n = parseFloat(String(v).replace(/[^0-9.]/g, "")); return isFinite(n) ? n : 0; };
+  const ownTotals = d => { let total = 0, spent = 0; d.shop.forEach(i => { const v = ownNum(i.price); total += v; if (i.got) spent += v; }); const lim = ownNum(d.limit); return { total, spent, left: total - spent, lim, over: lim ? total - lim : 0 }; };
+  const ownName = d => d.title.trim() || "My own dinner";
+  function ownTotHtml(d) {
+    const t = ownTotals(d);
+    return `<b>${cad(t.total)}</b> total · ${cad(t.spent)} bought · ${cad(t.left)} still to buy` + (t.lim ? `<br>${t.over > 0 ? `<span class="own-over">${cad(t.over)} over your ${cad(t.lim)} budget</span>` : `${cad(-t.over)} left of your ${cad(t.lim)} budget`}` : "");
+  }
+  const ownPaintTot = () => { const d = ownCur(), el = $("#ownTot"); if (d && el) el.innerHTML = ownTotHtml(d); };
+  function renderOwn() {
+    const box = $("#ownBody"); if (!box) return;
+    if (!ownDinners.length) { const n = ownNew(); ownDinners.push(n); ownId = n.id; saveOwn(); }
+    if (!ownCur()) { ownId = ownDinners[0].id; saveOwn(); }
+    const d = ownCur();
+    const row = (arr, id) => arr;
+    box.innerHTML = `<div class="ms-chips own-chips">${ownDinners.map(x => `<button type="button" class="ms-chip" data-ownpick="${x.id}" aria-pressed="${x.id === d.id}">${esc(ownName(x))}</button>`).join("")}<button type="button" class="ms-chip" data-ownnew>+ New dinner</button></div>
+      <div class="card own-card"><h4 class="ms-h">The dinner</h4>
+        <label class="calc-field"><span>Name</span><input class="input" data-ownf="title" maxlength="50" placeholder="e.g. Christmas Day at our house" value="${esc(d.title)}"></label>
+        <div class="own-row own-r3"><label class="calc-field"><span>Guests</span><input class="input" data-ownf="guests" inputmode="numeric" maxlength="3" value="${esc(d.guests)}"></label>
+        <label class="calc-field"><span>Date</span><input class="input" type="date" data-ownf="date" value="${esc(d.date)}"></label>
+        <label class="calc-field"><span>Time</span><input class="input" type="time" data-ownf="time" value="${esc(d.time)}"></label></div></div>
+      <div class="card own-card"><h4 class="ms-h">Menu</h4><p class="cf-fine">One dish per line.</p>${OWN_COURSES.map(([k, n]) => `<label class="calc-field"><span>${n}</span><textarea class="input" rows="2" data-ownc="${k}" placeholder="Type your dishes">${esc(d.course[k] || "")}</textarea></label>`).join("")}</div>
+      <div class="card own-card"><h4 class="ms-h">Who is bringing what</h4>${d.bring.map(r => `<div class="own-row own-r2"><input class="input" data-own="bring" data-id="${r.id}" data-k="who" placeholder="Name" value="${esc(r.who)}"><input class="input" data-own="bring" data-id="${r.id}" data-k="dish" placeholder="Dish" value="${esc(r.dish)}"><button type="button" class="icon-btn" data-owndel="bring:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
+        <button type="button" class="btn btn-ghost btn-block" data-ownadd="bring">+ Add a person</button></div>
+      <div class="card own-card"><h4 class="ms-h">Shopping list and prices</h4><p class="cf-fine">Type each item and its price. Tick it when it is in your buggy.</p>
+        <div class="cf-stats own-tot" id="ownTot">${ownTotHtml(d)}</div>
+        ${d.shop.map(r => `<div class="own-row own-r4"><input type="checkbox" data-own="shop" data-id="${r.id}" data-k="got" ${r.got ? "checked" : ""} aria-label="In the buggy"><input class="input" data-own="shop" data-id="${r.id}" data-k="name" placeholder="Item" value="${esc(r.name)}"><input class="input own-price" data-own="shop" data-id="${r.id}" data-k="price" inputmode="decimal" placeholder="$" value="${esc(r.price)}"><button type="button" class="icon-btn" data-owndel="shop:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
+        <button type="button" class="btn btn-ghost btn-block" data-ownadd="shop">+ Add an item</button>
+        <label class="calc-field own-lim"><span>My budget for this dinner (optional)</span><input class="input" data-ownf="limit" inputmode="decimal" placeholder="e.g. 150" value="${esc(d.limit)}"></label>
+        <button type="button" class="btn btn-gold btn-block" data-ownbudget>Add this total to my Budget</button></div>
+      <div class="card own-card"><h4 class="ms-h">Cooking timeline</h4><p class="cf-fine">Type a time and a step. Tap Timer to set a countdown for it (up to 24 hours ahead).</p>
+        ${d.steps.map(r => `<div class="own-row own-r5"><input class="input" type="time" data-own="steps" data-id="${r.id}" data-k="time" value="${esc(r.time)}"><input class="input" data-own="steps" data-id="${r.id}" data-k="text" placeholder="e.g. Turkey into the oven" value="${esc(r.text)}"><button type="button" class="btn btn-ghost btn-sm own-tm" data-owntimer="${r.id}">Timer</button><button type="button" class="icon-btn" data-owndel="steps:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
+        <button type="button" class="btn btn-ghost btn-block" data-ownadd="steps">+ Add a step</button></div>
+      <div class="card own-card"><h4 class="ms-h">Guest notes</h4><textarea class="input" rows="3" data-ownf="notes" placeholder="Allergies, who is coming, seating ideas">${esc(d.notes)}</textarea></div>
+      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button></div>`;
+  }
+  function ownDinnerDoc(id) {
+    const d = ownDinners.find(x => x.id === id); if (!d) return { error: "That dinner isn't here any more" };
+    const t = ownTotals(d), blank = n => Array.from({ length: n }, () => `<li class="own-bl">&nbsp;</li>`).join("");
+    const css = PRINT_CSS + ` .od h3{font:600 9pt sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#B08D4E;border-bottom:1px solid #C9A45C;padding-bottom:3px;margin:14px 0 5px} .od ul{list-style:none;padding:0;margin:0} .od li{margin:4px 0;font-size:11pt} .own-bl{border-bottom:1px solid #ccc;height:16px} .od .pr{float:right}`;
+    const dateTxt = d.date ? new Date(d.date + "T12:00").toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" }) : "";
+    const menu = OWN_COURSES.map(([k, n]) => { const lines = String(d.course[k] || "").split("\n").map(x => x.trim()).filter(Boolean); return `<p><b>${n}:</b> ${lines.length ? lines.map(esc).join(" · ") : "________________________________"}</p>`; }).join("");
+    const bring = d.bring.filter(r => r.who || r.dish);
+    const shop = d.shop.filter(r => r.name || r.price);
+    const steps = d.steps.filter(r => r.time || r.text);
+    const html = `<div class="od"><h1>${esc(ownName(d))}</h1><p class="pm-sub">${[dateTxt, d.time, d.guests ? d.guests + " guests" : ""].filter(Boolean).map(esc).join(" · ")}</p>
+      <h3>Menu</h3>${menu}
+      <h3>Who is bringing what</h3><ul>${bring.length ? bring.map(r => `<li>${esc(r.who)}: ${esc(r.dish)}</li>`).join("") : blank(4)}</ul>
+      <h3>Shopping list</h3><ul>${shop.length ? shop.map(r => `<li>${r.got ? "☑" : "☐"} ${esc(r.name)}${ownNum(r.price) ? `<span class="pr">${cad(ownNum(r.price))}</span>` : ""}</li>`).join("") + `<li><b>Total ${cad(t.total)}</b>${t.lim ? ` of ${cad(t.lim)} budget` : ""}</li>` : blank(8)}</ul>
+      <h3>Cooking timeline</h3><ul>${steps.length ? steps.map(r => `<li><b>${esc(r.time)}</b> ${esc(r.text)}</li>`).join("") : blank(6)}</ul>
+      <h3>Guest notes</h3><p>${d.notes ? esc(d.notes).replace(/\n/g, "<br>") : "________________________________"}</p></div><p class="pm-foot">Made with Noël Tier 1 Hub.</p>`;
+    return { title: ownName(d), css, html, margin: 0.5, file: "My-Own-Dinner" };
+  }
+  $("#view-own").addEventListener("input", e => {
+    const t = e.target, d = ownCur(); if (!d) return;
+    if (t.dataset.ownf) d[t.dataset.ownf] = t.value;
+    else if (t.dataset.ownc) d.course[t.dataset.ownc] = t.value;
+    else if (t.dataset.own) { const r = d[t.dataset.own].find(x => x.id === t.dataset.id); if (!r) return; r[t.dataset.k] = t.type === "checkbox" ? t.checked : t.value; }
+    else return;
+    d.updated = Date.now(); saveOwn(); ownPaintTot();
+    if (t.dataset.ownf === "title") { const c = $(`[data-ownpick="${d.id}"]`); if (c) c.textContent = ownName(d); }
+  });
+  $("#view-own").addEventListener("click", e => {
+    const t = e.target, d = ownCur();
+    const pk = t.closest("[data-ownpick]"); if (pk) { ownId = pk.dataset.ownpick; saveOwn(); renderOwn(); return; }
+    if (t.closest("[data-ownnew]")) { const n = ownNew(); ownDinners.push(n); ownId = n.id; saveOwn(); renderOwn(); window.scrollTo(0, 0); return; }
+    if (!d) return;
+    const ad = t.closest("[data-ownadd]");
+    if (ad) { const k = ad.dataset.ownadd; d[k].push(k === "bring" ? { id: uid(), who: "", dish: "" } : k === "shop" ? { id: uid(), name: "", price: "", got: false } : { id: uid(), time: "", text: "" }); saveOwn(); renderOwn(); return; }
+    const dl = t.closest("[data-owndel]"); if (dl) { const [k, id] = dl.dataset.owndel.split(":"); d[k] = d[k].filter(x => x.id !== id); if (!d[k].length) d[k].push(k === "bring" ? { id: uid(), who: "", dish: "" } : k === "shop" ? { id: uid(), name: "", price: "", got: false } : { id: uid(), time: "", text: "" }); saveOwn(); renderOwn(); return; }
+    const tm = t.closest("[data-owntimer]");
+    if (tm) {
+      const r = d.steps.find(x => x.id === tm.dataset.owntimer); if (!r || !r.time) { toast("Type a time first"); return; }
+      const [y, mo, da] = (d.date || dayYmd()).split("-").map(Number), [h, mi] = r.time.split(":").map(Number), secs = (new Date(y, mo - 1, da, h, mi).getTime() - Date.now()) / 1000;
+      if (secs <= 10) { toast("That time has passed"); return; }
+      if (secs > 86400) { toast("Timers can run up to 24 hours. Set this one the day before."); return; }
+      getAudio(); calcTimer("own-" + r.id, r.text || "Dinner step", "⏰", Math.round(secs)); toast("⏰ Timer set for " + r.time); return;
+    }
+    if (t.closest("[data-ownbudget]")) {
+      const tot = ownTotals(d).total; if (!tot) { toast("Add some prices first"); return; }
+      const key = "own:" + d.id, it = foodBudget.items.find(x => x.meal === key), name = "My dinner: " + ownName(d);
+      if (it) { it.name = name; it.amt = Math.round(tot * 100) / 100; } else foodBudget.items.push({ id: uid(), meal: key, name, amt: Math.round(tot * 100) / 100, date: budToday() });
+      save("foodBudget", foodBudget); toast(`Added ${cad(tot)} to your Budget`); return;
+    }
+    const dr = t.closest("[data-owndrop]"); if (dr) { if (confirm("Delete this dinner?")) { ownDinners = ownDinners.filter(x => x.id !== dr.dataset.owndrop); foodBudget.items = foodBudget.items.filter(x => x.meal !== "own:" + dr.dataset.owndrop); save("foodBudget", foodBudget); ownId = ownDinners[0] ? ownDinners[0].id : null; saveOwn(); renderOwn(); } }
   });
 
   $("#mealSkip").addEventListener("click", e => { e.preventDefault(); $("#mealOwn").scrollIntoView({ behavior: "smooth", block: "start" }); });
@@ -13638,6 +13765,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     else if (key === "calendar") d = calendarDoc();
     else if (key === "mastershop") d = masterShopDoc();
     else if (key.startsWith("savedmenu:")) d = savedMenuDoc(key.slice(10));
+    else if (key.startsWith("owndinner:")) d = ownDinnerDoc(key.slice(10));
     if (!d) return { error: "That page isn't available any more" };
     // 🏷️ the family (or company) name across the top of every printed page set
     const who = familyTitle(family);
