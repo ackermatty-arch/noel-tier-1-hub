@@ -75,8 +75,9 @@
     // called before the app starts: waits until unlocked (or returns at once if the lock is off)
     async check() {
       wire();
-      if (!cfg()) return;
-      await new Promise(res => { resolveGate = res; show("unlock"); tryBio().then(ok => { if (ok) hide(); }); });
+      const preview = !cfg() && /[?&]lock\b/.test(location.search);   // ?lock = preview the login screen (no PIN needed)
+      if (!cfg() && !preview) return;
+      await new Promise(res => { resolveGate = res; show("unlock"); if (preview) { $("#lockForgot").hidden = true; $("#lockMsg").textContent = "Enter your PIN to open your lists. (Preview: tap UNLOCK to go in.)"; } tryBio().then(ok => { if (ok) hide(); }); });
     },
     async refreshCard() {
       const c = cfg(), on = !!c;
