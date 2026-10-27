@@ -46,3 +46,17 @@ off = s.replace('window.NOEL_EDITION = "family";', 'window.NOEL_EDITION = "offic
 assert off != s
 open("office.html", "w").write(off)
 print("office.html updated")
+
+# 👋 new-buyer preview pages: the same app, always starting as a brand-new buyer (nothing saved outside the tab)
+flag = '<script>window.NOEL_FORCE_FRESH = true;</script>\n<script id="noel-fresh">'
+for src, dst in (("index.html", "newbuyer.html"), ("office.html", "newbuyer-office.html")):
+    t = open(src).read().replace('<script id="noel-fresh">', flag, 1)
+    open(dst, "w").write(t)
+print("new-buyer pages updated")
+
+# 🔎 review pages: a clean copy with no lock screen, for looking through everything (kept in the tab only)
+rflag = '<script>window.NOEL_REVIEW = true;</script>\n<script id="noel-fresh">'
+for src, dst in (("index.html", "review.html"), ("office.html", "review-office.html")):
+    t = open(src).read().replace('<script id="noel-fresh">', rflag, 1)
+    open(dst, "w").write(t)
+print("review pages updated")

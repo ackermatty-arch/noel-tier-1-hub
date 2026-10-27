@@ -6,13 +6,18 @@
 /* 👋 ?fresh on the link = try the app as a brand-new buyer. Everything is kept in this browser tab only (it is gone when the tab closes), so your real saved data is never touched. */
 (function () {
   try {
-    if (!/[?&]fresh\b/.test(location.search)) return;
+    if (!window.NOEL_FORCE_FRESH && !window.NOEL_REVIEW && !/[?&]fresh\b/.test(location.search)) return;
     var ss = window.sessionStorage, id = ss.getItem("noel_fresh_id");
     if (!id) { id = Math.random().toString(36).slice(2, 8); ss.setItem("noel_fresh_id", id); }
     Object.defineProperty(window, "localStorage", { configurable: true, get: function () { return ss; } });
     var open = IDBFactory.prototype.open;
     IDBFactory.prototype.open = function (name, ver) { return open.call(this, "fresh-" + id + "-" + name, ver); };
     window.NOEL_FRESH = true;
+    document.addEventListener("DOMContentLoaded", function () {
+      var b = document.createElement("div"); b.textContent = window.NOEL_REVIEW ? "REVIEW COPY · nothing is saved" : "NEW-BUYER PREVIEW · nothing is saved";
+      b.style.cssText = "position:fixed;left:8px;bottom:74px;z-index:99999;background:#151515;color:#E4C27A;border:1px solid #C9A45C;font:600 9px/1 sans-serif;letter-spacing:.12em;padding:5px 8px;pointer-events:none";
+      document.body.appendChild(b);
+    });
   } catch (e) {}
 })();
 </script>
@@ -6947,7 +6952,7 @@ window.NOEL_MEALS = (function () {
     // called before the app starts: waits until unlocked (or returns at once if the lock is off)
     async check() {
       wire();
-      const preview = !cfg() && /[?&]lock\b/.test(location.search);   // ?lock = preview the login screen (no PIN needed)
+      const preview = !cfg() && (window.NOEL_FORCE_FRESH || /[?&]lock\b/.test(location.search));   // ?lock = preview the login screen (no PIN needed)
       if (!cfg() && !preview) return;
       await new Promise(res => { resolveGate = res; show("unlock"); if (preview) { $("#lockForgot").hidden = true; $("#lockMsg").textContent = "Enter your PIN to open your lists. (Preview: tap UNLOCK to go in.)"; } tryBio().then(ok => { if (ok) hide(); }); });
     },
