@@ -1977,6 +1977,8 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .menu-top:not(.menu-top2) { flex-wrap: nowrap; gap: 8px; }
 .menu-top:not(.menu-top2) .menu-go { flex: 1 1 0; min-width: 0; padding: 12px 4px; font-size: 11px; letter-spacing: .04em; white-space: nowrap; text-align: center; }
 .menu-top:not(.menu-top2) .menu-go span { margin-left: 2px; }
+/* Meals: the planner stops at "See my plan". Noël generates everything after that. */
+#view-meals .wz-more, #view-meals #mealSkip, #view-meals #foodBudget, #view-meals #mealOwn, #view-meals #mealDietBottom { display: none !important; }
 </style>
 </head>
 <body>
