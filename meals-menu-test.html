@@ -1875,11 +1875,15 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .menu-rule span { width: 70px; border-top: 1px solid #C9A45C; }
 .menu-rule.sm { margin: 22px 0; }
 .menu-group { font-family: var(--font-display); letter-spacing: .3em; text-transform: uppercase; font-size: 12.5px; color: #fff; background: #151515; padding: 9px 12px; margin: 26px 0 20px; }
-.menu-dish h4 { font-family: var(--font-display); font-size: 19px; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 12px; color: #151515; }
-.menu-course { margin: 0 0 11px; }
-.menu-course b { display: block; font-family: var(--font-display); font-size: 10.5px; letter-spacing: .28em; text-transform: uppercase; color: #B08D4E; margin-bottom: 3px; }
-.menu-course span { display: block; font-size: 14.5px; line-height: 1.45; color: #222; }
-.menu-course i { color: #C9A45C; font-style: normal; margin: 0 2px; }
+.menu-dish h4 { font-family: var(--font-display); font-size: 18px; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 8px; color: #151515; }
+.menu-items { font-size: 14.5px; line-height: 1.5; color: #222; margin: 0 0 8px; }
+.menu-items i, .menu-drinks i { color: #C9A45C; font-style: normal; margin: 0 2px; }
+.menu-drinks { font-size: 13.5px; line-height: 1.45; color: #444; margin: 0 0 6px; }
+.menu-drinks b { font-family: var(--font-display); font-size: 10.5px; letter-spacing: .26em; text-transform: uppercase; color: #B08D4E; margin-right: 6px; }
+.menu-sub2 { font-size: 12.5px; font-style: italic; color: #8C8C8C; margin: 0; }
+.menu-rule.sm { margin: 18px 0; }
+.menu-bottom { flex-direction: column; align-items: center; }
+.menu-ready { font-family: var(--font-display); letter-spacing: .12em; text-transform: uppercase; font-size: 14px; margin: 0 0 10px; }
 .menu-note { border-top: 1px solid #C9A45C; border-bottom: 1px solid #C9A45C; padding: 12px 8px; font-size: 13.5px; font-style: italic; color: #555; margin: 8px 0 0; }
 </style>
 </head>
@@ -10458,12 +10462,15 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
       MENU_GROUPS.map(([g, ids]) => `<h3 class="menu-group">${g}</h3>` + ids.map(id => {
         const m = mealById(id); if (!m || m.soon) return "";
-        const courses = (m.menuFor ? m.menuFor(mealSizes(m, cfgFor(id))) : m.menu).filter(([c]) => !/pairing/i.test(c));
-        return `<div class="menu-dish"><h4>${esc(m.name)}</h4>` + courses.map(([c, items]) =>
-          `<p class="menu-course"><b>${esc(c)}</b><span>${items.map(i => esc(String(i).replace(/\s*\(24 pieces\)/, ""))).join(/^main$/i.test(c) ? "<br>" : ' <i>·</i> ')}</span></p>`).join("") + `</div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
+        const all = (m.menuFor ? m.menuFor(mealSizes(m, cfgFor(id))) : m.menu).filter(([c]) => !/pairing/i.test(c)), clean = i => esc(String(i).replace(/\s*\(24 pieces\)/, ""));
+        const dr = all.filter(([c]) => /drink/i.test(c)), food = all.filter(([c]) => !/drink/i.test(c));
+        let drinks = dr.flatMap(([, items]) => items.map(clean));
+        if (!drinks.length) { const names = [...(m.drinks || []).map(d => d[1]).join(" ").matchAll(/((?:[A-Z][\w'’-]*\s)*[A-Z][\w'’-]*)\s*\(recipe included\)/g)].map(x => x[1]); drinks = [...names.map(esc), "wine pairings"]; }
+        return `<div class="menu-dish"><h4>${esc(m.name)}</h4><p class="menu-items">${food.flatMap(([, items]) => items.map(clean)).join(" <i>·</i> ")}</p>` +
+          `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p><p class="menu-sub2">Substitutions available</p></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
       }).join("")).join("") +
-      `<p class="menu-note">Substitutions welcome. Add a vegan, gluten-free or dairy-free dish to any dinner when you plan it.</p>
-      <div class="menu-bottom">${go}</div>`;
+      `<p class="menu-note">Substitutions available on every dinner: add a vegan, gluten-free or dairy-free dish when you plan it.</p>
+      <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}</div>`;
   }
   document.addEventListener("click", e => {
     const nav = e.target.closest && e.target.closest("[data-view=meals]");
