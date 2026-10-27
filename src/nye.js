@@ -157,7 +157,7 @@
     el.innerHTML = `<div class="menu-top">${go}</div>
       <p class="menu-star">✦</p><h2 class="menu-title">New Year's Eve</h2><p class="menu-sub">Party bites, games and a midnight countdown, all planned for you</p><p class="menu-rule"><span></span>✦<span></span></p>
       <h3 class="menu-group">The Party</h3>` +
-      blk("New Year's Eve Party", `<p class="menu-items">${food.join(dot)}</p><p class="menu-drinks"><b>Drinks</b> ${drinks.join(dot)}</p><p class="menu-sub2">Substitutions available</p>`) +
+      blk("New Year's Eve Party", `<p class="menu-items">${food.join(dot)}</p><p class="menu-drinks"><b>Drinks</b> ${drinks.join(dot)}</p><p class="menu-sub2">Vegan dish available to add</p>`) +
       `<h3 class="menu-group">Party Themes</h3>` +
       blk("Pick your style", `<p class="menu-items">${NYE_THEMES.map(t => esc(t[0])).join(dot)}</p>`) +
       `<h3 class="menu-group">Games</h3>` +

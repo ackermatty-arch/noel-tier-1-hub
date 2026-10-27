@@ -656,7 +656,7 @@
       blk("Pick what's planned", line(OFF_ACTS.map(a => esc(plain(a[1]))).concat(["Secret Santa", "Silent auction"]).join(dot))) +
       `<h3 class="menu-group">Planning Tools</h3>` +
       blk("Behind the scenes", line(`Approval request for your boss${dot}Budget, costs and vendors${dot}Potluck sign-ups${dot}Printable menu and shopping list${dot}Handover file for next year's planner`)) +
-      `<p class="menu-note">Substitutions available. Everything can be changed as your plans do.</p>
+      `<p class="menu-note">Everything you plan is saved and can be reviewed any time.</p>
       <div class="menu-bottom"><p class="menu-ready">Ready to plan your party?</p>${go}</div>`;
   }
   document.addEventListener("click", e => {

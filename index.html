@@ -2397,12 +2397,12 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
     <h2 class="view-title" id="mealsTitle">Meal Planner</h2>
     <p class="view-intro">Pick a dinner, choose how many guests and when you'll eat. Noël sizes every recipe, estimates your grocery prices, writes your shopping list and sets every alarm.</p>
     <div class="meal-master" id="mealMaster" hidden></div>
-    <a href="#mealOwn" class="meal-skip" id="mealSkip">Making your own dinner? Timers &amp; dietary dishes ↓</a>
+    <a href="#mealOwn" class="meal-skip" id="mealSkip">Making your own dinner? Timers &amp; vegan dishes ↓</a>
     <div id="mealHome">
       <div id="wizBox"></div>
       <details class="wz-more"><summary>Browse every dinner, recipe and the Christmas Eve service</summary>
       <div class="seg seg4 sub-tabs" id="mealTabs" role="group" aria-label="Meal type"></div>
-      <p class="meal-diet-note" id="mealDietNote" hidden>🌱 These vegan, gluten-free, dairy-free dishes are <b>add-ons</b> for 1–5 people. Add one to any dinner and it joins that meal's timeline, alarms and shopping list, or use it on its own.</p>
+      <p class="meal-diet-note" id="mealDietNote" hidden>🌱 These vegan dishes are <b>add-ons</b> for 1–5 people. Add one to any dinner and it joins that meal's timeline, alarms and shopping list, or use it on its own.</p>
       <div id="mealList"></div>
       </details>
     </div>
@@ -2437,8 +2437,8 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
       <ul class="meal-own-list" id="mealOwnList"></ul>
     </div>
     <div class="card meal-own" id="mealDietBottom">
-      <h3>🌱 Dietary dishes &amp; substitutes</h3>
-      <p class="review-sub">Making your own dinner, or have guests who are vegan, gluten-free or dairy-free? These dishes work on their own for 1–5 people. Open one for its recipe, shopping list and timers, or print it straight away.</p>
+      <h3>🌱 Vegan dishes to add</h3>
+      <p class="review-sub">Have vegan guests? These vegan dishes can be added to any dinner, or made on their own for 1–5 people. Open one for its recipe, shopping list and timers, or print it straight away.</p>
       <div id="mealDietList"></div>
     </div>
   </section>
@@ -10290,8 +10290,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function addonPickerHtml() {
     const list = MD.meals.filter(a => a.addon);
     if (!list.length) return "";
-    return `<div class="meal-addons"><span class="meal-lab">Dietary guests?</span>
-      <p class="meal-addon-sub">Add a vegan, gluten-free, dairy-free dish for 1–5 people. It joins this dinner's timeline, alarms and shopping list.</p>` +
+    return `<div class="meal-addons"><span class="meal-lab">Add a vegan dish?</span>
+      <p class="meal-addon-sub">Add a vegan dish for 1–5 people. It joins this dinner's timeline, alarms and shopping list.</p>` +
       list.map(a => { const on = !!mealAddons[a.id], g = cfgFor(a.id).guests;
         return `<div class="addon-row"><label><input type="checkbox" data-addon="${a.id}" ${on ? "checked" : ""}> ${a.icon} ${esc(a.name)}</label>` +
           (on ? `<div class="stepper sm"><button type="button" data-ag="${a.id}:-1" aria-label="Fewer people">−</button><output>${g}</output><button type="button" data-ag="${a.id}:1" aria-label="More people">+</button></div>` : "") + `</div>`; }).join("") + `</div>`;
@@ -10664,10 +10664,10 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         let drinks = dr.flatMap(([, items]) => items.map(clean));
         if (!drinks.length) { const names = [...(m.drinks || []).map(d => d[1]).join(" ").matchAll(/((?:[A-Z][\w'’-]*\s)*[A-Z][\w'’-]*)\s*\(recipe included\)/g)].map(x => x[1]); drinks = [...names.map(esc), "wine pairings"]; }
         return `<div class="menu-dish"><h4>${esc(m.name)}</h4><p class="menu-items">${food.flatMap(([, items]) => items.map(clean)).join(" <i>·</i> ")}</p>` +
-          `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p><p class="menu-sub2">Substitutions available</p><a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
+          `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p><p class="menu-sub2">Vegan dish available to add</p><a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
       }).join("")).join("") +
-      `<p class="menu-note">Substitutions available on every dinner: add a vegan, gluten-free or dairy-free dish when you plan it.</p>
-      <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}<button type="button" class="menu-own" data-menuown>Cooking your own dinner idea? Timers and dietary dishes ›</button></div>`;
+      `<p class="menu-note">Would you like to add a vegan dish? You can add one when you plan your dinner.</p>
+      <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}<button type="button" class="menu-own" data-menuown>Cooking your own dinner idea? Timers and vegan dishes ›</button></div>`;
   }
   document.addEventListener("click", e => {
     const nav = e.target.closest && e.target.closest("[data-view=meals]");
@@ -10785,7 +10785,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const whenShort = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
   function wizDietHtml() {
     const list = MD.meals.filter(a => a.addon); if (!list.length) return "";
-    return `<div class="wz-diet"><div class="wz-step"><span class="wz-n">+</span>Dietary dishes <small>Optional. A vegan, gluten-free, dairy-free dish for 1–5 people, added to your plan.</small></div>` +
+    return `<div class="wz-diet"><div class="wz-step"><span class="wz-n">+</span>Add a vegan dish <small>Optional. For vegan guests, 1–5 people, added to your plan.</small></div>` +
       list.map(a => { const on = !!mealAddons[a.id], g = cfgFor(a.id).guests;
         return `<div class="addon-row"><label><input type="checkbox" data-wzadd="${a.id}" ${on ? "checked" : ""}> ${esc(a.name)}</label>` +
           (on ? `<div class="stepper sm"><button type="button" data-wzag="${a.id}:-1" aria-label="Fewer people">−</button><output>${g}</output><button type="button" data-wzag="${a.id}:1" aria-label="More people">+</button></div>` : "") + `</div>`; }).join("") + `</div>`;
@@ -11069,7 +11069,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     el.innerHTML = `<div class="menu-top">${go}</div>
       <p class="menu-star">✦</p><h2 class="menu-title">New Year's Eve</h2><p class="menu-sub">Party bites, games and a midnight countdown, all planned for you</p><p class="menu-rule"><span></span>✦<span></span></p>
       <h3 class="menu-group">The Party</h3>` +
-      blk("New Year's Eve Party", `<p class="menu-items">${food.join(dot)}</p><p class="menu-drinks"><b>Drinks</b> ${drinks.join(dot)}</p><p class="menu-sub2">Substitutions available</p>`) +
+      blk("New Year's Eve Party", `<p class="menu-items">${food.join(dot)}</p><p class="menu-drinks"><b>Drinks</b> ${drinks.join(dot)}</p><p class="menu-sub2">Vegan dish available to add</p>`) +
       `<h3 class="menu-group">Party Themes</h3>` +
       blk("Pick your style", `<p class="menu-items">${NYE_THEMES.map(t => esc(t[0])).join(dot)}</p>`) +
       `<h3 class="menu-group">Games</h3>` +
@@ -13570,7 +13570,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       blk("Pick what's planned", line(OFF_ACTS.map(a => esc(plain(a[1]))).concat(["Secret Santa", "Silent auction"]).join(dot))) +
       `<h3 class="menu-group">Planning Tools</h3>` +
       blk("Behind the scenes", line(`Approval request for your boss${dot}Budget, costs and vendors${dot}Potluck sign-ups${dot}Printable menu and shopping list${dot}Handover file for next year's planner`)) +
-      `<p class="menu-note">Substitutions available. Everything can be changed as your plans do.</p>
+      `<p class="menu-note">Everything you plan is saved and can be reviewed any time.</p>
       <div class="menu-bottom"><p class="menu-ready">Ready to plan your party?</p>${go}</div>`;
   }
   document.addEventListener("click", e => {

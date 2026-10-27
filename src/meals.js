@@ -262,8 +262,8 @@
   function addonPickerHtml() {
     const list = MD.meals.filter(a => a.addon);
     if (!list.length) return "";
-    return `<div class="meal-addons"><span class="meal-lab">Dietary guests?</span>
-      <p class="meal-addon-sub">Add a vegan, gluten-free, dairy-free dish for 1–5 people. It joins this dinner's timeline, alarms and shopping list.</p>` +
+    return `<div class="meal-addons"><span class="meal-lab">Add a vegan dish?</span>
+      <p class="meal-addon-sub">Add a vegan dish for 1–5 people. It joins this dinner's timeline, alarms and shopping list.</p>` +
       list.map(a => { const on = !!mealAddons[a.id], g = cfgFor(a.id).guests;
         return `<div class="addon-row"><label><input type="checkbox" data-addon="${a.id}" ${on ? "checked" : ""}> ${a.icon} ${esc(a.name)}</label>` +
           (on ? `<div class="stepper sm"><button type="button" data-ag="${a.id}:-1" aria-label="Fewer people">−</button><output>${g}</output><button type="button" data-ag="${a.id}:1" aria-label="More people">+</button></div>` : "") + `</div>`; }).join("") + `</div>`;
@@ -636,10 +636,10 @@
         let drinks = dr.flatMap(([, items]) => items.map(clean));
         if (!drinks.length) { const names = [...(m.drinks || []).map(d => d[1]).join(" ").matchAll(/((?:[A-Z][\w'’-]*\s)*[A-Z][\w'’-]*)\s*\(recipe included\)/g)].map(x => x[1]); drinks = [...names.map(esc), "wine pairings"]; }
         return `<div class="menu-dish"><h4>${esc(m.name)}</h4><p class="menu-items">${food.flatMap(([, items]) => items.map(clean)).join(" <i>·</i> ")}</p>` +
-          `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p><p class="menu-sub2">Substitutions available</p><a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
+          `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p><p class="menu-sub2">Vegan dish available to add</p><a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
       }).join("")).join("") +
-      `<p class="menu-note">Substitutions available on every dinner: add a vegan, gluten-free or dairy-free dish when you plan it.</p>
-      <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}<button type="button" class="menu-own" data-menuown>Cooking your own dinner idea? Timers and dietary dishes ›</button></div>`;
+      `<p class="menu-note">Would you like to add a vegan dish? You can add one when you plan your dinner.</p>
+      <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}<button type="button" class="menu-own" data-menuown>Cooking your own dinner idea? Timers and vegan dishes ›</button></div>`;
   }
   document.addEventListener("click", e => {
     const nav = e.target.closest && e.target.closest("[data-view=meals]");
@@ -757,7 +757,7 @@
   const whenShort = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
   function wizDietHtml() {
     const list = MD.meals.filter(a => a.addon); if (!list.length) return "";
-    return `<div class="wz-diet"><div class="wz-step"><span class="wz-n">+</span>Dietary dishes <small>Optional. A vegan, gluten-free, dairy-free dish for 1–5 people, added to your plan.</small></div>` +
+    return `<div class="wz-diet"><div class="wz-step"><span class="wz-n">+</span>Add a vegan dish <small>Optional. For vegan guests, 1–5 people, added to your plan.</small></div>` +
       list.map(a => { const on = !!mealAddons[a.id], g = cfgFor(a.id).guests;
         return `<div class="addon-row"><label><input type="checkbox" data-wzadd="${a.id}" ${on ? "checked" : ""}> ${esc(a.name)}</label>` +
           (on ? `<div class="stepper sm"><button type="button" data-wzag="${a.id}:-1" aria-label="Fewer people">−</button><output>${g}</output><button type="button" data-wzag="${a.id}:1" aria-label="More people">+</button></div>` : "") + `</div>`; }).join("") + `</div>`;
