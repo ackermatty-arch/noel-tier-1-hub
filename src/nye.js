@@ -130,7 +130,7 @@
     $("#jarReveal").innerHTML = `<h4>👀 This year's wishes</h4>` + mine.map(w => `<p class="wish-open"><b>${esc(w.name)}</b>: “${esc(w.text)}”</p>`).join("");
   });
 
-  function renderNye() { renderNyeCount(); renderNyeParty(); renderJar(); }
+  function renderNye() { renderNyeCount(); renderNyeParty(); renderJar(); renderNyeMenu(); }
   setInterval(() => { if ($("#view-nye").classList.contains("active")) renderNyeCount(); }, 1000);
   setInterval(applySeasonNav, 60000);
 
@@ -141,4 +141,39 @@
   $("#nyePlan").addEventListener("click", () => { showView("meals"); openMeal("nyeparty"); });
   $("#nyeCard").addEventListener("click", () => { ecard.d = "nyc"; save("ecard", ecard); syncCards(); showView("invites"); showPane("cards"); toast("🥂 Midnight Champagne card selected"); });
   document.addEventListener("click", e => { const g = e.target.closest("[data-goview]"); if (g) showView(g.dataset.goview); });
+
+  // ---------- 📖 the New Year's menu: a quick first page, then "Build my party" opens the planner ----------
+  let nyeScreen = "menu";
+  const NYE_THEMES = [["Pajama & Champagne Gala", "Ultra-comfy clothes, fancy bites and bubbly"], ["Masquerade", "Masks on until the stroke of midnight"], ["Black, White & Gold Gala", "Classy, glam and very photogenic"],
+    ["Family & Kids Countdown", "Early countdown, big fun, little ones in bed on time"], ["Vintage Casino Royale", "A high-stakes 1960s lounge"], ["Neon Glow Party", "Blacklights, glow sticks and high energy"], ["End of the World Lounge", "Cheeky, dramatic, last-night-on-Earth glamour"]];
+  function renderNyeMenu() {
+    const el = $("#nyeMenu"), v = $("#view-nye"); if (!el) return;
+    const on = nyeScreen === "menu"; v.classList.toggle("on-menu", on); el.hidden = !on; if (!on || el.dataset.built) return; el.dataset.built = "1";
+    const go = `<button type="button" class="menu-go" data-nyego>Build my party <span>›</span></button>`;
+    const m = mealById("nyeparty"), all = m ? (m.menuFor ? m.menuFor(mealSizes(m, cfgFor("nyeparty"))) : m.menu) : [];
+    const clean = i => esc(String(i).replace(/\s*\(24 pieces\)/, ""));
+    const food = all.filter(([c]) => !/drink|pairing/i.test(c)).flatMap(([, it]) => it.map(clean)), drinks = all.filter(([c]) => /drink/i.test(c)).flatMap(([, it]) => it.map(clean));
+    const dot = " <i>·</i> ", blk = (name, body) => `<div class="menu-dish"><h4>${name}</h4>${body}</div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
+    el.innerHTML = `<div class="menu-top">${go}</div>
+      <p class="menu-star">✦</p><h2 class="menu-title">New Year's Eve</h2><p class="menu-sub">Party bites, games and a midnight countdown, all planned for you</p><p class="menu-rule"><span></span>✦<span></span></p>
+      <h3 class="menu-group">The Party</h3>` +
+      blk("New Year's Eve Party", `<p class="menu-items">${food.join(dot)}</p><p class="menu-drinks"><b>Drinks</b> ${drinks.join(dot)}</p><p class="menu-sub2">Substitutions available</p>`) +
+      `<h3 class="menu-group">Party Themes</h3>` +
+      blk("Pick your style", `<p class="menu-items">${NYE_THEMES.map(t => esc(t[0])).join(dot)}</p>`) +
+      `<h3 class="menu-group">Games</h3>` +
+      blk("Pass the phone and play", `<p class="menu-items">Who Wrote It?${dot}Would You Rather${dot}Who's Most Likely To${dot}Two Truths &amp; a Midnight Lie${dot}Guess the Resolution${dot}Draw the Countdown${dot}Happy New Year Categories${dot}10-Second Countdown${dot}Year-in-Review Quiz</p>`) +
+      `<h3 class="menu-group">Midnight</h3>` +
+      blk("The finishing touches", `<p class="menu-items">Big Countdown with fireworks${dot}Wishes Jar${dot}Midnight Champagne card${dot}Appetizer Ideas${dot}Printable Party Planner</p>`) +
+      `<p class="menu-note">Everything can be adjusted when you build: guests, theme, appetizers and start time.</p>
+      <div class="menu-bottom"><p class="menu-ready">Ready to build your night?</p>${go}<button type="button" class="menu-own" data-nyecount>Just here for the countdown? Open it ›</button></div>`;
+  }
+  document.addEventListener("click", e => {
+    const nav = e.target.closest && e.target.closest("[data-goview=nye],[data-view=nye]");
+    if (nav) { nyeScreen = "menu"; setTimeout(renderNyeMenu, 0); }
+  }, true);
+  $("#view-nye").addEventListener("click", e => {
+    if (e.target.closest("[data-nyego]")) { nyeScreen = "build"; renderNyeMenu(); window.scrollTo(0, 0); }
+    if (e.target.closest("[data-nyemenu]")) { nyeScreen = "menu"; renderNyeMenu(); window.scrollTo(0, 0); }
+    if (e.target.closest("[data-nyecount]")) { nyeScreen = "build"; renderNyeMenu(); window.scrollTo(0, 0); }
+  });
   /* @nye-end */

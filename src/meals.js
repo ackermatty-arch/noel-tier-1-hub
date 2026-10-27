@@ -247,8 +247,9 @@
   // 🥂 New Year's party: party style + pick the appetizers (from Appetizer Ideas)
   function partyControlsHtml(c, p, m) {
     const picked = new Set(p.items.concat(p.drinkItems).map(i => i.name));
-    return `<span class="meal-lab">Party style</span><div class="seg sub-tabs meal-done" role="group" aria-label="Party style">
-      <button type="button" data-pmode="meal" aria-pressed="${c.mode !== "before"}">Appetizers are the meal</button><button type="button" data-pmode="before" aria-pressed="${c.mode === "before"}">Before dinner</button></div>
+    return `<span class="meal-lab">Will you serve dinner too?</span><div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Will you serve dinner too?">
+      <button type="button" data-pmode="meal" aria-pressed="${c.mode !== "before"}"><b>No, appetizers are the meal</b><small>About 12 bites per guest</small></button><button type="button" data-pmode="before" aria-pressed="${c.mode === "before"}"><b>Yes, light bites before dinner</b><small>About 5 bites per guest</small></button></div>
+      <p class="host-rem" style="margin:6px 0 12px">Cooking a dinner as well? Plan it from the Meals menu, or use your own timers.</p>
       <span class="meal-lab">Pick your appetizers (${picked.size})</span>
       <p class="party-total">Estimated total <b>${cad0(pricedShop(m, p.f, p).total)}</b> · about ${cad(pricedShop(m, p.f, p).total / c.guests)} per guest<small>${currency} · ${m.eve ? "includes the hot cocoa bar" : "includes the midnight toast"}. Prices beside each appetizer are for ${c.guests} guests; tap to add or remove.</small></p>
       <div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])} <span class="chip-price">${picked.has(a[1]) ? "" : "+"}${cad0(MD.appCost(a[1], p) * fx())}</span></button>`).join("")}</div>`;

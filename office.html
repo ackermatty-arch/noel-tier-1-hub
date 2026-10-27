@@ -1862,8 +1862,8 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .wz-more { margin: 14px 0; border: 1px solid #E6E6E6; padding: 0 12px; }
 .wz-more > summary { padding: 14px 0; cursor: pointer; font-family: var(--font-display); letter-spacing: .08em; text-transform: uppercase; font-size: 12.5px; }
 /* The Noël Menu */
-#view-meals.on-menu > :not(#mealMenu) { display: none !important; }
-#mealMenu { text-align: center; padding: 0 4px 24px; }
+#view-meals.on-menu > :not(#mealMenu), #view-nye.on-menu > :not(#nyeMenu) { display: none !important; }
+#mealMenu, #nyeMenu { text-align: center; padding: 0 4px 24px; }
 .menu-top, .menu-bottom { display: flex; justify-content: flex-end; }
 .menu-bottom { justify-content: center; margin-top: 20px; }
 .menu-go { background: #151515; color: #E4C27A; border: 1px solid #C9A45C; padding: 11px 16px; font-family: var(--font-display); letter-spacing: .12em; text-transform: uppercase; font-size: 13px; cursor: pointer; }
@@ -1886,6 +1886,10 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .menu-ready { font-family: var(--font-display); letter-spacing: .12em; text-transform: uppercase; font-size: 14px; margin: 0 0 10px; }
 .menu-pic { display: inline-block; margin-top: 8px; font-size: 12.5px; color: #8a6d3b; text-decoration: underline; text-underline-offset: 3px; }
 .menu-own { background: none; border: 0; margin-top: 14px; font-size: 13.5px; color: #151515; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 6px; }
+.menu-line { font-size: 15px; line-height: 1.4; margin: 0 0 8px; color: #222; }
+.pm-two button { display: block; text-align: left; }
+.pm-two b { display: block; font-size: 13px; }
+.pm-two small { display: block; font-size: 11.5px; margin-top: 2px; opacity: .8; font-weight: 400; text-transform: none; letter-spacing: 0; }
 .menu-note { border-top: 1px solid #C9A45C; border-bottom: 1px solid #C9A45C; padding: 12px 8px; font-size: 13.5px; font-style: italic; color: #555; margin: 8px 0 0; }
 </style>
 </head>
@@ -2358,6 +2362,8 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
        VIEW — 🥂 NEW YEAR'S EVE (its button replaces Meals from Dec 26)
        ============================================================ -->
   <section class="view" id="view-nye" aria-labelledby="nyeTitle">
+    <div id="nyeMenu" hidden></div>
+    <button type="button" class="meal-back" data-nyemenu>‹ The menu</button>
     <h2 class="view-title" id="nyeTitle">New Year's Eve</h2>
     <p class="view-intro">Plan the party, play the games, seal your wishes and count down to midnight together.</p>
 
@@ -10107,8 +10113,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   // 🥂 New Year's party: party style + pick the appetizers (from Appetizer Ideas)
   function partyControlsHtml(c, p, m) {
     const picked = new Set(p.items.concat(p.drinkItems).map(i => i.name));
-    return `<span class="meal-lab">Party style</span><div class="seg sub-tabs meal-done" role="group" aria-label="Party style">
-      <button type="button" data-pmode="meal" aria-pressed="${c.mode !== "before"}">Appetizers are the meal</button><button type="button" data-pmode="before" aria-pressed="${c.mode === "before"}">Before dinner</button></div>
+    return `<span class="meal-lab">Will you serve dinner too?</span><div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Will you serve dinner too?">
+      <button type="button" data-pmode="meal" aria-pressed="${c.mode !== "before"}"><b>No, appetizers are the meal</b><small>About 12 bites per guest</small></button><button type="button" data-pmode="before" aria-pressed="${c.mode === "before"}"><b>Yes, light bites before dinner</b><small>About 5 bites per guest</small></button></div>
+      <p class="host-rem" style="margin:6px 0 12px">Cooking a dinner as well? Plan it from the Meals menu, or use your own timers.</p>
       <span class="meal-lab">Pick your appetizers (${picked.size})</span>
       <p class="party-total">Estimated total <b>${cad0(pricedShop(m, p.f, p).total)}</b> · about ${cad(pricedShop(m, p.f, p).total / c.guests)} per guest<small>${currency} · ${m.eve ? "includes the hot cocoa bar" : "includes the midnight toast"}. Prices beside each appetizer are for ${c.guests} guests; tap to add or remove.</small></p>
       <div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])} <span class="chip-price">${picked.has(a[1]) ? "" : "+"}${cad0(MD.appCost(a[1], p) * fx())}</span></button>`).join("")}</div>`;
@@ -10718,7 +10725,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#jarReveal").innerHTML = `<h4>👀 This year's wishes</h4>` + mine.map(w => `<p class="wish-open"><b>${esc(w.name)}</b>: “${esc(w.text)}”</p>`).join("");
   });
 
-  function renderNye() { renderNyeCount(); renderNyeParty(); renderJar(); }
+  function renderNye() { renderNyeCount(); renderNyeParty(); renderJar(); renderNyeMenu(); }
   setInterval(() => { if ($("#view-nye").classList.contains("active")) renderNyeCount(); }, 1000);
   setInterval(applySeasonNav, 60000);
 
@@ -10729,6 +10736,41 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#nyePlan").addEventListener("click", () => { showView("meals"); openMeal("nyeparty"); });
   $("#nyeCard").addEventListener("click", () => { ecard.d = "nyc"; save("ecard", ecard); syncCards(); showView("invites"); showPane("cards"); toast("🥂 Midnight Champagne card selected"); });
   document.addEventListener("click", e => { const g = e.target.closest("[data-goview]"); if (g) showView(g.dataset.goview); });
+
+  // ---------- 📖 the New Year's menu: a quick first page, then "Build my party" opens the planner ----------
+  let nyeScreen = "menu";
+  const NYE_THEMES = [["Pajama & Champagne Gala", "Ultra-comfy clothes, fancy bites and bubbly"], ["Masquerade", "Masks on until the stroke of midnight"], ["Black, White & Gold Gala", "Classy, glam and very photogenic"],
+    ["Family & Kids Countdown", "Early countdown, big fun, little ones in bed on time"], ["Vintage Casino Royale", "A high-stakes 1960s lounge"], ["Neon Glow Party", "Blacklights, glow sticks and high energy"], ["End of the World Lounge", "Cheeky, dramatic, last-night-on-Earth glamour"]];
+  function renderNyeMenu() {
+    const el = $("#nyeMenu"), v = $("#view-nye"); if (!el) return;
+    const on = nyeScreen === "menu"; v.classList.toggle("on-menu", on); el.hidden = !on; if (!on || el.dataset.built) return; el.dataset.built = "1";
+    const go = `<button type="button" class="menu-go" data-nyego>Build my party <span>›</span></button>`;
+    const m = mealById("nyeparty"), all = m ? (m.menuFor ? m.menuFor(mealSizes(m, cfgFor("nyeparty"))) : m.menu) : [];
+    const clean = i => esc(String(i).replace(/\s*\(24 pieces\)/, ""));
+    const food = all.filter(([c]) => !/drink|pairing/i.test(c)).flatMap(([, it]) => it.map(clean)), drinks = all.filter(([c]) => /drink/i.test(c)).flatMap(([, it]) => it.map(clean));
+    const dot = " <i>·</i> ", blk = (name, body) => `<div class="menu-dish"><h4>${name}</h4>${body}</div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
+    el.innerHTML = `<div class="menu-top">${go}</div>
+      <p class="menu-star">✦</p><h2 class="menu-title">New Year's Eve</h2><p class="menu-sub">Party bites, games and a midnight countdown, all planned for you</p><p class="menu-rule"><span></span>✦<span></span></p>
+      <h3 class="menu-group">The Party</h3>` +
+      blk("New Year's Eve Party", `<p class="menu-items">${food.join(dot)}</p><p class="menu-drinks"><b>Drinks</b> ${drinks.join(dot)}</p><p class="menu-sub2">Substitutions available</p>`) +
+      `<h3 class="menu-group">Party Themes</h3>` +
+      blk("Pick your style", `<p class="menu-items">${NYE_THEMES.map(t => esc(t[0])).join(dot)}</p>`) +
+      `<h3 class="menu-group">Games</h3>` +
+      blk("Pass the phone and play", `<p class="menu-items">Who Wrote It?${dot}Would You Rather${dot}Who's Most Likely To${dot}Two Truths &amp; a Midnight Lie${dot}Guess the Resolution${dot}Draw the Countdown${dot}Happy New Year Categories${dot}10-Second Countdown${dot}Year-in-Review Quiz</p>`) +
+      `<h3 class="menu-group">Midnight</h3>` +
+      blk("The finishing touches", `<p class="menu-items">Big Countdown with fireworks${dot}Wishes Jar${dot}Midnight Champagne card${dot}Appetizer Ideas${dot}Printable Party Planner</p>`) +
+      `<p class="menu-note">Everything can be adjusted when you build: guests, theme, appetizers and start time.</p>
+      <div class="menu-bottom"><p class="menu-ready">Ready to build your night?</p>${go}<button type="button" class="menu-own" data-nyecount>Just here for the countdown? Open it ›</button></div>`;
+  }
+  document.addEventListener("click", e => {
+    const nav = e.target.closest && e.target.closest("[data-goview=nye],[data-view=nye]");
+    if (nav) { nyeScreen = "menu"; setTimeout(renderNyeMenu, 0); }
+  }, true);
+  $("#view-nye").addEventListener("click", e => {
+    if (e.target.closest("[data-nyego]")) { nyeScreen = "build"; renderNyeMenu(); window.scrollTo(0, 0); }
+    if (e.target.closest("[data-nyemenu]")) { nyeScreen = "menu"; renderNyeMenu(); window.scrollTo(0, 0); }
+    if (e.target.closest("[data-nyecount]")) { nyeScreen = "build"; renderNyeMenu(); window.scrollTo(0, 0); }
+  });
   /* @nye-end */
 
   /* @gideas-start */
