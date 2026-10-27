@@ -499,6 +499,13 @@ body.flash::before {
 .calc:not([open]) summary .chev { transform: rotate(-90deg); }
 .calc-body { padding: 14px 16px 16px; display: grid; gap: 12px; }
 .seg.seg3 { grid-template-columns: repeat(3, 1fr); }
+.seg.seg-meat { grid-template-columns: repeat(2, 1fr); }
+.seg.seg-meat button { font-size: 13.5px; padding: 0 4px; }
+.calc-hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+.calc-weights { flex: 1; min-width: 0; display: grid; gap: 8px; }
+.calc-weights .calc-field > span { color: var(--pine-dark); }
+.calc-meal-h { margin: 10px 0 0; padding: 8px 0 2px; font-weight: 800; color: var(--pine-dark); font-size: 15px; border-bottom: 1px solid var(--line); }
+.calc-meal-h:first-child { margin-top: 0; }
 .seg.seg3 button { font-size: 13px; padding: 0 4px; }
 .calc-row { display: flex; gap: 10px; align-items: flex-end; }
 .calc-field { display: grid; gap: 5px; flex: 1; min-width: 0; }
@@ -1911,6 +1918,36 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .pm-two b { display: block; font-size: 13px; }
 .pm-two small { display: block; font-size: 11.5px; margin-top: 2px; opacity: .8; font-weight: 400; text-transform: none; letter-spacing: 0; }
 .menu-note { border-top: 1px solid #C9A45C; border-bottom: 1px solid #C9A45C; padding: 12px 8px; font-size: 13.5px; font-style: italic; color: #555; margin: 8px 0 0; }
+
+
+.menu-subgroup { font-family: var(--font-display); letter-spacing: .25em; text-transform: uppercase; font-size: 12px; color: #9a7b3c; text-align: center; margin: 18px 0 14px; }
+.pr-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.62); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 18px; }
+.pr-card { background: #fff; border: 2px solid #C9A24A; width: 100%; max-width: 440px; max-height: 86vh; overflow: auto; padding: 18px 16px 16px; text-align: center; }
+.pr-title { font-family: var(--font-display); letter-spacing: .2em; text-transform: uppercase; font-size: 20px; margin: 0; color: #111; }
+.pr-sub { margin: 4px 0 12px; color: #666; font-size: 13px; }
+.pr-meal { text-align: left; border-top: 1px solid #C9A24A; padding: 12px 0 4px; }
+.pr-meal h4 { margin: 0 0 4px; font-family: var(--font-display); font-size: 16px; color: #111; }
+.pr-when { margin: 0 0 8px; font-size: 13.5px; color: #333; }
+.pr-steps { list-style: none; margin: 0 0 6px; padding: 0; }
+.pr-steps li { display: flex; gap: 10px; padding: 5px 0; border-bottom: 1px dashed #ddd; font-size: 13px; }
+.pr-steps li b { flex: 0 0 74px; color: #111; }
+.pr-steps li.pr-past { color: #999; }
+.pr-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; position: sticky; bottom: -16px; background: #fff; padding: 10px 0 2px; border-top: 1px solid #C9A24A; }
+.run-now { margin: 0 0 22px; }
+.run-now[hidden] { display: none; }
+.run-h { font-family: var(--font-display); letter-spacing: .3em; text-transform: uppercase; font-size: 12.5px; color: #fff; background: #151515; padding: 9px 12px; margin: 0 0 14px; }
+#view-alarms .duty.running { box-shadow: 0 0 0 2px #151515, 0 0 0 4px #C9A24A, 0 0 20px rgba(201,162,74,.6); }
+#view-alarms .duty.running .duty-status { color: #8a6a1f; font-weight: 800; }
+.tm-box { margin: 0 0 12px; overflow: hidden; }
+.tm-box summary { list-style: none; cursor: pointer; padding: 14px 16px; font-family: var(--font-display); letter-spacing: .12em; text-transform: uppercase; font-size: 15px; color: #111; display: flex; justify-content: space-between; }
+.tm-box summary::-webkit-details-marker { display: none; }
+.tm-box[open] summary { border-bottom: 1px solid #C9A24A; }
+.tm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 16px; }
+.tm-go { background: #fff; border: 1px solid #C9A24A; padding: 12px 8px; text-align: center; font: inherit; color: #111; cursor: pointer; }
+.tm-go b { display: block; font-size: 13.5px; }
+.tm-go small { color: #777; font-size: 12px; }
+.tm-go:active { background: #151515; color: #fff; }
+.tm-intro { margin: 0 0 14px; font-size: 13.5px; color: #555; }
 </style>
 </head>
 <body>
@@ -2642,8 +2679,12 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
        VIEW 3 — PREPPING & DUTY ALARMS
        ============================================================ -->
   <section class="view" id="view-alarms" aria-labelledby="alarmsTitle">
-    <h2 class="view-title" id="alarmsTitle">Duty Alarms</h2>
-    <p class="view-intro">Start a timer for each holiday duty. Your alarm sound plays when time's up.</p>
+    <h2 class="view-title" id="alarmsTitle">My Timers</h2>
+    <p class="view-intro">Set your own timers. Your alarm sound plays when time's up.</p>
+    <div class="run-now" id="runNow" hidden>
+      <h3 class="run-h">Running now</h3>
+      <div class="duty-grid" id="runGrid"></div>
+    </div>
 
     <!-- 🔔 WEEKLY CHECK-IN REMINDERS (Nov 1 → one week before New Year's) -->
     <div class="card checkin-card" id="checkinCard">
@@ -2667,21 +2708,22 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
     <!-- ============================================================
          🦃 TURKEY & HAM CALCULATOR (guide times from USDA charts)
          ============================================================ -->
-    <details class="card calc fam-only" id="calcCard" open>
+    <details class="card calc fam-only" id="calcCard">
       <summary>
         <span class="calc-ico">🦃</span>
-        <span><b>Turkey &amp; Ham Calculator</b><small>Thaw, cook and resting times, with timers in one tap</small></span>
+        <span><b>Holiday Roast Calculator</b><small>Roast beef, turkey or ham: thaw, cook and rest times, with every timer in one tap</small></span>
         <span class="chev">▾</span>
       </summary>
       <div class="calc-body">
-        <div class="seg seg3" id="meatPick" role="group" aria-label="What are you cooking?">
+        <p class="calc-hint">Tap every dish you are cooking. Each one gets its own weight and its own timers.</p>
+        <div class="seg seg-meat" id="meatPick" role="group" aria-label="What are you cooking?">
+          <button type="button" data-meat="roast" aria-pressed="false">Roast beef</button>
           <button type="button" data-meat="turkey" aria-pressed="true">Turkey</button>
           <button type="button" data-meat="stuffed" aria-pressed="false">Stuffed turkey</button>
           <button type="button" data-meat="ham" aria-pressed="false">Cooked ham</button>
         </div>
         <div class="calc-row">
-          <label class="calc-field"><span>Weight</span>
-            <input class="input" id="calcWeight" type="number" inputmode="decimal" min="1" max="40" step="0.5" value="14"></label>
+          <div class="calc-weights" id="calcMeals"></div>
           <div class="seg seg-unit" id="unitPick" role="group" aria-label="Weight unit">
             <button type="button" data-unit="lb" aria-pressed="true">lb</button>
             <button type="button" data-unit="kg" aria-pressed="false">kg</button>
@@ -2691,11 +2733,20 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
           <input class="input" id="calcDinner" type="datetime-local"></label>
         <div class="calc-results" id="calcResults" aria-live="polite"></div>
         <div class="calc-actions">
-          <button type="button" class="btn btn-green btn-block" id="calcCookBtn">⏰ Start the oven timer</button>
-          <button type="button" class="btn btn-ghost btn-block" id="calcRestBtn">Start the resting timer</button>
+          <button type="button" class="btn btn-green btn-block" id="calcCookBtn">⏰ Start all the timers</button>
         </div>
         <p class="calc-note">Guide times at 325°F / 160°C, based on USDA charts. Ovens vary, so always check with a meat thermometer before serving.</p>
       </div>
+    </details>
+
+        <p class="tm-intro">Tap a box, set the time, press Start. Nothing here is set for you.</p>
+    <details class="card tm-box" id="presetHoliday">
+      <summary><span>Holiday reminders</span><span>▾</span></summary>
+      <div class="tm-grid" data-presets="holiday"></div>
+    </details>
+    <details class="card tm-box" id="presetKitchen">
+      <summary><span>Kitchen timers</span><span>▾</span></summary>
+      <div class="tm-grid" data-presets="kitchen"></div>
     </details>
 
     <!-- ✏️ ALARM SOUND choice (saved per phone). Default is the song. -->
@@ -2717,7 +2768,7 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
     <div class="duty-grid" id="dutyGrid"></div>
 
     <form class="card add-duty" id="addDutyForm" autocomplete="off">
-      <h3>➕ Add a custom duty</h3>
+      <h3>➕ My own timer</h3>
       <div class="row">
         <select class="input" name="icon" aria-label="Icon">
           <option>⏰</option><option>🍗</option><option>🥧</option><option>🍷</option>
@@ -2810,7 +2861,7 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
   <button class="nav-btn" data-view="gifts"><span class="nav-ico">🎁</span>Gifts</button>
   <button class="nav-btn" data-view="budget"><span class="nav-ico">💰</span>Budget</button>
   <button class="nav-btn" data-view="invites"><span class="nav-ico">✉️</span>Cards</button>
-  <button class="nav-btn" data-view="alarms"><span class="nav-ico">⏰</span>Alarms<span class="nav-badge" id="alarmBadge">0</span></button>
+  <button class="nav-btn" data-view="alarms"><span class="nav-ico">⏰</span>Timers<span class="nav-badge" id="alarmBadge">0</span></button>
   <button class="nav-btn" data-view="review"><span class="nav-ico">✨</span>Review</button>
 </nav>
 
@@ -7653,10 +7704,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const dutyNames = l => (l || []).map(x => x.name).join("|"), idleAll = l => l.every(x => x.status === "idle" || !x.status);
   if (SPACE === "office" && Array.isArray(duties) && idleAll(duties) && [dutyNames(DEFAULT_DUTIES), OLD_OFFICE_DUTIES.join("|")].includes(dutyNames(duties))) duties = null;
   if (!Array.isArray(duties)) {
-    duties = (SPACE === "office" ? OFFICE_DUTIES : DEFAULT_DUTIES).map(d => ({
-      id: d.id, icon: d.icon, name: d.name, custom: false,
-      duration: d.minutes * 60, remaining: d.minutes * 60, endAt: null, status: "idle"
-    }));
+    duties = [];   // a new install starts with an empty timers page: nothing is set until you tap it
     save(KEYS.duties, duties);
   }
 
@@ -7672,8 +7720,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
   const STATUS_TEXT = { idle: "Ready", running: "Counting down", paused: "Paused", done: "Time's up!" };
 
-  function renderDuties() {
-    $("#dutyGrid").innerHTML = duties.map(d => {
+  const ringAt = d => new Date(d.endAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  function dutyCard(d) {
       const frac = d.duration ? d.remaining / d.duration : 0;
       const locked = d.status === "running";
       return `<article class="card duty ${d.status}" data-id="${d.id}">
@@ -7692,7 +7740,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
           </div>
           <div class="duty-adjust">
             <button class="icon-btn" data-act="minus" ${locked ? "disabled" : ""} aria-label="One minute less">−</button>
-            <span>${fmtLen(d.duration)}</span>
+            <span>${locked && d.endAt ? "Rings at " + ringAt(d) : fmtLen(d.duration)}</span>
             <button class="icon-btn" data-act="plus" ${locked ? "disabled" : ""} aria-label="One minute more">+</button>
           </div>
           <div class="duty-actions">
@@ -7703,7 +7751,14 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
           </div>
         </div>
       </article>`;
-    }).join("");
+  }
+  function renderDuties() {
+    // Timers that are ringing or counting down are pinned to the top of the page, soonest first.
+    const live = duties.filter(d => d.status === "done" || d.status === "running")
+      .sort((x, y) => (x.status === "done" ? 0 : 1) - (y.status === "done" ? 0 : 1) || x.remaining - y.remaining);
+    $("#runGrid").innerHTML = live.map(dutyCard).join("");
+    $("#runNow").hidden = !live.length;
+    $("#dutyGrid").innerHTML = duties.filter(d => !live.includes(d)).map(dutyCard).join("");
     updateBadge();
     updateWakeLock();
   }
@@ -7723,7 +7778,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     b.classList.toggle("show", n > 0);
   }
 
-  $("#dutyGrid").addEventListener("click", e => {
+  const dutyClick = e => {
     const btn = e.target.closest("[data-act]");
     if (!btn) return;
     getAudio(); // unlock audio on a user tap (needed on iPhone)
@@ -7752,7 +7807,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     }
     save(KEYS.duties, duties);
     renderDuties();
-  });
+  };
+  $("#dutyGrid").addEventListener("click", dutyClick);
+  $("#runGrid").addEventListener("click", dutyClick);
 
   $("#addDutyForm").addEventListener("submit", e => {
     e.preventDefault();
@@ -7762,10 +7819,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (!name) return;
     duties.push({ id: "c-" + uid(), icon: f.icon.value, name, custom: true,
       duration: mins * 60, remaining: mins * 60, endAt: null, status: "idle" });
+    getAudio(); startDuty(duties[duties.length - 1]);
     save(KEYS.duties, duties);
     f.name.value = "";
     renderDuties();
-    toast(`⏰ "${name}" added`);
+    toast(`⏰ "${name}" started`);
   });
 
   $("#stopAllTimers").addEventListener("click", () => {
@@ -8453,11 +8511,17 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     stuffed: [[8, 12, 3, 3.5], [12, 14, 3.5, 4], [14, 18, 4, 4.25], [18, 20, 4.25, 4.75], [20, 24, 4.75, 5.25]]
   };
   const MEAT = {
-    turkey:  { name: "Turkey", icon: "🦃", rest: 20, temp: "165°F / 74°C in the thickest part of the thigh" },
-    stuffed: { name: "Turkey", icon: "🦃", rest: 20, temp: "165°F / 74°C in the thigh and the stuffing" },
-    ham:     { name: "Ham",    icon: "🍖", rest: 10, temp: "140°F / 60°C" }
+    roast:   { name: "Roast beef",     icon: "🥩", rest: 20, def: 4,  temp: "145°F / 63°C medium-rare, 160°F / 71°C medium" },
+    turkey:  { name: "Turkey",         icon: "🦃", rest: 20, def: 14, temp: "165°F / 74°C in the thickest part of the thigh" },
+    stuffed: { name: "Stuffed turkey", icon: "🦃", rest: 20, def: 14, temp: "165°F / 74°C in the thigh and the stuffing" },
+    ham:     { name: "Ham",            icon: "🍖", rest: 10, def: 8,  temp: "140°F / 60°C" }
   };
-  let calc = load("calc", { meat: "turkey", unit: "lb", weight: 14, dinner: null });
+  const MEAT_ORDER = ["roast", "turkey", "stuffed", "ham"];
+  let calc = load("calc", { meats: ["turkey"], unit: "lb", w: {}, dinner: null });
+  if (!Array.isArray(calc.meats)) { calc.meats = [calc.meat || "turkey"]; calc.w = calc.w || {}; if (calc.weight) calc.w[calc.meat || "turkey"] = calc.weight; }
+  if (!calc.w) calc.w = {};
+  if (!calc.meats.length) calc.meats = ["turkey"];
+  const getW = k => calc.w[k] != null ? calc.w[k] : (calc.unit === "kg" ? Math.round(MEAT[k].def / 2.20462 * 2) / 2 : MEAT[k].def);
 
   function defaultDinner() {
     const now = new Date();
@@ -8471,7 +8535,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const whenFull = d => d.toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   const whenDay = d => d.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
 
-  function cookRange(meat = calc.meat, weight = calc.weight, unit = calc.unit) {
+  function cookRange(meat, weight, unit = calc.unit) {
     const lb = unit === "kg" ? weight * 2.20462 : weight;
     if (!(lb > 0)) return { error: "Enter the weight from the package." };
     if (meat === "ham") {
@@ -8479,37 +8543,63 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       const per = lb >= 10 ? [15, 18] : [18, 24];          // minutes per lb: whole vs half ham
       return { lb, min: lb * per[0] / 60, max: lb * per[1] / 60 };
     }
+    if (meat === "roast") {
+      if (lb < 2 || lb > 10) return { lb, error: "For a beef roast under 2 lb (1 kg) or over 10 lb (4.5 kg), follow your butcher's directions." };
+      return { lb, min: lb * 20 / 60, max: lb * 25 / 60 };   // about 20-25 min per lb at 325°F
+    }
     if (lb < 8 || lb > 24) return { lb, error: "For turkeys under 8 lb (3.6 kg) or over 24 lb (11 kg), follow the package directions." };
     const row = COOK_TABLE[meat].find(r => lb <= r[1]);
     return { lb, min: row[2], max: row[3] };
   }
 
-  function renderCalc() {
-    const m = MEAT[calc.meat], r = cookRange();
-    $$("#meatPick button").forEach(b => b.setAttribute("aria-pressed", b.dataset.meat === calc.meat ? "true" : "false"));
-    $$("#unitPick button").forEach(b => b.setAttribute("aria-pressed", b.dataset.unit === calc.unit ? "true" : "false"));
-    $("#calcCookBtn").disabled = $("#calcRestBtn").disabled = !!r.error;
-    $("#calcRestBtn").textContent = `Start the ${m.rest}-minute resting timer`;
-    const box = $("#calcResults");
-    if (r.error) { box.innerHTML = `<div class="calc-warn">${esc(r.error)}</div>`; return; }
+  const PREHEAT = 20;   // minutes
+  function mealPlan(k) {
+    const m = MEAT[k], r = cookRange(k, getW(k));
+    if (r.error) return { k, m, r };
     const dinner = calc.dinner ? new Date(calc.dinner) : defaultDinner();
     const ovenIn = new Date(dinner.getTime() - (r.max * 60 + m.rest) * 60000);
-    let thaw;
-    if (calc.meat === "ham") {
-      thaw = `<div class="res sub"><span>If frozen, thaw in the fridge</span><b>4–6 h per lb</b></div>`;
-    } else {
-      const days = Math.ceil(r.lb / 4);                    // fridge: about 1 day for every 4 lb
-      const water = Math.max(1, Math.ceil(r.lb * .5));      // cold water: about 30 min per lb
-      thaw = `<div class="res"><span>❄️ Thaw in the fridge</span><b>about ${days} day${days > 1 ? "s" : ""}</b></div>
-        <div class="res sub"><span>or in cold water, changed every 30 min</span><b>about ${water} h</b></div>
-        <div class="res plan"><span>🗓️ Move it to the fridge by</span><b>${whenDay(new Date(ovenIn.getTime() - days * 864e5))}</b></div>`;
-    }
-    box.innerHTML = `
-      <div class="res"><span>🔥 ${calc.meat === "ham" ? "Heat" : "Roast"} at 325°F / 160°C</span><b>${hrsText(r.min)} – ${hrsText(r.max)}</b></div>
-      <div class="res"><span>⏳ Rest before carving</span><b>${m.rest} min</b></div>
-      ${thaw}
-      <div class="res plan"><span>🍽️ Into the oven by</span><b>${whenFull(ovenIn)}</b></div>
-      <div class="res sub"><span>Ready at</span><b>${m.temp}</b></div>`;
+    const t = [                                            // seconds from the moment the timers start
+      [`${m.name}: oven on`, "🔥", PREHEAT * 60],
+      [`${m.name}: check the temperature`, m.icon, Math.round((PREHEAT + r.min * 60) * 60)],
+      [`${m.name}: take it out`, "🍽️", Math.round((PREHEAT + r.max * 60) * 60)],
+      [`${m.name}: rested, time to carve`, "🔪", Math.round((PREHEAT + r.max * 60 + m.rest) * 60)]
+    ];
+    return { k, m, r, dinner, ovenIn, t };
+  }
+
+  function renderCalc() {
+    $$("#meatPick button").forEach(b => b.setAttribute("aria-pressed", calc.meats.includes(b.dataset.meat) ? "true" : "false"));
+    $$("#unitPick button").forEach(b => b.setAttribute("aria-pressed", b.dataset.unit === calc.unit ? "true" : "false"));
+    const plans = MEAT_ORDER.filter(k => calc.meats.includes(k)).map(mealPlan);
+    $("#calcCookBtn").disabled = !plans.length || plans.some(p => p.r.error);
+    const many = plans.length > 1;
+    $("#calcCookBtn").textContent = many ? `⏰ Start all ${plans.length * 4} timers` : "⏰ Start all 4 timers";
+    $("#calcResults").innerHTML = plans.map(p => {
+      const head = `<div class="calc-meal-h">${p.m.icon} ${esc(p.m.name)}</div>`;
+      if (p.r.error) return head + `<div class="calc-warn">${esc(p.r.error)}</div>`;
+      let thaw;
+      if (p.k === "ham") {
+        thaw = `<div class="res sub"><span>If frozen, thaw in the fridge</span><b>4–6 h per lb</b></div>`;
+      } else {
+        const days = Math.ceil(p.r.lb / (p.k === "roast" ? 5 : 4));  // fridge: about 1 day for every 4-5 lb
+        const water = Math.max(1, Math.ceil(p.r.lb * .5));            // cold water: about 30 min per lb
+        thaw = `<div class="res"><span>❄️ Thaw in the fridge</span><b>about ${days} day${days > 1 ? "s" : ""}</b></div>
+          <div class="res sub"><span>or in cold water, changed every 30 min</span><b>about ${water} h</b></div>
+          <div class="res plan"><span>🗓️ Move it to the fridge by</span><b>${whenDay(new Date(p.ovenIn.getTime() - days * 864e5))}</b></div>`;
+      }
+      return head + `
+        <div class="res"><span>🔥 ${p.k === "ham" ? "Heat" : "Roast"} at 325°F / 160°C</span><b>${hrsText(p.r.min)} – ${hrsText(p.r.max)}</b></div>
+        <div class="res"><span>⏳ Rest before carving</span><b>${p.m.rest} min</b></div>
+        ${thaw}
+        <div class="res plan"><span>🍽️ Into the oven by</span><b>${whenFull(p.ovenIn)}</b></div>
+        <div class="res sub"><span>Ready at</span><b>${p.m.temp}</b></div>
+        <div class="res sub"><span>Timers you get</span><b>oven on, check, take out, carve</b></div>`;
+    }).join("");
+  }
+  function renderCalcWeights() {
+    $("#calcMeals").innerHTML = MEAT_ORDER.filter(k => calc.meats.includes(k)).map(k =>
+      `<label class="calc-field"><span>${esc(MEAT[k].name)} weight (${calc.unit})</span>
+        <input class="input" data-wk="${k}" type="number" inputmode="decimal" min="1" max="40" step="0.5" value="${getW(k)}"></label>`).join("");
   }
 
   function calcTimer(id, name, icon, secs) {
@@ -8517,35 +8607,59 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (!d) { d = { id, icon, name, custom: true, duration: secs, remaining: secs, endAt: null, status: "idle" }; duties.unshift(d); }
     d.name = name; d.icon = icon;
     getAudio(); startDuty(d, secs); commitDuties();
-    setTimeout(() => $("#dutyGrid").scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    setTimeout(() => ($("#runNow").hidden ? $("#dutyGrid") : $("#runNow")).scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   }
   function initCalc() {
-    $("#calcWeight").value = calc.weight;
     $("#calcDinner").value = toLocalInput(calc.dinner ? new Date(calc.dinner) : defaultDinner());
-    renderCalc();
+    renderCalcWeights(); renderCalc();
   }
+  // ⏱️ tap-to-start shelf: nothing exists until you tap it
+  const KITCHEN_PRESETS = [
+    { id: "sides", icon: "🥔", name: "Stir the Sides", minutes: 15 }, { id: "cookie", icon: "🍪", name: "Cookies in the Oven", minutes: 12 },
+    { id: "rolls", icon: "🥖", name: "Check the Rolls", minutes: 12 }, { id: "gravy", icon: "🥣", name: "Simmer the Gravy", minutes: 10 }];
+  const HOLIDAY_PRESETS = SPACE === "office" ? OFFICE_DUTIES : [
+    { id: "elf", icon: "🧝", name: "Move the Elf", minutes: 5 }, { id: "wrap", icon: "🎁", name: "Wrap Secret Gifts", minutes: 20 },
+    { id: "cocoa", icon: "☕", name: "Hot Cocoa Time", minutes: 10 }, { id: "photo", icon: "📷", name: "Family Photo", minutes: 15 }];
+  if (SPACE === "office") { const h = $("#presetHoliday summary span"); if (h) h.textContent = "Event timers"; }
+  function paintPresets() {
+    $$("[data-presets]").forEach(g => {
+      const list = g.dataset.presets === "kitchen" ? KITCHEN_PRESETS : HOLIDAY_PRESETS;
+      g.innerHTML = list.map(p => `<button type="button" class="tm-go" data-pid="${p.id}"><b>${esc(p.name)}</b><small>${p.minutes} min</small></button>`).join("");
+      g.onclick = e => {
+        const b = e.target.closest("[data-pid]"); if (!b) return;
+        const p = list.find(x => x.id === b.dataset.pid); if (!p) return;
+        const d = duties.find(x => x.id === p.id); if (d && d.status === "running") { toast(`⏰ ${p.name} is already running`); return; }
+        calcTimer(p.id, p.name, p.icon, p.minutes * 60); toast(`⏰ ${p.name}: ${p.minutes} min`);
+      };
+    });
+  }
+  paintPresets();
   $("#meatPick").addEventListener("click", e => {
     const b = e.target.closest("[data-meat]"); if (!b) return;
-    calc.meat = b.dataset.meat; save("calc", calc); renderCalc();
+    const k = b.dataset.meat, i = calc.meats.indexOf(k);
+    if (i >= 0) { if (calc.meats.length > 1) calc.meats.splice(i, 1); } else calc.meats.push(k);
+    save("calc", calc); renderCalcWeights(); renderCalc();
   });
   $("#unitPick").addEventListener("click", e => {
     const b = e.target.closest("[data-unit]"); if (!b || b.dataset.unit === calc.unit) return;
-    calc.weight = Math.round((calc.unit === "lb" ? calc.weight / 2.20462 : calc.weight * 2.20462) * 2) / 2;
-    calc.unit = b.dataset.unit; $("#calcWeight").value = calc.weight; save("calc", calc); renderCalc();
+    MEAT_ORDER.forEach(k => { const w = getW(k); calc.w[k] = Math.round((calc.unit === "lb" ? w / 2.20462 : w * 2.20462) * 2) / 2; });
+    calc.unit = b.dataset.unit; save("calc", calc); renderCalcWeights(); renderCalc();
   });
-  $("#calcWeight").addEventListener("input", e => { calc.weight = parseFloat(e.target.value) || 0; save("calc", calc); renderCalc(); });
+  $("#calcMeals").addEventListener("input", e => {
+    const i = e.target.closest("[data-wk]"); if (!i) return;
+    calc.w[i.dataset.wk] = parseFloat(i.value) || 0; save("calc", calc); renderCalc();
+  });
   $("#calcDinner").addEventListener("change", e => {
     const d = new Date(e.target.value); calc.dinner = isNaN(d) ? null : d.getTime(); save("calc", calc); renderCalc();
   });
   $("#calcCookBtn").addEventListener("click", () => {
-    const r = cookRange(), m = MEAT[calc.meat]; if (r.error) return;
-    calcTimer("calc-oven", `${m.name}: check the temperature`, m.icon, Math.round(r.min * 3600));
-    toast(`⏰ Oven timer set for ${hrsText(r.min)}. Check the temperature when it rings.`);
-  });
-  $("#calcRestBtn").addEventListener("click", () => {
-    const m = MEAT[calc.meat];
-    calcTimer("calc-rest", `${m.name} resting`, "🍽️", m.rest * 60);
-    toast(`⏳ Resting timer set for ${m.rest} minutes`);
+    const plans = MEAT_ORDER.filter(k => calc.meats.includes(k)).map(mealPlan);
+    if (!plans.length || plans.some(p => p.r.error)) return;
+    let n = 0;
+    plans.slice().reverse().forEach(p => p.t.slice().reverse().forEach(([name, icon, secs], j) => {
+      calcTimer("calc-" + p.k + "-" + (j + 1), name, icon, secs); n++;
+    }));
+    toast(`⏰ ${n} timers set for ${plans.map(p => p.m.name.toLowerCase()).join(" and ")}`);
   });
 
   /* ============================================================
@@ -10192,6 +10306,32 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     renderMeals();
     return true;
   }
+  // 🧾 the review card: see everything first, nothing is set until Confirm
+  function planReview(ids) {
+    const old = document.getElementById("planReview"); if (old) old.remove();
+    const now = Date.now(), clock = t => new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    let allOk = true;
+    const blocks = ids.map(id => {
+      const m = mealById(id); if (!m) return "";
+      const c = cfgFor(id), D = dinnerAt(c), past = D < now; if (past) allOk = false;
+      const steps = past ? [] : buildSteps(m, c).filter(s => s.alarm);
+      return `<div class="pr-meal"><h4>${esc(m.name)}</h4>
+        <p class="pr-when">${past ? "That time has passed. Go back and pick a later time." : `Dinner at <b>${clock(D)}</b> for <b>${c.guests}</b> guest${c.guests > 1 ? "s" : ""}`}</p>
+        ${steps.length ? `<ul class="pr-steps">${steps.map(s => `<li${s.t <= now ? ' class="pr-past"' : ""}><b>${clock(s.t)}</b><span>${esc(s.text)}${s.t <= now ? " (already past)" : ""}</span></li>`).join("")}</ul>` : ""}</div>`;
+    }).join("");
+    const el = document.createElement("div"); el.id = "planReview"; el.className = "pr-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+    el.innerHTML = `<div class="pr-card"><p class="menu-star">✦</p><h3 class="pr-title">Your plan</h3><p class="pr-sub">Check it over. Nothing is set yet.</p>${blocks}
+      <div class="pr-btns"><button type="button" class="btn btn-ghost" data-prback>Go back</button><button type="button" class="btn btn-gold" data-prok ${allOk ? "" : "disabled"}>Confirm and add</button></div></div>`;
+    document.body.appendChild(el);
+    el.addEventListener("click", e => {
+      if (e.target === el || e.target.closest("[data-prback]")) { el.remove(); return; }
+      if (e.target.closest("[data-prok]")) {
+        let ok = 0; ids.forEach(id => { const m = mealById(id); if (m && startMealPlan(m, true)) ok++; });
+        el.remove(); renderMeals();
+        toast(ok ? `Added. Alarms are set for ${ok} dinner${ok > 1 ? "s" : ""}.` : "That time has passed. Pick a later time.");
+      }
+    });
+  }
   function stopMealPlan(m) {
     mealPlans = mealPlans.filter(p => p.id !== m.id); saveMealPlans(); syncMealNative(); renderMeals(); toast("⏹ Alarms stopped for " + m.name);
   }
@@ -10331,7 +10471,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const dn = t.closest("[data-done]");
     if (dn) { const c = cfgFor(m.id); c.doneness = dn.dataset.done; mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
     const pn = t.closest("[data-mpane]"); if (pn) { mealSel.pane = pn.dataset.mpane; save("mealSel", mealSel); renderMealDetail(m); return; }
-    if (t.closest("#mealStart")) { startMealPlan(m); return; }
+    if (t.closest("#mealStart")) { planReview([m.id]); return; }
     if (t.closest("#mealStop")) { if (confirm("Stop all the alarms for this meal?")) stopMealPlan(m); return; }
     const nt = t.closest("[data-night]");
     if (nt) { const c = cfgFor(m.id); c.date = nt.dataset.night === "eve" ? eveYmd() : dayYmd(); mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); toast(nt.dataset.night === "eve" ? "🕯️ Set for Christmas Eve" : "🎄 Set for Christmas Day"); return; }
@@ -10450,7 +10590,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         <div class="wz-step"><span class="wz-n">4</span>Your ${WN[n]} plan is ready</div>
         <ul class="wz-list">${sel.map(id => `<li><button type="button" data-wzopen="${id}"><b>${esc(mealById(id).name)}</b><small>Recipes, timeline and prices</small><span class="meal-go">›</span></button></li>`).join("")}</ul>
         <button type="button" class="btn btn-ghost btn-block" data-wzshop>Shopping list for ${sel.length > 1 ? "these dinners" : "this dinner"}</button>
-        ${planned === sel.length ? `<p class="wz-on">Alarms are on. Noël will ring at each step.</p><button type="button" class="btn btn-ghost btn-block" data-wzstop>Turn alarms off</button>` : `<button type="button" class="btn btn-gold btn-block" data-wzalarm>Set my alarms</button><p class="wz-hint">Alarms ring for every step: thawing, prepping, roasting and serving.</p>`}`;
+        ${planned === sel.length ? `<p class="wz-on">Alarms are on. Noël will ring at each step.</p><button type="button" class="btn btn-ghost btn-block" data-wzstop>Turn alarms off</button>` : `<button type="button" class="btn btn-gold btn-block" data-wzalarm>Show my plan</button><p class="wz-hint">You will see everything first. Nothing is set until you tap Confirm.</p>`}`;
     }
     $("#wizBox").innerHTML = h + `</div>`;
   }
@@ -10467,11 +10607,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const wg = t.closest("[data-wzg]"); if (wg && n) { wiz.guests[n] = Math.min(20, Math.max(1, wizGuests(n) + +wg.dataset.wzg)); wizSave(); wizApply(n); renderMeals(); return; }
     const wo = t.closest("[data-wzopen]"); if (wo) { openMeal(wo.dataset.wzopen); return; }
     if (t.closest("[data-wzshop]") && n) { msSel = [...wiz.sel[n]]; save("masterSel", msSel); msOpen = true; renderMeals(); window.scrollTo(0, 0); return; }
-    if (t.closest("[data-wzalarm]") && n) {
-      wizApply(n); let ok = 0; wiz.sel[n].forEach(id => { if (startMealPlan(mealById(id), true)) ok++; });
-      renderMeals();
-      toast(ok ? `Alarms are set for ${ok} dinner${ok > 1 ? "s" : ""}. Open one to see its timeline.` : "That time has passed. Pick a later time or night."); return;
-    }
+    if (t.closest("[data-wzalarm]") && n) { wizApply(n); planReview([...wiz.sel[n]]); return; }
     if (t.closest("[data-wzstop]") && n) { if (confirm("Turn off the alarms for these dinners?")) { mealPlans = mealPlans.filter(p => !wiz.sel[n].includes(p.id)); saveMealPlans(); syncMealNative(); renderMeals(); } return; }
   });
   $("#view-meals").addEventListener("change", e => {
@@ -10482,7 +10618,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
 
   // ---- 📖 the menu: a restaurant-style first page, then "Plan my dinner" opens the builder ----
   let mealScreen = mealSel.id ? "build" : "menu";
-  const MENU_GROUPS = [["Christmas Eve", ["eveparty", "seafood"]], ["Traditional", ["turkey", "primerib", "ham"]], ["Elegant", ["lambcrown", "porkcrown"]], ["Vegan", ["vegan"]]];
+  const MENU_GROUPS = [["Christmas Eve", ["eveparty", "seafood"], "Christmas Eve"], ["Traditional", ["turkey", "primerib", "ham"], "Christmas Dinner"], ["Elegant", ["lambcrown", "porkcrown"]], ["Vegan", ["vegan"]]];
   function renderMealMenu() {
     const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
     const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);
@@ -10492,7 +10628,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const go = `<button type="button" class="menu-go" data-menugo>${hasPlan ? "My dinner plan" : "Plan my dinner"} <span>›</span></button>`;
     el.innerHTML = `<div class="menu-top">${go}</div>
       <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
-      MENU_GROUPS.map(([g, ids]) => `<h3 class="menu-group">${g}</h3>` + ids.map(id => {
+      MENU_GROUPS.map(([g, ids, band]) => (band ? `<h3 class="menu-group">${band}</h3>` : "") + (band === g ? "" : `<h3 class="menu-subgroup">${g}</h3>`) + ids.map(id => {
         const m = mealById(id); if (!m || m.soon) return "";
         const all = (m.menuFor ? m.menuFor(mealSizes(m, cfgFor(id))) : m.menu).filter(([c]) => !/pairing/i.test(c)), clean = i => esc(String(i).replace(/\s*\(24 pieces\)/, ""));
         const dr = all.filter(([c]) => /drink/i.test(c)), food = all.filter(([c]) => !/drink/i.test(c));

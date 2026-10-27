@@ -304,6 +304,32 @@
     renderMeals();
     return true;
   }
+  // 🧾 the review card: see everything first, nothing is set until Confirm
+  function planReview(ids) {
+    const old = document.getElementById("planReview"); if (old) old.remove();
+    const now = Date.now(), clock = t => new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    let allOk = true;
+    const blocks = ids.map(id => {
+      const m = mealById(id); if (!m) return "";
+      const c = cfgFor(id), D = dinnerAt(c), past = D < now; if (past) allOk = false;
+      const steps = past ? [] : buildSteps(m, c).filter(s => s.alarm);
+      return `<div class="pr-meal"><h4>${esc(m.name)}</h4>
+        <p class="pr-when">${past ? "That time has passed. Go back and pick a later time." : `Dinner at <b>${clock(D)}</b> for <b>${c.guests}</b> guest${c.guests > 1 ? "s" : ""}`}</p>
+        ${steps.length ? `<ul class="pr-steps">${steps.map(s => `<li${s.t <= now ? ' class="pr-past"' : ""}><b>${clock(s.t)}</b><span>${esc(s.text)}${s.t <= now ? " (already past)" : ""}</span></li>`).join("")}</ul>` : ""}</div>`;
+    }).join("");
+    const el = document.createElement("div"); el.id = "planReview"; el.className = "pr-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+    el.innerHTML = `<div class="pr-card"><p class="menu-star">✦</p><h3 class="pr-title">Your plan</h3><p class="pr-sub">Check it over. Nothing is set yet.</p>${blocks}
+      <div class="pr-btns"><button type="button" class="btn btn-ghost" data-prback>Go back</button><button type="button" class="btn btn-gold" data-prok ${allOk ? "" : "disabled"}>Confirm and add</button></div></div>`;
+    document.body.appendChild(el);
+    el.addEventListener("click", e => {
+      if (e.target === el || e.target.closest("[data-prback]")) { el.remove(); return; }
+      if (e.target.closest("[data-prok]")) {
+        let ok = 0; ids.forEach(id => { const m = mealById(id); if (m && startMealPlan(m, true)) ok++; });
+        el.remove(); renderMeals();
+        toast(ok ? `Added. Alarms are set for ${ok} dinner${ok > 1 ? "s" : ""}.` : "That time has passed. Pick a later time.");
+      }
+    });
+  }
   function stopMealPlan(m) {
     mealPlans = mealPlans.filter(p => p.id !== m.id); saveMealPlans(); syncMealNative(); renderMeals(); toast("⏹ Alarms stopped for " + m.name);
   }
@@ -443,7 +469,7 @@
     const dn = t.closest("[data-done]");
     if (dn) { const c = cfgFor(m.id); c.doneness = dn.dataset.done; mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); return; }
     const pn = t.closest("[data-mpane]"); if (pn) { mealSel.pane = pn.dataset.mpane; save("mealSel", mealSel); renderMealDetail(m); return; }
-    if (t.closest("#mealStart")) { startMealPlan(m); return; }
+    if (t.closest("#mealStart")) { planReview([m.id]); return; }
     if (t.closest("#mealStop")) { if (confirm("Stop all the alarms for this meal?")) stopMealPlan(m); return; }
     const nt = t.closest("[data-night]");
     if (nt) { const c = cfgFor(m.id); c.date = nt.dataset.night === "eve" ? eveYmd() : dayYmd(); mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); toast(nt.dataset.night === "eve" ? "🕯️ Set for Christmas Eve" : "🎄 Set for Christmas Day"); return; }
@@ -562,7 +588,7 @@
         <div class="wz-step"><span class="wz-n">4</span>Your ${WN[n]} plan is ready</div>
         <ul class="wz-list">${sel.map(id => `<li><button type="button" data-wzopen="${id}"><b>${esc(mealById(id).name)}</b><small>Recipes, timeline and prices</small><span class="meal-go">›</span></button></li>`).join("")}</ul>
         <button type="button" class="btn btn-ghost btn-block" data-wzshop>Shopping list for ${sel.length > 1 ? "these dinners" : "this dinner"}</button>
-        ${planned === sel.length ? `<p class="wz-on">Alarms are on. Noël will ring at each step.</p><button type="button" class="btn btn-ghost btn-block" data-wzstop>Turn alarms off</button>` : `<button type="button" class="btn btn-gold btn-block" data-wzalarm>Set my alarms</button><p class="wz-hint">Alarms ring for every step: thawing, prepping, roasting and serving.</p>`}`;
+        ${planned === sel.length ? `<p class="wz-on">Alarms are on. Noël will ring at each step.</p><button type="button" class="btn btn-ghost btn-block" data-wzstop>Turn alarms off</button>` : `<button type="button" class="btn btn-gold btn-block" data-wzalarm>Show my plan</button><p class="wz-hint">You will see everything first. Nothing is set until you tap Confirm.</p>`}`;
     }
     $("#wizBox").innerHTML = h + `</div>`;
   }
@@ -579,11 +605,7 @@
     const wg = t.closest("[data-wzg]"); if (wg && n) { wiz.guests[n] = Math.min(20, Math.max(1, wizGuests(n) + +wg.dataset.wzg)); wizSave(); wizApply(n); renderMeals(); return; }
     const wo = t.closest("[data-wzopen]"); if (wo) { openMeal(wo.dataset.wzopen); return; }
     if (t.closest("[data-wzshop]") && n) { msSel = [...wiz.sel[n]]; save("masterSel", msSel); msOpen = true; renderMeals(); window.scrollTo(0, 0); return; }
-    if (t.closest("[data-wzalarm]") && n) {
-      wizApply(n); let ok = 0; wiz.sel[n].forEach(id => { if (startMealPlan(mealById(id), true)) ok++; });
-      renderMeals();
-      toast(ok ? `Alarms are set for ${ok} dinner${ok > 1 ? "s" : ""}. Open one to see its timeline.` : "That time has passed. Pick a later time or night."); return;
-    }
+    if (t.closest("[data-wzalarm]") && n) { wizApply(n); planReview([...wiz.sel[n]]); return; }
     if (t.closest("[data-wzstop]") && n) { if (confirm("Turn off the alarms for these dinners?")) { mealPlans = mealPlans.filter(p => !wiz.sel[n].includes(p.id)); saveMealPlans(); syncMealNative(); renderMeals(); } return; }
   });
   $("#view-meals").addEventListener("change", e => {
@@ -594,7 +616,7 @@
 
   // ---- 📖 the menu: a restaurant-style first page, then "Plan my dinner" opens the builder ----
   let mealScreen = mealSel.id ? "build" : "menu";
-  const MENU_GROUPS = [["Christmas Eve", ["eveparty", "seafood"]], ["Traditional", ["turkey", "primerib", "ham"]], ["Elegant", ["lambcrown", "porkcrown"]], ["Vegan", ["vegan"]]];
+  const MENU_GROUPS = [["Christmas Eve", ["eveparty", "seafood"], "Christmas Eve"], ["Traditional", ["turkey", "primerib", "ham"], "Christmas Dinner"], ["Elegant", ["lambcrown", "porkcrown"]], ["Vegan", ["vegan"]]];
   function renderMealMenu() {
     const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
     const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);
@@ -604,7 +626,7 @@
     const go = `<button type="button" class="menu-go" data-menugo>${hasPlan ? "My dinner plan" : "Plan my dinner"} <span>›</span></button>`;
     el.innerHTML = `<div class="menu-top">${go}</div>
       <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
-      MENU_GROUPS.map(([g, ids]) => `<h3 class="menu-group">${g}</h3>` + ids.map(id => {
+      MENU_GROUPS.map(([g, ids, band]) => (band ? `<h3 class="menu-group">${band}</h3>` : "") + (band === g ? "" : `<h3 class="menu-subgroup">${g}</h3>`) + ids.map(id => {
         const m = mealById(id); if (!m || m.soon) return "";
         const all = (m.menuFor ? m.menuFor(mealSizes(m, cfgFor(id))) : m.menu).filter(([c]) => !/pairing/i.test(c)), clean = i => esc(String(i).replace(/\s*\(24 pieces\)/, ""));
         const dr = all.filter(([c]) => /drink/i.test(c)), food = all.filter(([c]) => !/drink/i.test(c));
