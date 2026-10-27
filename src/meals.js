@@ -550,19 +550,21 @@
 
 
   // ---- 🎄 guided planner: night → dinners → guests and time → next steps ----
-  const WN = { day: "Christmas Day", eve: "Christmas Eve" };
+  const WN = { day: "Christmas Day", eve: "Christmas Eve", eved: "Christmas Eve Dinner" };
   let wiz = load("wiz", null);
   if (!wiz || !wiz.sel) {
-    const at = n => mealPlans.filter(p => !p.svc && ymdOf(p.at) === (n === "eve" ? eveYmd() : dayYmd())).map(p => p.id);
-    wiz = { night: null, sel: { day: at("day"), eve: at("eve") }, time: {}, guests: {} };
+    const at = n => mealPlans.filter(p => !p.svc && ymdOf(p.at) === (n === "day" ? dayYmd() : eveYmd()) && (n === "day" || (n === "eve") === ((mealById(p.id) || {}).tab === "eve"))).map(p => p.id);
+    wiz = { night: null, sel: { day: at("day"), eve: at("eve"), eved: at("eved") }, time: {}, guests: {} };
   }
+  if (!wiz.sel.eved) wiz.sel.eved = [];
+  if (wiz.night && !WN[wiz.night]) wiz.night = null;
   const wizSave = () => save("wiz", wiz);
-  const wizDate = n => n === "eve" ? eveYmd() : dayYmd();
-  const wizTime = n => wiz.time[n] || (n === "eve" ? "18:00" : "17:00");
+  const wizDate = n => n === "day" ? dayYmd() : eveYmd();
+  const wizTime = n => wiz.time[n] || (n === "day" ? "17:00" : "18:00");
   const wizGuests = n => wiz.guests[n] || 2;
   const wizOpts = n => {
     const mains = MD.meals.filter(m => !m.soon && !m.addon && ["traditional", "elegant", "vegan"].includes(m.tab));
-    return n === "eve" ? MD.meals.filter(m => !m.soon && !m.addon && m.tab === "eve").concat(mains) : mains;
+    return n === "eve" ? MD.meals.filter(m => !m.soon && !m.addon && m.tab === "eve") : mains;
   };
   function wizApply(n) {
     const t = wizTime(n), g = wizGuests(n);
@@ -582,7 +584,7 @@
     const n = wiz.night, sel = n ? wiz.sel[n] : [];
     const dayBtn = k => `<button type="button" class="wz-night" data-wznight="${k}" aria-pressed="${n === k}"><b>${WN[k]}</b><small>${wiz.sel[k].length ? wiz.sel[k].length + " dinner" + (wiz.sel[k].length > 1 ? "s" : "") + " chosen" : "Tap to plan"}</small></button>`;
     let h = `<div class="wz-top"><button type="button" class="meal-back" data-wzmenu>‹ The menu</button><button type="button" class="meal-back" data-wzsaved>My saved menus</button></div><div class="card wz"><h3 class="wz-t">Plan your Christmas dinner</h3>
-      <div class="wz-step"><span class="wz-n">1</span>Which night?</div><div class="wz-nights">${dayBtn("eve")}${dayBtn("day")}</div>`;
+      <div class="wz-step"><span class="wz-n">1</span>Which night?</div><div class="wz-nights">${dayBtn("eve")}${dayBtn("eved")}${dayBtn("day")}</div>`;
     if (n) {
       h += `<div class="wz-step"><span class="wz-n">2</span>What are you cooking? <small>Tap one or more. Chosen dinners turn black.</small></div><div class="wz-opts">` +
         wizOpts(n).map(m => `<button type="button" class="wz-opt" data-wzpick="${m.id}" aria-pressed="${sel.includes(m.id)}"><span><b>${esc(m.name)}</b><small>${esc(m.blurb)}</small></span><i>${sel.includes(m.id) ? "✓" : "+"}</i></button>`).join("") + `</div>`;
@@ -603,7 +605,7 @@
     if (pk && n) {
       const id = pk.dataset.wzpick, arr = wiz.sel[n], i = arr.indexOf(id);
       if (i >= 0) { arr.splice(i, 1); if (planOf(id)) { mealPlans = mealPlans.filter(p => p.id !== id); saveMealPlans(); syncMealNative(); } }
-      else { ["day", "eve"].forEach(k => { if (k !== n) { const j = wiz.sel[k].indexOf(id); if (j >= 0) wiz.sel[k].splice(j, 1); } }); arr.push(id); wizApply(n); }
+      else { ["day", "eve", "eved"].forEach(k => { if (k !== n) { const j = wiz.sel[k].indexOf(id); if (j >= 0) wiz.sel[k].splice(j, 1); } }); arr.push(id); wizApply(n); }
       wizSave(); renderMeals(); return;
     }
     const wg = t.closest("[data-wzg]"); if (wg && n) { wiz.guests[n] = Math.min(20, Math.max(1, wizGuests(n) + +wg.dataset.wzg)); wizSave(); wizApply(n); renderMeals(); return; }
@@ -640,7 +642,7 @@
         return `<div class="menu-dish"><h4>${esc(m.name)}</h4><p class="menu-items">${food.flatMap(([, items]) => items.map(clean)).join(" <i>·</i> ")}</p>` +
           `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p><p class="menu-sub2">Vegan dish available to add</p><a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
       }).join("")).join("") +
-      `<p class="menu-note">Would you like to add a vegan dish? You can add one when you plan your dinner.</p>
+      `<p class="menu-note">Have vegan guests? Choose a vegan dish to add when you plan your dinner.</p>
       <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}</div>`;
   }
   document.addEventListener("click", e => {
