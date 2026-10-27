@@ -8980,7 +8980,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const t = familyTitle(family);
     $(".brand-title").textContent = t || "Noël Tier 1 Hub";          // ✏️ default title
     $(".brand-sub").textContent = t ? "Noël Tier 1 Hub" : "Plan · Celebrate · Remember";  // ✏️ default subtitle
-    $(".app-footer").textContent = t ? `${t}${/s$/i.test(t) ? "'" : "'s"} Holiday Hub` : "Noël Tier 1 Hub · Private & stored only on this device";   // ✏️ footer
+    $(".app-footer").textContent = t ? `${t}${/s$/i.test(t) ? "'" : "'s"} Noël Hub` : "Noël Tier 1 Hub · Private & stored only on this device";   // ✏️ footer
     document.title = t ? `${t} · Noël Tier 1 Hub` : "Noël Tier 1 Hub";
     $("#navMeals").hidden = hubMode === "company";   // 🍽️ the big-dinner planner is for families
     $("#hostBanner").hidden = $("#orgBanner").hidden = hubMode === "company";   // 🏡 hosting is for families too
