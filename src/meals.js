@@ -625,7 +625,7 @@
     if (el.dataset.built === sig) return; el.dataset.built = sig;
     const go = `<button type="button" class="menu-go" data-menugo>${hasPlan ? "My dinner plan" : "Plan my dinner"} <span>›</span></button>`;
     const sv = savedMenus.length ? `<button type="button" class="menu-go menu-saved" data-menusaved>My saved menus (${savedMenus.length}) <span>›</span></button>` : "";
-    el.innerHTML = `<div class="menu-top">${sv}${go}</div>
+    el.innerHTML = `<div class="menu-top"><button type="button" class="menu-go menu-skip" data-menuskip>Don't plan my dinner</button>${go}</div>${sv ? `<div class="menu-top menu-top2">${sv}</div>` : ""}
       <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
       MENU_GROUPS.map(([g, ids, band]) => (band ? `<h3 class="menu-group">${band}</h3>` : "") + (band === g ? "" : `<h3 class="menu-subgroup">${g}</h3>`) + ids.map(id => {
         const m = mealById(id); if (!m || m.soon) return "";
@@ -637,7 +637,7 @@
           `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p><p class="menu-sub2">Vegan dish available to add</p><a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
       }).join("")).join("") +
       `<p class="menu-note">Would you like to add a vegan dish? You can add one when you plan your dinner.</p>
-      <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}<button type="button" class="menu-own" data-menuown>Cooking your own dinner idea? Timers and vegan dishes ›</button></div>`;
+      <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}</div>`;
   }
   document.addEventListener("click", e => {
     const nav = e.target.closest && e.target.closest("[data-view=meals]");
@@ -645,6 +645,7 @@
   }, true);
   $("#view-meals").addEventListener("click", e => {
     if (e.target.closest("[data-menugo]")) { mealScreen = "build"; renderMeals(); window.scrollTo(0, 0); }
+    if (e.target.closest("[data-menuskip]")) { const b = document.querySelector(".nav-btn[data-view=alarms]"); if (b) b.click(); return; }
     if (e.target.closest("[data-menuown]")) { mealScreen = "build"; renderMeals(); setTimeout(() => { const o = $("#mealOwn"); if (o) o.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); }
     if (e.target.closest("[data-wzmenu]")) { mealScreen = "menu"; renderMeals(); window.scrollTo(0, 0); }
   });
