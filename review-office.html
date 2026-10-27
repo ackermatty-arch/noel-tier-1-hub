@@ -10354,13 +10354,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const blocks = ids.map(id => {
       const m = mealById(id); if (!m) return "";
       const c = cfgFor(id), D = dinnerAt(c), past = D < now; if (past) allOk = false;
-      const steps = past ? [] : buildSteps(m, c).filter(s => s.alarm);
+      const adds = activeAddons(m);
       return `<div class="pr-meal"><h4>${esc(m.name)}</h4>
-        <p class="pr-when">${past ? "That time has passed. Go back and pick a later time." : `Dinner at <b>${clock(D)}</b> for <b>${c.guests}</b> guest${c.guests > 1 ? "s" : ""}`}</p>
-        ${steps.length ? `<ul class="pr-steps">${steps.map(s => `<li${s.t <= now ? ' class="pr-past"' : ""}><b>${clock(s.t)}</b><span>${esc(s.text)}${s.t <= now ? " (already past)" : ""}</span></li>`).join("")}</ul>` : ""}</div>`;
+        <p class="pr-when">${past ? "That time has passed. Go back and pick a later time." : `<b>${c.guests}</b> guest${c.guests > 1 ? "s" : ""}<br>${esc(whenLong(D))}`}</p>
+        ${adds.length ? `<p class="pr-add"><b>Vegan add-on${adds.length > 1 ? "s" : ""}</b></p><ul class="pr-steps">${adds.map(x => `<li><span>${esc(x.a.name)} <small>(${x.c.guests} portion${x.c.guests > 1 ? "s" : ""})</small></span></li>`).join("")}</ul>` : ""}</div>`;
     }).join("");
     const el = document.createElement("div"); el.id = "planReview"; el.className = "pr-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
-    el.innerHTML = `<div class="pr-card"><p class="menu-star">✦</p><h3 class="pr-title">Your plan</h3><p class="pr-sub">Check it over. Next you will see your full menu and shopping list.</p>${blocks}
+    el.innerHTML = `<div class="pr-card"><p class="menu-star">✦</p><h3 class="pr-title">Your plan</h3><p class="pr-sub">Here is what you planned. Next you will see your full menu and shopping list.</p>${blocks}
       <div class="pr-btns"><button type="button" class="btn btn-ghost" data-prback>Go back</button><button type="button" class="btn btn-gold" data-prok ${allOk ? "" : "disabled"}>Confirm</button></div></div>`;
     document.body.appendChild(el);
     el.addEventListener("click", e => {
