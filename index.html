@@ -1863,8 +1863,8 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .wz-more { margin: 14px 0; border: 1px solid #E6E6E6; padding: 0 12px; }
 .wz-more > summary { padding: 14px 0; cursor: pointer; font-family: var(--font-display); letter-spacing: .08em; text-transform: uppercase; font-size: 12.5px; }
 /* The Noël Menu */
-#view-meals.on-menu > :not(#mealMenu), #view-nye.on-menu > :not(#nyeMenu) { display: none !important; }
-#mealMenu, #nyeMenu { text-align: center; padding: 0 4px 24px; }
+#view-meals.on-menu > :not(#mealMenu), #view-nye.on-menu > :not(#nyeMenu), #view-office.on-menu > :not(#offMenu):not([data-goview="planner"]) { display: none !important; }
+#mealMenu, #nyeMenu, #offMenu { text-align: center; padding: 0 4px 24px; }
 .menu-top, .menu-bottom { display: flex; justify-content: flex-end; }
 .menu-bottom { justify-content: center; margin-top: 20px; }
 .menu-go { background: #151515; color: #E4C27A; border: 1px solid #C9A45C; padding: 11px 16px; font-family: var(--font-display); letter-spacing: .12em; text-transform: uppercase; font-size: 13px; cursor: pointer; }
@@ -2279,6 +2279,8 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
        ============================================================ -->
   <section class="view" id="view-office" aria-labelledby="officeTitle">
     <button type="button" class="meal-back" data-goview="planner">‹ Planner</button>
+    <div id="offMenu" hidden></div>
+    <button type="button" class="meal-back" data-offmenu>‹ The menu</button>
     <h2 class="view-title" id="officeTitle">Office Party Plan</h2>
     <p class="view-intro">Plan it, get it approved, and leave a tidy record for next year.</p>
     <div class="apps-filters host-tabs" id="offTabs"></div>
@@ -12632,6 +12634,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const offYear = () => (off.ev.date ? +off.ev.date.slice(0, 4) : new Date().getFullYear());
 
   function renderOffice() {
+    renderOffMenu();
     const tab = off.tab || "event";
     $("#offTabs").innerHTML = [["event", "📋 Event"], ["food", "🍽️ Food"], ["approval", "📨 Approval"], ["potluck", "🥘 Potluck"], ["santa", "🎅 Secret Santa"], ["awards", "🏆 Awards"], ["auction", "🔨 Auction"], ["charity", "⭐ Charity"], ["handover", "📦 Handover"]].map(([k, l]) =>
       `<button type="button" class="chip${k === tab ? " on" : ""}" data-oftab="${k}">${l}${k === "approval" ? ` <span class="ap-dot ${off.appr.status}"></span>` : ""}</button>`).join("");
@@ -13230,6 +13233,39 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#view-office").addEventListener("change", e => { const t = e.target; if (t.dataset.ofask != null) { off.ask = off.ask || {}; off.ask[t.dataset.ofask] = t.checked; saveOff(); t.closest("label").classList.toggle("on", t.checked); } });
   if (SPACE === "office") document.body.classList.toggle("co-kids", off.ev.who === "family");
   offSync();
+
+  /* ---------- 📖 the Office menu: a quick first page, then "Start planning" opens the planner ---------- */
+  let offScreen = "menu";
+  function renderOffMenu() {
+    const el = $("#offMenu"), v = $("#view-office"); if (!el) return;
+    const on = offScreen === "menu"; v.classList.toggle("on-menu", on); el.hidden = !on; if (!on || el.dataset.built) return; el.dataset.built = "1";
+    const go = `<button type="button" class="menu-go" data-offgo>Start planning <span>›</span></button>`, dot = " <i>·</i> ";
+    const blk = (n, b) => `<div class="menu-dish"><h4>${n}</h4>${b}</div><p class="menu-rule sm"><span></span>✦<span></span></p>`, line = x => `<p class="menu-items">${x}</p>`;
+    const plain = l => l.replace(/^\S+\s/, "");
+    el.innerHTML = `<div class="menu-top">${go}</div>
+      <p class="menu-star">✦</p><h2 class="menu-title">Office Christmas Party</h2><p class="menu-sub">Plan it, get it approved and leave a tidy record for next year</p><p class="menu-rule"><span></span>✦<span></span></p>
+      <h3 class="menu-group">The Party</h3>` +
+      blk("Who's invited", line(OFF_WHO.map(w => esc(w[2])).join(dot))) +
+      blk("Where", line(`In the office${dot}Rent a venue${dot}Team outing${dot}Someone's home`)) +
+      `<h3 class="menu-group">Food</h3>` +
+      blk("Feed everyone", line(`Appetizers we make${dot}Catered or ordered in${dot}Potluck${dot}The venue provides it`) + `<p class="menu-sub2">Menu, amounts, cost and shopping list included</p>`) +
+      `<h3 class="menu-group">Drinks</h3>` +
+      blk("No alcohol", line(`Sparkling Cranberry-Orange Punch${dot}Cucumber-Mint Lime Spritz${dot}Hot Spiced Apple Cider${dot}Coffee and tea`)) +
+      blk("Alcohol served", line(`Wine${dot}Beer${dot}Sparkling wine for the toast`) + `<p class="menu-drinks"><b>Always</b> non-alcoholic choices too</p><p class="menu-sub2">Not sure? We write the question to ask your boss</p>`) +
+      `<h3 class="menu-group">Activities</h3>` +
+      blk("Pick what's planned", line(OFF_ACTS.map(a => esc(plain(a[1]))).concat(["Secret Santa", "Silent auction"]).join(dot))) +
+      `<h3 class="menu-group">Planning Tools</h3>` +
+      blk("Behind the scenes", line(`Approval request for your boss${dot}Budget, costs and vendors${dot}Potluck sign-ups${dot}Printable menu and shopping list${dot}Handover file for next year's planner`)) +
+      `<p class="menu-note">Substitutions available. Everything can be changed as your plans do.</p>
+      <div class="menu-bottom"><p class="menu-ready">Ready to plan your party?</p>${go}</div>`;
+  }
+  document.addEventListener("click", e => {
+    if (e.target.closest && e.target.closest("[data-goview=office]")) { offScreen = "menu"; setTimeout(renderOffMenu, 0); }
+  }, true);
+  $("#view-office").addEventListener("click", e => {
+    if (e.target.closest("[data-offgo]")) { offScreen = "build"; renderOffMenu(); window.scrollTo(0, 0); }
+    if (e.target.closest("[data-offmenu]")) { offScreen = "menu"; renderOffMenu(); window.scrollTo(0, 0); }
+  });
   /* @office-end */
   /* @print-start */
   /* ============================================================
