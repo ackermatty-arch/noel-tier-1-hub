@@ -592,14 +592,15 @@
 
 
   // ---- 📖 the menu: a restaurant-style first page, then "Plan my dinner" opens the builder ----
-  let mealScreen = (mealSel.id || mealPlans.some(p => !p.svc)) ? "build" : "menu";
+  let mealScreen = mealSel.id ? "build" : "menu";
   const MENU_GROUPS = [["Christmas Eve", ["eveparty", "seafood"]], ["Traditional", ["turkey", "primerib", "ham"]], ["Elegant", ["lambcrown", "porkcrown"]], ["Vegan", ["vegan"]]];
   function renderMealMenu() {
     const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
     const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);
     v.classList.toggle("on-menu", on); el.hidden = !on; if (!on) return;
-    if (el.dataset.built) return; el.dataset.built = "1";
-    const go = `<button type="button" class="menu-go" data-menugo>Plan my dinner <span>›</span></button>`;
+    const hasPlan = mealPlans.some(p => !p.svc), sig = hasPlan ? "plan" : "none";
+    if (el.dataset.built === sig) return; el.dataset.built = sig;
+    const go = `<button type="button" class="menu-go" data-menugo>${hasPlan ? "My dinner plan" : "Plan my dinner"} <span>›</span></button>`;
     el.innerHTML = `<div class="menu-top">${go}</div>
       <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
       MENU_GROUPS.map(([g, ids]) => `<h3 class="menu-group">${g}</h3>` + ids.map(id => {
@@ -616,8 +617,8 @@
   }
   document.addEventListener("click", e => {
     const nav = e.target.closest && e.target.closest("[data-view=meals]");
-    if (nav && !$("#view-meals").classList.contains("active")) { mealScreen = (mealSel.id || mealPlans.some(p => !p.svc)) ? "build" : "menu"; setTimeout(renderMeals, 0); }
-  });
+    if (nav && !$("#view-meals").classList.contains("active")) { mealScreen = mealSel.id ? "build" : "menu"; setTimeout(renderMeals, 0); }
+  }, true);
   $("#view-meals").addEventListener("click", e => {
     if (e.target.closest("[data-menugo]")) { mealScreen = "build"; renderMeals(); window.scrollTo(0, 0); }
     if (e.target.closest("[data-menuown]")) { mealScreen = "build"; renderMeals(); setTimeout(() => { const o = $("#mealOwn"); if (o) o.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); }
