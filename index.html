@@ -1733,6 +1733,9 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .nav-btn { font-size: 9px !important; gap: 1px !important; letter-spacing: .02em !important; }
 .bottom-nav .nav-ico { width: 15px !important; height: 20px !important; }
 .nav-btn.active::before { top: -1px; }
+
+.bk { font-size: 2.1em; line-height: .5; margin-right: 0; font-weight: 400; vertical-align: -.12em; display: inline-block; }
+.meal-back, .back-btn { display: inline-flex; align-items: center; }
 </style>
 </head>
 <body>
@@ -12935,6 +12938,10 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function clean(n){
     if(n.nodeType===3){
       var p=n.parentElement; if(!p||p.closest(SKIP)) return;
+      if(/^\s*\u2039/.test(n.nodeValue) && !(p.classList&&p.classList.contains("bk")) && p.matches&&p.matches(".meal-back,.back-btn")){
+        var sp=document.createElement("span"); sp.className="bk"; sp.textContent="\u2039";
+        n.nodeValue=n.nodeValue.replace(/^\s*\u2039\s*/,""); p.insertBefore(sp,n);
+      }
       var t=n.nodeValue.replace(/\u23F8\uFE0F?/g,"\u2016 "); if(!RX.test(t)){RX.lastIndex=0; if(t!==n.nodeValue) n.nodeValue=t; return;} RX.lastIndex=0;
       var u=t.replace(RX,"").replace(/^\s+/,function(m){return n.previousSibling?m:""}).replace(/ {2,}/g," ");
       if(u!==t) n.nodeValue=u;
