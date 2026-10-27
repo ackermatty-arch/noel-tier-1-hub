@@ -1715,6 +1715,24 @@ h1, h2, .view-title, .brand-title, .welcome-box h2, .gate-box h2, .nc-big, .shee
 .view-title { font-size: 28px; }
 .btn, .chip, .seg button, .classy-btn, .nav-btn { font-family: var(--font-body); }
 
+/* Cinzel for everything + thinner top and bottom banners */
+:root { --font-body: "Cinzel", Georgia, serif; --font-display: "Cinzel", Georgia, serif; --nav-h: 50px; }
+body, button, input, select, textarea, .btn, .chip, .seg button, .classy-btn, .nav-btn, .input { font-family: "Cinzel", Georgia, serif !important; }
+body { font-size: 14.5px; font-weight: 500; line-height: 1.55; letter-spacing: .01em; }
+h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
+.view-title { font-size: 25px; }
+.app-header { padding: calc(7px + var(--safe-t)) 14px 8px !important; border-bottom-width: 1px !important; }
+.brand-logo { width: 30px !important; height: 30px !important; }
+.brand-title { font-size: 13.5px !important; }
+.brand-sub { font-size: 7.5px !important; }
+.music-btn { width: 34px !important; height: 34px !important; }
+.countdown-chip { padding: 3px 9px !important; }
+.countdown-chip strong { font-size: 15px !important; }
+.countdown-chip small { font-size: 7.5px !important; }
+.bottom-nav { border-top-width: 1px !important; }
+.nav-btn { font-size: 9px !important; gap: 1px !important; letter-spacing: .02em !important; }
+.bottom-nav .nav-ico { width: 15px !important; height: 20px !important; }
+.nav-btn.active::before { top: -1px; }
 </style>
 </head>
 <body>
