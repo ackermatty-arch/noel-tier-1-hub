@@ -53,7 +53,7 @@
       if (est != null) est = est * fx();   // estimates in the chosen currency
       const key = prefix + dept + "|" + name, price = est == null ? null : est * (pf[key] || 1);
       if (price != null) { total += price; if (!ticks[key]) left += price; }
-      return { q, name, key, est, price, on: !!ticks[key], edited: !!pf[key] };
+      return { q, name, key, dept, est, price, on: !!ticks[key], edited: !!pf[key] };
     };
     const groups = m.shop(f, p).map(([dept, items]) => [dept, items.map(it => item("")(it, dept))]);
     activeAddons(m).forEach(({ a, c: ac, p: ap }) => {   // 🌱 each add-on gets its own section
@@ -177,9 +177,10 @@
   function renderMeals() {
     renderDietBottom();
     const m = mealSel.id && mealById(mealSel.id);
-    $("#mealHome").hidden = !!m; $("#mealDetail").hidden = !m;
-    if (!m || m.soon) { mealSel.id = null; $("#mealHome").hidden = false; $("#mealDetail").hidden = true; renderMealHome(); }
+    $("#mealHome").hidden = !!m || msOpen; $("#mealDetail").hidden = !m || msOpen;
+    if (!m || m.soon) { mealSel.id = null; $("#mealHome").hidden = msOpen; $("#mealDetail").hidden = true; renderMealHome(); }
     else renderMealDetail(m);
+    renderMasterShop();
     renderMaster();
   }
 
@@ -514,6 +515,104 @@
     if (it && confirm(`Remove “${it.name}” from your food budget?`)) { foodBudget.items = foodBudget.items.filter(x => x !== it); save("foodBudget", foodBudget); renderFoodBudget(); }
   });
   renderFoodBudget();
+
+
+  // ---- 🛒 master shopping list: the chosen recipes merged into one list, repeats added up ----
+  let msSel = load("masterSel", null);               // null = whichever dinners you've planned; or the ids you picked
+  let msTicks = load("masterTicks", {});             // what's already in the buggy
+  let msOpen = false, msHide = false;
+  const FRAC_N = { "½": .5, "¼": .25, "¾": .75, "⅓": 1 / 3, "⅔": 2 / 3 };
+  const msNum = x => { const r = Math.round(x * 100) / 100; return Number.isInteger(r) ? String(r) : String(r); };
+  const msIds = () => (Array.isArray(msSel) ? msSel : mealPlans.filter(p => !p.svc).map(p => p.id)).filter(id => { const m = mealById(id); return m && !m.soon && !m.addon && m.shop; });
+  function msParse(q) {
+    const m = String(q || "").trim().match(/^(\d+(?:\.\d+)?)?\s*([½¼¾⅓⅔])?\s*(.*)$/);
+    return { n: (m[1] ? +m[1] : 0) + (m[2] ? FRAC_N[m[2]] : 0), u: (m[3] || "").trim() };
+  }
+  const msNorm = name => String(name).toLowerCase().replace(/\(.*?\)/g, "").split(/[^a-z0-9]+/).filter(Boolean).map(w =>
+    /ies$/.test(w) ? w.slice(0, -3) + "y" : /(ch|sh|ss|x)es$/.test(w) ? w.slice(0, -2) : /oes$/.test(w) ? w.slice(0, -2) : /[^s]s$/.test(w) ? w.slice(0, -1) : w).join(" ");
+  function msBuild() {
+    const ids = msIds(), map = new Map(), depts = [];
+    ids.forEach(id => {
+      const m = mealById(id), c = cfgFor(id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
+      ps.groups.forEach(([, items]) => items.forEach(it => {
+        const key = msNorm(it.name); let e = map.get(key);
+        if (!e) { e = { key, dept: it.dept, units: {}, price: null, meals: [], best: -1, name: it.name }; map.set(key, e); if (!depts.includes(it.dept)) depts.push(it.dept); }
+        const { n, u } = msParse(it.q); e.units[u] = (e.units[u] || 0) + n;
+        if (it.price != null) e.price = (e.price || 0) + it.price;
+        if (!e.meals.includes(m.name)) e.meals.push(m.name);
+        if (n >= e.best) { e.best = n; e.name = it.name; }
+      }));
+    });
+    const items = [...map.values()].map(e => Object.assign(e, { name: Object.values(e.units).reduce((a, n) => a + n, 0) > 1 ? e.name.replace(/^bunch\b/, "bunches") : e.name, q: Object.entries(e.units).map(([u, n]) => (n ? msNum(n) : "") + (u ? (n ? " " : "") + u : "")).filter(Boolean).join(" + "), on: !!msTicks[e.key] }));
+    const groups = depts.map(d => [d, items.filter(i => i.dept === d)]);
+    let total = 0, left = 0, done = 0;
+    items.forEach(i => { if (i.price != null) { total += i.price; if (!i.on) left += i.price; } if (i.on) done++; });
+    return { ids, groups, items, total, left, done };
+  }
+  const msTextOf = b => `Noël shopping list (${b.ids.map(id => mealById(id).name).join(", ")})\nEstimated ${cad0(b.total)} ${currency}\n` +
+    b.groups.map(([d, its]) => `\n${d.toUpperCase()}\n` + its.map(i => `${i.on ? "☑" : "☐"} ${i.q ? i.q + " " : ""}${i.name}`).join("\n")).join("\n");
+  function msStatsHtml(b) {
+    const pct = b.items.length ? Math.round(100 * b.done / b.items.length) : 0;
+    return `<div class="ms-count"><b>${b.done}</b> of ${b.items.length} in the buggy</div><div class="ms-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+      <div class="ms-money"><span>Estimated total <b>${cad0(b.total)}</b></span><span>Still to buy <b>${cad0(b.left)}</b></span></div>`;
+  }
+  function renderMasterShop() {
+    const entry = $("#msEntry"), box = $("#mealShopAll"); if (!entry || !box) return;
+    const inDetail = !!(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);
+    entry.hidden = msOpen || inDetail; box.hidden = !msOpen;
+    if (!entry.hidden) {
+      const b = msBuild();
+      entry.innerHTML = `<button type="button" class="card ms-entry" data-msopen><span class="meal-txt"><b>Master shopping list</b><small>${b.ids.length ? `${b.ids.length} recipe${b.ids.length > 1 ? "s" : ""} · ${b.items.length} items · about ${cad0(b.total)} ${currency}. One combined list, no repeats.` : "Choose a few recipes and get one combined list with no repeats, saved on your phone for the store."}</small></span><span class="meal-go">›</span></button>`;
+    }
+    if (!msOpen) return;
+    const b = msBuild(), pick = new Set(b.ids);
+    const chips = MD.meals.filter(m => !m.soon && !m.addon && m.shop).map(m => `<button type="button" class="ms-chip" data-mssel="${m.id}" aria-pressed="${pick.has(m.id)}">${esc(m.name)}</button>`).join("");
+    box.innerHTML = `<button type="button" class="meal-back" id="msBack">‹ All meals</button>
+      <h3 class="meal-title">Master shopping list</h3>
+      <p class="view-intro">Pick the recipes you're cooking. Noël merges them into one list and adds up repeats like onions and butter. It's saved on this phone, so it works in the store with no signal.</p>
+      <div class="card"><h4 class="ms-h">Recipes on this list</h4><div class="ms-chips">${chips}</div></div>` +
+      (b.items.length ? `<div class="card ms-stats" id="msStats">${msStatsHtml(b)}</div>
+      <div class="ms-acts">
+        <button type="button" class="btn btn-gold" data-print="mastershop">Print or save PDF</button>
+        <button type="button" class="btn btn-ghost" data-msshare>Send to a phone</button>
+        <button type="button" class="btn btn-ghost" data-mssms>Text it</button>
+        <button type="button" class="btn btn-ghost" data-msmail>Email it</button>
+        <button type="button" class="btn btn-ghost" data-mscopy>Copy list</button>
+        <button type="button" class="btn btn-ghost" id="msHide" aria-pressed="${msHide}">${msHide ? "Show ticked items" : "Hide ticked items"}</button>
+      </div>
+      <div class="shop-note">${currencySwitchHtml()}Rough ${curName()} prices. Tick each item as it goes in your buggy.</div>
+      <div class="card ms-list${msHide ? " hide-on" : ""}">` + b.groups.map(([d, its]) => `<h4 class="ms-dept">${esc(d)}</h4><ul class="ms-items">` + its.map(i =>
+        `<li class="${i.on ? "on" : ""}"><label><input type="checkbox" data-mstick="${esc(i.key)}" ${i.on ? "checked" : ""}><span class="ms-t">${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}${i.meals.length > 1 ? `<small>used in ${i.meals.length} recipes</small>` : `<small>${esc(i.meals[0])}</small>`}</span></label></li>`).join("") + `</ul>`).join("") +
+      `<div class="send-btns"><button type="button" class="btn btn-ghost" id="msClear">Untick everything</button></div></div>` : `<div class="card"><p class="review-sub">Tap a recipe above to start your list.</p></div>`);
+  }
+  function masterShopDoc() {
+    const b = msBuild(); if (!b.items.length) return { error: "Choose a recipe first" };
+    const css = PRINT_CSS + ` .ms-c{column-count:2;column-gap:28px} .ms-c h3{font:600 9pt sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#B08D4E;border-bottom:1px solid #C9A45C;padding-bottom:3px;margin:14px 0 5px;break-after:avoid} .ms-c li{margin:3px 0;break-inside:avoid;font-size:11pt} .ms-c small{color:#777;font-size:8.5pt}`;
+    const html = `<h1>Shopping list</h1><p class="pm-sub">${esc(b.ids.map(id => mealById(id).name).join(" · "))}<br>${b.items.length} items · estimated ${cad0(b.total)} ${currency}</p><div class="ms-c">` +
+      b.groups.map(([d, its]) => `<h3>${esc(d)}</h3><ul>${its.map(i => `<li>☐ ${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}${i.price != null ? ` <small>${cad(i.price)}</small>` : ""}</li>`).join("")}</ul>`).join("") + `</div><p class="pm-foot">Made with Noël Tier 1 Hub. Repeated items are already added together.</p>`;
+    return { title: "Master shopping list", css, html, margin: 0.5, file: "Master-Shopping-List" };
+  }
+  $("#view-meals").addEventListener("click", async e => {
+    const t = e.target;
+    if (t.closest("[data-msopen]")) { msOpen = true; renderMeals(); window.scrollTo(0, 0); return; }
+    if (!msOpen) return;
+    if (t.closest("#msBack")) { msOpen = false; renderMeals(); return; }
+    const sel = t.closest("[data-mssel]");
+    if (sel) { const cur = new Set(msIds()); cur.has(sel.dataset.mssel) ? cur.delete(sel.dataset.mssel) : cur.add(sel.dataset.mssel); msSel = [...cur]; save("masterSel", msSel); renderMasterShop(); return; }
+    if (t.closest("#msHide")) { msHide = !msHide; renderMasterShop(); return; }
+    if (t.closest("#msClear")) { if (confirm("Untick everything on the master list?")) { msTicks = {}; save("masterTicks", msTicks); renderMasterShop(); } return; }
+    const text = () => msTextOf(msBuild());
+    if (t.closest("[data-msshare]")) { const x = text(); try { if (navigator.share) { await navigator.share({ title: "Shopping list", text: x }); return; } } catch (err) { if (err && err.name === "AbortError") return; } try { await navigator.clipboard.writeText(x); toast("List copied. Paste it into a text or email."); } catch (err) { toast("Couldn't copy the list"); } return; }
+    if (t.closest("[data-mscopy]")) { try { await navigator.clipboard.writeText(text()); toast("List copied. Paste it anywhere."); } catch (err) { toast("Couldn't copy the list"); } return; }
+    if (t.closest("[data-mssms]")) { location.href = "sms:?&body=" + encodeURIComponent(text()); return; }
+    if (t.closest("[data-msmail]")) { location.href = "mailto:?subject=" + encodeURIComponent("Shopping list") + "&body=" + encodeURIComponent(text()); return; }
+  });
+  $("#view-meals").addEventListener("change", e => {
+    const t = e.target; if (!msOpen || !t.dataset.mstick) return;
+    if (t.checked) msTicks[t.dataset.mstick] = 1; else delete msTicks[t.dataset.mstick];
+    save("masterTicks", msTicks); t.closest("li").classList.toggle("on", t.checked);
+    const b = msBuild(), st = $("#msStats"); if (st) st.innerHTML = msStatsHtml(b);
+  });
 
   $("#mealSkip").addEventListener("click", e => { e.preventDefault(); $("#mealOwn").scrollIntoView({ behavior: "smooth", block: "start" }); });
   /* @meals-end */

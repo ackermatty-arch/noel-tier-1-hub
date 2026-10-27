@@ -35,6 +35,7 @@
     else if (key === "aucwinners") d = aucWinnersDoc();
     else if (key === "labels" || key === "return") d = labelDoc(key);
     else if (key === "calendar") d = calendarDoc();
+    else if (key === "mastershop") d = masterShopDoc();
     if (!d) return { error: "That page isn't available any more" };
     // 🏷️ the family (or company) name across the top of every printed page set
     const who = familyTitle(family);
