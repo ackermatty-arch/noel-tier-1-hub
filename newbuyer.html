@@ -1949,6 +1949,30 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .tm-go small { color: #777; font-size: 12px; }
 .tm-go:active { background: #151515; color: #fff; }
 .tm-intro { margin: 0 0 14px; font-size: 13.5px; color: #555; }
+
+#view-meals.on-sub > :not(#mealConfirm):not(#mealSaved) { display: none !important; }
+.menu-top { gap: 8px; flex-wrap: wrap; }
+.menu-saved { background: #fff; color: #151515; }
+.wz-top { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.wz-diet { margin-top: 6px; }
+.cf-menu { margin-bottom: 14px; }
+.cf-dish { padding: 8px 0 10px; border-bottom: 1px solid #E6E6E6; }
+.cf-dish:last-child { border-bottom: 0; }
+.cf-dish h4 { margin: 0; font-family: var(--font-display); font-size: 17px; color: #151515; }
+.cf-when { margin: 2px 0 6px; font-size: 13px; color: #666; }
+.cf-course { margin: 3px 0; font-size: 13.5px; line-height: 1.45; }
+.cf-course b { color: #9a7b3c; font-family: var(--font-display); letter-spacing: .08em; text-transform: uppercase; font-size: 11.5px; margin-right: 6px; }
+.cf-course i { color: #C9A45C; font-style: normal; }
+.cf-stats { margin-bottom: 14px; text-align: center; }
+.cf-big small { display: block; font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; color: #777; }
+.cf-big b { font-family: var(--font-display); font-size: 34px; color: #151515; }
+.cf-fine { margin: 6px 0 0; font-size: 12px; color: #777; }
+.ms-items li.have .ms-t { color: #999; text-decoration: line-through; }
+.cf-save { margin: 16px 0 24px; }
+.sv-card { display: grid; gap: 4px; margin-bottom: 12px; }
+.sv-card b { font-family: var(--font-display); font-size: 16px; }
+.sv-card small { color: #666; }
+.sv-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -2385,6 +2409,8 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
     </div>
     <div id="mealDetail" hidden></div>
     <div id="mealShopAll" hidden></div>
+    <div id="mealConfirm" hidden></div>
+    <div id="mealSaved" hidden></div>
     <div class="card meal-own" id="foodBudget">
       <h3>💵 Food budget</h3>
       <p class="review-sub">Your holiday food spending, kept separate from gifts.</p>
@@ -10179,6 +10205,10 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         <button type="button" class="btn btn-ghost" data-dopen="${a.id}">📖 Open</button><button type="button" class="btn btn-green" data-print="meal:${a.id}">🖨️ Print</button></div></div>`; }).join("");
   }
   function renderMeals() {
+    const sub = mealView === "confirm" || mealView === "saved" || mealView === "savedOne";
+    $("#view-meals").classList.toggle("on-sub", sub);
+    if (sub) { $("#view-meals").classList.remove("on-menu"); const mm = $("#mealMenu"); if (mm) mm.hidden = true; renderConfirm(); renderSaved(); return; }
+    renderConfirm(); renderSaved();
     renderDietBottom();
     const m = mealSel.id && mealById(mealSel.id);
     $("#mealHome").hidden = !!m || msOpen; $("#mealDetail").hidden = !m || msOpen;
@@ -10253,9 +10283,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     return `<span class="meal-lab">Will you serve dinner too?</span><div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Will you serve dinner too?">
       <button type="button" data-pmode="meal" aria-pressed="${c.mode !== "before"}"><b>No, appetizers are the meal</b><small>About 12 bites per guest</small></button><button type="button" data-pmode="before" aria-pressed="${c.mode === "before"}"><b>Yes, light bites before dinner</b><small>About 5 bites per guest</small></button></div>
       <p class="host-rem" style="margin:6px 0 12px">Cooking a dinner as well? Plan it from the Meals menu, or use your own timers.</p>
-      <span class="meal-lab">Pick your appetizers (${picked.size})</span>
+      ${m.eve ? `<p class="party-total">Estimated total <b>${cad0(pricedShop(m, p.f, p).total)}</b> · about ${cad(pricedShop(m, p.f, p).total / c.guests)} per guest<small>${currency} · our set Christmas Eve menu, includes the hot cocoa bar.</small></p>` : `<span class="meal-lab">Pick your appetizers (${picked.size})</span>
       <p class="party-total">Estimated total <b>${cad0(pricedShop(m, p.f, p).total)}</b> · about ${cad(pricedShop(m, p.f, p).total / c.guests)} per guest<small>${currency} · ${m.eve ? "includes the hot cocoa bar" : "includes the midnight toast"}. Prices beside each appetizer are for ${c.guests} guests; tap to add or remove.</small></p>
-      <div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])} <span class="chip-price">${picked.has(a[1]) ? "" : "+"}${cad0(MD.appCost(a[1], p) * fx())}</span></button>`).join("")}</div>`;
+      <div class="apps-filters party-picks">${(window.NOEL_APPS || []).map(a => `<button type="button" class="chip${picked.has(a[1]) ? " on" : ""}" data-pick="${esc(a[1])}">${a[0]} ${esc(a[1])} <span class="chip-price">${picked.has(a[1]) ? "" : "+"}${cad0(MD.appCost(a[1], p) * fx())}</span></button>`).join("")}</div>`}`;
   }
   // 🌱 the "dietary guests" picker shown on every main dinner
   function addonPickerHtml() {
@@ -10321,15 +10351,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${steps.length ? `<ul class="pr-steps">${steps.map(s => `<li${s.t <= now ? ' class="pr-past"' : ""}><b>${clock(s.t)}</b><span>${esc(s.text)}${s.t <= now ? " (already past)" : ""}</span></li>`).join("")}</ul>` : ""}</div>`;
     }).join("");
     const el = document.createElement("div"); el.id = "planReview"; el.className = "pr-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
-    el.innerHTML = `<div class="pr-card"><p class="menu-star">✦</p><h3 class="pr-title">Your plan</h3><p class="pr-sub">Check it over. Nothing is set yet.</p>${blocks}
-      <div class="pr-btns"><button type="button" class="btn btn-ghost" data-prback>Go back</button><button type="button" class="btn btn-gold" data-prok ${allOk ? "" : "disabled"}>Confirm and add</button></div></div>`;
+    el.innerHTML = `<div class="pr-card"><p class="menu-star">✦</p><h3 class="pr-title">Your plan</h3><p class="pr-sub">Check it over. Next you will see your full menu and shopping list.</p>${blocks}
+      <div class="pr-btns"><button type="button" class="btn btn-ghost" data-prback>Go back</button><button type="button" class="btn btn-gold" data-prok ${allOk ? "" : "disabled"}>Confirm</button></div></div>`;
     document.body.appendChild(el);
     el.addEventListener("click", e => {
       if (e.target === el || e.target.closest("[data-prback]")) { el.remove(); return; }
       if (e.target.closest("[data-prok]")) {
-        let ok = 0; ids.forEach(id => { const m = mealById(id); if (m && startMealPlan(m, true)) ok++; });
-        el.remove(); renderMeals();
-        toast(ok ? `Added. Alarms are set for ${ok} dinner${ok > 1 ? "s" : ""}.` : "That time has passed. Pick a later time.");
+        el.remove(); cf = { ids: ids.filter(id => mealById(id)), night: wiz.night, have: {} }; mealView = "confirm"; renderMeals(); window.scrollTo(0, 0);
       }
     });
   }
@@ -10577,21 +10605,21 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const box = $("#wizBox"); if (!box) return;
     const n = wiz.night, sel = n ? wiz.sel[n] : [];
     const dayBtn = k => `<button type="button" class="wz-night" data-wznight="${k}" aria-pressed="${n === k}"><b>${WN[k]}</b><small>${wiz.sel[k].length ? wiz.sel[k].length + " dinner" + (wiz.sel[k].length > 1 ? "s" : "") + " chosen" : "Tap to plan"}</small></button>`;
-    let h = `<button type="button" class="meal-back" data-wzmenu>‹ The menu</button><div class="card wz"><h3 class="wz-t">Plan your Christmas dinner</h3>
+    let h = `<div class="wz-top"><button type="button" class="meal-back" data-wzmenu>‹ The menu</button><button type="button" class="meal-back" data-wzsaved>My saved menus</button></div><div class="card wz"><h3 class="wz-t">Plan your Christmas dinner</h3>
       <div class="wz-step"><span class="wz-n">1</span>Which night?</div><div class="wz-nights">${dayBtn("eve")}${dayBtn("day")}</div>`;
     if (n) {
       h += `<div class="wz-step"><span class="wz-n">2</span>What are you cooking? <small>Tap one or more. Chosen dinners turn black.</small></div><div class="wz-opts">` +
         wizOpts(n).map(m => `<button type="button" class="wz-opt" data-wzpick="${m.id}" aria-pressed="${sel.includes(m.id)}"><span><b>${esc(m.name)}</b><small>${esc(m.blurb)}</small></span><i>${sel.includes(m.id) ? "✓" : "+"}</i></button>`).join("") + `</div>`;
+      if (sel.length) h += wizDietHtml();
     }
     if (n && sel.length) {
       const g = wizGuests(n), planned = sel.filter(id => planOf(id)).length;
       h += `<div class="wz-step"><span class="wz-n">3</span>How many guests, and what time?</div>
         <div class="wz-row"><div class="stepper"><button type="button" data-wzg="-1" aria-label="Fewer guests">−</button><output>${g}</output><button type="button" data-wzg="1" aria-label="More guests">+</button></div><span class="wz-lab">guests</span>
         <label class="wz-time"><span class="wz-lab">Dinner at</span><input class="input" type="time" id="wizTime" value="${esc(wizTime(n))}"></label></div>
-        <div class="wz-step"><span class="wz-n">4</span>Your ${WN[n]} plan is ready</div>
+        <div class="wz-step"><span class="wz-n">4</span>Ready? See your plan first</div>
         <ul class="wz-list">${sel.map(id => `<li><button type="button" data-wzopen="${id}"><b>${esc(mealById(id).name)}</b><small>Recipes, timeline and prices</small><span class="meal-go">›</span></button></li>`).join("")}</ul>
-        <button type="button" class="btn btn-ghost btn-block" data-wzshop>Shopping list for ${sel.length > 1 ? "these dinners" : "this dinner"}</button>
-        ${planned === sel.length ? `<p class="wz-on">Alarms are on. Noël will ring at each step.</p><button type="button" class="btn btn-ghost btn-block" data-wzstop>Turn alarms off</button>` : `<button type="button" class="btn btn-gold btn-block" data-wzalarm>Show my plan</button><p class="wz-hint">You will see everything first. Nothing is set until you tap Confirm.</p>`}`;
+        ${planned === sel.length ? `<p class="wz-on">Alarms are on. Noël will ring at each step.</p><button type="button" class="btn btn-ghost btn-block" data-wzstop>Turn alarms off</button>` : `<button type="button" class="btn btn-gold btn-block" data-wzalarm>See my plan</button><p class="wz-hint">You will check everything first. Nothing is set until you save.</p>`}`;
     }
     $("#wizBox").innerHTML = h + `</div>`;
   }
@@ -10624,10 +10652,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
     const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);
     v.classList.toggle("on-menu", on); el.hidden = !on; if (!on) return;
-    const hasPlan = mealPlans.some(p => !p.svc), sig = hasPlan ? "plan" : "none";
+    const hasPlan = mealPlans.some(p => !p.svc), sig = (hasPlan ? "plan" : "none") + savedMenus.length;
     if (el.dataset.built === sig) return; el.dataset.built = sig;
     const go = `<button type="button" class="menu-go" data-menugo>${hasPlan ? "My dinner plan" : "Plan my dinner"} <span>›</span></button>`;
-    el.innerHTML = `<div class="menu-top">${go}</div>
+    const sv = savedMenus.length ? `<button type="button" class="menu-go menu-saved" data-menusaved>My saved menus (${savedMenus.length}) <span>›</span></button>` : "";
+    el.innerHTML = `<div class="menu-top">${sv}${go}</div>
       <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
       MENU_GROUPS.map(([g, ids, band]) => (band ? `<h3 class="menu-group">${band}</h3>` : "") + (band === g ? "" : `<h3 class="menu-subgroup">${g}</h3>`) + ids.map(id => {
         const m = mealById(id); if (!m || m.soon) return "";
@@ -10643,7 +10672,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
   document.addEventListener("click", e => {
     const nav = e.target.closest && e.target.closest("[data-view=meals]");
-    if (nav && !$("#view-meals").classList.contains("active")) { mealScreen = mealSel.id ? "build" : "menu"; setTimeout(renderMeals, 0); }
+    if (nav && !$("#view-meals").classList.contains("active")) { mealView = ""; cf = null; mealScreen = mealSel.id ? "build" : "menu"; setTimeout(renderMeals, 0); }
   }, true);
   $("#view-meals").addEventListener("click", e => {
     if (e.target.closest("[data-menugo]")) { mealScreen = "build"; renderMeals(); window.scrollTo(0, 0); }
@@ -10664,8 +10693,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
   const msNorm = name => String(name).toLowerCase().replace(/\(.*?\)/g, "").split(/[^a-z0-9]+/).filter(Boolean).map(w =>
     /ies$/.test(w) ? w.slice(0, -3) + "y" : /(ch|sh|ss|x)es$/.test(w) ? w.slice(0, -2) : /oes$/.test(w) ? w.slice(0, -2) : /[^s]s$/.test(w) ? w.slice(0, -1) : w).join(" ");
-  function msBuild() {
-    const ids = msIds(), map = new Map(), depts = [];
+  function msBuild(idsArg) {
+    const ids = idsArg ? idsArg.filter(id => { const m = mealById(id); return m && !m.soon && !m.addon && m.shop; }) : msIds(), map = new Map(), depts = [];
     ids.forEach(id => {
       const m = mealById(id), c = cfgFor(id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
       ps.groups.forEach(([, items]) => items.forEach(it => {
@@ -10746,6 +10775,136 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (t.checked) msTicks[t.dataset.mstick] = 1; else delete msTicks[t.dataset.mstick];
     save("masterTicks", msTicks); t.closest("li").classList.toggle("on", t.checked);
     const b = msBuild(), st = $("#msStats"); if (st) st.innerHTML = msStatsHtml(b);
+  });
+
+
+  // ---- 🧾 full menu + shopping list page, Save, and "My saved menus" ----
+  let mealView = "", cf = null, svId = null;                 // "" | "confirm" | "saved" | "savedOne"
+  let savedMenus = load("savedMenus", []);
+  const saveSaved = () => save("savedMenus", savedMenus);
+  const whenLong = t => new Date(t).toLocaleString(undefined, { weekday: "long", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const whenShort = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  function wizDietHtml() {
+    const list = MD.meals.filter(a => a.addon); if (!list.length) return "";
+    return `<div class="wz-diet"><div class="wz-step"><span class="wz-n">+</span>Dietary dishes <small>Optional. A vegan, gluten-free, dairy-free dish for 1–5 people, added to your plan.</small></div>` +
+      list.map(a => { const on = !!mealAddons[a.id], g = cfgFor(a.id).guests;
+        return `<div class="addon-row"><label><input type="checkbox" data-wzadd="${a.id}" ${on ? "checked" : ""}> ${esc(a.name)}</label>` +
+          (on ? `<div class="stepper sm"><button type="button" data-wzag="${a.id}:-1" aria-label="Fewer people">−</button><output>${g}</output><button type="button" data-wzag="${a.id}:1" aria-label="More people">+</button></div>` : "") + `</div>`; }).join("") + `</div>`;
+  }
+  function cfBuild() {
+    const b = msBuild(cf.ids); let total = 0, toBuy = 0, have = 0;
+    b.items.forEach(i => { i.have = !!cf.have[i.key]; if (i.have) have++; if (i.price != null) { total += i.price; if (!i.have) toBuy += i.price; } });
+    b.total = total; b.toBuy = toBuy; b.haveN = have; return b;
+  }
+  const cfStatsHtml = b => `<div class="cf-big"><small>Estimated cost to buy</small><b>${cad0(b.toBuy)}</b></div>
+    <div class="ms-money"><span>${b.items.length - b.haveN} items to buy</span><span>${b.haveN} already at home</span></div>
+    <p class="cf-fine">Full dinner cost ${cad0(b.total)} ${currency}. Rough prices.</p>`;
+  function cfMenuHtml(ids) {
+    return ids.map(id => { const m = mealById(id), c = cfgFor(id), D = dinnerAt(c);
+      return `<div class="cf-dish"><h4>${esc(m.name)}</h4><p class="cf-when">${esc(whenLong(D))} · ${c.guests} guest${c.guests > 1 ? "s" : ""}</p>` +
+        allMenu(m).map(([course, items]) => `<p class="cf-course"><b>${esc(course)}</b> ${items.map(i => esc(String(i))).join(" <i>·</i> ")}</p>`).join("") + `</div>`; }).join("");
+  }
+  function renderConfirm() {
+    const box = $("#mealConfirm"); if (!box) return;
+    if (mealView !== "confirm" || !cf) { box.hidden = true; return; }
+    box.hidden = false;
+    const b = cfBuild();
+    box.innerHTML = `<button type="button" class="meal-back" data-cfback>‹ Back to my plan</button>
+      <h3 class="meal-title">Your menu and shopping list</h3>
+      <p class="view-intro">Everything is ticked because you need to buy it. Untick anything you already have at home, then tap Save.</p>
+      <div class="card cf-menu"><h4 class="ms-h">Your menu</h4>${cfMenuHtml(cf.ids)}</div>
+      <div class="card cf-stats" id="cfStats">${cfStatsHtml(b)}</div>
+      <div class="card ms-list">` + (b.groups.map(([d, its]) => `<h4 class="ms-dept">${esc(d)}</h4><ul class="ms-items">` + its.map(i =>
+        `<li class="${i.have ? "have" : ""}"><label><input type="checkbox" data-cftick="${esc(i.key)}" ${i.have ? "" : "checked"}><span class="ms-t">${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}<small>${i.have ? "Already have it" : (i.price != null ? cad(i.price) : "")}</small></span></label></li>`).join("") + `</ul>`).join("")) + `</div>
+      <button type="button" class="btn btn-gold btn-block cf-save" data-cfsave>Save my menu and set alarms</button>`;
+  }
+  function cfSave() {
+    const b = cfBuild(), now = Date.now();
+    let ok = 0; cf.ids.forEach(id => { if (startMealPlan(mealById(id), true)) ok++; });
+    const snap = { id: "sm" + now.toString(36), savedAt: now, night: cf.night || null,
+      at: Math.min(...cf.ids.map(id => dinnerAt(cfgFor(id)))), names: cf.ids.map(id => mealById(id).name),
+      menu: cf.ids.map(id => { const m = mealById(id), c = cfgFor(id); return { name: m.name, at: dinnerAt(c), guests: c.guests, courses: allMenu(m).map(([k, items]) => [k, items.map(String)]) }; }),
+      shop: b.groups.map(([d, its]) => [d, its.map(i => ({ key: i.key, q: i.q, name: i.name, price: i.price, have: !!i.have }))]),
+      bought: {}, total: b.total, toBuy: b.toBuy, cur: currency };
+    savedMenus.unshift(snap); saveSaved();
+    const old = $("#planReview"); if (old) old.remove();
+    const el = document.createElement("div"); el.id = "planReview"; el.className = "pr-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+    el.innerHTML = `<div class="pr-card"><p class="menu-star">✦</p><h3 class="pr-title">Saved</h3>
+      <p class="pr-sub">${esc(snap.names.join(" and "))}<br>${esc(whenLong(snap.at))}</p>
+      <div class="pr-meal"><p class="pr-when">Estimated cost to buy <b>${cad0(snap.toBuy)}</b><br>${ok ? `Alarms are set for ${ok} dinner${ok > 1 ? "s" : ""}.` : "The dinner time has passed, so no alarms were set."}</p></div>
+      <div class="pr-btns"><button type="button" class="btn btn-ghost" data-svlist>My saved menus</button><button type="button" class="btn btn-gold" data-svdone>Done</button></div></div>`;
+    document.body.appendChild(el);
+    el.addEventListener("click", e => {
+      if (e.target.closest("[data-svlist]")) { el.remove(); mealView = "saved"; renderMeals(); window.scrollTo(0, 0); }
+      else if (e.target.closest("[data-svdone]") || e.target === el) { el.remove(); mealView = ""; mealScreen = "menu"; renderMeals(); window.scrollTo(0, 0); }
+    });
+    cf = null; mealView = "";
+    mealScreen = "menu"; renderMeals();
+  }
+  const svBuyList = s => s.shop.map(([d, its]) => [d, its.filter(i => !i.have)]).filter(([, its]) => its.length);
+  function renderSaved() {
+    const box = $("#mealSaved"); if (!box) return;
+    if (mealView !== "saved" && mealView !== "savedOne") { box.hidden = true; return; }
+    box.hidden = false;
+    if (mealView === "saved") {
+      box.innerHTML = `<button type="button" class="meal-back" data-svback>‹ The menu</button><h3 class="meal-title">My saved menus</h3>` +
+        (savedMenus.length ? savedMenus.map(s => `<div class="card sv-card"><b>${esc(s.names.join(" and "))}</b><small>${esc(whenLong(s.at))}</small><small>To buy ${cad0(s.toBuy)} ${esc(s.cur || "")}</small>
+          <div class="sv-acts"><button type="button" class="btn btn-gold" data-svopen="${s.id}">Open</button><button type="button" class="btn btn-ghost" data-svdel="${s.id}">Delete</button></div></div>`).join("")
+          : `<div class="card"><p class="review-sub">Nothing saved yet. Plan a dinner, tap See my plan, then Save.</p></div>`);
+      return;
+    }
+    const s = savedMenus.find(x => x.id === svId); if (!s) { mealView = "saved"; renderSaved(); return; }
+    const buy = svBuyList(s), n = buy.reduce((a, [, its]) => a + its.length, 0), done = buy.reduce((a, [, its]) => a + its.filter(i => s.bought[i.key]).length, 0);
+    const haveItems = s.shop.flatMap(([, its]) => its.filter(i => i.have));
+    box.innerHTML = `<button type="button" class="meal-back" data-svlistback>‹ My saved menus</button><h3 class="meal-title">${esc(s.names.join(" and "))}</h3>
+      <div class="card cf-menu"><h4 class="ms-h">Menu</h4>${s.menu.map(m => `<div class="cf-dish"><h4>${esc(m.name)}</h4><p class="cf-when">${esc(whenLong(m.at))} · ${m.guests} guest${m.guests > 1 ? "s" : ""}</p>` +
+        m.courses.map(([k, items]) => `<p class="cf-course"><b>${esc(k)}</b> ${items.map(esc).join(" <i>·</i> ")}</p>`).join("") + `</div>`).join("")}</div>
+      <div class="card cf-stats"><div class="cf-big"><small>Estimated cost to buy</small><b>${cad0(s.toBuy)}</b></div><p class="cf-fine" id="svCount">${done} of ${n} in the buggy</p></div>
+      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="savedmenu:${s.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-svcopy="${s.id}">Copy list</button></div>
+      <div class="card ms-list">` + buy.map(([d, its]) => `<h4 class="ms-dept">${esc(d)}</h4><ul class="ms-items">` + its.map(i =>
+        `<li class="${s.bought[i.key] ? "on" : ""}"><label><input type="checkbox" data-svtick="${esc(i.key)}" ${s.bought[i.key] ? "checked" : ""}><span class="ms-t">${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}</span></label></li>`).join("") + `</ul>`).join("") +
+      (haveItems.length ? `<h4 class="ms-dept">Already at home</h4><p class="cf-fine">${haveItems.map(i => esc(i.name)).join(", ")}</p>` : "") + `</div>
+      <div class="send-btns"><button type="button" class="btn btn-ghost" data-svdel="${s.id}">Delete this saved menu</button></div>`;
+  }
+  const svText = s => `Noël menu (${s.names.join(", ")})\n${whenLong(s.at)}\nEstimated to buy ${cad0(s.toBuy)} ${s.cur || ""}\n` + svBuyList(s).map(([d, its]) => `\n${d.toUpperCase()}\n` + its.map(i => `${s.bought[i.key] ? "☑" : "☐"} ${i.q ? i.q + " " : ""}${i.name}`).join("\n")).join("\n");
+  function savedMenuDoc(id) {
+    const s = savedMenus.find(x => x.id === id); if (!s) return { error: "That saved menu isn't here any more" };
+    const css = PRINT_CSS + ` .ms-c{column-count:2;column-gap:28px} .ms-c h3{font:600 9pt sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#B08D4E;border-bottom:1px solid #C9A45C;padding-bottom:3px;margin:14px 0 5px;break-after:avoid} .ms-c li{margin:3px 0;break-inside:avoid;font-size:11pt} .sm-d{margin:0 0 12px} .sm-d h2{font-size:15pt;margin:0 0 2px} .sm-d p{margin:2px 0;font-size:10.5pt}`;
+    const menu = s.menu.map(m => `<div class="sm-d"><h2>${esc(m.name)}</h2><p>${esc(whenLong(m.at))} · ${m.guests} guest${m.guests > 1 ? "s" : ""}</p>` + m.courses.map(([k, items]) => `<p><b>${esc(k)}:</b> ${items.map(esc).join(" · ")}</p>`).join("") + `</div>`).join("");
+    const html = `<h1>Menu and shopping list</h1><p class="pm-sub">${esc(s.names.join(" · "))}<br>Estimated to buy ${cad0(s.toBuy)} ${esc(s.cur || "")}</p>${menu}<div class="ms-c">` +
+      svBuyList(s).map(([d, its]) => `<h3>${esc(d)}</h3><ul>${its.map(i => `<li>☐ ${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}</li>`).join("")}</ul>`).join("") + `</div><p class="pm-foot">Made with Noël Tier 1 Hub.</p>`;
+    return { title: "Menu and shopping list", css, html, margin: 0.5, file: "My-Noel-Menu" };
+  }
+  $("#view-meals").addEventListener("click", async e => {
+    const t = e.target;
+    const ag = t.closest("[data-wzag]");
+    if (ag) { const [aid, d] = ag.dataset.wzag.split(":"), ac = cfgFor(aid); ac.guests = Math.min(5, Math.max(1, ac.guests + +d)); mealCfg[aid] = ac; save("mealCfg", mealCfg); if (wiz.night) wizApply(wiz.night); renderMeals(); return; }
+    if (t.closest("[data-menusaved]") || t.closest("[data-wzsaved]")) { mealView = "saved"; renderMeals(); window.scrollTo(0, 0); return; }
+    if (t.closest("[data-cfback]")) { mealView = ""; renderMeals(); window.scrollTo(0, 0); return; }
+    if (t.closest("[data-cfsave]")) { cfSave(); window.scrollTo(0, 0); return; }
+    if (t.closest("[data-svback]")) { mealView = ""; mealScreen = "menu"; renderMeals(); window.scrollTo(0, 0); return; }
+    if (t.closest("[data-svlistback]")) { mealView = "saved"; renderMeals(); window.scrollTo(0, 0); return; }
+    const op = t.closest("[data-svopen]"); if (op) { svId = op.dataset.svopen; mealView = "savedOne"; renderMeals(); window.scrollTo(0, 0); return; }
+    const dl = t.closest("[data-svdel]"); if (dl) { if (confirm("Delete this saved menu?")) { savedMenus = savedMenus.filter(x => x.id !== dl.dataset.svdel); saveSaved(); mealView = "saved"; renderMeals(); } return; }
+    const cp = t.closest("[data-svcopy]"); if (cp) { const s = savedMenus.find(x => x.id === cp.dataset.svcopy); if (s) { try { await navigator.clipboard.writeText(svText(s)); toast("List copied. Paste it anywhere."); } catch (err) { toast("Couldn't copy the list"); } } return; }
+  });
+  $("#view-meals").addEventListener("change", e => {
+    const t = e.target;
+    if (t.dataset.wzadd) { mealAddons[t.dataset.wzadd] = t.checked; save("mealAddons", mealAddons); if (wiz.night) wizApply(wiz.night); renderMeals(); return; }
+    if (t.dataset.cftick && cf) {
+      if (t.checked) delete cf.have[t.dataset.cftick]; else cf.have[t.dataset.cftick] = 1;
+      const li = t.closest("li"); li.classList.toggle("have", !t.checked);
+      const sm = li.querySelector("small"); const b = cfBuild(); const it = b.items.find(i => i.key === t.dataset.cftick);
+      if (sm && it) sm.textContent = !t.checked ? "Already have it" : (it.price != null ? cad(it.price) : "");
+      $("#cfStats").innerHTML = cfStatsHtml(b); return;
+    }
+    if (t.dataset.svtick) {
+      const s = savedMenus.find(x => x.id === svId); if (!s) return;
+      if (t.checked) s.bought[t.dataset.svtick] = 1; else delete s.bought[t.dataset.svtick];
+      saveSaved(); t.closest("li").classList.toggle("on", t.checked);
+      const buy = svBuyList(s), n = buy.reduce((a, [, its]) => a + its.length, 0), d = buy.reduce((a, [, its]) => a + its.filter(i => s.bought[i.key]).length, 0);
+      const c = $("#svCount"); if (c) c.textContent = `${d} of ${n} in the buggy`;
+    }
   });
 
   $("#mealSkip").addEventListener("click", e => { e.preventDefault(); $("#mealOwn").scrollIntoView({ behavior: "smooth", block: "start" }); });
@@ -13462,6 +13621,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     else if (key === "labels" || key === "return") d = labelDoc(key);
     else if (key === "calendar") d = calendarDoc();
     else if (key === "mastershop") d = masterShopDoc();
+    else if (key.startsWith("savedmenu:")) d = savedMenuDoc(key.slice(10));
     if (!d) return { error: "That page isn't available any more" };
     // 🏷️ the family (or company) name across the top of every printed page set
     const who = familyTitle(family);
