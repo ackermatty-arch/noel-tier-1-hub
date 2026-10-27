@@ -91,8 +91,8 @@
   function renderBudget() {
     budRecordDay();
     const T = budTotals(), tab = budget.tab || "overview";
-    $("#budTabs").innerHTML = [["overview", "📊 Overview"], ["sheet", "🧾 Spreadsheet"], ["set", "🎯 Budgets"]].map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
-    $("#budBody").innerHTML = ({ overview: budOverview, sheet: budSheet, set: budSet })[tab](T);
+    $("#budTabs").innerHTML = [["overview", "📊 Overview"], ["sheet", "🧾 Spreadsheet"], ["set", "🎯 Budgets"], ["shared", "🤝 Shared costs"]].map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
+    $("#budBody").innerHTML = ({ overview: budOverview, sheet: budSheet, set: budSet, shared: budShared })[tab](T);
   }
   function budOverview(T) {
     const left = T.limit - T.spent, pct = T.limit ? T.spent / T.limit : 0, now = new Date();
@@ -192,9 +192,77 @@
   // keep last year's total when the season is saved (called from Start fresh)
   function budgetArchive(year) {
     const T = budTotals(); budget.past = budget.past.filter(p => p.year !== year).concat({ year, total: Math.round(T.spent * 100) / 100, by: T.by });
-    budget.expenses = []; budget.daily = {}; saveBudget();
+    budget.expenses = []; budget.daily = {}; budget.shared = null; saveBudget();
   }
 
+  // ---------- 🤝 Shared costs: who paid, who it was for, who owes whom ----------
+  const shr = () => (budget.shared = budget.shared || { people: [], items: [] });
+  const shrName = id => (shr().people.find(p => p.id === id) || {}).name || "Someone";
+  function shrBalances() {
+    const s = shr(), bal = {}; s.people.forEach(p => { bal[p.id] = 0; });
+    s.items.forEach(it => {
+      const by = (it.by && it.by.length ? it.by : s.people.map(p => p.id)).filter(id => id in bal);
+      if (!by.length || !(it.paid in bal)) return;
+      bal[it.paid] += it.amt; const share = it.amt / by.length; by.forEach(id => { bal[id] -= share; });
+    });
+    const cr = [], db = [];
+    Object.entries(bal).forEach(([id, v]) => { const c = Math.round(v * 100); if (c > 0) cr.push([id, c]); else if (c < 0) db.push([id, -c]); });
+    cr.sort((a, b) => b[1] - a[1]); db.sort((a, b) => b[1] - a[1]);
+    const pays = [];
+    while (cr.length && db.length) { const m = Math.min(cr[0][1], db[0][1]); pays.push([db[0][0], cr[0][0], m / 100]); cr[0][1] -= m; db[0][1] -= m; if (!cr[0][1]) cr.shift(); if (!db[0][1]) db.shift(); }
+    return { bal, pays };
+  }
+  function shrText() {
+    const s = shr(), { pays } = shrBalances(), total = s.items.reduce((a, x) => a + x.amt, 0);
+    return `Shared costs: ${money(total)} in total\n` + s.items.map(x => `• ${x.what}: ${money(x.amt)} (paid by ${shrName(x.paid)})`).join("\n") + "\n\nTo settle up:\n" + (pays.length ? pays.map(([a, b, m]) => `${shrName(a)} pays ${shrName(b)} ${money(m)}`).join("\n") : "Everyone is square.");
+  }
+  function shrDoc() {
+    const s = shr(); if (!s.items.length) return { error: "Add a shared cost first" };
+    const { bal, pays } = shrBalances(), total = s.items.reduce((a, x) => a + x.amt, 0);
+    const css = `.sc{font:11pt/1.45 Georgia,serif;color:#151515} .sc h1{font-size:20pt;margin:0;letter-spacing:.12em;text-transform:uppercase} .sc .sc-s{color:#B08D4E;font:600 8.5pt sans-serif;letter-spacing:.2em;text-transform:uppercase;margin:2px 0 14px}
+      .sc h2{font:600 9pt sans-serif;letter-spacing:.25em;text-transform:uppercase;color:#B08D4E;border-bottom:1px solid #C9A45C;padding-bottom:3px;margin:16px 0 6px} .sc table{width:100%;border-collapse:collapse} .sc td,.sc th{padding:5px 6px;border-bottom:1px solid #E3D2A8;text-align:left} .sc th{font:600 8pt sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#B08D4E} .sc .num{text-align:right}`;
+    const html = `<div class="sc"><h1>Shared costs</h1><p class="sc-s">${money(total)} in total · ${new Date().toLocaleDateString()}</p>
+      <h2>Costs</h2><table><tr><th>What</th><th>Paid by</th><th>Split between</th><th class="num">Amount</th></tr>${s.items.map(x => `<tr><td>${esc(x.what)}</td><td>${esc(shrName(x.paid))}</td><td>${esc((x.by && x.by.length ? x.by : s.people.map(p => p.id)).map(shrName).join(", "))}</td><td class="num">${money(x.amt)}</td></tr>`).join("")}</table>
+      <h2>Where everyone stands</h2><table>${s.people.map(p => `<tr><td>${esc(p.name)}</td><td class="num">${bal[p.id] > 0.004 ? "is owed " + money(bal[p.id]) : bal[p.id] < -0.004 ? "owes " + money(-bal[p.id]) : "all square"}</td></tr>`).join("")}</table>
+      <h2>To settle up</h2>${pays.length ? `<table>${pays.map(([a, b, m]) => `<tr><td>${esc(shrName(a))} pays ${esc(shrName(b))}</td><td class="num"><b>${money(m)}</b></td></tr>`).join("")}</table>` : "<p>Everyone is square.</p>"}</div>`;
+    return { noBrand: 1, title: "Shared costs", css, html, margin: 0.6, file: "Shared-Costs" };
+  }
+  function budShared() {
+    const s = shr(), { bal, pays } = shrBalances(), total = s.items.reduce((a, x) => a + x.amt, 0), many = s.people.length >= 2;
+    const fam = (typeof org !== "undefined" && org.members) ? org.members.filter(m => !s.people.some(p => p.name.toLowerCase() === m.name.toLowerCase())) : [];
+    return `<div class="card pt-card"><h3>Shared costs</h3><p class="host-rem">Sharing a hotel, groceries, a gift or a party? Add who's in, log each cost with who paid, and Noël works out who owes whom.</p></div>
+      <div class="card pt-card"><h3>Who's sharing</h3><div class="shr-people">${s.people.map(p => `<span class="shr-chip">${esc(p.name)}<button type="button" class="shr-x" data-shrp="${p.id}" aria-label="Remove ${esc(p.name)}">✕</button></span>`).join("") || `<small class="host-rem">Nobody yet. Add names below.</small>`}</div>
+        <form id="shrPersonForm" class="santa-kid-row" autocomplete="off"><input class="input" name="pname" maxlength="20" placeholder="Name" aria-label="Name"><button class="btn btn-green" type="submit">Add</button></form>
+        ${fam.length ? `<button type="button" class="btn btn-ghost btn-block" data-shrfam style="margin-top:8px">Add my family members</button>` : ""}</div>
+      ${many ? `<form class="card pt-card" id="shrItemForm" autocomplete="off"><h3>Add a cost</h3>
+        <input class="input" name="what" maxlength="40" placeholder="What was it?" aria-label="What" style="width:100%">
+        ${fillChips(["Hotel", "Groceries", "Tickets", "Gas", "Restaurant", "Gift", "Other"].map(x => [x, x === "Other" ? "" : x]), "#shrItemForm [name=what]")}
+        <div class="org-addr-row"><input class="input" name="amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Amount" aria-label="Amount"><select class="input" name="paid" aria-label="Paid by">${s.people.map(p => `<option value="${p.id}">Paid by ${esc(p.name)}</option>`).join("")}</select></div>
+        <p class="host-rem" style="margin:6px 0 2px">Split between</p><div class="shr-by">${s.people.map(p => `<label><input type="checkbox" name="by" value="${p.id}" checked><span>${esc(p.name)}</span></label>`).join("")}</div>
+        <button class="btn btn-green btn-block" type="submit" style="margin-top:10px">Add cost</button></form>` : `<p class="host-rem">Add at least two people to start.</p>`}
+      ${s.items.length ? `<div class="card pt-card"><h3>Costs · ${money(total)}</h3>${s.items.map(x => { const n = (x.by && x.by.length ? x.by : s.people.map(p => p.id)).filter(id => s.people.some(p => p.id === id)).length || 1;
+        return `<div class="shr-row"><div><b>${esc(x.what)}</b><small>Paid by ${esc(shrName(x.paid))} · split ${n} ways (${money(x.amt / n)} each)</small></div><span class="shr-amt">${money(x.amt)}</span><button type="button" class="icon-btn" data-shri="${x.id}" aria-label="Remove">✕</button></div>`; }).join("")}</div>
+      <div class="card pt-card"><h3>Where everyone stands</h3>${s.people.map(p => `<div class="shr-row"><b>${esc(p.name)}</b><span class="shr-amt">${bal[p.id] > 0.004 ? "is owed " + money(bal[p.id]) : bal[p.id] < -0.004 ? "owes " + money(-bal[p.id]) : "all square"}</span></div>`).join("")}</div>
+      <div class="card pt-card shr-settle"><h3>To settle up</h3>${pays.length ? pays.map(([a, b, m]) => `<div class="shr-pay"><span>${esc(shrName(a))} pays ${esc(shrName(b))}</span><b>${money(m)}</b></div>`).join("") : `<p>Everyone is square.</p>`}
+        <div class="send-btns" style="margin-top:10px"><button type="button" class="btn btn-green" data-shrshare>Share summary</button><button type="button" class="btn btn-ghost" data-print="shared">Print</button><button type="button" class="btn btn-ghost" data-shrclear>Start over</button></div></div>` : ""}`;
+  }
+  $("#view-budget").addEventListener("click", async e => {
+    const t = e.target, s = shr(), save1 = () => { saveBudget(); renderBudget(); };
+    const px = t.closest("[data-shrp]"); if (px) { s.people = s.people.filter(p => p.id !== px.dataset.shrp); save1(); return; }
+    const ix = t.closest("[data-shri]"); if (ix) { s.items = s.items.filter(x => x.id !== ix.dataset.shri); save1(); return; }
+    if (t.closest("[data-shrfam]")) { org.members.forEach(m => { if (!s.people.some(p => p.name.toLowerCase() === m.name.toLowerCase())) s.people.push({ id: uid(), name: m.name }); }); save1(); return; }
+    if (t.closest("[data-shrclear]")) { if (!confirm("Clear all shared costs and start over?")) return; budget.shared = { people: s.people, items: [] }; save1(); return; }
+    if (t.closest("[data-shrshare]")) { const text = shrText(); try { if (navigator.share) { await navigator.share({ title: "Shared costs", text }); return; } } catch (err) { if (err && err.name === "AbortError") return; } try { await navigator.clipboard.writeText(text); toast("📋 Summary copied. Paste it into a text or email."); } catch (err) { toast("Couldn't copy the summary"); } }
+  });
+  $("#view-budget").addEventListener("submit", e => {
+    const f = e.target, s = shr();
+    if (f.id === "shrPersonForm") { const n = f.pname.value.trim(); if (!n) return; if (!s.people.some(p => p.name.toLowerCase() === n.toLowerCase())) s.people.push({ id: uid(), name: n }); saveBudget(); renderBudget(); return; }
+    if (f.id === "shrItemForm") {
+      const what = f.what.value.trim(), amt = parseFloat(f.amt.value), by = [...f.querySelectorAll("[name=by]:checked")].map(x => x.value);
+      if (!what || !(amt > 0)) { toast("Add what it was and how much"); return; } if (!by.length) { toast("Tick who it was for"); return; }
+      s.items.push({ id: uid(), what, amt: Math.round(amt * 100) / 100, paid: f.paid.value, by }); saveBudget(); renderBudget(); toast(`Added ${money(amt)}`);
+    }
+  });
   // ---------- taps & typing ----------
   $("#view-budget").addEventListener("click", e => {
     const t = e.target;

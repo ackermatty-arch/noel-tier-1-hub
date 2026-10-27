@@ -23,6 +23,7 @@
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "chores") d = choresDoc();
     else if (key === "budget") d = budgetDoc();
+    else if (key === "shared") d = shrDoc();
     else if (key === "approval") d = approvalDoc();
     else if (key === "potluck") d = potluckDoc();
     else if (key === "awards") d = awardsDoc();
