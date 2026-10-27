@@ -12652,6 +12652,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${fld("name", "Event name", "text", "e.g. Holiday Party", "wide")}${fld("date", "Date", "date")}${fld("headcount", off.ev.who === "family" ? "Adults (about)" : "Guests (about)", "number")}${off.ev.who === "family" ? fld("kids", "Kids (about)", "number") : ""}${fld("start", "Starts", "time")}${fld("end", "Ends", "time")}
         ${fld("venue", "Venue", "text", "e.g. Boardroom, The Keg", "wide")}${fld("address", "Address", "text", "", "wide")}${fld("theme", "Theme", "text", "e.g. Ugly sweater")}${fld("dress", "Dress code", "text", "e.g. Festive casual")}
         ${fld("organizer", "Organized by", "text", "Your name")}${fld("budget", "Approved budget", "number", "$")}</div></div>
+      ${offAlcCardHtml()}
       <div class="card pt-card"><h3>✨ What's planned</h3><div class="apps-filters">${offActList().map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div>
         ${off.acts.gifts ? `<div class="off-grid" style="margin-top:8px">${fld("giftLimit", "Gift exchange limit", "number", "$")}</div>` : ""}</div>
       <div class="card pt-card"><h3>💵 Costs & vendors</h3>
@@ -12676,6 +12677,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       `• Where: ${e.venue || "to be confirmed"}${e.address ? ` (${e.address})` : ""}${e.where ? ` · ${{ office: "in the office", venue: "rented venue", outing: "team outing", home: "at a home" }[e.where]}` : ""}`,
       `• Guests: about ${hc}${e.who === "family" && +e.kids ? ` adults and ${+e.kids} kids` : " people"}${offWho() ? ` (${{ staff: "staff only", partners: "staff and their partners", family: "staff and their families, kids welcome" }[off.ev.who]})` : ""}`];
     const fd = (off.food || {}).style; if (fd) lines.push(`• Food: ${{ apps: "appetizers we'll make ourselves", catered: "catered / ordered in", potluck: "potluck (everyone brings a dish)", venue: "provided by the venue" }[fd]}`);
+    if (e.alcohol) lines.push(`• Drinks: ${e.alcohol === "none" ? "alcohol-free (mocktails, cider, punch, coffee and tea)" : "alcohol served, with plenty of non-alcoholic choices"}`);
     if (e.theme || e.dress) lines.push(`• ${[e.theme && `Theme: ${e.theme}`, e.dress && `Dress code: ${e.dress}`].filter(Boolean).join(" · ")}`);
     const acts = offActs(); if (acts.length) lines.push("", "WHAT'S PLANNED", ...acts.map(a => "• " + a.replace(/^\S+\s/, "")));
     lines.push("", "BUDGET");
@@ -13118,6 +13120,43 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const dItems = drinks.map(n => { const batch = (SHOP[n] || [16])[0], b = Math.max(1, Math.ceil(P.all * 1.5 / batch - 1e-9)); return { n, row: (window.NOEL_APPS || []).find(r => r[1] === n), b, cost: cost(n, b) }; });
     return { P, picks, items, dItems, total, each, all, sum: items.concat(dItems).reduce((t, i) => t + i.cost, 0) };
   }
+
+  /* ---------- 🥂 DRINKS POLICY: no alcohol or alcohol, decided with the boss, then built into the menu ---------- */
+  const OFF_ALC = [["none", "🧃", "No alcohol", "Mocktails, cider, punch, coffee and tea"], ["yes", "🥂", "Alcohol served", "Wine, beer and bubbly, plus non-alcoholic choices"], ["", "❓", "Not decided yet", "Ask your boss or staff first"]];
+  const OFF_ALC_ASK = "Quick question for the holiday party: should we serve alcohol, or keep it alcohol-free? Either way, I'll make sure there are plenty of non-alcoholic choices. Let me know what you'd like so I can plan the menu. Thank you!";
+  function offAlcTiles() {
+    return `<div class="who-pick">${OFF_ALC.map(([k, i, l, d]) => `<button type="button" class="who-tile${(off.ev.alcohol || "") === k ? " on" : ""}" data-ofalc="${k}"><span class="wt-ico">${i}</span><span><b>${l}</b><small>${d}</small></span></button>`).join("")}</div>`;
+  }
+  function offAlcCardHtml() {
+    const a = off.ev.alcohol || "";
+    return `<div class="card pt-card"><h3>🥂 Drinks at the party</h3><p class="host-rem">Will there be alcohol? Check with your boss or staff, then choose. Your drinks menu changes to match.</p>${offAlcTiles()}
+      ${a === "" ? `<div class="off-ask"><p class="host-rem" style="margin:10px 0 6px"><b>Not sure?</b> Send this to your boss, HR or the planning team:</p><p class="off-quote">${esc(OFF_ALC_ASK)}</p>
+        <div class="send-btns"><button type="button" class="btn btn-ghost" data-ofalcask="share">Send it</button><button type="button" class="btn btn-ghost" data-ofalcask="copy">Copy it</button></div></div>` : `<p class="host-rem" style="margin-top:10px">${a === "none" ? "Alcohol-free. Your menu has mocktails and warm drinks." : "Alcohol served. Your menu adds wine, beer and bubbly, and always keeps non-alcoholic choices."} Find it on the 🍽️ Food tab.</p>`}</div>`;
+  }
+  function offHours() {
+    const s = off.ev.start, e = off.ev.end; if (!s || !e) return 3;
+    const [a, b] = s.split(":").map(Number), [c, d] = e.split(":").map(Number); let m = c * 60 + d - (a * 60 + b); if (m <= 0) m += 1440;
+    return Math.min(8, Math.max(1, Math.round(m / 60 * 2) / 2));
+  }
+  function offDrinksPlan(P) {
+    const a = off.ev.alcohol || "", n = P.all, h = offHours(), c = Math.ceil, plural = (k, one, many) => `${k} ${k === 1 ? one : many}`;
+    if (!a) return null;
+    if (a === "none") return { mode: a, groups: [["Mocktails & cold drinks", [
+        ["Sparkling Cranberry-Orange Punch", plural(c(n / 10), "batch", "batches") + " (about 16 cups each)"], ["Cucumber-Mint Lime Spritz (mocktail)", plural(c(n / 12), "pitcher", "pitchers")], ["Sparkling water and ginger ale", `${c(n * 1.2)} cans, mixed`]]],
+      ["Warm drinks", [["Hot Spiced Apple Cider", plural(c(n / 12), "pot", "pots") + " (a slow cooker works well)"], ["Coffee and tea", plural(c(n / 8), "carafe", "carafes") + ", with tea bags, milk and sugar"]]]], tips: [] };
+    const drinkers = c(P.a * 0.7), total = drinkers * (h + 1), wine = c(total * 0.5 / 5), beer = c(total * 0.3), bub = c(total * 0.2 / 6);
+    return { mode: a, groups: [["Alcohol (a rough guide)", [
+        ["Wine, red and white", `${plural(wine, "bottle", "bottles")} (5 glasses each)`], ["Beer, regular and light", `${beer} beers (about ${plural(c(beer / 6), "six-pack", "six-packs")})`], ["Sparkling wine for the toast", `${plural(bub, "bottle", "bottles")} (6 glasses each)`]]],
+      ["Non-alcoholic choices (always have these)", [["Sparkling water, juice and ginger ale", `${c(n * 1.5)} cans, mixed`], ["Sparkling Cranberry-Orange Punch", plural(c(n / 12), "batch", "batches")], ["Coffee and tea", plural(c(n / 10), "carafe", "carafes")]]]],
+      tips: ["Serve food all evening and keep water out.", "Drink tickets (two each) keep it comfortable.", "Plan safe rides home: a ride-share code or a taxi list.", "Check the venue's alcohol rules with HR first.", "Make it clear that having a drink is optional."], note: `Guide: about ${drinkers} drinkers, ${total} drinks over ${h} ${h === 1 ? "hour" : "hours"}.` };
+  }
+  function offDrinksHtml(P) {
+    const D = offDrinksPlan(P);
+    const head = `<div class="card pt-card"><h3>🥤 Drinks menu</h3>${offAlcTiles()}`;
+    if (!D) return head + `<p class="host-rem" style="margin-top:10px">Choose No alcohol or Alcohol served and your drinks menu appears here. Not sure? Ask your boss or staff first. The question is on the 📋 Event tab.</p></div>`;
+    return head + D.groups.map(([g, rows]) => `<h4 class="shop-dept">${g}</h4><ul class="cat-list">${rows.map(([n, q]) => `<li><b>${esc(n)}</b><span>${esc(q)}</span></li>`).join("")}</ul>`).join("") +
+      (D.tips.length ? `<h4 class="shop-dept">Hosting tips</h4><ul class="cat-list">${D.tips.map(t => `<li><span>${esc(t)}</span></li>`).join("")}</ul>` : "") + (D.note ? `<p class="host-rem">${esc(D.note)}</p>` : "") + `</div>`;
+  }
   function offFoodHtml() {
     const F = offFoodCfg(), P = offPeople();
     const pick = `<div class="card pt-card"><h3>🍽️ How are you feeding everyone?</h3><div class="who-pick">${OFF_FOOD.map(([k, i, l, d]) => `<button type="button" class="who-tile${F.style === k ? " on" : ""}" data-offood="${k}"><span class="wt-ico">${i}</span><span><b>${l}</b><small>${d}</small></span></button>`).join("")}</div></div>`;
@@ -13135,6 +13174,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
           <li><b>🥤 Drinks</b><span>${drinks} drinks <small>(2–3 per person; add coffee and tea)</small></span></li></ul>
         <p class="host-rem">Choose one main (pizza or platters), not both, unless it's a long party. Order 1–2 weeks ahead in December, and ask for vegetarian and gluten-free portions.</p>
         <button type="button" class="btn btn-ghost btn-block" data-oftab="event">💵 Add the quote to Costs &amp; vendors ›</button></div>
+        ${offDrinksHtml(P)}
         <div class="card pt-card">${offNear("Order from someone local", [["🍽️ Caterers", "catering"], ["🍕 Pizza delivery", "pizza delivery"], ["🥪 Sandwich & wrap platters", "sandwich platter catering"], ["🛒 Grocery store party platters", "grocery store party platters"], ["🧁 Bakeries", "bakery"], ["☕ Coffee for groups", "coffee catering"]], "Opens your Maps app with places near you. Most have menus and phone numbers right there.")}</div>` + offSuppliesHtml(P);
     }
     // 🍢 appetizers we make ourselves
@@ -13145,6 +13185,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         <div class="apps-filters">${(window.NOEL_APPS || []).map(r => `<button type="button" class="chip${X.picks.includes(r[1]) ? " on" : ""}" data-offapp="${esc(r[1])}">${X.picks.includes(r[1]) ? "✓ " : ""}${r[0]} ${esc(r[1])}${off.ev.who === "family" && KID_APPS.includes(r[1]) ? " ⭐" : ""}</button>`).join("")}</div></div>
       ${X.items.length || X.dItems.length ? `<div class="card pt-card"><h3>🧾 Your menu</h3><ul class="cat-list">${X.items.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.pieces} pieces · ${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}<small>💡 ${esc(i.row[3])}</small></span></li>`).join("")}${X.dItems.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}</span></li>`).join("")}</ul>
         <div class="send-btns"><button type="button" class="btn btn-red" data-print="offfood">🖨️ Menu &amp; shopping list</button><button type="button" class="btn btn-ghost" id="offFoodCost">💵 Add ${cad0(X.sum)} to costs</button></div></div>` : ""}
+      ${offDrinksHtml(X.P)}
       <div class="card pt-card">${offNear("Shop for it near me", [["🛒 Grocery stores", "grocery store"], ["📦 Warehouse & bulk stores", "warehouse club store"], ["🧁 Bakeries", "bakery"], ["🥤 Party supply stores", "party supply store"]], "Short on time? Grocery stores sell ready-made party platters too.")}</div>` + offSuppliesHtml(X.P);
   }
   // 🛒 one-tap shopping: pick a store, then tap what you need (opens that store's search)
@@ -13169,6 +13210,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const html = `<div class="of"><h1>🍢 ${esc(off.ev.name || "Office Party")} Menu</h1><p class="of-s">${X.P.a} adults${X.P.k ? ` + ${X.P.k} kids` : ""} · about ${X.total} bites · about ${cad0(X.sum)} ${currency}</p>
       <h2>The menu</h2><table><tr><th>Appetizer</th><th>How many</th><th>Make ahead</th></tr>${X.items.map(i => `<tr><td><b>${esc(i.n)}</b></td><td>${i.pieces} pieces (${i.b} ${i.b === 1 ? "batch" : "batches"})</td><td>${esc(i.row[3])}</td></tr>`).join("")}${X.dItems.map(i => `<tr><td><b>${esc(i.n)}</b></td><td>${i.b} ${i.b === 1 ? "batch" : "batches"}</td><td>${esc(i.row[3])}</td></tr>`).join("")}</table>
       <h2>Shopping list</h2><ul>${X.items.concat(X.dItems).flatMap(i => (SHOP[i.n] || [0, []])[1].map(([t, pr]) => `<li>☐ ${i.b > 1 ? `<b>${i.b} ×</b> ` : ""}${esc(t)}${pr ? ` · ${cad(pr * i.b * fx())}` : ""} <small style="color:#999">(${esc(i.n)})</small></li>`)).join("")}</ul>
+      ${(DD => DD ? `<h2>Drinks menu (${DD.mode === "none" ? "alcohol-free" : "alcohol served"})</h2>` + DD.groups.map(([g, rows]) => `<h3>${esc(g)}</h3><table>${rows.map(([n, q]) => `<tr><td><b>${esc(n)}</b></td><td>${esc(q)}</td></tr>`).join("")}</table>`).join("") + (DD.tips.length ? `<ul>${DD.tips.map(t => `<li>• ${esc(t)}</li>`).join("")}</ul>` : "") : "")(offDrinksPlan(X.P))}
       <h2>Plates, cups &amp; extras</h2><ul><li>☐ ${Math.ceil(X.P.all * 1.5)} plates</li><li>☐ ${X.P.all * 3} napkins</li><li>☐ ${X.P.all * 3} cups</li><li>☐ ${X.P.all} cutlery sets</li><li>☐ ${Math.ceil(X.P.all / 8)} bags of ice</li><li>☐ Garbage &amp; recycling bags</li></ul></div>`;
     return { title: "Office party menu & shopping list", css, html, margin: 0.5, file: "Office-Party-Menu" };
   }
@@ -13176,6 +13218,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const t = e.target, F = offFoodCfg();
     const wh = t.closest("[data-ofwhere]"); if (wh) { off.ev.where = wh.dataset.ofwhere; off.ev.spot = ""; saveOff(); renderOffice(); return; }
     const sp = t.closest("[data-ofspot]"); if (sp) { off.ev.spot = sp.dataset.ofspot; const clean = sp.dataset.ofspot.replace(/^\S+\s/, ""); if (!off.ev.venue || OFF_WHERE.some(w => w[4].some(x => x[0].replace(/^\S+\s/, "") === off.ev.venue))) off.ev.venue = clean; saveOff(); renderOffice(); return; }
+    const al = t.closest("[data-ofalc]"); if (al) { off.ev.alcohol = al.dataset.ofalc; saveOff(); renderOffice(); return; }
+    const aq = t.closest("[data-ofalcask]"); if (aq) { (async () => { try { if (aq.dataset.ofalcask === "share" && navigator.share) { await navigator.share({ title: "Holiday party drinks", text: OFF_ALC_ASK }); return; } } catch (err) { if (err && err.name === "AbortError") return; } try { await navigator.clipboard.writeText(OFF_ALC_ASK); toast("Copied. Paste it into a message to your boss."); } catch (err) { toast("Couldn't copy the question"); } })(); return; }
     const fs = t.closest("[data-offood]"); if (fs) { F.style = fs.dataset.offood; if (F.style === "potluck") off.acts.potluck = 1; if (F.style === "catered") off.acts.catered = 1; saveOff(); renderOffice(); return; }
     const so = t.closest("[data-ofstore]"); if (so) { off.store = so.dataset.ofstore; saveOff(); renderOffice(); return; }
     const by = t.closest("[data-ofbuy]"); if (by) { const st = giStores(), cur = st.find(x => x[0] === off.store) || st[0]; openStore(cur[2](by.dataset.ofbuy)); return; }
