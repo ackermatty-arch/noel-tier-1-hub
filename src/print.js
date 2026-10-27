@@ -40,6 +40,19 @@
     // 🏷️ the family (or company) name across the top of every printed page set
     const who = familyTitle(family);
     if (who && !d.error && !d.noBrand && !d.branded) { d.html = `<div class="pt-brand">${esc(who)}</div>` + d.html; d.css += ` .pt-brand{font:600 8.5pt/1 sans-serif;letter-spacing:.28em;text-transform:uppercase;color:#a8823c;text-align:center;border-bottom:1px solid #e3d6b8;padding:0 0 6px;margin:0 0 14px}`; d.branded = 1; }
+    return lowInk(d);
+  }
+  // 🖨️ low-ink look for every printable: black and grey text, no colour fills, a thin light-gold trim
+  const INK_KEEP = "★☆✦✓✕☐✧";
+  const LOWINK_CSS = ` html,body{background:#fff!important} *{color:#222!important;background:transparent!important;box-shadow:none!important;text-shadow:none!important;border-color:#D9BF86!important;outline-color:#D9BF86!important}
+    h1,h2,h3,h4,b,strong,summary{color:#151515!important} h1{letter-spacing:.04em} h1:after{content:"";display:block;width:100%;border-bottom:1px solid #D9BF86;margin-top:7px}
+    h2{border-bottom:1px solid #D9BF86!important} th{background:transparent!important;border-bottom:1px solid #D9BF86!important} td{border-color:#E8D7AE!important}
+    li,p,td,span,small,i{color:#2a2a2a!important} .pt-brand{color:#8a7440!important;border-color:#D9BF86!important}`;
+  function lowInk(d) {
+    if (!d || d.error) return d;
+    const sw = { "✅": "✓", "✔": "✓", "☑": "✓", "⛔": "✕", "🚫": "✕", "❌": "✕", "⭐": "★", "🌟": "★", "✨": "✦" };
+    d.html = String(d.html).replace(/[✅✔☑⛔🚫❌⭐🌟✨]/gu, c => sw[c]).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{2300}-\u{23FF}\uFE0F]/gu, c => INK_KEEP.includes(c) ? c : "");
+    d.css = String(d.css) + LOWINK_CSS;
     return d;
   }
   // 🕯️ Holiday Self-Care: gentle reminders, a calm plan and a permission slip
