@@ -2520,7 +2520,7 @@ window.NOEL_MEALS = (function () {
   }
   // 🕯️ CHRISTMAS EVE: a cozy appetizer night (same appetizer engine, no midnight countdown)
   function eveDate() { const now = new Date(); let y = now.getFullYear(); if (now > new Date(y, 11, 24, 23, 59)) y++; return `${y}-12-24`; }
-  const EVE_DEFAULT = ["Charcuterie Board", "Baked Brie", "Slow Cooker Meatballs", "Pigs in a Blanket", "Shrimp Cocktail", "Cookie Platter", "Sparkling Punch"];
+  const EVE_DEFAULT = ["Charcuterie Board", "Baked Brie", "Slow Cooker Meatballs", "Pigs in a Blanket", "Shrimp Cocktail", "Sparkling Punch"];
   function evePartyPlan(guests, c = {}) {
     const p = nyePartyPlan(guests, Object.assign({}, c, { picks: c.picks && c.picks.length ? c.picks : EVE_DEFAULT }));
     const food = p.items.length, drinks = p.drinkItems.map(i => i.name);
@@ -2598,7 +2598,7 @@ window.NOEL_MEALS = (function () {
     defaultTime: "17:30", defaultDate: eveDate,
     menu: [["Your Christmas Eve menu", ["Pick your appetizers above"]]],
     menuFor(p) {
-      return [["Appetizers", p.items.map(i => `${i.name} (${i.pieces} pieces)`)], ["Drinks", p.drinkItems.map(i => i.name).concat(["Hot cocoa bar", "Eggnog or mulled wine for the grown-ups"])], ["For Santa", ["Milk and cookies", "A carrot for the reindeer"]]];
+      return [["Appetizers", p.items.map(i => `${i.name} (${i.pieces} pieces)`)], ["Drinks", p.drinkItems.map(i => i.name).concat(["Hot cocoa bar", "Eggnog or mulled wine for the grown-ups"])]];
     },
     drinks: [
       ["Cozy drinks", "Set up a hot cocoa bar: cocoa, mini marshmallows, whipped cream and candy canes to stir."],
@@ -2623,7 +2623,6 @@ window.NOEL_MEALS = (function () {
       if (hasP("Chocolate Fondue")) add(115, "🍫", "Melt the chocolate fondue and set out the fruit, marshmallows and pretzels");
       add(165, "🎅", "Check where Santa is on the Santa Tracker");
       add(180, "📖", "Read 'Twas the Night Before Christmas together");
-      add(190, "🥛", "Set out milk and cookies for Santa, and a carrot for the reindeer");
       add(200, "🛏️", "Little ones to bed. Santa only comes when everyone is asleep!");
       return out.sort((a, b) => a.m - b.m);
     },
@@ -2636,7 +2635,6 @@ window.NOEL_MEALS = (function () {
         (APP_SHOP[i.name] || [0, []])[1].map(([n, price]) => [price == null ? "" : String(i.batches), n, price == null ? null : price * i.batches])]);
       const tins = Math.max(1, Math.ceil(p.g / 10));
       groups.push(["☕ Hot cocoa bar", [[String(tins), `tin${tins > 1 ? "s" : ""} hot chocolate mix`, tins * 6], ["1", "bag mini marshmallows", 3], ["1", "can whipped cream", 4], ["1", "box candy canes", 3]]]);
-      groups.push(["🎅 For Santa", [["", "milk and cookies (from your cookie platter is perfect)", null], ["1", "carrot for the reindeer", null]]]);
       return groups;
     }
   });
