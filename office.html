@@ -1776,6 +1776,12 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .btn, .btn-red, .btn-green, .meal-back { min-height: 32px !important; padding: 0 12px !important; font-size: 12.5px !important; letter-spacing: .06em; }
 .btn-block { min-height: 34px !important; }
 #orgEventForm .btn, .org-add .btn, .santa-add .btn, .gi-add .btn { align-self: center; }
+
+/* Calendar days: gold frame for chosen day, gold dots for days with plans */.cal-cell.sel { background: #fff !important; color: #151515 !important; box-shadow: inset 0 0 0 2.5px #B08D4E; }
+.cal-cell.sel span { font-weight: 700; color: #151515 !important; }
+.cal-cell.has { background: #fff; box-shadow: inset 0 0 0 1px #E3D2A8; }
+.cal-cell i { color: #C9A45C; font-size: .5rem; letter-spacing: 2px; }
+.cal-cell.today span { border-bottom: 1.5px solid #C9A45C; }
 </style>
 </head>
 <body>
@@ -11271,7 +11277,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const sel = org.calDay || ymd(today), cells = [];
     for (let i = 0; i < first; i++) cells.push(`<span class="cal-cell blank"></span>`);
     for (let d = 1; d <= days; d++) { const k = ymd(new Date(y, mo, d)), list = byDay[k] || [];
-      cells.push(`<button type="button" class="cal-cell${k === sel ? " sel" : ""}${k === ymd(today) ? " today" : ""}" data-oday="${k}"><span>${d}</span><i>${list.slice(0, 3).map(e => e.mine ? memberEmoji(e.who) : e.icon).join("")}</i></button>`); }
+      cells.push(`<button type="button" class="cal-cell${k === sel ? " sel" : ""}${k === ymd(today) ? " today" : ""}${list.length ? " has" : ""}" data-oday="${k}"><span>${d}</span><i>${list.slice(0, 3).map(() => "●").join("")}</i></button>`); }
     const dayList = byDay[sel] || [];
     return `<div class="card org-card cal-card"><div class="cal-head"><button type="button" class="icon-btn" data-omonth="-1" aria-label="Previous month">‹</button><b>${m0.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</b><button type="button" class="icon-btn" data-omonth="1" aria-label="Next month">›</button></div>
         <div class="cal-grid">${["S", "M", "T", "W", "T", "F", "S"].map(d => `<span class="cal-dow">${d}</span>`).join("")}${cells.join("")}</div></div>

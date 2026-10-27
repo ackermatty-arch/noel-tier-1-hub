@@ -95,7 +95,7 @@
     const sel = org.calDay || ymd(today), cells = [];
     for (let i = 0; i < first; i++) cells.push(`<span class="cal-cell blank"></span>`);
     for (let d = 1; d <= days; d++) { const k = ymd(new Date(y, mo, d)), list = byDay[k] || [];
-      cells.push(`<button type="button" class="cal-cell${k === sel ? " sel" : ""}${k === ymd(today) ? " today" : ""}" data-oday="${k}"><span>${d}</span><i>${list.slice(0, 3).map(e => e.mine ? memberEmoji(e.who) : e.icon).join("")}</i></button>`); }
+      cells.push(`<button type="button" class="cal-cell${k === sel ? " sel" : ""}${k === ymd(today) ? " today" : ""}${list.length ? " has" : ""}" data-oday="${k}"><span>${d}</span><i>${list.slice(0, 3).map(() => "●").join("")}</i></button>`); }
     const dayList = byDay[sel] || [];
     return `<div class="card org-card cal-card"><div class="cal-head"><button type="button" class="icon-btn" data-omonth="-1" aria-label="Previous month">‹</button><b>${m0.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</b><button type="button" class="icon-btn" data-omonth="1" aria-label="Next month">›</button></div>
         <div class="cal-grid">${["S", "M", "T", "W", "T", "F", "S"].map(d => `<span class="cal-dow">${d}</span>`).join("")}${cells.join("")}</div></div>
