@@ -13,7 +13,7 @@
   const BUD_CATS = [
     ["gifts", "🎁", "Gifts", "#b3262e"], ["food", "🍽️", "Food & drinks", "#2f6b4a"], ["decor", "🎄", "Decorations", "#c9a227"],
     ["hosting", "🏡", "Hosting & home", "#8b4a3a"], ["party", "🎉", "Parties & outings", "#6a4c93"], ["cards", "✉️", "Cards & postage", "#3b6ea5"],
-    ["travel", "🚗", "Travel", "#4f8a8b"], ["giving", "💛", "Giving", "#d98b9b"], ["other", "📦", "Other", "#8c8c8c"]
+    ["travel", "🚗", "Travel", "#4f8a8b"], ["giving", "⭐", "Giving", "#d98b9b"], ["other", "📦", "Other", "#8c8c8c"]
   ];
   const budCat = k => BUD_CATS.find(c => c[0] === k) || BUD_CATS[BUD_CATS.length - 1];
   let budget = load("budget", null) || { limit: 0, cats: {}, expenses: [], daily: {}, past: [], tab: "overview", sort: "date", filter: "all" };

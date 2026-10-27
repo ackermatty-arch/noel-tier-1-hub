@@ -75,7 +75,7 @@
       ["🎁", "Good enough is wonderful", "Nobody remembers if the bows matched. They remember that you were there and you laughed."],
       ["🙅", "No is a full sentence", "You don't have to go to every party or bake for every event. Choose the ones that light you up."],
       ["🚶", "Step outside every day", "Ten minutes of fresh air, Christmas lights or snow does more than another hour of scrolling."],
-      ["💛", "Fill your own cup too", "Rest, water, a real meal and one small thing just for you. You can't pour from an empty mug."]];
+      ["⭐", "Fill your own cup too", "Rest, water, a real meal and one small thing just for you. You can't pour from an empty mug."]];
     const perm = O ? ["Leave the party early", "Bring store-bought treats", "Turn on my out-of-office", "Take a real lunch break", "Say no to one more committee", "Not check email over the holidays"]
       : ["Skip a party (or two)", "Buy store-bought cookies", "Take a nap", "Say no without explaining", "Wear pajamas all day", "Not make it perfect"];
     const css = `.sc{font:12pt/1.5 Georgia,serif;color:#2a2a2a} .sc h1{font-size:26pt;margin:0;text-align:center;color:#1E3A2F} .sc .sc-sub{text-align:center;font:italic 10.5pt Georgia,serif;color:#8a6d3b;margin:4px 0 20px}
@@ -86,7 +86,7 @@
     const html = `<div class="sc"><h1>🕯️ Holiday Self-Care</h1><p class="sc-sub">Five gentle reminders for a calmer, merrier season</p>
       ${R.map(([i, t, d]) => `<div class="rem"><span>${i}</span><div><b>${t}</b>${d}</div></div>`).join("")}
       <div class="cols"><div><h2>🌿 This week, just for me</h2><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div>
-        <div><h2>🤍 Things I can let go of</h2><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div></div>
+        <div><h2>⭐ Things I can let go of</h2><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div></div>
       <div class="perm"><h3>📜 Official Permission Slip</h3><p style="text-align:center;margin:0 0 6px">I hereby give myself permission to:</p><ul>${perm.map(x => `<li>☐ ${x}</li>`).join("")}</ul>
         <p class="sign">Signed: <span></span></p></div></div>`;
     return { title: "Holiday Self-Care", css, html, margin: 0.55, file: "Holiday-Self-Care" };

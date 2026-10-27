@@ -18,7 +18,7 @@
     if (cssCache) return cssCache;
     let all = "";
     document.querySelectorAll("style").forEach(s => { all += s.textContent + "\n"; });
-    const a = all.indexOf("💌 INVITE CARDS"), b = all.indexOf("/* ---------- 💌 Invites tab");
+    const a = all.indexOf("✉️ INVITE CARDS"), b = all.indexOf("/* ---------- ✉️ Invites tab");
     const cards = a > -1 && b > a ? all.slice(all.lastIndexOf("/*", a), b) : "";
     const fonts = (document.getElementById("embeddedFonts") || {}).textContent || "";
     cssCache = fonts + "\n" + cards +

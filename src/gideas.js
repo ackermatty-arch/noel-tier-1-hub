@@ -222,7 +222,7 @@
     const stores = giStores();
     $("#giStores").innerHTML = stores.map(([n, home]) => `<button type="button" class="gi-store" data-gihome="${home}">${esc(n)}</button>`).join("");
     $("#giCats").innerHTML = GIDEA_CATS.map(c => `<button type="button" class="gi-cat${c[0] === gi.cat ? " on" : ""}" data-gicat="${c[0]}"><span>${c[1]}</span><b>${esc(c[2])}</b><small>${esc(c[3])}</small></button>`).join("") +
-      `<button type="button" class="gi-cat${gi.cat === "saved" ? " on" : ""}" data-gicat="saved"><span>♥</span><b>Saved</b><small>${Object.keys(gi.saved).length} ideas</small></button>`;
+      `<button type="button" class="gi-cat${gi.cat === "saved" ? " on" : ""}" data-gicat="saved"><span>★</span><b>Saved</b><small>${Object.keys(gi.saved).length} ideas</small></button>`;
     $("#giFilters").innerHTML = GI_BUDGETS.map(([k, l]) => `<button type="button" class="chip${gi.budget === k ? " on" : ""}" data-gibudget="${k}">${l}</button>`).join("") +
       `<button type="button" class="chip${gi.eco ? " on" : ""}" data-gieco="1">🌿 Eco picks</button>` +
       `<span class="gi-break"></span>` + GI_INTERESTS.map(([k, l]) => `<button type="button" class="chip${gi.interest === k ? " on" : ""}" data-giint="${k}">${l}</button>`).join("");
@@ -235,7 +235,7 @@
       const k = giKey(c, x), suffix = (GIDEA_CATS.find(z => z[0] === c) || [])[4] || "", q = (x[0] + " " + suffix).trim(), adding = giAddFor === k;
       return `<div class="card gi-card" data-gik="${esc(k)}">
         <div class="gi-top"><div><h4>${esc(x[0])}${x[5] ? ` <span class="gi-eco">🌿 Eco</span>` : ""}</h4><p>${esc(x[1])}</p></div>
-          <button type="button" class="app-fav" data-gisave aria-pressed="${gi.saved[k] ? "true" : "false"}" aria-label="Save ${esc(x[0])}">${gi.saved[k] ? "♥" : "♡"}</button></div>
+          <button type="button" class="app-fav" data-gisave aria-pressed="${gi.saved[k] ? "true" : "false"}" aria-label="Save ${esc(x[0])}">${gi.saved[k] ? "★" : "☆"}</button></div>
         <div class="gi-meta"><span class="gi-price">${giRange(x)}</span>${gi.cat === "saved" ? `<span class="gi-for">${esc((GIDEA_CATS.find(z => z[0] === c) || [])[2] || "")}</span>` : ""}</div>
         <div class="gi-find"><span>Find it:</span>${stores.map(([n, , s]) => `<button type="button" class="gi-store sm" data-giurl="${esc(s(q))}">${esc(n)}</button>`).join("")}</div>
         ${adding ? `<div class="gi-add"><select class="input" data-giperson>${people.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join("")}<option value="__new">➕ Someone new…</option></select>
@@ -243,7 +243,7 @@
             <button type="button" class="btn btn-green" data-giaddgo>Add</button></div>`
           : `<button type="button" class="btn btn-ghost btn-block gi-addbtn" data-giadd>➕ Add to my gift tracker</button>`}
       </div>`;
-    }).join("") : `<p class="apps-empty">${gi.cat === "saved" ? "Tap ♡ on any idea to save it here." : "No ideas match those filters. Try another price or interest."}</p>`;
+    }).join("") : `<p class="apps-empty">${gi.cat === "saved" ? "Tap ☆ on any idea to save it here." : "No ideas match those filters. Try another price or interest."}</p>`;
     if (giAddFor) { const sel = $("#giList [data-giperson]"); if (sel && !gifts.people.length) sel.value = "__new"; }
   }
 
@@ -257,7 +257,7 @@
     const i = t.closest("[data-giint]"); if (i) { gi.interest = gi.interest === i.dataset.giint ? "" : i.dataset.giint; save1(); renderIdeas(); return; }
     const card = t.closest("[data-gik]"); if (!card) return;
     const k = card.dataset.gik;
-    if (t.closest("[data-gisave]")) { if (gi.saved[k]) delete gi.saved[k]; else { gi.saved[k] = 1; toast("♥ Saved to your ideas"); } save1(); renderIdeas(); return; }
+    if (t.closest("[data-gisave]")) { if (gi.saved[k]) delete gi.saved[k]; else { gi.saved[k] = 1; toast("★ Saved to your ideas"); } save1(); renderIdeas(); return; }
     if (t.closest("[data-giadd]")) { giAddFor = k; renderIdeas(); return; }
     if (t.closest("[data-giaddgo]")) {
       const [cat, name] = k.split("|"), x = (GIDEAS[cat] || []).find(y => y[0] === name); if (!x) return;

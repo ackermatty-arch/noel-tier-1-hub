@@ -2,7 +2,7 @@
      📒 ORGANIZER: six simple tools, each on its own clean screen
      ✉️ Card List (address book, sent/received, Avery 5160 labels, CSV)
      📅 Calendar (your family's events + everything Noël has planned)
-     🙏 Thank-Yous · 📦 Packages · 💛 Giving · 🗂️ Spending at a glance
+     🙏 Thank-Yous · 📦 Packages · ⭐ Giving · 🗂️ Spending at a glance
      Everything stays encrypted on the phone.
      ============================================================ */
   let org = load("organizer", null) || {
@@ -15,7 +15,7 @@
   const parseYmd = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
   const shortDate = s => parseYmd(s).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
   const MEMBER_EMOJI = ["👧", "👦", "👩", "👨", "👵", "👴", "🧒", "👶", "🐶", "⭐"];
-  const ORG_TOOLS = [["cards", "✉️", "Card List"], ["cal", "📅", "Calendar"], ["thanks", "🙏", "Thank-Yous"], ["packages", "📦", "Packages"], ["giving", "💛", "Giving"], ["spend", "🗂️", "Spending"]];
+  const ORG_TOOLS = [["cards", "✉️", "Card List"], ["cal", "📅", "Calendar"], ["thanks", "🙏", "Thank-Yous"], ["packages", "📦", "Packages"], ["giving", "⭐", "Giving"], ["spend", "🗂️", "Spending"]];
 
   function orgStatus(k) {
     const y = orgYear();
@@ -119,14 +119,14 @@
   function orgThanksHtml() {
     const done = org.thanks.filter(t => t.done).length;
     return `<div class="card org-card"><p class="host-rem">${org.thanks.length ? `${done} of ${org.thanks.length} thank-yous sent${done === org.thanks.length ? " 🎉" : ""}` : "Jot down gifts as they're opened, then tick each thank-you as it's sent."}</p>
-      <ul class="host-list">${org.thanks.map(t => `<li data-ot="${t.id}"><label class="${t.done ? "on" : ""}"><input type="checkbox" data-otdone ${t.done ? "checked" : ""}><span><b>${esc(t.from)}</b>${t.gift ? ` · ${esc(t.gift)}` : ""}</span></label><button type="button" class="chip" data-otnote>💌 Note</button><button class="icon-btn" data-odel aria-label="Remove">✕</button></li>`).join("")}</ul>
+      <ul class="host-list">${org.thanks.map(t => `<li data-ot="${t.id}"><label class="${t.done ? "on" : ""}"><input type="checkbox" data-otdone ${t.done ? "checked" : ""}><span><b>${esc(t.from)}</b>${t.gift ? ` · ${esc(t.gift)}` : ""}</span></label><button type="button" class="chip" data-otnote>✉️ Note</button><button class="icon-btn" data-odel aria-label="Remove">✕</button></li>`).join("")}</ul>
       <form id="orgThanksForm" class="org-ev-form" autocomplete="off"><div class="org-addr-row"><input class="input" name="from" list="orgNames" maxlength="40" placeholder="From" aria-label="From"><input class="input" name="gift" maxlength="50" placeholder="Gift" aria-label="Gift"></div><button class="btn btn-green btn-block" type="submit">➕ Add</button></form>
       <datalist id="orgNames">${[...new Set(org.contacts.map(c => c.name).concat(gifts.people.map(p => p.name)))].map(n => `<option value="${esc(n)}">`).join("")}</datalist></div>`;
   }
-  // 💌 ready-to-send thank-you wording, personalised with who & what
+  // ✉️ ready-to-send thank-you wording, personalised with who & what
   const TY_TPL = [
-    ["❤️ Heartfelt", "Dear {from},\n\nThank you so much for the {gift}! It was so thoughtful of you, and we absolutely love it. Wishing you a wonderful new year!"],
-    ["😊 Friendly", "Hi {from}! Just wanted to say a big thank you for the {gift}. You always know exactly what we'll love. ❤️"],
+    ["⭐ Heartfelt", "Dear {from},\n\nThank you so much for the {gift}! It was so thoughtful of you, and we absolutely love it. Wishing you a wonderful new year!"],
+    ["😊 Friendly", "Hi {from}! Just wanted to say a big thank you for the {gift}. You always know exactly what we'll love. ⭐"],
     ["🧒 From the kids", "Dear {from},\n\nThank you for the {gift}! I really like it and I use it every day. Thank you for thinking of me!\n\nLove, "],
     ["💵 Money or gift card", "Dear {from},\n\nThank you for your generous gift! We're planning to put it toward something special, and we'll think of you when we do."],
     ["💬 Quick text", "Thank you for the {gift}, {from}! Loved it. Merry Christmas! 🎄"],
@@ -162,7 +162,7 @@
         <input class="input" name="track" maxlength="40" placeholder="Tracking number (optional)" aria-label="Tracking number">
         <button class="btn btn-green btn-block" type="submit">Add</button></form>`;
   }
-  // ---------- 💛 Giving ----------
+  // ---------- ⭐ Giving ----------
   const GIVE_IDEAS = ["Food bank donation", "Toy drive", "Winter coat drive", "Animal shelter", "Volunteer shift", "Sponsor a family", "Gift for a neighbour in need"];
   function orgGivingHtml() {
     const total = org.giving.reduce((a, g) => a + (+g.amt || 0), 0);
@@ -218,7 +218,7 @@
     const day = t.closest("[data-oday]"); if (day) { org.calDay = day.dataset.oday; saveOrg(); renderOrg(); return; }
     const dm = t.closest("[data-odelmem]"); if (dm) { org.members = org.members.filter(m => m.id !== dm.dataset.odelmem); orgChanged(); return; }
     const dev = t.closest("[data-odelev]"); if (dev) { org.events = org.events.filter(x => x.id !== dev.closest("[data-oev]").dataset.oev); orgChanged(); return; }
-    const gi2 = t.closest("[data-ogive]"); if (gi2) { org.giving.push({ id: uid(), what: gi2.dataset.ogive, amt: 0, done: false }); orgChanged(); toast("💛 Added"); return; }
+    const gi2 = t.closest("[data-ogive]"); if (gi2) { org.giving.push({ id: uid(), what: gi2.dataset.ogive, amt: 0, done: false }); orgChanged(); toast("⭐ Added"); return; }
     const c = t.closest("[data-oc]"), ct = c && org.contacts.find(x => x.id === c.dataset.oc);
     if (ct) {
       if (t.closest("[data-osent]")) { ct.sent = ct.sent || {}; ct.sent[y] = !ct.sent[y]; }
@@ -259,6 +259,6 @@
     if (f.id === "orgOtherForm") { const n = f.name.value.trim(); if (!n) return; org.other.push({ id: uid(), name: n, amt: parseFloat(f.amt.value) || 0 }); }
     orgChanged();
   });
-  // 💌 a card sent from the Outbox ticks that person off the Christmas card list
+  // ✉️ a card sent from the Outbox ticks that person off the Christmas card list
   window.__orgTickSent = name => { const ct = org.contacts.find(c => String(c.name || "").trim().toLowerCase() === name); if (ct) { ct.sent = ct.sent || {}; ct.sent[orgYear()] = true; orgChanged(); } };
   /* @org-end */
