@@ -3086,8 +3086,8 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
   <button class="nav-btn" data-view="gifts"><span class="nav-ico">🎁</span>Gifts</button>
   <button class="nav-btn" data-view="tasks"><span class="nav-ico">✅</span>Tasks</button>
   <button class="nav-btn" data-view="meals" id="navMeals"><span class="nav-ico">🍽️</span>Menu</button>
-  <button class="nav-btn" data-view="invites"><span class="nav-ico">✉️</span>Cards</button>
   <button class="nav-btn" data-view="nye" id="navNye"><span class="nav-ico">🥂</span>NYE</button>
+  <button class="nav-btn" data-view="invites"><span class="nav-ico">✉️</span>Cards</button>
   <button class="nav-btn" data-view="games"><span class="nav-ico">🎮</span>Games</button>
   <button class="nav-btn" data-view="review"><span class="nav-ico">✨</span>Review</button>
 </nav>
@@ -7575,7 +7575,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   /* 👆 SWIPE between tabs (left = next tab, right = previous tab)
      Ignores up/down scrolling, edge swipes (Android "back"), text boxes,
      sliders and anything inside a pop-up or full-screen page. */
-  const VIEW_ORDER = ["budget", "planner", "gifts", "tasks", "office", "host", "own", "meals", "invites", "org", "nye", "games", "review"];
+  const VIEW_ORDER = ["budget", "planner", "gifts", "tasks", "office", "host", "own", "meals", "nye", "invites", "org", "games", "review"];
   let swipe = null;
   document.querySelector("main").addEventListener("touchstart", e => {
     const t = e.touches[0];
