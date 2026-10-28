@@ -2561,7 +2561,6 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 
 
   <section class="view" id="view-org" aria-labelledby="orgTitle">
-    <button type="button" class="btn btn-green btn-sm gift-tasks-btn" id="orgTimersBtn">Timers ›</button>
     <h2 class="view-title" id="orgTitle">Calendar</h2>
     <p class="view-intro">Everything coming up, and the orders on their way.</p>
     <div class="seg sub-tabs" id="orgTabs" role="group" aria-label="Calendar or packages"></div>
@@ -8067,7 +8066,6 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#dutyGrid").addEventListener("click", dutyClick);
   $("#runGrid").addEventListener("click", dutyClick);
 
-  $("#orgTimersBtn").addEventListener("click", () => { const t = $("#timersBlock"); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); });
   $("#addDutyForm [name=icon]").addEventListener("change", e => {   // picking Move the elf / Santa goodies fills the name; Other leaves it for you to type
     const o = e.target.selectedOptions[0], nm = $("#addDutyForm [name=name]");
     if (o && o.dataset.fill !== undefined) { nm.value = o.dataset.fill; if (!o.dataset.fill) nm.focus(); }
@@ -12614,7 +12612,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const MEMBER_EMOJI = ["★", "◆", "●", "▲", "■", "✦", "☾", "✿", "❖", "✚"];   // plain gold-style symbols (coloured emoji are stripped app-wide, which left this picker empty)
   function renderOrg() {   // Calendar tab (calendar + packages); Card list and Thank-yous live in the Cards tab
     if (org.view !== "packages") org.view = "cal";
-    const tabs = $("#orgTabs"); if (tabs) tabs.innerHTML = [["cal", "Calendar"], ["packages", "Packages"]].map(([k, l]) => `<button type="button" data-otool="${k}" aria-pressed="${org.view === k}">${l}</button>`).join("");
+    const tabs = $("#orgTabs"); if (tabs) tabs.innerHTML = [["cal", "Calendar / Timers"], ["packages", "Packages"]].map(([k, l]) => `<button type="button" data-otool="${k}" aria-pressed="${org.view === k}">${l}</button>`).join("");
     const tool = $("#orgTool"); if (tool) tool.innerHTML = org.view === "packages" ? orgPackagesHtml() : orgCalHtml();
     const cl = $("#paneCardList"), th = $("#paneThanks");
     if (cl && !cl.hidden) cl.innerHTML = orgCardsHtml();

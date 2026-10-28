@@ -17,7 +17,7 @@
   const MEMBER_EMOJI = ["★", "◆", "●", "▲", "■", "✦", "☾", "✿", "❖", "✚"];   // plain gold-style symbols (coloured emoji are stripped app-wide, which left this picker empty)
   function renderOrg() {   // Calendar tab (calendar + packages); Card list and Thank-yous live in the Cards tab
     if (org.view !== "packages") org.view = "cal";
-    const tabs = $("#orgTabs"); if (tabs) tabs.innerHTML = [["cal", "Calendar"], ["packages", "Packages"]].map(([k, l]) => `<button type="button" data-otool="${k}" aria-pressed="${org.view === k}">${l}</button>`).join("");
+    const tabs = $("#orgTabs"); if (tabs) tabs.innerHTML = [["cal", "Calendar / Timers"], ["packages", "Packages"]].map(([k, l]) => `<button type="button" data-otool="${k}" aria-pressed="${org.view === k}">${l}</button>`).join("");
     const tool = $("#orgTool"); if (tool) tool.innerHTML = org.view === "packages" ? orgPackagesHtml() : orgCalHtml();
     const cl = $("#paneCardList"), th = $("#paneThanks");
     if (cl && !cl.hidden) cl.innerHTML = orgCardsHtml();
