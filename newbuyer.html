@@ -2154,6 +2154,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 #view-gifts,#view-planner,#view-org,#view-tasks{position:relative}.gift-tasks-btn{position:absolute;top:2px;right:0;z-index:2}.wish-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .bottom-nav .nav-btn{font-size:9px!important}#invTabs button{font-size:11px;padding:0 2px}
 #alarmBadge{display:none!important}
+.cal-btn .cal-txt{font:700 8px/1.2 var(--font-body,inherit);letter-spacing:0;display:block;text-transform:uppercase;text-align:center;color:var(--gold-light)}
 </style>
 </head>
 <body>
@@ -7345,13 +7346,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
 
   // --- Planner phases & default tasks. Keep each task "id" unique.
   const FAMILY_PHASES = [
-    { id: "w4", icon: "🗓️", title: "4 Weeks Before", tasks: [
+    { id: "w4", icon: "🗓️", title: "8 Weeks Before", tasks: [
       { id: "w4-1", text: "Set the holiday budget" },
       { id: "w4-2", text: "Write the gift list" },
       { id: "w4-3", text: "Order online gifts early" },
       { id: "w4-4", text: "Confirm travel & guest plans" },
       { id: "w4-5", text: "Send cards & invitations" } ] },
-    { id: "w2", icon: "🎁", title: "2 Weeks Before", tasks: [
+    { id: "w2", icon: "🎁", title: "4 Weeks Before", tasks: [
       { id: "w2-1", text: "Finish gift shopping" },
       { id: "w2-2", text: "Wrap gifts" },
       { id: "w2-3", text: "Decorate the house" },
@@ -12739,8 +12740,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   // ---------- 📅 the tiny calendar in the header (opens as a small popup anywhere in the app) ----------
   let miniM = "", miniD = "";
   function calBtnIcon() {
-    const b = $("#calBtn"); if (!b) return; const d = new Date().getDate();
-    b.innerHTML = `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><text x="12" y="18" text-anchor="middle" font-size="8.5" font-family="Cinzel, serif" stroke="none" fill="currentColor">${d}</text></svg>`;
+    const b = $("#calBtn"); if (!b) return;
+    b.innerHTML = `<span class="cal-txt">Timers<br>/Cal</span>`;
   }
   // 👆 swipe the calendar grid left or right to change month (mini popup and full calendar)
   (() => { let x0 = 0, y0 = 0, on = false;

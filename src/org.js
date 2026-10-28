@@ -143,8 +143,8 @@
   // ---------- 📅 the tiny calendar in the header (opens as a small popup anywhere in the app) ----------
   let miniM = "", miniD = "";
   function calBtnIcon() {
-    const b = $("#calBtn"); if (!b) return; const d = new Date().getDate();
-    b.innerHTML = `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><text x="12" y="18" text-anchor="middle" font-size="8.5" font-family="Cinzel, serif" stroke="none" fill="currentColor">${d}</text></svg>`;
+    const b = $("#calBtn"); if (!b) return;
+    b.innerHTML = `<span class="cal-txt">Timers<br>/Cal</span>`;
   }
   // 👆 swipe the calendar grid left or right to change month (mini popup and full calendar)
   (() => { let x0 = 0, y0 = 0, on = false;
