@@ -16,7 +16,7 @@
     ["travel", "🚗", "Travel", "#6B5A3A"], ["giving", "⭐", "Giving", "#A8A8A8"], ["other", "📦", "Other", "#2B2B2B"]
   ];
   const budCat = k => BUD_CATS.find(c => c[0] === k) || BUD_CATS[BUD_CATS.length - 1];
-  let budget = load("budget", null) || { limit: 0, cats: {}, expenses: [], daily: {}, past: [], tab: "set", sort: "date", filter: "all" };
+  let budget = load("budget", null) || { limit: 0, cats: {}, expenses: [], daily: {}, past: [], tab: "overview", sort: "date", filter: "all" };
   // the Organizer's old "other costs" move in here once
   if (typeof org !== "undefined" && org.other && org.other.length) { org.other.forEach(x => budget.expenses.push({ id: x.id, cat: "other", name: x.name, amt: +x.amt || 0, date: "" })); org.other = []; save("organizer", org); }
   const saveBudget = () => save("budget", budget);
@@ -90,10 +90,11 @@
   // ---------- screens ----------
   function renderBudget() {
     budRecordDay();
-    const T = budTotals(), tab = hubMode === "company" && budget.tab === "shared" ? "overview" : (budget.tab || "overview");
-    $("#budTabs").innerHTML = [["set", "🎯 Budgets"], ["overview", "📊 Overview"], ["gifts", "🎁 Gift tracker"], ["sheet", "🧾 Spreadsheet"], ["shared", "🤝 Shared costs"]].filter(([k]) => !(k === "shared" && hubMode === "company")).map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
-    $("#budBody").innerHTML = tab === "gifts" ? "" : ({ overview: budOverview, sheet: budSheet, set: budSet, shared: budShared })[tab](T);
-    const tp = $("#paneTrack"); if (tp) { tp.hidden = tab !== "gifts"; if (tab === "gifts") renderGifts(); }   // 🎁 the gift tracker lives here now
+    const T = budTotals(), tab = (hubMode === "company" && budget.tab === "shared") || budget.tab === "gifts" ? "overview" : (budget.tab || "overview");
+    $("#budTabs").innerHTML = [["overview", "📊 Overview"], ["set", "🎯 Budget"], ["sheet", "🧾 Spreadsheet"], ["shared", "🤝 Shared costs"]].filter(([k]) => !(k === "shared" && hubMode === "company")).map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
+    $("#budBody").innerHTML = ({ overview: budOverview, sheet: budSheet, set: budSet, shared: budShared })[tab](T);
+    const tp = $("#paneTrack"); if (tp) { tp.hidden = tab !== "set"; if (tab === "set") renderGifts(); }   // 🎁 the gift tracker lives here now
+    const b2 = $("#budBody2"); if (b2) b2.innerHTML = tab === "set" ? budSetMore(T) : "";
   }
   function budOverview(T) {
     const left = T.limit - T.spent, pct = T.limit ? T.spent / T.limit : 0, now = new Date();
@@ -141,13 +142,16 @@
       <div class="card pt-card"><button type="button" class="btn btn-red btn-block" id="budCsv">Spreadsheet (Excel)</button>
         <p class="host-rem">${N ? "Choose AirDrop, Mail or Save to Files to get it onto your computer." : "It saves to your downloads."} Preview it first, then save. It opens in Excel, Google Sheets or Numbers, with a summary, your budget by category and every purchase.</p></div>`;
   }
-  function budSet(T) {
+  // 🎯 Budget tab = "Add your budget" + Gift tracker (moved in from Gifts). Other budgets sit in an optional fold underneath.
+  let budCatOpen = false;
+  function budSet(T) { return ""; }
+  function budSetMore(T) {
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
-    return `<div class="card pt-card"><h3>💰 Total holiday budget</h3>${inp("total", budget.limit, T.catSum ? "Total of categories: " + money(T.catSum) : "$")}
+    return `<details class="fold" id="budCatFold"${budCatOpen ? " open" : ""}><summary>More budgets (optional)</summary>
+      <div class="card pt-card"><h3>Total holiday budget</h3>${inp("total", budget.limit, T.catSum ? "Total of categories: " + money(T.catSum) : "$")}
         <p class="host-rem">Leave it empty and Noël adds up your category budgets for you.</p></div>
-      <div class="card pt-card"><h3>🎯 Budget for each category</h3>
-        ${BUD_CATS.map(([k, i, l]) => `<div class="bud-set-row"><span>${i} ${l}${k === "gifts" ? "<small>Same as the Gift Tracker budget</small>" : k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div>
-      <div class="card pt-card bud-facts"><h3>💡 Budget tips</h3><p>• A common rule of thumb: about half for gifts, a quarter for food and entertaining, and the rest for everything else.</p><p>• Set your gift budget per person first, then add it up.</p><p>• Keep a little "oops" money (about 10%) for last-minute extras.</p></div>`;
+      <div class="card pt-card"><h3>Budget for each category</h3>
+        ${BUD_CATS.filter(([k]) => k !== "gifts").map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>`;
   }
 
   // ---------- spreadsheet file & printed report ----------
@@ -273,6 +277,7 @@
     const del = t.closest("[data-bdel]"); if (del) { budget.expenses = budget.expenses.filter(x => x.id !== del.dataset.bdel); saveBudget(); renderBudget(); return; }
     if (t.closest("#budCsv")) { const x = $("#xlOpen"); if (x) x.click(); }
   });
+  $("#view-budget").addEventListener("toggle", e => { if (e.target.id === "budCatFold") budCatOpen = e.target.open; }, true);
   $("#view-budget").addEventListener("change", e => {
     const t = e.target; if (t.dataset.blim == null) return;
     const v = Math.max(0, parseFloat(t.value) || 0), k = t.dataset.blim;

@@ -2764,7 +2764,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
     <div id="paneTrack" hidden>
     <div class="card budget-card">
       <div class="budget-top">
-        <label class="budget-field"><span>Total budget</span>
+        <label class="budget-field"><span>Add your budget</span>
           <span class="money"><span class="cur" id="giftCur">$</span><input id="giftBudget" type="number" inputmode="decimal" min="0" step="1" placeholder="0" aria-label="Total budget"></span></label>
         <div class="budget-stat"><span>Spent</span><strong id="giftSpent">$0</strong></div>
         <div class="budget-stat"><span id="giftLeftLabel">Left</span><strong id="giftLeft">–</strong></div>
@@ -2774,6 +2774,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
       <div class="gift-counts" id="giftCounts"></div>
     </div>
 
+    <div class="section-label">Gift tracker</div>
     <div id="peopleList"></div>
 
     <form class="card add-task" id="addPersonForm" autocomplete="off">
@@ -2784,6 +2785,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
       </div>
     </form>
     </div>
+    <div id="budBody2"></div>
   </section>
 
   <!-- ============================================================
@@ -8511,7 +8513,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (m) { yearNotes.unshift({ id: uid(), text: m[1].charAt(0).toUpperCase() + m[1].slice(1), date: Date.now() }); save("yearNotes", yearNotes); renderReview(); return `Got it. Saved for next Christmas: ${m[1]}.`; }
     if (has(/\b(best moments?|holiday review|review tab|notes? for next (year|christmas)|leave a review)\b/)) { closeSheets(); showView("review"); return "Here's your holiday review. Add your best moments and notes for next year."; }
     if (has(/\bwish ?lists?\b/)) { closeSheets(); showView("gifts"); showGiftPane("wish"); return "Here's your wish list."; }
-    if (has(/\b(gift tracker|gifts|presents|shopping list)\b/) && !has(/\b(check off|tick off|cross off|mark|uncheck|untick|done with|finished)\b/)) { closeSheets(); budget.tab = "gifts"; saveBudget(); showView("budget"); return "Here's your gift tracker, on the Budget page."; }
+    if (has(/\b(gift tracker|gifts|presents|shopping list)\b/) && !has(/\b(check off|tick off|cross off|mark|uncheck|untick|done with|finished)\b/)) { closeSheets(); budget.tab = "set"; saveBudget(); showView("budget"); return "Here's your gift tracker, on the Budget page."; }
 
     // 2. Help
     if (has(/\b(help|what can (i|you) say|commands)\b/))
@@ -13155,7 +13157,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     ["travel", "🚗", "Travel", "#6B5A3A"], ["giving", "⭐", "Giving", "#A8A8A8"], ["other", "📦", "Other", "#2B2B2B"]
   ];
   const budCat = k => BUD_CATS.find(c => c[0] === k) || BUD_CATS[BUD_CATS.length - 1];
-  let budget = load("budget", null) || { limit: 0, cats: {}, expenses: [], daily: {}, past: [], tab: "set", sort: "date", filter: "all" };
+  let budget = load("budget", null) || { limit: 0, cats: {}, expenses: [], daily: {}, past: [], tab: "overview", sort: "date", filter: "all" };
   // the Organizer's old "other costs" move in here once
   if (typeof org !== "undefined" && org.other && org.other.length) { org.other.forEach(x => budget.expenses.push({ id: x.id, cat: "other", name: x.name, amt: +x.amt || 0, date: "" })); org.other = []; save("organizer", org); }
   const saveBudget = () => save("budget", budget);
@@ -13229,10 +13231,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   // ---------- screens ----------
   function renderBudget() {
     budRecordDay();
-    const T = budTotals(), tab = hubMode === "company" && budget.tab === "shared" ? "overview" : (budget.tab || "overview");
-    $("#budTabs").innerHTML = [["set", "🎯 Budgets"], ["overview", "📊 Overview"], ["gifts", "🎁 Gift tracker"], ["sheet", "🧾 Spreadsheet"], ["shared", "🤝 Shared costs"]].filter(([k]) => !(k === "shared" && hubMode === "company")).map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
-    $("#budBody").innerHTML = tab === "gifts" ? "" : ({ overview: budOverview, sheet: budSheet, set: budSet, shared: budShared })[tab](T);
-    const tp = $("#paneTrack"); if (tp) { tp.hidden = tab !== "gifts"; if (tab === "gifts") renderGifts(); }   // 🎁 the gift tracker lives here now
+    const T = budTotals(), tab = (hubMode === "company" && budget.tab === "shared") || budget.tab === "gifts" ? "overview" : (budget.tab || "overview");
+    $("#budTabs").innerHTML = [["overview", "📊 Overview"], ["set", "🎯 Budget"], ["sheet", "🧾 Spreadsheet"], ["shared", "🤝 Shared costs"]].filter(([k]) => !(k === "shared" && hubMode === "company")).map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
+    $("#budBody").innerHTML = ({ overview: budOverview, sheet: budSheet, set: budSet, shared: budShared })[tab](T);
+    const tp = $("#paneTrack"); if (tp) { tp.hidden = tab !== "set"; if (tab === "set") renderGifts(); }   // 🎁 the gift tracker lives here now
+    const b2 = $("#budBody2"); if (b2) b2.innerHTML = tab === "set" ? budSetMore(T) : "";
   }
   function budOverview(T) {
     const left = T.limit - T.spent, pct = T.limit ? T.spent / T.limit : 0, now = new Date();
@@ -13280,13 +13283,16 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       <div class="card pt-card"><button type="button" class="btn btn-red btn-block" id="budCsv">Spreadsheet (Excel)</button>
         <p class="host-rem">${N ? "Choose AirDrop, Mail or Save to Files to get it onto your computer." : "It saves to your downloads."} Preview it first, then save. It opens in Excel, Google Sheets or Numbers, with a summary, your budget by category and every purchase.</p></div>`;
   }
-  function budSet(T) {
+  // 🎯 Budget tab = "Add your budget" + Gift tracker (moved in from Gifts). Other budgets sit in an optional fold underneath.
+  let budCatOpen = false;
+  function budSet(T) { return ""; }
+  function budSetMore(T) {
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
-    return `<div class="card pt-card"><h3>💰 Total holiday budget</h3>${inp("total", budget.limit, T.catSum ? "Total of categories: " + money(T.catSum) : "$")}
+    return `<details class="fold" id="budCatFold"${budCatOpen ? " open" : ""}><summary>More budgets (optional)</summary>
+      <div class="card pt-card"><h3>Total holiday budget</h3>${inp("total", budget.limit, T.catSum ? "Total of categories: " + money(T.catSum) : "$")}
         <p class="host-rem">Leave it empty and Noël adds up your category budgets for you.</p></div>
-      <div class="card pt-card"><h3>🎯 Budget for each category</h3>
-        ${BUD_CATS.map(([k, i, l]) => `<div class="bud-set-row"><span>${i} ${l}${k === "gifts" ? "<small>Same as the Gift Tracker budget</small>" : k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div>
-      <div class="card pt-card bud-facts"><h3>💡 Budget tips</h3><p>• A common rule of thumb: about half for gifts, a quarter for food and entertaining, and the rest for everything else.</p><p>• Set your gift budget per person first, then add it up.</p><p>• Keep a little "oops" money (about 10%) for last-minute extras.</p></div>`;
+      <div class="card pt-card"><h3>Budget for each category</h3>
+        ${BUD_CATS.filter(([k]) => k !== "gifts").map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>`;
   }
 
   // ---------- spreadsheet file & printed report ----------
@@ -13412,6 +13418,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const del = t.closest("[data-bdel]"); if (del) { budget.expenses = budget.expenses.filter(x => x.id !== del.dataset.bdel); saveBudget(); renderBudget(); return; }
     if (t.closest("#budCsv")) { const x = $("#xlOpen"); if (x) x.click(); }
   });
+  $("#view-budget").addEventListener("toggle", e => { if (e.target.id === "budCatFold") budCatOpen = e.target.open; }, true);
   $("#view-budget").addEventListener("change", e => {
     const t = e.target; if (t.dataset.blim == null) return;
     const v = Math.max(0, parseFloat(t.value) || 0), k = t.dataset.blim;
