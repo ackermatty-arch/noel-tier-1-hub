@@ -2160,6 +2160,9 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 .header-actions { gap: 6px !important; margin-right: 4px; }
 .cal-btn { width: auto !important; min-width: 50px; padding: 0 6px !important; }
 .cal-btn .cal-txt { white-space: nowrap; }
+
+.own-more { margin: 0; align-self: center; font-size: 12px; line-height: 1.4; letter-spacing: .04em; color: #6b5a30; text-align: left; }
+.own-more b { color: #151515; }
 </style>
 </head>
 <body>
@@ -11430,7 +11433,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${d.steps.map(r => `<div class="own-row own-r5"><input class="input" type="time" data-own="steps" data-id="${r.id}" data-k="time" value="${esc(r.time)}"><input class="input" data-own="steps" data-id="${r.id}" data-k="text" placeholder="e.g. Turkey into the oven" value="${esc(r.text)}"><button type="button" class="btn btn-ghost btn-sm own-tm" data-owntimer="${r.id}">Timer</button><button type="button" class="icon-btn" data-owndel="steps:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
         <button type="button" class="btn btn-ghost btn-block" data-ownadd="steps">+ Add a step</button></div>
       <div class="card own-card"><h4 class="ms-h">Guest notes</h4><textarea class="input" rows="3" data-ownf="notes" placeholder="Allergies, who is coming, seating ideas">${esc(d.notes)}</textarea></div>
-      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button></div>`);
+      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button><p class="own-more">Need more timers? Tap <b>Timers/Cal</b> in the top right banner.</p></div>`);
   }
   function ownDinnerDoc(id) {
     const d = ownDinners.find(x => x.id === id); if (!d) return { error: "That dinner isn't here any more" };
