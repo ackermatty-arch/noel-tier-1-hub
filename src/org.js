@@ -77,6 +77,18 @@
   function calEvents() {
     const out = org.events.map(e => Object.assign({ mine: true }, e));
     const add = (date, icon, title, time) => out.push({ date, icon, title, time: time || "", auto: true });
+    if (hubMode === "company") {   // 🏢 the office calendar shows the office plan, never family things
+      if (typeof off !== "undefined") {
+        const e = off.ev || {}, A = off.appr || {};
+        if (e.date) add(e.date, "🎉", (e.name || "Office party") + (e.venue ? ` at ${e.venue}` : ""), e.start || "");
+        if (e.date && off.acts && off.acts.santa && off.santa && off.santa.time) add(e.date, "🎅", "Santa visit" + (off.santa.who ? ` (${off.santa.who})` : ""), off.santa.time);
+        (off.costs || []).forEach(c => { if (c.orderBy && !c.ordered) add(c.orderBy, "📦", "Order: " + (c.name || c.type)); });
+        if (A.status === "sent" && A.sentAt) add(ymd(new Date(A.sentAt + (A.followDays || 3) * 864e5)), "📨", "Follow up on your approval request");
+      }
+      org.packages.forEach(p => { if (p.eta && !p.arrived) add(p.eta, "📦", p.item + " arrives"); });
+      add(`${orgYear()}-12-10`, "✉️", "Send your client cards");
+      return out.sort((a, b) => (a.date + (a.time || "99")).localeCompare(b.date + (b.time || "99")));
+    }
     const D = hostDinner(), dd = new Date(D);
     const mdp = mainDinnerPlan();
     add(ymd(dd), "🍽️", mdp ? mdp.name : "Christmas dinner", `${String(dd.getHours()).padStart(2, "0")}:${String(dd.getMinutes()).padStart(2, "0")}`);
@@ -136,6 +148,52 @@
   }
   const calDefault = () => { const n = new Date(), m = n.getMonth(); return m === 10 || m === 11 || m === 0 ? ymd(new Date(n.getFullYear(), m, 1)) : ymd(new Date(orgYear(), 11, 1)); };
   const memberEmoji = id => (org.members.find(m => m.id === id) || {}).emoji || "📌";
+
+  // ---------- 📅 the tiny calendar in the header (opens as a small popup anywhere in the app) ----------
+  let miniM = "", miniD = "";
+  function calBtnIcon() {
+    const b = $("#calBtn"); if (!b) return; const d = new Date().getDate();
+    b.innerHTML = `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><text x="12" y="18" text-anchor="middle" font-size="8.5" font-family="Cinzel, serif" stroke="none" fill="currentColor">${d}</text></svg>`;
+  }
+  function closeMini() { const el = $("#miniCal"); if (el) el.remove(); }
+  function openMiniCal() {
+    if ($("#miniCal")) { closeMini(); return; }
+    const t = new Date(); miniM = ymd(new Date(t.getFullYear(), t.getMonth(), 1)); miniD = ymd(t);
+    const el = document.createElement("div"); el.id = "miniCal"; el.className = "pr-overlay mc-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); document.body.appendChild(el);
+    renderMini();
+    const touched = () => { saveOrg(); orgSync(); renderMini(); calBtnIcon(); if ($("#view-org") && $("#view-org").classList.contains("active")) renderOrg(); };
+    el.addEventListener("click", e => {
+      const t2 = e.target;
+      if (t2 === el || t2.closest("[data-mcclose]")) { closeMini(); return; }
+      const mo = t2.closest("[data-mcmonth]"); if (mo) { const m0 = parseYmd(miniM); miniM = ymd(new Date(m0.getFullYear(), m0.getMonth() + +mo.dataset.mcmonth, 1)); renderMini(); return; }
+      const dy = t2.closest("[data-mcday]"); if (dy) { miniD = dy.dataset.mcday; renderMini(); return; }
+      const dl = t2.closest("[data-mcdel]"); if (dl) { if (confirm("Remove this event?")) { org.events = org.events.filter(x => x.id !== dl.dataset.mcdel); touched(); } return; }
+      if (t2.closest("[data-mcfull]")) { closeMini(); org.view = "cal"; org.calDay = miniD; saveOrg(); showView("org"); renderOrg(); window.scrollTo(0, 0); }
+    });
+    el.addEventListener("change", e => {
+      const mv = e.target.closest("[data-mcmove]"); if (!mv || !mv.value) return;
+      const ev = org.events.find(x => x.id === mv.dataset.mcmove); if (!ev) return;
+      ev.date = mv.value; miniD = mv.value; miniM = ymd(new Date(parseYmd(mv.value).getFullYear(), parseYmd(mv.value).getMonth(), 1)); toast("📅 Moved to " + shortDate(mv.value)); touched();
+    });
+    el.addEventListener("submit", e => {
+      e.preventDefault(); const f = e.target; if (f.id !== "mcForm") return; const ti = f.title.value.trim(); if (!ti) { toast("📅 Give it a name"); return; }
+      org.events.push({ id: uid(), date: miniD, time: f.time.value, title: ti, who: "", notes: "", remind: true }); toast("📅 Added"); touched();
+    });
+  }
+  function renderMini() {
+    const el = $("#miniCal"); if (!el) return;
+    const today = ymd(new Date()), m0 = parseYmd(miniM), y = m0.getFullYear(), mo = m0.getMonth(), first = new Date(y, mo, 1).getDay(), days = new Date(y, mo + 1, 0).getDate();
+    const evs = calEvents(), byDay = {}; evs.forEach(e => { (byDay[e.date] = byDay[e.date] || []).push(e); });
+    const cells = []; for (let i = 0; i < first; i++) cells.push(`<span class="cal-cell blank"></span>`);
+    for (let d = 1; d <= days; d++) { const k = ymd(new Date(y, mo, d)), n = (byDay[k] || []).length; cells.push(`<button type="button" class="cal-cell${k === miniD ? " sel" : ""}${k === today ? " today" : ""}${n ? " has" : ""}" data-mcday="${k}"><span>${d}</span><i>${n ? "●" : ""}</i></button>`); }
+    const list = byDay[miniD] || [], t12 = t => t ? mclock(parseYmd(miniD).setHours(...t.split(":").map(Number))) : "All day";
+    el.innerHTML = `<div class="pr-card mc-card"><div class="cal-head"><button type="button" class="icon-btn" data-mcmonth="-1" aria-label="Previous month">‹</button><b>${m0.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</b><button type="button" class="icon-btn" data-mcmonth="1" aria-label="Next month">›</button><button type="button" class="icon-btn mc-x" data-mcclose aria-label="Close">✕</button></div>
+      <div class="cal-grid">${["S", "M", "T", "W", "T", "F", "S"].map(d => `<span class="cal-dow">${d}</span>`).join("")}${cells.join("")}</div>
+      <div class="mc-day"><h4>${shortDate(miniD)}</h4>
+        ${list.length ? `<ul class="cal-list">${list.map(e => `<li><span class="cl-time">${t12(e.time)}</span><span class="cl-txt">${esc(e.title)}${e.auto ? `<small>${hubMode === "company" ? "From your plan" : "Added for you"}</small>` : `<small><label class="mc-mv">Move to <input type="date" class="input" data-mcmove="${e.id}" value="${e.date}"></label> <button type="button" class="of-lnk" data-mcdel="${e.id}">Remove</button></small>`}</span></li>`).join("")}</ul>` : `<p class="host-rem">Nothing booked.</p>`}
+        <form id="mcForm" class="mc-add" autocomplete="off"><input class="input" name="title" maxlength="60" placeholder="Add something on this day"><input class="input" name="time" type="time" aria-label="Time"><button class="btn btn-green" type="submit">Add</button></form>
+        <button type="button" class="classy-link" data-mcfull>Open the full calendar ›</button></div></div>`;
+  }
 
   // ---------- 🙏 Thank-yous ----------
   function orgThanksHtml() {

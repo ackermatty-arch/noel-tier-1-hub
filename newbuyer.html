@@ -2051,6 +2051,17 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .pl-view .pl h1 { font: 600 22px Cinzel, serif; margin: 0; } .pl-view .pl-s { color: #B08D4E; font: 600 11px Cinzel, serif; letter-spacing: .14em; text-transform: uppercase; margin: 2px 0 12px; }
 .pl-view .pl h2 { font: 600 14px Cinzel, serif; letter-spacing: .12em; text-transform: uppercase; color: #B08D4E; border-bottom: 1px solid #C9A45C; padding-bottom: 3px; margin: 16px 0 6px; }
 .pl-view .pl table { width: 100%; border-collapse: collapse; } .pl-view .pl td, .pl-view .pl th { padding: 6px 4px; border-bottom: 1px solid #ece4d2; text-align: left; vertical-align: top; font-size: 14px; } .pl-view .pl .num { text-align: right; }
+.countdown-chip[hidden] { display: none !important; }
+.cal-btn { color: var(--gold-light); }
+.xmas-pill { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 10000; background: #151515; color: #fff; border: 1px solid #C9A45C; padding: 11px 20px; font: 600 14px Cinzel, serif; letter-spacing: .06em; box-shadow: 0 6px 22px rgba(0,0,0,.35); transition: opacity .7s; cursor: pointer; }
+.xmas-pill b { color: #C9A45C; font-size: 17px; } .xmas-pill.out { opacity: 0; }
+.mc-card { padding: 14px; max-width: 360px; } .mc-card .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; } .mc-card .cal-head b { font: 600 15px Cinzel, serif; flex: 1; text-align: center; }
+.mc-card .cal-cell { border-radius: 0; } .mc-card .cal-cell.has i { color: #C9A45C; } .mc-card .cal-cell.sel { background: #151515; color: #fff; } .mc-card .cal-cell.today span { font-weight: 800; text-decoration: underline; }
+.mc-day { margin-top: 12px; border-top: 1px solid #C9A45C; padding-top: 10px; } .mc-day h4 { margin: 0 0 6px; font: 600 14px Cinzel, serif; }
+.mc-add { display: grid; grid-template-columns: 1fr 108px auto; gap: 6px; margin-top: 8px; } .mc-mv { display: inline-flex; align-items: center; gap: 6px; } .mc-mv input { padding: 4px 6px; font-size: 13px; width: 140px; }
+.mc-day .classy-link { display: block; margin: 10px auto 0; }
+.mc-card .cal-cell { aspect-ratio: 1.2 !important; } .mc-card .cal-cell.sel { background: #151515 !important; color: #fff !important; }
+.mc-day .cal-list li { display: grid; grid-template-columns: 64px 1fr; gap: 8px; text-align: left; } .mc-day .cl-txt { text-align: left; } .mc-day .cl-txt small { display: block; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -2075,7 +2086,8 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
       <button class="music-btn tray-btn" id="outBtn" aria-label="Outbox: cards waiting to send" hidden>✉️<span class="tray-count" id="outCount">0</span></button>
       <button class="music-btn tray-btn" id="trayBtn" aria-label="Print Tray">🖨️<span class="tray-count" id="trayCount">0</span></button>
       <button class="music-btn" id="musicBtn" aria-label="Holiday music">🎵</button>
-      <div class="countdown-chip" aria-live="polite">
+      <button class="music-btn cal-btn" id="calBtn" aria-label="Open my calendar" type="button"></button>
+      <div class="countdown-chip" aria-live="polite" hidden>
         <strong id="xmasDays">--</strong>
         <small id="xmasLabel">days to go</small>
       </div>
@@ -12224,6 +12236,18 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function calEvents() {
     const out = org.events.map(e => Object.assign({ mine: true }, e));
     const add = (date, icon, title, time) => out.push({ date, icon, title, time: time || "", auto: true });
+    if (hubMode === "company") {   // 🏢 the office calendar shows the office plan, never family things
+      if (typeof off !== "undefined") {
+        const e = off.ev || {}, A = off.appr || {};
+        if (e.date) add(e.date, "🎉", (e.name || "Office party") + (e.venue ? ` at ${e.venue}` : ""), e.start || "");
+        if (e.date && off.acts && off.acts.santa && off.santa && off.santa.time) add(e.date, "🎅", "Santa visit" + (off.santa.who ? ` (${off.santa.who})` : ""), off.santa.time);
+        (off.costs || []).forEach(c => { if (c.orderBy && !c.ordered) add(c.orderBy, "📦", "Order: " + (c.name || c.type)); });
+        if (A.status === "sent" && A.sentAt) add(ymd(new Date(A.sentAt + (A.followDays || 3) * 864e5)), "📨", "Follow up on your approval request");
+      }
+      org.packages.forEach(p => { if (p.eta && !p.arrived) add(p.eta, "📦", p.item + " arrives"); });
+      add(`${orgYear()}-12-10`, "✉️", "Send your client cards");
+      return out.sort((a, b) => (a.date + (a.time || "99")).localeCompare(b.date + (b.time || "99")));
+    }
     const D = hostDinner(), dd = new Date(D);
     const mdp = mainDinnerPlan();
     add(ymd(dd), "🍽️", mdp ? mdp.name : "Christmas dinner", `${String(dd.getHours()).padStart(2, "0")}:${String(dd.getMinutes()).padStart(2, "0")}`);
@@ -12283,6 +12307,52 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
   const calDefault = () => { const n = new Date(), m = n.getMonth(); return m === 10 || m === 11 || m === 0 ? ymd(new Date(n.getFullYear(), m, 1)) : ymd(new Date(orgYear(), 11, 1)); };
   const memberEmoji = id => (org.members.find(m => m.id === id) || {}).emoji || "📌";
+
+  // ---------- 📅 the tiny calendar in the header (opens as a small popup anywhere in the app) ----------
+  let miniM = "", miniD = "";
+  function calBtnIcon() {
+    const b = $("#calBtn"); if (!b) return; const d = new Date().getDate();
+    b.innerHTML = `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><text x="12" y="18" text-anchor="middle" font-size="8.5" font-family="Cinzel, serif" stroke="none" fill="currentColor">${d}</text></svg>`;
+  }
+  function closeMini() { const el = $("#miniCal"); if (el) el.remove(); }
+  function openMiniCal() {
+    if ($("#miniCal")) { closeMini(); return; }
+    const t = new Date(); miniM = ymd(new Date(t.getFullYear(), t.getMonth(), 1)); miniD = ymd(t);
+    const el = document.createElement("div"); el.id = "miniCal"; el.className = "pr-overlay mc-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); document.body.appendChild(el);
+    renderMini();
+    const touched = () => { saveOrg(); orgSync(); renderMini(); calBtnIcon(); if ($("#view-org") && $("#view-org").classList.contains("active")) renderOrg(); };
+    el.addEventListener("click", e => {
+      const t2 = e.target;
+      if (t2 === el || t2.closest("[data-mcclose]")) { closeMini(); return; }
+      const mo = t2.closest("[data-mcmonth]"); if (mo) { const m0 = parseYmd(miniM); miniM = ymd(new Date(m0.getFullYear(), m0.getMonth() + +mo.dataset.mcmonth, 1)); renderMini(); return; }
+      const dy = t2.closest("[data-mcday]"); if (dy) { miniD = dy.dataset.mcday; renderMini(); return; }
+      const dl = t2.closest("[data-mcdel]"); if (dl) { if (confirm("Remove this event?")) { org.events = org.events.filter(x => x.id !== dl.dataset.mcdel); touched(); } return; }
+      if (t2.closest("[data-mcfull]")) { closeMini(); org.view = "cal"; org.calDay = miniD; saveOrg(); showView("org"); renderOrg(); window.scrollTo(0, 0); }
+    });
+    el.addEventListener("change", e => {
+      const mv = e.target.closest("[data-mcmove]"); if (!mv || !mv.value) return;
+      const ev = org.events.find(x => x.id === mv.dataset.mcmove); if (!ev) return;
+      ev.date = mv.value; miniD = mv.value; miniM = ymd(new Date(parseYmd(mv.value).getFullYear(), parseYmd(mv.value).getMonth(), 1)); toast("📅 Moved to " + shortDate(mv.value)); touched();
+    });
+    el.addEventListener("submit", e => {
+      e.preventDefault(); const f = e.target; if (f.id !== "mcForm") return; const ti = f.title.value.trim(); if (!ti) { toast("📅 Give it a name"); return; }
+      org.events.push({ id: uid(), date: miniD, time: f.time.value, title: ti, who: "", notes: "", remind: true }); toast("📅 Added"); touched();
+    });
+  }
+  function renderMini() {
+    const el = $("#miniCal"); if (!el) return;
+    const today = ymd(new Date()), m0 = parseYmd(miniM), y = m0.getFullYear(), mo = m0.getMonth(), first = new Date(y, mo, 1).getDay(), days = new Date(y, mo + 1, 0).getDate();
+    const evs = calEvents(), byDay = {}; evs.forEach(e => { (byDay[e.date] = byDay[e.date] || []).push(e); });
+    const cells = []; for (let i = 0; i < first; i++) cells.push(`<span class="cal-cell blank"></span>`);
+    for (let d = 1; d <= days; d++) { const k = ymd(new Date(y, mo, d)), n = (byDay[k] || []).length; cells.push(`<button type="button" class="cal-cell${k === miniD ? " sel" : ""}${k === today ? " today" : ""}${n ? " has" : ""}" data-mcday="${k}"><span>${d}</span><i>${n ? "●" : ""}</i></button>`); }
+    const list = byDay[miniD] || [], t12 = t => t ? mclock(parseYmd(miniD).setHours(...t.split(":").map(Number))) : "All day";
+    el.innerHTML = `<div class="pr-card mc-card"><div class="cal-head"><button type="button" class="icon-btn" data-mcmonth="-1" aria-label="Previous month">‹</button><b>${m0.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</b><button type="button" class="icon-btn" data-mcmonth="1" aria-label="Next month">›</button><button type="button" class="icon-btn mc-x" data-mcclose aria-label="Close">✕</button></div>
+      <div class="cal-grid">${["S", "M", "T", "W", "T", "F", "S"].map(d => `<span class="cal-dow">${d}</span>`).join("")}${cells.join("")}</div>
+      <div class="mc-day"><h4>${shortDate(miniD)}</h4>
+        ${list.length ? `<ul class="cal-list">${list.map(e => `<li><span class="cl-time">${t12(e.time)}</span><span class="cl-txt">${esc(e.title)}${e.auto ? `<small>${hubMode === "company" ? "From your plan" : "Added for you"}</small>` : `<small><label class="mc-mv">Move to <input type="date" class="input" data-mcmove="${e.id}" value="${e.date}"></label> <button type="button" class="of-lnk" data-mcdel="${e.id}">Remove</button></small>`}</span></li>`).join("")}</ul>` : `<p class="host-rem">Nothing booked.</p>`}
+        <form id="mcForm" class="mc-add" autocomplete="off"><input class="input" name="title" maxlength="60" placeholder="Add something on this day"><input class="input" name="time" type="time" aria-label="Time"><button class="btn btn-green" type="submit">Add</button></form>
+        <button type="button" class="classy-link" data-mcfull>Open the full calendar ›</button></div></div>`;
+  }
 
   // ---------- 🙏 Thank-yous ----------
   function orgThanksHtml() {
@@ -14493,6 +14563,18 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   renderGuests();
   updateCountdown();
   setInterval(updateCountdown, 60000);
+  // 📅 tiny calendar button + 🎄 the daily "days until Christmas" note (family side only)
+  calBtnIcon(); $("#calBtn").addEventListener("click", openMiniCal);
+  function xmasNotify() {
+    if (hubMode !== "family") return;
+    const n = new Date(), today = new Date(n.getFullYear(), n.getMonth(), n.getDate()), key = ymd(today); if (load("xmasNoteDay", "") === key) return;
+    const xmas = new Date(n.getFullYear(), 11, 25), days = Math.round((xmas - today) / 86400000); if (days < 0 || days > 120) return;
+    save("xmasNoteDay", key);
+    const el = document.createElement("div"); el.className = "xmas-pill"; el.setAttribute("role", "status");
+    el.innerHTML = days === 0 ? "Merry Christmas!" : `<b>${days}</b> ${days === 1 ? "day" : "days"} until Christmas`;
+    el.addEventListener("click", () => el.remove()); document.body.appendChild(el); setTimeout(() => el.classList.add("out"), 6000); setTimeout(() => el.remove(), 6800);
+  }
+  setTimeout(xmasNotify, 1500);
   renderTeams();
   renderPlanner();
   renderDuties();
