@@ -35,6 +35,7 @@
     table: { shape: "rect", seats: 10, names: [], kids: false, kseats: 6, knames: [], style: "casual" },
     house: { wifi: "", pass: "", parking: "", rules: "", kids: "" }
   };
+  host.trips = host.trips || [];
   host.who = host.who || {}; host.jobs = host.jobs || []; host.jobDone = host.jobDone || {};
   const HOST_JOBS = [   // jobs on the big day: [id, job, when]
     ["greet", "Greet guests and take coats", "As guests arrive"], ["drinks", "Pour drinks and refill glasses", "All evening"], ["kids", "Keep the kids busy (games, crafts, a movie)", "All day"],
@@ -104,12 +105,12 @@
   }
 
   // ---------- screens ----------
-  const HOST_TABS = [["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["house", "📶 House info"]];
+  const HOST_TABS = [["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["house", "📶 House info"], ["away", "✈️ Traveling away"]];
   function renderHost() {
     const tab = host.tab || "guests";
     $("#hostRemind").innerHTML = `<label class="host-switch"><input type="checkbox" id="hostRemindBox" ${host.remind ? "checked" : ""}><span><b>🔔 Helpful little reminders</b><small>${host.remind ? `On. Noël will nudge you at just the right moments, timed to your dinner on ${hostFmt(hostDinner())}.` : "Turn on for well-timed nudges for cleaning, guests and the little things that are easy to forget."}</small></span></label>`;
     $("#hostTabs").innerHTML = HOST_TABS.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-htab="${k}">${l}</button>`).join("");
-    $("#hostBody").innerHTML = ({ guests: hostGuestsHtml, rooms: hostRoomsHtml, table: hostTableHtml, clean: hostCleanHtml, supplies: hostSuppliesHtml, house: hostHouseHtml })[tab]();
+    $("#hostBody").innerHTML = ({ guests: hostGuestsHtml, rooms: hostRoomsHtml, table: hostTableHtml, clean: hostCleanHtml, supplies: hostSuppliesHtml, house: hostHouseHtml, away: hostAwayHtml })[tab]();
   }
   const roomOpts = sel => `<option value="">Not staying over</option>` + host.rooms.map(r => `<option value="${r.id}" ${r.id === sel ? "selected" : ""}>${r.icon} ${esc(r.name)}</option>`).join("");
   function hostGuestsHtml() {
@@ -219,6 +220,24 @@
     return `<div class="card host-card"><p class="host-rem">${have} of ${all.length} ready</p>${HOST_SUPPLIES.concat(host.custom.length ? [["Your extras", host.custom]] : []).map(([sec, items]) => `<h4 class="shop-dept">${esc(sec)}</h4><ul class="host-list">${items.map(i => `<li><label class="${host.supplies[i] ? "on" : ""}"><input type="checkbox" data-hsup="${esc(i)}" ${host.supplies[i] ? "checked" : ""}><span>${esc(i)}</span></label></li>`).join("")}</ul>`).join("")}
       <form class="santa-kid-row" id="hostSupForm" autocomplete="off" style="margin-top:12px"><input class="input" name="sup" maxlength="40" placeholder="Add your own item" aria-label="Add your own item"><button class="btn btn-green" type="submit">Add</button></form></div>`;
   }
+  const AWAY = [
+    ["trip", "✈️", "Flights & trains", "Where to · which flight or train", "e.g. Toronto, AC 215", "datetime-local", "Leaves"],
+    ["pet", "🐾", "Pet care", "Pet", "e.g. Max the dog", "text", "Who is looking after them"],
+    ["pass", "🛂", "Passports", "Whose passport", "e.g. Mum", "date", "Expires"]
+  ];
+  function hostAwayHtml() {
+    return AWAY.map(([k, ico, title, l1, ph, t2, l2]) => {
+      const items = host.trips.filter(x => x.k === k);
+      const fmt = x => k === "trip" && x.b ? new Date(x.b).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : k === "pass" && x.b ? "expires " + x.b : x.b || "";
+      const warn = x => k === "pass" && x.b && new Date(x.b).getTime() < Date.now() + 183 * 864e5 ? ` <b class="host-pill over">${new Date(x.b).getTime() < Date.now() ? "expired" : "renew soon"}</b>` : "";
+      return `<div class="card host-card"><h3>${ico} ${title}</h3>
+        ${items.length ? `<ul class="host-list">${items.map(x => `<li data-htrip="${x.id}"><span><b>${esc(x.a)}</b>${x.b ? `<small>${esc(fmt(x))}</small>` : ""}${warn(x)}</span><button type="button" class="icon-btn" data-hdeltrip aria-label="Remove">✕</button></li>`).join("")}</ul>` : `<p class="host-rem">Nothing added yet.</p>`}
+        <form class="host-away-form" data-htripform="${k}" autocomplete="off">
+          <label><span class="meal-lab">${l1}</span><input class="input" name="a" maxlength="60" placeholder="${ph}" required></label>
+          <label><span class="meal-lab">${l2}</span><input class="input" name="b" type="${t2}" ${t2 === "text" ? 'maxlength="60"' : ""}></label>
+          <button class="btn btn-green btn-block" type="submit">Add</button></form></div>`;
+    }).join("");
+  }
   function hostHouseHtml() {
     const h = host.house, f = (k, l, ph, area) => `<label><span class="meal-lab">${l}</span>${area ? `<textarea class="input" rows="2" data-hhouse="${k}" maxlength="200" placeholder="${ph}">${esc(h[k] || "")}</textarea>` : `<input class="input" data-hhouse="${k}" maxlength="60" value="${esc(h[k] || "")}" placeholder="${ph}">`}</label>`;
     return `<div class="card host-card host-house"><p class="host-rem">Everything guests ask about, on one pretty card. Share it as a picture by text before they arrive.</p>
@@ -305,6 +324,7 @@
       return;
     }
     if (t.closest("#hostShareCard")) { shareHouseCard(); return; }
+    const dt = t.closest("[data-hdeltrip]"); if (dt) { const id = dt.closest("[data-htrip]").dataset.htrip; host.trips = host.trips.filter(x => x.id !== id); saveHost(); renderHost(); return; }
     const dj = t.closest("[data-hdeljob]"); if (dj) { const id = dj.closest("[data-hjob]").dataset.hjob; host.jobs = host.jobs.filter(j => j.id !== id); delete host.who["j:" + id]; delete host.jobDone[id]; saveHost(); renderHost(); return; }
   });
   $("#view-host").addEventListener("change", async e => {
@@ -330,6 +350,7 @@
   });
   $("#view-host").addEventListener("submit", e => {
     e.preventDefault(); const f = e.target;
+    if (f.dataset.htripform) { const n = f.a.value.trim(); if (!n) return; host.trips.push({ id: uid(), k: f.dataset.htripform, a: n, b: f.b.value.trim() }); saveHost(); renderHost(); return; }
     if (f.id === "hostGuestForm") { const n = f.gname.value.trim(); if (!n) return; host.guests.push({ id: uid(), name: n, people: 1, travel: "drive", room: "", pickup: false }); }
     if (f.id === "hostRoomForm") { const n = f.rname.value.trim(); if (!n) return; host.rooms.push({ id: uid(), name: n, icon: "🛏️", beds: 2, ready: {} }); }
     if (f.id === "hostJobForm") { const n = f.job.value.trim(); if (!n) return; host.jobs.push({ id: uid(), text: n, when: f.when.value.trim() }); }
