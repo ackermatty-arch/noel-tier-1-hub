@@ -70,7 +70,7 @@
     const od = e.target.closest("#coDash [data-ocdone]"); if (od) { const c = off.costs.find(x => x.id === od.dataset.ocdone); if (c) { c.ordered = !c.ordered; saveOff(); renderCoDash(); } }
   });
 
-  const OFF_GROUP = { event: "plan", guests: "plan", food: "plan", acts: "plan", approval: "approve", plan: "run", more: "more", saved: "more", polls: "more", potluck: "more", santa: "more", awards: "more", auction: "more", charity: "more", handover: "more" };
+  const OFF_GROUP = { event: "plan", guests: "plan", food: "plan", acts: "plan", approval: "approve", plan: "run", more: "more", saved: "more", savedone: "more", polls: "more", potluck: "more", santa: "more", awards: "more", auction: "more", charity: "more", handover: "more" };
   const OFF_SUB = [["event", "📋 Event"], ["guests", "👥 Guests"], ["food", "🍽️ Food"], ["acts", "🎭 Activities"]];
   const OFF_MORE = [["saved", "📁", "My saved plans", "Approved plans, print any time"], ["polls", "🗳️", "Votes", "Pick a date or a caterer"], ["potluck", "🥘", "Potluck", "Who brings what"], ["santa", "🎅", "Secret Santa", "Draw names"], ["awards", "🏆", "Awards", "Silly office awards"], ["auction", "🔨", "Auction", "Silent auction"], ["charity", "⭐", "Charity", "Give back"], ["handover", "📦", "Handover", "Survey, report, next year"]];
   function offMoreHtml() {
@@ -84,7 +84,7 @@
     if (G === "plan") sub = `<div class="off-sub">${OFF_SUB.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-oftab="${k}">${l}</button>`).join("")}</div>`;
     else if (G === "more" && tab !== "more") sub = `<div class="off-sub"><button type="button" class="chip" data-oftab="more">‹ More</button><span class="off-subt">${(OFF_MORE.find(m => m[0] === tab) || [0, "", ""])[1]} ${(OFF_MORE.find(m => m[0] === tab) || [0, 0, ""])[2]}</span></div>`;
     $("#offTabs").innerHTML = `<div class="off-steps">${steps.map(([g, t, n, l, done]) => `<button type="button" class="off-step${g === G ? " on" : ""}${done ? " done" : ""}" data-oftab="${t}">${n ? `<i>${done ? "✓" : n}</i>` : ""}<span>${l}</span></button>`).join("")}</div>${sub}`;
-    $("#offBody").innerHTML = ({ event: offEventHtml, guests: offGuestsHtml, polls: offPollsHtml, food: offFoodHtml, acts: offActsHtml, approval: offApprovalHtml, plan: offPlanHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml, more: offMoreHtml, saved: offSavedHtml })[tab]() + (G === "plan" && tab !== "event" ? `<button type="button" class="btn btn-gold btn-block" data-offreview style="margin-top:12px">📄 See my plan ›</button>` : "");
+    $("#offBody").innerHTML = ({ event: offEventHtml, guests: offGuestsHtml, polls: offPollsHtml, food: offFoodHtml, acts: offActsHtml, approval: offApprovalHtml, plan: offPlanHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml, more: offMoreHtml, saved: offSavedHtml, savedone: offSavedOne })[tab]() + (G === "plan" && tab !== "event" ? `<button type="button" class="btn btn-gold btn-block" data-offreview style="margin-top:12px">📄 See my plan ›</button>` : "");
   }
   const fld = (k, label, type, ph, extra) => `<label class="off-f${extra === "wide" ? " wide" : ""}"><span class="meal-lab">${label}</span>${type === "area" ? `<textarea class="input" rows="2" data-ev="${k}" maxlength="300" placeholder="${ph || ""}">${esc(off.ev[k] || "")}</textarea>` : `<input class="input" type="${type || "text"}" data-ev="${k}" value="${esc(off.ev[k] ?? "")}" placeholder="${ph || ""}" ${type === "number" ? 'inputmode="decimal" min="0"' : 'maxlength="80"'}>`}</label>`;
   function offEventHtml() {
@@ -364,7 +364,11 @@
   }
   function offSavedList() {
     const saved = off.saved || [];
-    return saved.length ? `<div class="card pt-card"><h3>📁 My saved plans</h3><ul class="host-list">${saved.slice().reverse().map(x => `<li data-plsv="${x.id}"><span><b>${esc(x.name)}</b><small>${new Date(x.at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</small></span><button type="button" class="of-lnk" data-print="offsaved:${x.id}">Print</button><button type="button" class="icon-btn" data-plsvdel aria-label="Delete">✕</button></li>`).join("")}</ul></div>` : "";
+    return saved.length ? `<div class="card pt-card"><h3>📁 My saved plans</h3><ul class="host-list">${saved.slice().reverse().map(x => `<li data-plsv="${x.id}"><span><b>${esc(x.name)}</b><small>${new Date(x.at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</small></span><button type="button" class="of-lnk of-done" data-plopen="${x.id}">Open</button><button type="button" class="of-lnk" data-print="offsaved:${x.id}">Print</button><button type="button" class="icon-btn" data-plsvdel aria-label="Delete">✕</button></li>`).join("")}</ul></div>` : "";
+  }
+  function offSavedOne() {
+    const x = (off.saved || []).find(y => y.id === off.svId); if (!x) return offSavedHtml();
+    return `<button type="button" class="chip" data-oftab="saved" style="margin-bottom:10px">‹ My saved plans</button><div class="card pt-card pl-view"><div class="pl">${x.html}</div></div><div class="send-btns"><button type="button" class="btn btn-red" data-print="offsaved:${x.id}">🖨️ Print</button><button type="button" class="btn btn-ghost" data-oftab="saved">Back</button></div>`;
   }
   function offSavedHtml() { return offSavedList() || `<div class="card pt-card"><h3>📁 My saved plans</h3><p class="host-rem">Nothing saved yet. When your plan is approved a copy is saved here automatically. You can also tap "Save a copy" on the Run it step.</p></div>`; }
   function offPlanHtml() {
@@ -388,6 +392,7 @@
     if (e.target.closest("[data-offreview]")) { offReview(); return; }
     if (!e.target.closest("#view-office")) return;
     if (e.target.closest("[data-plsave]")) { offSavePlan(); saveOff(); renderOffice(); toast("📁 Saved to My saved plans"); return; }
+    const po = e.target.closest("[data-plopen]"); if (po) { off.svId = po.dataset.plopen; off.tab = "savedone"; saveOff(); renderOffice(); window.scrollTo(0, 0); return; }
     const d = e.target.closest("[data-plsvdel]"); if (d) { if (confirm("Delete this saved plan?")) { off.saved = (off.saved || []).filter(x => x.id !== d.closest("[data-plsv]").dataset.plsv); saveOff(); renderOffice(); } }
   });
 
