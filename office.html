@@ -11994,7 +11994,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const t = e.target, save1 = () => save("giftIdeas", gi);
     const home = t.closest("[data-gihome]"); if (home) { openStore(home.dataset.gihome); return; }
     const url = t.closest("[data-giurl]"); if (url) { openStore(url.dataset.giurl); return; }
-    const c = t.closest("[data-gicat]"); if (c) { gi.cat = c.dataset.gicat; giAddFor = null; save1(); renderIdeas(); return; }
+    const c = t.closest("[data-gicat]"); if (c) { gi.cat = c.dataset.gicat; giAddFor = null; save1(); renderIdeas(); setTimeout(() => { const l = $("#giList"); if (l) l.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); return; }
     if (t.closest("[data-giclear]")) { gi.budget = "any"; gi.eco = false; gi.interest = ""; save1(); renderIdeas(); return; }
     const b = t.closest("[data-gibudget]"); if (b) { gi.budget = b.dataset.gibudget; save1(); renderIdeas(); return; }
     if (t.closest("[data-gieco]")) { gi.eco = !gi.eco; save1(); renderIdeas(); return; }
