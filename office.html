@@ -2648,6 +2648,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
           <option value="⏰">Timer</option><option value="🍗">Meat</option><option value="🥧">Pie or dessert</option><option value="🍷">Drinks</option>
           <option value="🎁">Gifts</option><option value="🕯️">Candles</option><option value="🚗">Leave or drive</option><option value="📞">Call</option>
           <option value="🧦">Stockings</option><option value="❄️">Chill</option>
+          <option value="🧝" data-fill="Move the elf">Move the elf</option><option value="🍪" data-fill="Goodies for Santa">Goodies to leave out for Santa</option><option value="⭐" data-fill="">Other (type your own)</option>
         </select>
         <input class="input" name="name" maxlength="40" placeholder="Duty name" aria-label="Duty name" required>
         <input class="input" name="minutes" type="number" min="1" max="1440" value="10" inputmode="numeric" aria-label="Minutes" required>
@@ -8062,6 +8063,10 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#dutyGrid").addEventListener("click", dutyClick);
   $("#runGrid").addEventListener("click", dutyClick);
 
+  $("#addDutyForm [name=icon]").addEventListener("change", e => {   // picking Move the elf / Santa goodies fills the name; Other leaves it for you to type
+    const o = e.target.selectedOptions[0], nm = $("#addDutyForm [name=name]");
+    if (o && o.dataset.fill !== undefined) { nm.value = o.dataset.fill; if (!o.dataset.fill) nm.focus(); }
+  });
   $("#addDutyForm").addEventListener("submit", e => {
     e.preventDefault();
     const f = e.target;
