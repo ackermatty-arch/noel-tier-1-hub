@@ -2948,15 +2948,6 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
       </div>
     </details>
 
-        <p class="tm-intro">Tap a box, set the time, press Start. Nothing here is set for you.</p>
-    <details class="card tm-box" id="presetHoliday">
-      <summary><span>Holiday reminders</span><span>▾</span></summary>
-      <div class="tm-grid" data-presets="holiday"></div>
-    </details>
-    <details class="card tm-box" id="presetKitchen">
-      <summary><span>Kitchen timers</span><span>▾</span></summary>
-      <div class="tm-grid" data-presets="kitchen"></div>
-    </details>
 
     <!-- ✏️ ALARM SOUND choice (saved per phone). Default is the song. -->
     <div class="card sound-card">
@@ -7954,6 +7945,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
      ============================================================ */
   const RING_C = 2 * Math.PI * 44; // circle circumference (r = 44)
   let duties = load(KEYS.duties, null);
+  // 🧹 the starter timers (Check the Turkey, Move the Elf…) are gone for good; clear them once from phones that still have them
+  if (Array.isArray(duties) && !load("dutiesCleaned", false)) {
+    const starter = new Set(DEFAULT_DUTIES.map(d => d.name).concat(OFFICE_DUTIES.map(d => d.name), OLD_OFFICE_DUTIES));
+    duties = duties.filter(d => d.custom || !starter.has(d.name)); save(KEYS.duties, duties); save("dutiesCleaned", true);
+  }
   // 🏢 the Office space starts with office timers (and swaps out family starters that were never changed)
   const dutyNames = l => (l || []).map(x => x.name).join("|"), idleAll = l => l.every(x => x.status === "idle" || !x.status);
   if (SPACE === "office" && Array.isArray(duties) && idleAll(duties) && [dutyNames(DEFAULT_DUTIES), OLD_OFFICE_DUTIES.join("|")].includes(dutyNames(duties))) duties = null;
