@@ -2151,7 +2151,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 .bud-next{margin-top:14px}
 .bottom-nav .nav-btn{font-size:8.5px!important;letter-spacing:0!important;padding-left:1px!important;padding-right:1px!important}
 #giftTabs{grid-template-columns:repeat(2,1fr)!important} body.co #giftTabs{display:none!important}
-#view-gifts{position:relative}.gift-tasks-btn{position:absolute;top:2px;right:0;z-index:2}.wish-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#view-gifts,#view-planner{position:relative}.gift-tasks-btn{position:absolute;top:2px;right:0;z-index:2}.wish-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .bottom-nav .nav-btn{font-size:8px!important}#invTabs button{font-size:11px;padding:0 2px}
 </style>
 </head>
@@ -2247,6 +2247,25 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
          https://drive.google.com/uc?export=download&id=YOUR_FILE_ID
          While a link is still "#", tapping it shows a friendly "coming soon" message. -->
     <div class="print-grid">
+      <!-- 🕯️ Just for you: self-care and survival tips come first -->
+      <article class="card print-card" id="selfCareCard">
+        <div class="print-thumb">🕯️</div>
+        <div class="print-info">
+          <h3>Holiday Self-Care</h3>
+          <p class="sc-desc">Five gentle reminders for a calmer, merrier season.</p>
+          <button type="button" class="btn btn-red btn-sm" data-print="selfcare">🖨️ Print</button>
+        </div>
+      </article>
+
+      <article class="card print-card">
+        <div class="print-thumb">😅</div>
+        <div class="print-info">
+          <h3 class="sv-title">Advanced Family &amp; Social Survival</h3>
+          <p class="sv-desc">Six tongue-in-cheek tips for surviving the holidays.</p>
+          <button type="button" class="btn btn-red btn-sm" data-print="survival">🖨️ Print</button>
+        </div>
+      </article>
+
       <!-- Featured bundle card (spans the full width) -->
       <article class="card print-card featured">
         <div class="print-thumb">🎉</div>
@@ -2375,6 +2394,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
        VIEW 2 — HOLIDAY PLANNER & CHECKLIST
        ============================================================ -->
   <section class="view" id="view-planner" aria-labelledby="plannerTitle">
+    <button type="button" class="btn btn-green btn-sm gift-tasks-btn" data-goview="gifts">Gifts ›</button>
     <h2 class="view-title" id="plannerTitle" data-co-title="Event Coordinator">Plan</h2>
     <p class="view-intro" data-co-desc="Your party plan, approvals, vendors and budget in one place. Everything saves automatically.">Travel plans, guests, rooms, seating, cleaning and supplies, all in one place, so the house is ready before the doorbell rings.</p>
 
@@ -2481,29 +2501,6 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 
     
     </details>
-
-    <div class="section-label">Just for You</div>
-
-    <!-- ✏️ SELF-CARE PRINTABLES: replace href="#" with your PDF links -->
-    <div class="print-grid">
-      <article class="card print-card" id="selfCareCard">
-        <div class="print-thumb">🕯️</div>
-        <div class="print-info">
-          <h3>Holiday Self-Care</h3>
-          <p class="sc-desc">Five gentle reminders for a calmer, merrier season.</p>
-          <button type="button" class="btn btn-red btn-sm" data-print="selfcare">🖨️ Print</button>
-        </div>
-      </article>
-
-      <article class="card print-card">
-        <div class="print-thumb">😅</div>
-        <div class="print-info">
-          <h3 class="sv-title">Advanced Family &amp; Social Survival</h3>
-          <p class="sv-desc">Six tongue-in-cheek tips for surviving the holidays.</p>
-          <button type="button" class="btn btn-red btn-sm" data-print="survival">🖨️ Print</button>
-        </div>
-      </article>
-    </div>
 
     <details class="fold" id="safeFold"><summary>Backup, spreadsheet &amp; privacy</summary>
     
