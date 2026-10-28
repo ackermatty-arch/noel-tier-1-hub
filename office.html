@@ -13270,9 +13270,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function renderOffice() {
     renderOffMenu();
     const tab = off.tab || "event";
-    $("#offTabs").innerHTML = [["event", "📋 Event"], ["guests", "👥 Guests"], ["polls", "🗳️ Votes"], ["food", "🍽️ Food"], ["approval", "📨 Approval"], ["potluck", "🥘 Potluck"], ["santa", "🎅 Secret Santa"], ["awards", "🏆 Awards"], ["auction", "🔨 Auction"], ["charity", "⭐ Charity"], ["handover", "📦 Handover"]].map(([k, l]) =>
+    $("#offTabs").innerHTML = [["event", "📋 Event"], ["guests", "👥 Guests"], ["polls", "🗳️ Votes"], ["food", "🍽️ Food"], ["approval", "📨 Approval"], ["plan", "📄 Plan"], ["potluck", "🥘 Potluck"], ["santa", "🎅 Secret Santa"], ["awards", "🏆 Awards"], ["auction", "🔨 Auction"], ["charity", "⭐ Charity"], ["handover", "📦 Handover"]].map(([k, l]) =>
       `<button type="button" class="chip${k === tab ? " on" : ""}" data-oftab="${k}">${l}${k === "approval" ? ` <span class="ap-dot ${off.appr.status}"></span>` : ""}</button>`).join("");
-    $("#offBody").innerHTML = ({ event: offEventHtml, guests: offGuestsHtml, polls: offPollsHtml, food: offFoodHtml, approval: offApprovalHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml })[tab]();
+    $("#offBody").innerHTML = ({ event: offEventHtml, guests: offGuestsHtml, polls: offPollsHtml, food: offFoodHtml, approval: offApprovalHtml, plan: offPlanHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml })[tab]();
   }
   const fld = (k, label, type, ph, extra) => `<label class="off-f${extra === "wide" ? " wide" : ""}"><span class="meal-lab">${label}</span>${type === "area" ? `<textarea class="input" rows="2" data-ev="${k}" maxlength="300" placeholder="${ph || ""}">${esc(off.ev[k] || "")}</textarea>` : `<input class="input" type="${type || "text"}" data-ev="${k}" value="${esc(off.ev[k] ?? "")}" placeholder="${ph || ""}" ${type === "number" ? 'inputmode="decimal" min="0"' : 'maxlength="80"'}>`}</label>`;
   function offEventHtml() {
@@ -13301,7 +13301,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
           <button class="btn btn-green btn-block" type="submit">➕ Add cost</button></form>
         ${offNear("Find vendors near me", [["🎧 DJs", "DJ for parties"], ["📸 Photo booth rentals", "photo booth rental"], ["🪑 Party rentals (tables, chairs)", "party rentals"], ["💐 Florists", "florist"]].concat(off.ev.who === "family" ? [["🎅 Santa for hire", "santa claus for hire"], ["🎈 Kids' entertainers", "kids party entertainer"]] : []))}</div>
       <div class="card pt-card"><h3>📝 Notes</h3>${fld("notes", "", "area", "Anything the approver should know, e.g. half-day Friday, partners welcome")}</div>
-      <button type="button" class="btn btn-red btn-block" data-oftab="approval">📨 Next: send it for approval ›</button>`;
+      <button type="button" class="btn btn-red btn-block" data-offreview>📄 See my plan ›</button>`;
   }
 
   // ---------- 📨 approval request ----------
@@ -13489,6 +13489,88 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (f.id === "svForm") { e.preventDefault(); e.stopImmediatePropagation(); offSurvey().push({ id: uid(), rate: +f.rate.value, next: f.next.value.trim() }); again(); return; }
   }, true);
 
+  // ---------- 📄 the plan: review card → approval → final plan ----------
+  const OFF_FOOD_LABEL = { apps: "Appetizers we make", catered: "Catered or ordered in", potluck: "Potluck", venue: "The venue provides it" };
+  const offMin = m => { const x = ((m % 1440) + 1440) % 1440; return offTime(String(Math.floor(x / 60)).padStart(2, "0") + ":" + String(x % 60).padStart(2, "0")); };
+  function offRunOfShow() {
+    const e = off.ev, [sh, sm] = (e.start || "17:00").split(":").map(Number), [eh, em] = (e.end || "21:00").split(":").map(Number);
+    const S = sh * 60 + sm, E = Math.max(S + 60, eh * 60 + em), F = offFoodCfg().style, out = [], add = (m, t) => out.push([m, t]);
+    add(S - 120, "Set up the room: tables, chairs, decorations and music");
+    if (F === "catered") add(S - 60, "Caterer arrives, or pick up the food");
+    if (F === "apps") add(S - 60, "Prepare and plate the appetizers");
+    add(S - 30, "Set out food, drinks, plates and name tags");
+    add(S, "Doors open and welcome everyone");
+    if (off.acts.booth) add(S + 15, "Photo booth opens");
+    let t = S + 20;
+    if (F) { add(t, "Food is served"); t += 40; }
+    [["games", "Games and icebreakers"], ["sweater", "Ugly sweater contest and voting"], ["gifts", "Gift exchange"], ["awards", "Silly Office Awards"], ["charity", "Charity drive update and thank-you"]].forEach(([k, l]) => { if (off.acts[k] && t < E - 30) { add(t, l); t += 30; } });
+    add(E - 20, "Thank everyone, group photo and leftovers");
+    add(E, "Party ends");
+    add(E + 30, "Clean up and return borrowed items");
+    return out.sort((a, b) => a[0] - b[0]).map(([m, t2]) => [offMin(m), t2]);
+  }
+  function offApprovedLog() { return off.appr.log.slice().reverse().find(l => l.s === "approved"); }
+  function offLastNote() { const l = off.appr.log.slice().reverse().find(l => l.s === "changes"); return l ? l.note : ""; }
+  function offPlanBody() {
+    const e = off.ev, hc = Math.max(1, +e.headcount || 1), total = offTotal(), F = offFoodCfg().style, g = offGuests(), t = offDietTally();
+    const row = (k, v) => v ? `<tr><td style="width:130px"><b>${k}</b></td><td>${v}</td></tr>` : "";
+    return `<h1>${esc(e.name || "Holiday Party")}</h1><p class="pl-s">${esc(family || "")}${family ? " · " : ""}${offYear()} · Event plan</p>
+      <table>${row("Date", e.date ? esc(offDate(e.date)) + (e.start ? `, ${offTime(e.start)}–${offTime(e.end)}` : "") : "")}${row("Venue", esc([e.venue, e.address].filter(Boolean).join(", ")))}${row("Guests", hc + (offWho() ? ` · ${esc(offWho()[2])}` : ""))}${row("Organized by", esc(e.organizer))}${row("Food", F ? esc(OFF_FOOD_LABEL[F]) : "")}${row("Theme / dress", esc([e.theme, e.dress].filter(Boolean).join(" · ")))}${row("Activities", esc(offActs().join(" · ")))}${row("Budget", `${money(total)} planned (about ${money(Math.round(total / hc * 100) / 100)} per person)${+e.budget ? ` of ${money(+e.budget)} approved` : ""}`)}</table>
+      <h2>Run of show</h2><table>${offRunOfShow().map(([a, b]) => `<tr><td style="width:90px"><b>${a}</b></td><td>${esc(b)}</td></tr>`).join("")}</table>
+      ${off.costs.length ? `<h2>Orders and vendors</h2><table><tr><th>What</th><th>Vendor</th><th>Contact</th><th>Order by</th><th class="num">Cost</th></tr>${off.costs.map(c => `<tr><td>${esc(c.type)}</td><td>${esc(c.name || "")}</td><td>${esc([c.contact, c.url].filter(Boolean).join(" · "))}</td><td>${c.orderBy ? esc(offDate(c.orderBy, { month: "short", day: "numeric" })) + (c.ordered ? " ✓" : "") : ""}</td><td class="num">${money(+c.cost || 0)}</td></tr>`).join("")}</table>` : ""}
+      ${g.length ? `<h2>Guests</h2><p>${g.filter(x => x.status === "yes").length} yes · ${g.filter(x => x.status === "remote").length} remote · ${g.filter(x => x.status === "pending").length} waiting · ${g.filter(x => x.status === "no").length} no. ${offAttend()} expected, counting plus-ones.</p>${Object.keys(t).length ? `<p><b>Dietary needs:</b> ${GS_DIET.filter(([k]) => t[k]).map(([k, l]) => `${t[k]} ${l.toLowerCase()}`).join(", ")}</p>` : ""}` : ""}
+      ${e.notes ? `<h2>Notes</h2><p>${esc(e.notes)}</p>` : ""}`;
+  }
+  const OFF_PLAN_CSS = `.pl{font:10.5pt/1.45 Georgia,serif;color:#222} .pl h1{font-size:20pt;margin:0;color:#1E3A2F} .pl .pl-s{color:#8a6d3b;font:600 8.5pt sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:2px 0 12px} .pl h2{font-size:12.5pt;color:#1E3A2F;border-bottom:1.5px solid #B8935A;margin:14px 0 5px;padding-bottom:2px} .pl table{width:100%;border-collapse:collapse} .pl td,.pl th{padding:4px 6px;border-bottom:1px solid #e6dcc6;text-align:left;vertical-align:top;font-size:10pt} .pl .num{text-align:right}`;
+  function offPlanDoc() { return { title: "Event plan", css: OFF_PLAN_CSS, html: `<div class="pl">${offPlanBody()}<p class="pl-s" style="margin-top:16px">Made with Noël Tier 1 Hub · Office Edition</p></div>`, margin: 0.5, file: "Event-Plan" }; }
+  function offSavedDoc(id) { const s = (off.saved || []).find(x => x.id === id); return s ? { title: s.name, css: OFF_PLAN_CSS, html: `<div class="pl">${s.html}<p class="pl-s" style="margin-top:16px">Made with Noël Tier 1 Hub · Office Edition</p></div>`, margin: 0.5, file: "Event-Plan" } : null; }
+  function offSavePlan() {
+    off.saved = off.saved || []; const ap = offApprovedLog();
+    off.saved.push({ id: uid(), at: Date.now(), name: (off.ev.name || "Holiday Party") + (ap ? ` · approved ${new Date(ap.at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}` : ""), html: offPlanBody() });
+    off.saved = off.saved.slice(-10);
+  }
+  function offReview() {
+    const old = document.getElementById("planReview"); if (old) old.remove();
+    const e = off.ev, hc = Math.max(1, +e.headcount || 1), total = offTotal(), lim = +e.budget || 0, F = offFoodCfg().style;
+    const missing = [!e.date && "a date", !e.name && "a name"].filter(Boolean);
+    const el = document.createElement("div"); el.id = "planReview"; el.className = "pr-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+    el.innerHTML = `<div class="pr-card"><p class="menu-star">✦</p><h3 class="pr-title">Your plan</h3><p class="pr-sub">Check the details. Next you will write the approval request${e.approver ? ` for ${esc(e.approver)}` : ""}.</p>
+      <div class="pr-meal"><h4>${esc(e.name || "Holiday Party")}</h4>
+        <p class="pr-when">${missing.length ? `Add ${missing.join(" and ")} on the Event tab first.` : `<b>${hc}</b> guest${hc > 1 ? "s" : ""}${offWho() ? ` · ${esc(offWho()[2])}` : ""}<br>${esc(offDate(e.date))}${e.start ? `<br>${offTime(e.start)} to ${offTime(e.end)}` : ""}`}</p>
+        ${e.venue ? `<p class="pr-add"><b>Where</b></p><ul class="pr-steps"><li><span>${esc(e.venue)}</span></li></ul>` : ""}
+        ${F ? `<p class="pr-add"><b>Food</b></p><ul class="pr-steps"><li><span>${esc(OFF_FOOD_LABEL[F])}</span></li></ul>` : ""}
+        ${offActs().length ? `<p class="pr-add"><b>Activities</b></p><ul class="pr-steps">${offActs().map(a => `<li><span>${esc(a)}</span></li>`).join("")}</ul>` : ""}
+        <p class="pr-add"><b>Cost</b></p><ul class="pr-steps"><li><span>${money(total)} planned, about ${money(Math.round(total / hc * 100) / 100)} per person${lim ? `<br><small>${total > lim ? `${money(total - lim)} over` : `${money(lim - total)} under`} the approved ${money(lim)}</small>` : ""}</span></li></ul></div>
+      <div class="pr-btns"><button type="button" class="btn btn-ghost" data-prback>Go back</button><button type="button" class="btn btn-gold" data-prok ${missing.length ? "disabled" : ""}>Confirm</button></div></div>`;
+    document.body.appendChild(el);
+    el.addEventListener("click", ev => {
+      if (ev.target === el || ev.target.closest("[data-prback]")) { el.remove(); return; }
+      if (ev.target.closest("[data-prok]")) { el.remove(); off.tab = "approval"; saveOff(); showView("office"); renderOffice(); window.scrollTo(0, 0); toast("✅ Plan confirmed. Now send it for approval"); }
+    });
+  }
+  function offPlanHtml() {
+    const st = off.appr.status, e = off.ev, ap = offApprovedLog(), saved = off.saved || [];
+    const savedHtml = saved.length ? `<div class="card pt-card"><h3>📁 My saved plans</h3><ul class="host-list">${saved.slice().reverse().map(s => `<li data-plsv="${s.id}"><span><b>${esc(s.name)}</b><small>${new Date(s.at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</small></span><button type="button" class="of-lnk" data-print="offsaved:${s.id}">Print</button><button type="button" class="icon-btn" data-plsvdel aria-label="Delete">✕</button></li>`).join("")}</ul></div>` : "";
+    if (st === "draft") return `<div class="card pt-card"><h3>📄 Your plan</h3><p class="host-rem">Review it, confirm it, then send it for approval. Your final plan appears here once it's approved.</p><button type="button" class="btn btn-gold btn-block" data-offreview>See my plan ›</button></div>` + savedHtml;
+    if (st === "sent") return `<div class="card pt-card ap-status sent"><div class="ap-big">📨</div><div><b>Waiting for ${esc(e.approver || "approval")}</b><small>Your final plan appears here as soon as you tap "It's approved" on the Approval tab.</small></div></div><button type="button" class="btn btn-ghost btn-block" data-oftab="approval">Go to Approval ›</button>` + savedHtml;
+    if (st === "changes") return `<div class="card pt-card ap-status changes"><div class="ap-big">✏️</div><div><b>Changes requested</b><small>${offLastNote() ? esc(offLastNote()) : "Update the plan, then send the new version."}</small></div></div>
+      <div class="send-btns"><button type="button" class="btn btn-ghost" data-oftab="event">✏️ Edit the plan</button><button type="button" class="btn btn-gold" data-offreview>Review and resend ›</button></div>` + savedHtml;
+    const run = offRunOfShow(), tot = offTotal();
+    return `<div class="card pt-card ap-status approved"><div class="ap-big">✅</div><div><b>Approved${ap ? ` on ${new Date(ap.at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}` : ""}</b><small>${e.approver ? `by ${esc(e.approver)}. ` : ""}Here is your plan. Book and order everything below.</small></div></div>
+      <div class="card pt-card"><h3>${esc(e.name || "Holiday Party")}</h3><p class="host-rem">${e.date ? esc(offDate(e.date)) : "Date to be set"}${e.start ? `<br>${offTime(e.start)} to ${offTime(e.end)}` : ""}${e.venue ? `<br>${esc(e.venue)}` : ""}</p></div>
+      <div class="card pt-card"><h3>🕒 Run of show</h3><ul class="cal-list">${run.map(([a, b]) => `<li><span class="cl-time">${a}</span><span class="cl-txt">${esc(b)}</span></li>`).join("")}</ul></div>
+      <div class="card pt-card"><h3>🛒 Book and order</h3>${off.costs.map(c => `<div class="off-cost" data-oc="${c.id}"><div><b>${esc(c.type)}</b>${c.name ? ` · ${esc(c.name)}` : ""}${c.contact ? `<small>📞 ${esc(c.contact)}</small>` : ""}${offOrderHtml(c)}</div><span>${money(+c.cost || 0)}</span><i></i></div>`).join("") || `<p class="host-rem">No costs added yet. Add vendors on the Event tab.</p>`}${off.costs.length ? `<div class="off-cost total"><div><b>Total</b></div><span>${money(tot)}</span><i></i></div>` : ""}
+        <button type="button" class="btn btn-ghost btn-block" data-oftab="food" style="margin-top:8px">🍽️ Open the Food plan ›</button></div>
+      <div class="card pt-card"><h3>👥 Guests</h3><p class="host-rem">${offGuests().length ? `<b>${offAttend()}</b> expected.` : "No guest list yet."}</p>${offDietLine()}<button type="button" class="btn btn-ghost btn-block" data-oftab="guests">Open Guests ›</button></div>
+      <div class="send-btns"><button type="button" class="btn btn-red" data-print="offplan">🖨️ Print the plan</button><button type="button" class="btn btn-gold" data-plsave>📁 Save a copy</button></div>` + savedHtml;
+  }
+  document.addEventListener("click", e => {
+    if (e.target.closest("[data-offreview]")) { offReview(); return; }
+    if (!e.target.closest("#view-office")) return;
+    if (e.target.closest("[data-plsave]")) { offSavePlan(); saveOff(); renderOffice(); toast("📁 Saved to My saved plans"); return; }
+    const d = e.target.closest("[data-plsvdel]"); if (d) { if (confirm("Delete this saved plan?")) { off.saved = (off.saved || []).filter(x => x.id !== d.closest("[data-plsv]").dataset.plsv); saveOff(); renderOffice(); } }
+  });
+
   // ---------- 📦 handover ----------
   function offHandoverHtml() {
     return offSurveyHtml() + `<div class="card pt-card"><h3>📝 Wrapping up</h3><p class="host-rem">Notes for next year's coordinator (even if that's you!).</p>
@@ -13594,7 +13676,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       location.href = INVITE.mailHref(off.ev.approverEmail || "", L.subject, L.body); setTimeout(apMarkSent, 800); return;
     }
     if (t.closest("#apCopy")) { const L = offLetter(off.appr.status === "changes"); try { await navigator.clipboard.writeText(L.subject + "\n\n" + L.body); toast("📋 Copied! Paste it into an email or message"); } catch (err) { toast("Couldn't copy on this device"); } if (off.appr.status === "draft" || off.appr.status === "changes") setTimeout(() => { if (confirm("Mark the request as sent?")) apMarkSent(); }, 400); return; }
-    const as = t.closest("[data-apset]"); if (as) { const note = ($("#apNote") || {}).value || ""; off.appr.status = as.dataset.apset; off.appr.log.push({ at: Date.now(), s: as.dataset.apset, note: note.trim() }); saveOff(); offSync(); renderOffice(); toast(as.dataset.apset === "approved" ? "🎉 Approved! Time to book everything" : "✏️ Noted. Update the plan, then send the new version"); return; }
+    const as = t.closest("[data-apset]"); if (as) { const note = ($("#apNote") || {}).value || ""; off.appr.status = as.dataset.apset; off.appr.log.push({ at: Date.now(), s: as.dataset.apset, note: note.trim() }); if (as.dataset.apset === "approved") offSavePlan(); off.tab = "plan"; saveOff(); offSync(); renderOffice(); toast(as.dataset.apset === "approved" ? "🎉 Approved! Your plan is ready" : "✏️ Noted. Update the plan, then send the new version"); return; }
     if (t.closest("#potShare")) { NoelMedia.share(new Blob([potText()], { type: "text/plain" }), "Potluck.txt", potText()).catch(() => {}); return; }
     if (t.closest("#offNewYear")) {
       if (!confirm("Start next year's party? This year's details are saved as \"Last year\" (with the vendors and your notes), then the event, approval, potluck and award winners are cleared.")) return;
@@ -14033,6 +14115,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     else if (key === "offfood") d = offFoodDoc();
     else if (key === "bidsheets") d = bidSheetsDoc();
     else if (key === "aucwinners") d = aucWinnersDoc();
+    else if (key === "offplan") d = offPlanDoc();
+    else if (key.startsWith("offsaved:")) d = offSavedDoc(key.slice(9));
     else if (key === "labels" || key === "return") d = labelDoc(key);
     else if (key === "calendar") d = calendarDoc();
     else if (key === "mastershop") d = masterShopDoc();

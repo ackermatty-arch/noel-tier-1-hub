@@ -33,6 +33,8 @@
     else if (key === "offfood") d = offFoodDoc();
     else if (key === "bidsheets") d = bidSheetsDoc();
     else if (key === "aucwinners") d = aucWinnersDoc();
+    else if (key === "offplan") d = offPlanDoc();
+    else if (key.startsWith("offsaved:")) d = offSavedDoc(key.slice(9));
     else if (key === "labels" || key === "return") d = labelDoc(key);
     else if (key === "calendar") d = calendarDoc();
     else if (key === "mastershop") d = masterShopDoc();
