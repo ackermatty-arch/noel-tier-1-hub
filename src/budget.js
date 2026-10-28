@@ -91,8 +91,9 @@
   function renderBudget() {
     budRecordDay();
     const T = budTotals(), tab = hubMode === "company" && budget.tab === "shared" ? "overview" : (budget.tab || "overview");
-    $("#budTabs").innerHTML = [["set", "🎯 Budgets"], ["overview", "📊 Overview"], ["sheet", "🧾 Spreadsheet"], ["shared", "🤝 Shared costs"]].filter(([k]) => !(k === "shared" && hubMode === "company")).map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
-    $("#budBody").innerHTML = ({ overview: budOverview, sheet: budSheet, set: budSet, shared: budShared })[tab](T);
+    $("#budTabs").innerHTML = [["set", "🎯 Budgets"], ["overview", "📊 Overview"], ["gifts", "🎁 Gift tracker"], ["sheet", "🧾 Spreadsheet"], ["shared", "🤝 Shared costs"]].filter(([k]) => !(k === "shared" && hubMode === "company")).map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
+    $("#budBody").innerHTML = tab === "gifts" ? "" : ({ overview: budOverview, sheet: budSheet, set: budSet, shared: budShared })[tab](T);
+    const tp = $("#paneTrack"); if (tp) { tp.hidden = tab !== "gifts"; if (tab === "gifts") renderGifts(); }   // 🎁 the gift tracker lives here now
   }
   function budOverview(T) {
     const left = T.limit - T.spent, pct = T.limit ? T.spent / T.limit : 0, now = new Date();

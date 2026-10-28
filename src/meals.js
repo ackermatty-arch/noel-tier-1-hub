@@ -658,7 +658,7 @@
 
   // ---- 🛒 master shopping list: the chosen recipes merged into one list, repeats added up ----
   let msSel = load("masterSel", null);               // null = whichever dinners you've planned; or the ids you picked
-  let msTicks = load("masterTicks", {});             // what's already in the buggy
+  let msTicks = load("masterTicks", {});             // what's already in the cart
   let msOpen = false, msHide = false;
   const FRAC_N = { "½": .5, "¼": .25, "¾": .75, "⅓": 1 / 3, "⅔": 2 / 3 };
   const msNum = x => { const r = Math.round(x * 100) / 100; return Number.isInteger(r) ? String(r) : String(r); };
@@ -692,7 +692,7 @@
     b.groups.map(([d, its]) => `\n${d.toUpperCase()}\n` + its.map(i => `${i.on ? "☑" : "☐"} ${i.q ? i.q + " " : ""}${i.name}`).join("\n")).join("\n");
   function msStatsHtml(b) {
     const pct = b.items.length ? Math.round(100 * b.done / b.items.length) : 0;
-    return `<div class="ms-count"><b>${b.done}</b> of ${b.items.length} in the buggy</div><div class="ms-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+    return `<div class="ms-count"><b>${b.done}</b> of ${b.items.length} in the cart</div><div class="ms-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
       <div class="ms-money"><span>Estimated total <b>${cad0(b.total)}</b></span><span>Still to buy <b>${cad0(b.left)}</b></span></div>`;
   }
   function renderMasterShop() {
@@ -719,7 +719,7 @@
         <button type="button" class="btn btn-ghost" data-mscopy>Copy list</button>
         <button type="button" class="btn btn-ghost" id="msHide" aria-pressed="${msHide}">${msHide ? "Show ticked items" : "Hide ticked items"}</button>
       </div>
-      <div class="shop-note">${currencySwitchHtml()}Rough ${curName()} prices. Tick each item as it goes in your buggy.</div>
+      <div class="shop-note">${currencySwitchHtml()}Rough ${curName()} prices. Tick each item as it goes in your cart.</div>
       <div class="card ms-list${msHide ? " hide-on" : ""}">` + b.groups.map(([d, its]) => `<h4 class="ms-dept">${esc(d)}</h4><ul class="ms-items">` + its.map(i =>
         `<li class="${i.on ? "on" : ""}"><label><input type="checkbox" data-mstick="${esc(i.key)}" ${i.on ? "checked" : ""}><span class="ms-t">${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}${i.meals.length > 1 ? `<small>used in ${i.meals.length} recipes</small>` : `<small>${esc(i.meals[0])}</small>`}</span></label></li>`).join("") + `</ul>`).join("") +
       `<div class="send-btns"><button type="button" class="btn btn-ghost" id="msClear">Untick everything</button></div></div>` : `<div class="card"><p class="review-sub">Tap a recipe above to start your list.</p></div>`);
@@ -837,7 +837,7 @@
     box.innerHTML = `<button type="button" class="meal-back" data-svlistback>‹ My saved menus</button><h3 class="meal-title">${esc(s.names.join(" and "))}</h3>
       <div class="card cf-menu"><h4 class="ms-h">Menu</h4>${s.menu.map(m => `<div class="cf-dish"><h4>${esc(m.name)}</h4><p class="cf-when">${esc(whenLong(m.at))} · ${m.guests} guest${m.guests > 1 ? "s" : ""}</p>` +
         m.courses.map(([k, items]) => `<p class="cf-course"><b>${esc(k)}</b> ${items.map(esc).join(" <i>·</i> ")}</p>`).join("") + `</div>`).join("")}</div>
-      <div class="card cf-stats"><div class="cf-big"><small>Estimated cost to buy</small><b>${cad0(s.toBuy)}</b></div><p class="cf-fine" id="svCount">${done} of ${n} in the buggy</p></div>
+      <div class="card cf-stats"><div class="cf-big"><small>Estimated cost to buy</small><b>${cad0(s.toBuy)}</b></div><p class="cf-fine" id="svCount">${done} of ${n} in the cart</p></div>
       <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="savedmenu:${s.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-svcopy="${s.id}">Copy list</button></div>
       <div class="card ms-list">` + buy.map(([d, its]) => `<h4 class="ms-dept">${esc(d)}</h4><ul class="ms-items">` + its.map(i =>
         `<li class="${s.bought[i.key] ? "on" : ""}"><label><input type="checkbox" data-svtick="${esc(i.key)}" ${s.bought[i.key] ? "checked" : ""}><span class="ms-t">${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}</span></label></li>`).join("") + `</ul>`).join("") +
@@ -883,7 +883,7 @@
       if (t.checked) s.bought[t.dataset.svtick] = 1; else delete s.bought[t.dataset.svtick];
       saveSaved(); t.closest("li").classList.toggle("on", t.checked);
       const buy = svBuyList(s), n = buy.reduce((a, [, its]) => a + its.length, 0), d = buy.reduce((a, [, its]) => a + its.filter(i => s.bought[i.key]).length, 0);
-      const c = $("#svCount"); if (c) c.textContent = `${d} of ${n} in the buggy`;
+      const c = $("#svCount"); if (c) c.textContent = `${d} of ${n} in the cart`;
     }
   });
 
@@ -898,7 +898,7 @@
   const ownNum = v => { const n = parseFloat(String(v).replace(/[^0-9.]/g, "")); return isFinite(n) ? n : 0; };
   const ownTotals = d => { let total = 0, spent = 0; d.shop.forEach(i => { const v = ownNum(i.price); total += v; if (i.got) spent += v; }); const lim = ownNum(d.limit); return { total, spent, left: total - spent, lim, over: lim ? total - lim : 0 }; };
   const ownName = d => d.title.trim() || (hubMode === "company" ? "My own event" : "My own dinner");
-  const coWords = s => hubMode !== "company" ? s : [["The dinner", "The event"], ["e.g. Christmas Day at our house", "e.g. Team lunch on Dec 18"], [">Menu<", ">Menu or catering order<"], ["Shopping list and prices", "Orders, supplies and prices"], ["Type each item and its price. Tick it when it is in your buggy.", "Type each order or supply and its price. Tick it when it is ordered or picked up."], ["In the buggy", "Ordered or picked up"], ["My budget for this dinner (optional)", "Approved budget for this event (optional)"], ["Cooking timeline", "Run of show"], ["Type a time and a step. Tap Timer to set a countdown for it (up to 24 hours ahead).", "Type a time and a step, like caterer arrives or doors open. Tap Timer to set a countdown for it."], ["Guest notes", "Notes"], [">Shopping list<", ">Orders and supplies<"], ["Allergies, who is coming, seating ideas", "Dietary needs, RSVPs, who is helping"], ["Delete this dinner", "Delete this event"], ["My own dinner", "My own event"]].reduce((a, [f, t]) => a.split(f).join(t), s);
+  const coWords = s => hubMode !== "company" ? s : [["The dinner", "The event"], ["e.g. Christmas Day at our house", "e.g. Team lunch on Dec 18"], [">Menu<", ">Menu or catering order<"], ["Shopping list and prices", "Orders, supplies and prices"], ["Type each item and its price. Tick it when it is in your cart at the grocery store.", "Type each order or supply and its price. Tick it when it is ordered or picked up."], ["In the cart", "Ordered or picked up"], ["My budget for this dinner (optional)", "Approved budget for this event (optional)"], ["Cooking timeline", "Run of show"], ["Type a time and a step. Tap Timer to set a countdown for it (up to 24 hours ahead).", "Type a time and a step, like caterer arrives or doors open. Tap Timer to set a countdown for it."], ["Guest notes", "Notes"], [">Shopping list<", ">Orders and supplies<"], ["Allergies, who is coming, seating ideas", "Dietary needs, RSVPs, who is helping"], ["Delete this dinner", "Delete this event"], ["My own dinner", "My own event"]].reduce((a, [f, t]) => a.split(f).join(t), s);
   function ownTotHtml(d) {
     const t = ownTotals(d);
     return `<b>${cad(t.total)}</b> total · ${cad(t.spent)} bought · ${cad(t.left)} still to buy` + (t.lim ? `<br>${t.over > 0 ? `<span class="own-over">${cad(t.over)} over your ${cad(t.lim)} budget</span>` : `${cad(-t.over)} left of your ${cad(t.lim)} budget`}` : "");
@@ -919,9 +919,9 @@
       <div class="card own-card"><h4 class="ms-h">Menu</h4><p class="cf-fine">One dish per line.</p>${OWN_COURSES.map(([k, n]) => `<label class="calc-field"><span>${n}</span><textarea class="input" rows="2" data-ownc="${k}" placeholder="Type your dishes">${esc(d.course[k] || "")}</textarea></label>`).join("")}</div>
       <div class="card own-card"><h4 class="ms-h">Who is bringing what</h4>${d.bring.map(r => `<div class="own-row own-r2"><input class="input" data-own="bring" data-id="${r.id}" data-k="who" placeholder="Name" value="${esc(r.who)}"><input class="input" data-own="bring" data-id="${r.id}" data-k="dish" placeholder="Dish" value="${esc(r.dish)}"><button type="button" class="icon-btn" data-owndel="bring:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
         <button type="button" class="btn btn-ghost btn-block" data-ownadd="bring">+ Add a person</button></div>
-      <div class="card own-card"><h4 class="ms-h">Shopping list and prices</h4><p class="cf-fine">Type each item and its price. Tick it when it is in your buggy.</p>
+      <div class="card own-card"><h4 class="ms-h">Shopping list and prices</h4><p class="cf-fine">Type each item and its price. Tick it when it is in your cart at the grocery store.</p>
         <div class="cf-stats own-tot" id="ownTot">${ownTotHtml(d)}</div>
-        ${d.shop.map(r => `<div class="own-row own-r4"><input type="checkbox" data-own="shop" data-id="${r.id}" data-k="got" ${r.got ? "checked" : ""} aria-label="In the buggy"><input class="input" data-own="shop" data-id="${r.id}" data-k="name" placeholder="Item" value="${esc(r.name)}"><input class="input own-price" data-own="shop" data-id="${r.id}" data-k="price" inputmode="decimal" placeholder="$" value="${esc(r.price)}"><button type="button" class="icon-btn" data-owndel="shop:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
+        ${d.shop.map(r => `<div class="own-row own-r4"><input type="checkbox" data-own="shop" data-id="${r.id}" data-k="got" ${r.got ? "checked" : ""} aria-label="In the cart"><input class="input" data-own="shop" data-id="${r.id}" data-k="name" placeholder="Item" value="${esc(r.name)}"><input class="input own-price" data-own="shop" data-id="${r.id}" data-k="price" inputmode="decimal" placeholder="$" value="${esc(r.price)}"><button type="button" class="icon-btn" data-owndel="shop:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
         <button type="button" class="btn btn-ghost btn-block" data-ownadd="shop">+ Add an item</button>
         <label class="calc-field own-lim"><span>My budget for this dinner (optional)</span><input class="input" data-ownf="limit" inputmode="decimal" placeholder="e.g. 150" value="${esc(d.limit)}"></label>
         <button type="button" class="btn btn-gold btn-block" data-ownbudget>Add this total to my Budget</button></div>
