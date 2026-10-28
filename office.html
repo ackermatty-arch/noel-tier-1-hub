@@ -2098,6 +2098,23 @@ input[type=time], input[type=date], input[type=datetime-local] { cursor: pointer
 .sh-item.done span.t{color:var(--c-muted);text-decoration:line-through}
 .sh-foot{display:flex;justify-content:space-between;margin-top:8px}
 .sh-foot button{background:none;border:0;color:var(--c-muted);font-size:13px;text-decoration:underline;padding:8px 0;cursor:pointer}
+
+/* Spreadsheet export */
+.xl-ov{position:fixed;inset:0;z-index:10040;display:none;background:#fff;flex-direction:column}
+.xl-ov.show{display:flex}
+.xl-head{background:#000;color:var(--c-gold2);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;font:600 14px "Cinzel",serif;letter-spacing:.12em}
+.xl-head button{background:none;border:1px solid var(--c-gold);color:var(--c-gold2);min-height:36px;padding:0 14px;font:600 12px "Cinzel",serif;cursor:pointer}
+.xl-tabs{display:flex;gap:0;overflow-x:auto;border-bottom:1px solid var(--c-gold);flex:0 0 auto}
+.xl-tabs button{flex:0 0 auto;min-height:44px;padding:0 16px;background:#fff;border:0;border-right:1px solid var(--c-line);font:600 13px "Cinzel",serif;color:var(--c-ink);cursor:pointer}
+.xl-tabs button.on{background:#000;color:var(--c-gold2)}
+.xl-body{flex:1;overflow:auto;padding:14px}
+.xl-body h3{font-family:"Cinzel",serif;margin:0 0 10px;font-size:17px}
+.xl-body table{border-collapse:collapse;min-width:100%;font-size:14px}
+.xl-body th{background:#000;color:var(--c-gold2);text-align:left;padding:8px 10px;font-weight:600;white-space:nowrap}
+.xl-body td{padding:8px 10px;border-bottom:1px solid var(--c-line);white-space:nowrap}
+.xl-body td.n{text-align:right}.xl-body tr.tot td{font-weight:700;border-top:2px solid var(--c-gold)}
+.xl-foot{padding:12px 16px;border-top:1px solid var(--c-gold)}
+.xl-foot button{display:block;width:100%;min-height:48px;background:#000;color:var(--c-gold2);border:1px solid var(--c-gold);font:600 13px "Cinzel",serif;letter-spacing:.18em;cursor:pointer}
 </style>
 </head>
 <body>
@@ -2455,6 +2472,7 @@ input[type=time], input[type=date], input[type=datetime-local] { cursor: pointer
       <p class="backup-last" id="backupLast">No backup saved yet.</p>
       <div class="send-btns">
         <button type="button" class="btn btn-green" id="backupSave">💾 Save a backup</button>
+        <button type="button" class="btn btn-gold" id="xlOpen">Spreadsheet (Excel)</button>
         <button type="button" class="btn btn-ghost" id="backupRestore">📂 Restore from a backup</button>
       </div>
       <input type="file" id="backupFile" accept=".json,application/json" hidden>
@@ -3336,6 +3354,10 @@ input[type=time], input[type=date], input[type=datetime-local] { cursor: pointer
 <!-- ============================================================
      🏡 WELCOME — family name (shown on first open)
      ============================================================ -->
+<div class="xl-ov" id="xlOv" role="dialog" aria-modal="true" aria-label="Spreadsheet preview">
+  <div class="xl-head"><span>SPREADSHEET PREVIEW</span><button type="button" id="xlClose">CLOSE</button></div>
+  <div class="xl-tabs" id="xlTabs"></div><div class="xl-body" id="xlBody"></div>
+  <div class="xl-foot"><button type="button" id="xlSave">SAVE SPREADSHEET</button></div></div>
 <div class="tour-ov" id="tourOverlay" role="dialog" aria-modal="true" aria-label="Quick tour"><div class="tour-box">
   <div class="tour-n" id="tourN"></div><div class="tour-sq" id="tourSq"></div><h3 id="tourH"></h3><p id="tourP"></p>
   <div class="tour-dots" id="tourDots"></div><button class="tour-btn" id="tourNext" type="button">NEXT</button>
@@ -9482,6 +9504,109 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (e.target.closest("[data-shhide]")) { save("shHide", true); renderStartHere(); }
   });
   function afterWelcomeTour() { if (!load("toured", false)) setTimeout(openTour, 350); }
+
+  /* ============================================================
+     SPREADSHEET EXPORT · preview on screen, then save a real .xlsx
+     Built on the phone (no internet, nothing leaves the device).
+     ============================================================ */
+  const XL = (() => {
+    const crcT = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+    const crc = b => { let c = ~0; for (let i = 0; i < b.length; i++) c = crcT[(c ^ b[i]) & 255] ^ (c >>> 8); return ~c >>> 0; };
+    const enc = new TextEncoder(), X = v => String(v).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
+    const col = i => { let s = ""; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = (i - m - 1) / 26; } return s; };
+    function zip(files) {
+      const parts = [], cen = []; let off = 0;
+      const u16 = n => [n & 255, (n >> 8) & 255], u32 = n => [n & 255, (n >> 8) & 255, (n >> 16) & 255, (n >>> 24) & 255];
+      files.forEach(([name, text]) => {
+        const nb = enc.encode(name), db = enc.encode(text), c = crc(db);
+        const h = new Uint8Array([0x50, 0x4b, 3, 4, 20, 0, 0, 8, 0, 0, 0, 0, 0x21, 0, ...u32(c), ...u32(db.length), ...u32(db.length), ...u16(nb.length), 0, 0]);
+        parts.push(h, nb, db);
+        cen.push(new Uint8Array([0x50, 0x4b, 1, 2, 20, 0, 20, 0, 0, 8, 0, 0, 0, 0, 0x21, 0, ...u32(c), ...u32(db.length), ...u32(db.length), ...u16(nb.length), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...u32(off)]), nb);
+        off += h.length + nb.length + db.length;
+      });
+      const cl = cen.reduce((a, b) => a + b.length, 0);
+      return new Blob([...parts, ...cen, new Uint8Array([0x50, 0x4b, 5, 6, 0, 0, 0, 0, ...u16(files.length), ...u16(files.length), ...u32(cl), ...u32(off), 0, 0])], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    }
+    // styles: 0 normal · 1 header · 2 money · 3 title · 4 bold · 5 bold money
+    const STY = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="&quot;$&quot;#,##0.00"/></numFmts><fonts count="4"><font><sz val="11"/><name val="Georgia"/></font><font><b/><sz val="11"/><color rgb="FFD9BF8C"/><name val="Georgia"/></font><font><b/><sz val="16"/><name val="Georgia"/></font><font><b/><sz val="11"/><name val="Georgia"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF000000"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="6"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="164" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyNumberFormat="1"/></cellXfs></styleSheet>`;
+    function sheetXml(sh) {
+      const rows = sh.rows.map((r, ri) => `<row r="${ri + 1}">` + r.map((v, ci) => {
+        if (v == null || v === "") return "";
+        const o = typeof v === "object" ? v : { v }, ref = col(ci) + (ri + 1);
+        return typeof o.v === "number" ? `<c r="${ref}" s="${o.s || 0}"><v>${o.v}</v></c>` : `<c r="${ref}" s="${o.s || 0}" t="inlineStr"><is><t xml:space="preserve">${X(o.v)}</t></is></c>`;
+      }).join("") + `</row>`).join("");
+      const cols = (sh.widths || []).map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join("");
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetPr><tabColor rgb="FFB8935A"/><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView showGridLines="0" workbookViewId="0"/></sheetViews><cols>${cols}</cols><sheetData>${rows}</sheetData><pageSetup orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>`;
+    }
+    function build(sheets) {
+      const n = sheets.length, ids = sheets.map((_, i) => i + 1);
+      const f = [
+        ["[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${ids.map(i => `<Override PartName="/xl/worksheets/sheet${i}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")}</Types>`],
+        ["_rels/.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+        ["xl/workbook.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((sh, i) => `<sheet name="${X(sh.name.replace(/[\\\/?*\[\]:]/g, "").slice(0, 31))}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("")}</sheets></workbook>`],
+        ["xl/_rels/workbook.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${ids.map(i => `<Relationship Id="rId${i}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i}.xml"/>`).join("")}<Relationship Id="rId${n + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
+        ["xl/styles.xml", STY]
+      ];
+      sheets.forEach((sh, i) => f.push([`xl/worksheets/sheet${i + 1}.xml`, sheetXml(sh)]));
+      return zip(f);
+    }
+    return { build };
+  })();
+  function xlSheets() {
+    const H = a => a.map(v => ({ v, s: 1 })), T = (t, sub) => [[{ v: t, s: 3 }], [sub || ""], []];
+    const co = hubMode === "company", dt = x => x ? new Date(x).toISOString().slice(0, 10) : "", S = [];
+    const stamp = "Noël Tier 1 Hub · exported " + new Date().toISOString().slice(0, 10);
+    const withTotal = (rows, c) => { const sum = rows.reduce((a, r) => a + (+(r[c] && r[c].v != null ? r[c].v : r[c]) || 0), 0); const t = []; t[0] = { v: "TOTAL", s: 4 }; t[c] = { v: Math.round(sum * 100) / 100, s: 5 }; return rows.concat([t]); };
+    const money = n => ({ v: +n || 0, s: 2 });
+    if (co) {
+      const o = load("office", null); if (!o) return [];
+      const ev = o.ev || {};
+      S.push({ name: "Event", widths: [22, 40], rows: [...T(ev.name || "Holiday Party", stamp), ...[["Date", ev.date], ["Time", [ev.start, ev.end].filter(Boolean).join(" to ")], ["Venue", ev.venue], ["Address", ev.address], ["Headcount", ev.headcount], ["Budget", ev.budget ? money(ev.budget) : ""], ["Event Coordinator", ev.organizer], ["Approver", ev.approver], ["Approval status", o.appr && o.appr.status]].filter(r => r[1] !== "" && r[1] != null).map(r => [{ v: r[0], s: 4 }, r[1]])] });
+      const cs = (o.costs || []).map(c => [c.type || "", c.name || "", c.contact || "", c.url || "", c.orderBy || "", c.ordered ? "Yes" : "No", money(c.cost)]);
+      let cr = [...T("Event Costs", stamp), H(["Type", "Vendor", "Contact", "Order link", "Order by", "Ordered", "Cost"]), ...withTotal(cs, 6)];
+      if (ev.budget) { const sp = cs.reduce((a, r) => a + r[6].v, 0); cr.push([], [{ v: "Event budget", s: 4 }, "", "", "", "", "", money(ev.budget)], [{ v: "Remaining", s: 4 }, "", "", "", "", "", { v: Math.round((ev.budget - sp) * 100) / 100, s: 5 }]); }
+      S.push({ name: "Event Costs", widths: [16, 26, 22, 30, 12, 10, 14], rows: cr });
+      const gs = (o.guests || []).map(g => [g.name || "", ({ yes: "Coming", no: "Cannot come", maybe: "Maybe", pending: "Waiting", sent: "Invited" })[g.status] || g.status || "Waiting", g.diet || g.note || ""]);
+      if (gs.length) S.push({ name: "Staff & Guests", widths: [26, 14, 30], rows: [...T("Staff & Guests", stamp), H(["Name", "RSVP", "Notes"]), ...gs] });
+      const lg = ((o.appr || {}).log || []).map(l => [dt(l.at), ({ sent: "Sent for approval", changes: "Changes requested", approved: "Approved", draft: "Draft" })[l.s] || l.s || "", l.note || ""]);
+      if (lg.length) S.push({ name: "Approval Log", widths: [14, 20, 40], rows: [...T("Approval Log", stamp), H(["Date", "Step", "Note"]), ...lg] });
+      return S;
+    }
+    const g = load("gifts", { people: [] }), rows = [];
+    (g.people || []).forEach(p => (p.gifts || []).forEach(x => rows.push([p.name || "", x.name || "", x.status === "idea" ? "Idea" : (x.status ? x.status[0].toUpperCase() + x.status.slice(1) : "Bought"), money(x.price)])));
+    if (rows.length) S.push({ name: "Gifts", widths: [20, 32, 12, 14], rows: [...T("Gift List", stamp + (g.budget ? " · budget $" + g.budget : "")), H(["Person", "Gift", "Status", "Price"]), ...withTotal(rows, 3)] });
+    const b = load("budget", null), ex = ((b && b.expenses) || []).map(e => [e.date || "", e.cat || "", e.name || "", money(e.amt)]);
+    if (ex.length) S.push({ name: "Spending", widths: [14, 16, 32, 14], rows: [...T("Spending", stamp + (b.limit ? " · budget $" + b.limit : "")), H(["Date", "Category", "Item", "Amount"]), ...withTotal(ex, 3)] });
+    const gl = load("guests", []).map(x => [x.name || "", x.tel || "", x.email || "", ({ new: "Not invited", sent: "Invited", yes: "Coming", maybe: "Maybe", no: "Can't come" })[x.s] || x.s || ""]);
+    if (gl.length) S.push({ name: "Guests", widths: [24, 16, 28, 14], rows: [...T("Guest List", stamp), H(["Name", "Phone", "Email", "Status"]), ...gl] });
+    const sm = load("savedMenus", []), sr = [];
+    sm.forEach(m => (m.shop || []).forEach(([d, its]) => its.forEach(i => sr.push([(m.names || []).join(", "), d, i.q || "", i.name || "", i.have ? "Have it" : "Buy", i.price != null ? money(i.price) : ""]))));
+    if (sr.length) S.push({ name: "Shopping", widths: [24, 16, 10, 30, 10, 12], rows: [...T("Shopping List", stamp), H(["Menu", "Aisle", "Qty", "Item", "Need", "Est. price"]), ...sr] });
+    const du = (load("duties", []) || []).map(d => [d.name || "", Math.round((d.duration || 0) / 60)]);
+    if (du.length) S.push({ name: "Timers", widths: [32, 12], rows: [...T("Timers", stamp), H(["Timer", "Minutes"]), ...du] });
+    return S;
+  }
+  let xlSh = [], xlI = 0;
+  const xlEsc = v => String(v == null ? "" : v).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+  function xlShow() {
+    const sh = xlSh[xlI]; if (!sh) { $("#xlBody").innerHTML = "<p>Nothing to export yet. Add some gifts, guests or costs first.</p>"; $("#xlTabs").innerHTML = ""; return; }
+    $("#xlTabs").innerHTML = xlSh.map((x, i) => `<button type="button" data-xl="${i}" class="${i === xlI ? "on" : ""}">${xlEsc(x.name)}</button>`).join("");
+    const cell = (v, h) => { const o = v && typeof v === "object" ? v : { v }; const isN = o.s === 2 || o.s === 5; const val = isN && typeof o.v === "number" ? "$" + o.v.toFixed(2) : o.v; return `<${h ? "th" : "td"}${isN ? ' class="n"' : ""}>${xlEsc(val)}</${h ? "th" : "td"}>`; };
+    let html = "<table><tbody>";
+    sh.rows.forEach(r => { if (!r.length) return; const hd = r[0] && r[0].s === 1, tt = r[0] && r[0].s === 3, tl = r[0] && r[0].v === "TOTAL";
+      if (tt) { html = `<h3>${xlEsc(r[0].v)}</h3><table><tbody>`; return; }
+      html += `<tr${tl ? ' class="tot"' : ""}>${r.map(c => cell(c, hd)).join("")}</tr>`; });
+    $("#xlBody").innerHTML = html + "</tbody></table>";
+  }
+  $("#xlOpen").addEventListener("click", () => { xlSh = xlSheets(); xlI = 0; xlShow(); $("#xlSave").hidden = !xlSh.length; $("#xlOv").classList.add("show"); });
+  $("#xlClose").addEventListener("click", () => $("#xlOv").classList.remove("show"));
+  $("#xlTabs").addEventListener("click", e => { const b = e.target.closest("[data-xl]"); if (b) { xlI = +b.dataset.xl; xlShow(); } });
+  $("#xlSave").addEventListener("click", async () => {
+    const name = (hubMode === "company" ? "Noel-Office-Plan-" : "Noel-Family-Plan-") + new Date().toISOString().slice(0, 10) + ".xlsx", blob = XL.build(xlSh);
+    if (NoelNative.isNative()) { try { await NoelMedia.share(blob, name, "My Noël Tier 1 Hub spreadsheet"); } catch (e) {} return; }
+    try { const file = new File([blob], name, { type: blob.type }); if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+    const url = URL.createObjectURL(blob), a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000); toast("Spreadsheet saved");
+  });
   function closeWelcome() { $("#welcomeOverlay").classList.remove("show"); save("welcomed", true); }
   $("#welcomeForm").addEventListener("submit", e => {
     e.preventDefault();
