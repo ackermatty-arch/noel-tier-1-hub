@@ -2134,6 +2134,10 @@ input[type=time], input[type=date], input[type=datetime-local] { cursor: pointer
 .mc-hint{margin:-4px 0 8px;font-size:12px;color:var(--c-muted);text-align:center}
 body .cal-cell.sel{background:#000!important;box-shadow:inset 0 0 0 2px var(--c-gold)!important}
 body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!important}
+
+/* Holiday Review stays hidden until Jan 2 (or until opened) */
+.nav-btn[data-view="review"]{display:none}
+body.rev-open .nav-btn[data-view="review"]{display:flex}
 </style>
 </head>
 <body>
@@ -3335,6 +3339,23 @@ body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!impor
 </div>
 
 <!-- 🎆 NEW YEAR prompt: save last Christmas and start fresh -->
+<div class="alert-overlay" id="reviewOverlay" role="alertdialog" aria-modal="true" aria-labelledby="reviewPopTitle">
+  <div class="alert-box">
+    <div class="tour-sq" style="margin-bottom:14px">&#9733;</div>
+    <h2 id="reviewPopTitle" class="checkin-title">Holiday Review</h2>
+    <p class="door-text" id="reviewPopText">Christmas is wrapped. Take a few minutes to look back on this season.</p>
+    <div id="reviewPopMain">
+      <button class="btn btn-red btn-block" id="reviewOpen">Open my Holiday Review</button>
+      <button class="btn btn-ghost btn-block" id="reviewLater" style="margin-top:8px">Remind me later</button>
+    </div>
+    <div id="reviewPopWhen" hidden>
+      <button class="btn btn-red btn-block" id="reviewToday">Later today</button>
+      <button class="btn btn-red btn-block" id="reviewTomorrow" style="margin-top:8px">Tomorrow</button>
+      <button class="btn btn-ghost btn-block" id="reviewBack" style="margin-top:8px">Back</button>
+    </div>
+  </div>
+</div>
+
 <div class="alert-overlay" id="newYearOverlay" role="alertdialog" aria-modal="true" aria-labelledby="newYearTitle">
   <div class="alert-box">
     <div class="door-big">🎆</div>
@@ -9154,7 +9175,37 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     startFresh();
   });
   setTimeout(seasonReminders, 3000);
+
+  /* ============================================================
+     HOLIDAY REVIEW · hidden until Jan 2, then pops up
+     "Remind me later" offers: later today (5 hours) or tomorrow 9:00
+     ============================================================ */
+  const revState = () => { const st = load("reviewState", {}); return st.s === season ? st : { s: season }; };
+  const revWindow = () => { const n = new Date(); return n >= new Date(season + 1, 0, 2) && n < new Date(season + 1, 10, 1); };
+  const reviewPending = () => revWindow() && !revState().opened;
+  function reviewDue() { const st = revState(); return reviewPending() && !(st.later && Date.now() < st.later); }
+  function syncReviewNav() { document.body.classList.toggle("rev-open", !!revState().opened); }
+  function reviewNotify() {
+    if (!window.NoelNative) return;
+    const st = revState(), jan2 = new Date(season + 1, 0, 2, 9, 30).getTime(), t = st.later || jan2;
+    NoelNative.scheduleList(9310, 9316, st.opened ? [] : [{ t, title: "Your Holiday Review is ready", body: "Take a few minutes to look back on this season." }]);
+  }
+  function maybeReview() {
+    if (!reviewDue()) return false;
+    if ($("#reviewOverlay").classList.contains("show") || $("#welcomeOverlay").classList.contains("show") || $("#alertOverlay").classList.contains("show")) return true;
+    $("#reviewPopText").textContent = `Christmas ${season} is wrapped. Take a few minutes to look back on this season.`;
+    $("#reviewPopMain").hidden = false; $("#reviewPopWhen").hidden = true; $("#reviewOverlay").classList.add("show"); return true;
+  }
+  const revLater = (ts, label) => { save("reviewState", Object.assign(revState(), { later: ts })); $("#reviewOverlay").classList.remove("show"); toast(label); reviewNotify(); };
+  $("#reviewOpen").addEventListener("click", () => { save("reviewState", Object.assign(revState(), { opened: true })); $("#reviewOverlay").classList.remove("show"); syncReviewNav(); reviewNotify(); showView("review"); window.scrollTo(0, 0); });
+  $("#reviewLater").addEventListener("click", () => { $("#reviewPopMain").hidden = true; $("#reviewPopWhen").hidden = false; });
+  $("#reviewBack").addEventListener("click", () => { $("#reviewPopMain").hidden = false; $("#reviewPopWhen").hidden = true; });
+  $("#reviewToday").addEventListener("click", () => { const t = Date.now() + 5 * 3600e3; revLater(t, "We'll remind you around " + new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })); });
+  $("#reviewTomorrow").addEventListener("click", () => { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(9, 0, 0, 0); revLater(d.getTime(), "We'll remind you tomorrow at 9:00 AM"); });
+  syncReviewNav(); reviewNotify();
+  setInterval(() => { if (!$("#newYearOverlay").classList.contains("show")) maybeReview(); }, 60000);
   function maybeNewYear() {
+    if (reviewPending()) return;
     const now = new Date();
     if (now < new Date(season + 1, 0, 2) || now < (load("newYearLater", 0) || 0)) return;
     if (!gifts.people.some(p => p.gifts.length) && !wishes.length && !moments.length && !Object.keys(checks).length) { season = seasonOf(now); save("season", season); renderMemories(); return; }   // nothing to save
@@ -10403,7 +10454,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   /* Opens the Welcome box on first launch, otherwise the usual check-ins */
   function afterUnlock() {
     if (!load("welcomed", false)) setTimeout(() => { if (!$("#alertOverlay").classList.contains("show")) openWelcome(); }, 500);
-    else setTimeout(() => { if ($("#alertOverlay").classList.contains("show")) return; maybeNewYear(); if (!$("#newYearOverlay").classList.contains("show")) maybeCheckin(/#checkin/.test(location.hash)); }, 900);
+    else setTimeout(() => { if ($("#alertOverlay").classList.contains("show")) return; if (maybeReview()) return; maybeNewYear(); if (!$("#newYearOverlay").classList.contains("show")) maybeCheckin(/#checkin/.test(location.hash)); }, 900);
   }
   /* @meals-start */
   /* ============================================================
