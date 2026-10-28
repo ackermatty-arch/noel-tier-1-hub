@@ -12248,6 +12248,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       add("t1-" + x.id, atDay(t, 1, 18), "🧳", `Pack tonight and check in: ${x.a} leaves tomorrow at ${mclock(t)}.`);
       add("t2-" + x.id, t - 3 * 3600000, "✈️", `Time to head out: ${x.a} leaves at ${mclock(t)}.`);
     });
+    host.trips.filter(x => x.k === "gtrip" && x.b).forEach(x => {
+      const t = new Date(x.b).getTime(); if (!t) return;
+      add("gt1-" + x.id, atDay(t, 1, 18), "🛬", `${x.a} arrives tomorrow at ${mclock(t)}. Who is picking them up?`);
+      add("gt2-" + x.id, t - 90 * 60000, "🚗", `Time to leave to pick up ${x.a}, arriving ${mclock(t)}.`);
+    });
     // 🚗 guests
     host.guests.forEach(g => {
       if (!g.arrive) return; const t = new Date(g.arrive).getTime();
@@ -12399,6 +12404,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
   const AWAY = [
     ["trip", "✈️", "Flights & trains", "Where to · which flight or train", "e.g. Toronto, AC 215", "datetime-local", "Leaves"],
+    ["gtrip", "🛬", "Guests' travel", "Guest · flight or train", "e.g. Grandma, AC 215", "datetime-local", "Arrives"],
     ["pet", "🐾", "Pet care", "Pet", "e.g. Max the dog", "text", "Who is looking after them"],
     ["pass", "🛂", "Passports", "Whose passport", "e.g. Mum", "date", "Expires"],
     ["other", "🧳", "Other", "What else do you need", "e.g. Hotel, car rental, travel insurance", "text", "Details (optional)"]
@@ -12406,9 +12412,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function hostAwayHtml() {
     return AWAY.map(([k, ico, title, l1, ph, t2, l2]) => {
       const items = host.trips.filter(x => x.k === k);
-      const fmt = x => k === "trip" && x.b ? new Date(x.b).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : k === "pass" && x.b ? "expires " + x.b : x.b || "";
+      const fmt = x => (k === "trip" || k === "gtrip") && x.b ? (k === "gtrip" ? "arrives " : "") + new Date(x.b).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : k === "pass" && x.b ? "expires " + x.b : x.b || "";
       const warn = x => k === "pass" && x.b && new Date(x.b).getTime() < Date.now() + 183 * 864e5 ? ` <b class="host-pill over">${new Date(x.b).getTime() < Date.now() ? "expired" : "renew soon"}</b>` : "";
-      return `<div class="card host-card"><h3>${ico} ${title}</h3>${k === "trip" ? `<p class="host-rem">If travelling before your Christmas home plans, Noël will add your travel dates, with reminders, to your calendar.</p>` : ""}
+      return `<div class="card host-card"><h3>${ico} ${title}</h3>${k === "gtrip" ? `<p class="host-rem">Guests flying or taking the train to you? Add them here and Noël will put their arrival in your calendar, with a reminder to pick them up.</p>` : ""}${k === "trip" ? `<p class="host-rem">If travelling before your Christmas home plans, Noël will add your travel dates, with reminders, to your calendar.</p>` : ""}
         ${items.length ? `<ul class="host-list">${items.map(x => `<li data-htrip="${x.id}"><span><b>${esc(x.a)}</b>${x.b ? `<small>${esc(fmt(x))}</small>` : ""}${warn(x)}</span><button type="button" class="icon-btn" data-hdeltrip aria-label="Remove">✕</button></li>`).join("")}</ul>` : `<p class="host-rem">Nothing added yet.</p>`}
         <form class="host-away-form" data-htripform="${k}" autocomplete="off">
           <label><span class="meal-lab">${l1}</span><input class="input" name="a" maxlength="60" placeholder="${ph}" required></label>
@@ -12440,7 +12446,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const room = id => { const r = host.rooms.find(x => x.id === id); return r ? r.name : ""; };
     const guests = host.guests.slice().sort((a, b) => (a.arrive || "z").localeCompare(b.arrive || "z"));
     const box = on => on ? "☑" : "☐";
-    const trips = host.trips.slice().sort((a, b) => ["trip", "pet", "pass", "other"].indexOf(a.k) - ["trip", "pet", "pass", "other"].indexOf(b.k) || (a.b || "").localeCompare(b.b || ""));
+    const trips = host.trips.slice().sort((a, b) => ["trip", "gtrip", "pet", "pass", "other"].indexOf(a.k) - ["trip", "gtrip", "pet", "pass", "other"].indexOf(b.k) || (a.b || "").localeCompare(b.b || ""));
     const cleanByDay = {}; HOST_CLEAN.forEach(([id, days, text]) => { const k = days ? day(atDay(D, days, 10)) : "Dinner day"; (cleanByDay[k] = cleanByDay[k] || []).push(`${box(host.clean[id])} ${esc(text)}${host.who["c:" + id] ? ` <b>(${esc(host.who["c:" + id])})</b>` : ""}`); });
     const need = HOST_SUPPLIES.flatMap(([, l]) => l).concat(host.custom).filter(i => !host.supplies[i]);
     const t = host.table, main = t.names.slice(0, t.seats), kids = t.kids ? t.knames.slice(0, t.kseats) : [];
@@ -12451,7 +12457,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       .fr th{background:#f4efe3;font:600 8pt sans-serif;text-transform:uppercase;letter-spacing:.06em} .fr .fr-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 18px} .fr .fr-seats{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;font-size:9.5pt}
       .fr ul{list-style:none;margin:0;padding:0} .fr li{margin:1px 0;font-size:9.5pt} .fr .fr-day{font-weight:bold;margin-top:4px;font-size:9.5pt} .fr .fr-need{columns:3;column-gap:12px} .fr .fr-need li{font-size:8.5pt} .fr p{margin:0 0 3px} .fr .fr-clean td{font-size:8.5pt;padding:2px 4px} .fr .fr-clean td:first-child{white-space:nowrap;font-weight:bold;width:62px} .fr .fr-foot{margin-top:12px;text-align:center;color:#999;font:8pt sans-serif}`;
     const html = `<div class="fr"><h1>🎄 Our Christmas Hosting Plan</h1><p class="fr-sub">Dinner · ${esc(hostFmt(D))}</p>
-      ${trips.length ? `<h2>Travel plans</h2><table>${trips.map(x => `<tr><td style="width:110px"><b>${({ trip: "✈️ Trip", pet: "🐾 Pet care", pass: "🛂 Passport", other: "🧳 Other" })[x.k] || ""}</b></td><td>${esc(x.a)}${x.b ? " · " + esc(x.k === "trip" ? new Date(x.b).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : x.k === "pass" ? "expires " + x.b : x.b) : ""}</td></tr>`).join("")}</table>` : ""}
+      ${trips.length ? `<h2>Travel plans</h2><table>${trips.map(x => `<tr><td style="width:110px"><b>${({ trip: "✈️ Trip", gtrip: "🛬 Guest travel", pet: "🐾 Pet care", pass: "🛂 Passport", other: "🧳 Other" })[x.k] || ""}</b></td><td>${esc(x.a)}${x.b ? " · " + esc(x.k === "trip" || x.k === "gtrip" ? new Date(x.b).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : x.k === "pass" ? "expires " + x.b : x.b) : ""}</td></tr>`).join("")}</table>` : ""}
       <h2>Guests &amp; arrivals</h2>${guests.length ? `<table><tr><th>Who</th><th>Arriving</th><th>Getting here</th><th>Sleeping</th><th>Notes</th></tr>${guests.map(g => `<tr><td><b>${esc(g.name)}</b> (${g.people || 1})</td><td>${g.arrive ? esc(hostFmt(new Date(g.arrive))) : "—"}</td><td>${g.travel === "fly" ? `✈️ ${esc(g.flight || "Flying")}` : "🚗 Driving"}${g.pickup ? "<br><b>Needs a pickup</b>" : ""}</td><td>${esc(room(g.room)) || "—"}</td><td>${esc(g.notes || "")}</td></tr>`).join("")}</table>` : `<p>No guests added yet.</p>`}
       <div class="fr-cols"><div><h2>Seating</h2>${main.some(Boolean) ? `<div class="fr-seats">${seatList(main)}</div>` : "<p>Not set yet.</p>"}${kids.some(Boolean) ? `<p class="fr-day">Kids' table</p><div class="fr-seats">${seatList(kids)}</div>` : ""}</div>
         <div><h2>Deep-clean countdown</h2><table class="fr-clean">${Object.entries(cleanByDay).map(([k, l]) => `<tr><td>${esc(k)}</td><td>${l.join("<br>")}</td></tr>`).join("")}</table></div></div>
@@ -12636,6 +12642,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     add(`${orgYear()}-12-25`, "🎄", "Christmas Day"); add(`${orgYear()}-12-31`, "🥂", "New Year's Eve");
     mealPlans.filter(pl => pl !== mdp).forEach(pl => { { const p = new Date(pl.at); add(ymd(p), pl.svc ? "⛪" : pl.eve ? "🕯️" : pl.party ? "🎉" : "🍽️", pl.svc ? pl.name : pl.party && !pl.eve ? "New Year's Eve party" : pl.name, `${String(p.getHours()).padStart(2, "0")}:${String(p.getMinutes()).padStart(2, "0")}`); } });
     host.trips.filter(x => x.k === "trip" && x.b).forEach(x => { const t = new Date(x.b); if (isNaN(t)) return; add(ymd(t), "✈️", x.a, x.b.slice(11, 16)); const pk = new Date(t.getTime() - 864e5); add(ymd(pk), "🧳", "Pack & check in: " + x.a); });
+    host.trips.filter(x => x.k === "gtrip" && x.b).forEach(x => { const t = new Date(x.b); if (isNaN(t)) return; add(ymd(t), "🛬", "Pick up: " + x.a, x.b.slice(11, 16)); });
     host.guests.forEach(g => { if (g.arrive) { const t = new Date(g.arrive); add(ymd(t), g.pickup ? "🚗" : "🚪", (g.pickup ? "Pick up " : "") + g.name + (g.pickup ? "" : " arrive"), g.arrive.slice(11, 16)); } });
     const cleanDays = {}; HOST_CLEAN.forEach(([id, days]) => { if (!host.clean[id] && days) { const k = ymd(new Date(atDay(D, days, 10))); cleanDays[k] = (cleanDays[k] || 0) + 1; } });
     Object.entries(cleanDays).forEach(([k, n]) => add(k, "🧽", `Cleaning day: ${n} ${n === 1 ? "task" : "tasks"} on your Hosting list`));
