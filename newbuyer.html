@@ -13601,7 +13601,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const offTB = () => (off.tbPick = off.tbPick || []);
   function offActsHtml() {
     const W = offWE(), PB = offPB(), SN = offSanta(), TB = offTB();
-    return `<div class="card pt-card"><h3>🎭 Activities</h3><p class="host-rem">Pick what to add. Everything you add shows up in your plan and the run of show.</p>
+    return `<div class="card pt-card"><h3>🎭 Activities</h3><p class="host-rem">Pick what to add. Everything you add shows up in your plan and the run of show.</p>${offActs().length ? `<p class="host-rem"><b>In your plan so far:</b> ${offActs().map(esc).join(" · ")}</p><button type="button" class="btn btn-gold btn-block" data-offreview>See my plan ›</button>` : ""}
         <div class="apps-filters">${[["elephant", "🎁 White elephant"], ["booth", "📸 Photo booth"], ["santa", "🎅 Santa visit"], ["teamb", "🧩 Team building"]].map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div></div>
       <details class="card pt-card ss-swap" data-dk="we" ${(off.open || {}).we ? "open" : ""}><summary>🎁 White elephant game</summary>
         <p class="host-rem">Gift limit: <b>${+off.ev.giftLimit ? money(+off.ev.giftLimit) : "set it on the Event tab"}</b></p><ol>${WE_RULES.map(r => `<li>${r}</li>`).join("")}</ol>
@@ -13628,7 +13628,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#view-office").addEventListener("toggle", e => { const d = e.target.closest && e.target.closest("[data-dk]"); if (d) { off.open = off.open || {}; off.open[d.dataset.dk] = d.open; saveOff(); } }, true);
   $("#view-office").addEventListener("click", e => {
     const t = e.target, again = () => { saveOff(); renderOffice(); renderCoDash(); };
-    const tb = t.closest("[data-tbpick]"); if (tb) { const n = tb.dataset.tbpick, L = offTB(); off.tbPick = L.includes(n) ? L.filter(x => x !== n) : L.concat(n); off.acts.teamb = off.tbPick.length ? 1 : 0; again(); return; }
+    const tb = t.closest("[data-tbpick]"); if (tb) { const n = tb.dataset.tbpick, L = offTB(); off.tbPick = L.includes(n) ? L.filter(x => x !== n) : L.concat(n); off.acts.teamb = off.tbPick.length ? 1 : 0; again(); toast(off.tbPick.includes(n) ? "🧩 Added to your plan" : "Removed from your plan"); return; }
     const wd = t.closest("[data-wedel]"); if (wd) { const W = offWE(); W.players.splice(+wd.dataset.wedel, 1); W.order = null; again(); return; }
     if (t.closest("[data-wedraw]")) { const W = offWE(), a = W.players.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } W.order = a; off.acts.elephant = 1; again(); return; }
     if (t.closest("[data-weclear]")) { offWE().order = null; again(); return; }
