@@ -223,7 +223,8 @@
   const AWAY = [
     ["trip", "✈️", "Flights & trains", "Where to · which flight or train", "e.g. Toronto, AC 215", "datetime-local", "Leaves"],
     ["pet", "🐾", "Pet care", "Pet", "e.g. Max the dog", "text", "Who is looking after them"],
-    ["pass", "🛂", "Passports", "Whose passport", "e.g. Mum", "date", "Expires"]
+    ["pass", "🛂", "Passports", "Whose passport", "e.g. Mum", "date", "Expires"],
+    ["other", "🧳", "Other", "What else do you need", "e.g. Hotel, car rental, travel insurance", "text", "Details (optional)"]
   ];
   function hostAwayHtml() {
     return AWAY.map(([k, ico, title, l1, ph, t2, l2]) => {
