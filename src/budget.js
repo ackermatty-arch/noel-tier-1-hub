@@ -114,7 +114,8 @@
         ${T.plannedGifts ? `<p>💡 <b>Gift ideas not bought yet:</b> ${money(T.plannedGifts)}${T.limit ? ` · ${T.spent + T.plannedGifts > T.limit ? "buying them all would go over budget" : "they still fit in your budget"}` : ""}</p>` : ""}
         ${last ? `<p>🗂️ <b>Last Christmas (${last.year}):</b> ${money(last.total)} in total · ${T.spent > last.total ? `${money(T.spent - last.total)} more so far this year` : `${money(last.total - T.spent)} less so far`}</p>` : ""}
         <p>📄 Want it on your computer? Open the <b>Spreadsheet</b> tab and tap <b>Spreadsheet (Excel)</b>.</p></div>
-      <button type="button" class="btn btn-ghost btn-block pt-print" data-print="budget">🖨️ Print my budget report</button>`;
+      <button type="button" class="btn btn-ghost btn-block pt-print" data-print="budget">🖨️ Print my budget report</button>
+      <button type="button" class="btn btn-green btn-block bud-next" data-btab="set" data-bnext="1">Set budget next ›</button>`;
   }
   function budSheet(T) {
     const f = budget.filter || "all", s = budget.sort || "date";
@@ -150,7 +151,8 @@
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
     return `<details class="fold" id="budCatFold"${budCatOpen ? " open" : ""}><summary>More budgets (optional)</summary>
       <div class="card pt-card"><h3>Budget for each category</h3>
-        ${BUD_CATS.filter(([k]) => k !== "gifts").map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>`;
+        ${BUD_CATS.filter(([k]) => k !== "gifts").map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>
+      <button type="button" class="btn btn-green btn-block bud-next" data-goview="planner">Let's plan ›</button>`;
   }
 
   // ---------- spreadsheet file & printed report ----------
@@ -270,7 +272,7 @@
   // ---------- taps & typing ----------
   $("#view-budget").addEventListener("click", e => {
     const t = e.target;
-    const tb = t.closest("[data-btab]"); if (tb) { budget.tab = tb.dataset.btab; saveBudget(); renderBudget(); return; }
+    const tb = t.closest("[data-btab]"); if (tb) { budget.tab = tb.dataset.btab; saveBudget(); renderBudget(); if (tb.dataset.bnext) scrollTo(0, 0); return; }
     const fl = t.closest("[data-bfilter]"); if (fl) { budget.filter = fl.dataset.bfilter; saveBudget(); renderBudget(); return; }
     const so = t.closest("[data-bsort]"); if (so) { budget.sort = so.dataset.bsort; saveBudget(); renderBudget(); return; }
     const del = t.closest("[data-bdel]"); if (del) { budget.expenses = budget.expenses.filter(x => x.id !== del.dataset.bdel); saveBudget(); renderBudget(); return; }

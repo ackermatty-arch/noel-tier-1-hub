@@ -2147,6 +2147,8 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 .budget-card .budget-field .cur{color:#8A6D3B!important}
 /* Traveling away */
 .host-away-form{display:grid;gap:8px;margin-top:10px}.host-away-form .input{width:100%}.host-card .host-list li[data-htrip]{display:flex;align-items:center;gap:8px;justify-content:space-between;border-bottom:1px solid #eee;padding:6px 0}.host-card li[data-htrip] small{display:block;color:#8A6D3B}
+.bud-next{margin-top:14px}
+.bottom-nav .nav-btn{font-size:8.5px!important;letter-spacing:0!important;padding-left:1px!important;padding-right:1px!important}
 </style>
 </head>
 <body>
@@ -2390,6 +2392,13 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
       <span class="ab-text"><b>Hosting &amp; Logistics</b><small>Guest arrivals, rooms, seating &amp; place cards, deep cleaning and supplies</small></span>
       <span class="ab-go">Open ›</span>
     </button>
+  </section>
+
+  <!-- ✅ TASKS: the checklist, printables and extras that used to sit under Hosting -->
+  <section class="view" id="view-tasks" aria-labelledby="tasksTitle">
+    <h2 class="view-title" id="tasksTitle">Tasks</h2>
+    <p class="view-intro">Tick off each task as you go. Your progress saves automatically.</p>
+
     <button class="advent-banner org-banner" data-goview="org" id="orgBanner">
       <span class="ab-ico">📒</span>
       <span class="ab-text"><b>Organizer</b><small>Card list &amp; labels, family calendar, thank-yous, packages, giving and spending</small></span>
@@ -3074,6 +3083,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 <nav class="bottom-nav" aria-label="Main">
   <button class="nav-btn" data-view="budget"><span class="nav-ico">💰</span>Budget</button>
   <button class="nav-btn" data-view="planner"><span class="nav-ico">📝</span>Planner</button>
+  <button class="nav-btn" data-view="tasks"><span class="nav-ico">✅</span>Tasks</button>
   <button class="nav-btn" data-view="meals" id="navMeals"><span class="nav-ico">🍽️</span>Menu</button>
   <button class="nav-btn" data-view="gifts"><span class="nav-ico">🎁</span>Gifts</button>
   <button class="nav-btn" data-view="invites"><span class="nav-ico">✉️</span>Cards</button>
@@ -7563,7 +7573,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   /* 👆 SWIPE between tabs (left = next tab, right = previous tab)
      Ignores up/down scrolling, edge swipes (Android "back"), text boxes,
      sliders and anything inside a pop-up or full-screen page. */
-  const VIEW_ORDER = ["budget", "planner", "office", "host", "org", "own", "meals", "gifts", "invites", "alarms", "nye", "games", "review"];
+  const VIEW_ORDER = ["budget", "planner", "tasks", "office", "host", "org", "own", "meals", "gifts", "invites", "alarms", "nye", "games", "review"];
   let swipe = null;
   document.querySelector("main").addEventListener("touchstart", e => {
     const t = e.touches[0];
@@ -8518,7 +8528,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       }
       return "Here are your appetizer ideas. Tap the heart to save a favourite.";
     }
-    if (has(/\b(back ?up|restore)\b/)) { closeSheets(); showView("planner"); { const f = $("#safeFold"); if (f) f.open = true; } setTimeout(() => $("#backupCard").scrollIntoView({ behavior: "smooth", block: "center" }), 150); return "Tap Save a backup to keep a copy of your lists."; }
+    if (has(/\b(back ?up|restore)\b/)) { closeSheets(); showView("tasks"); { const f = $("#safeFold"); if (f) f.open = true; } setTimeout(() => $("#backupCard").scrollIntoView({ behavior: "smooth", block: "center" }), 150); return "Tap Save a backup to keep a copy of your lists."; }
     if (has(/\b(invites?|invitations?|guest list|guests)\b/)) { closeSheets(); showView("invites"); showPane("invites"); return "Here are your party invites."; }
     if (has(/\b(send a card|e ?cards?|christmas cards?|greeting cards?|new years? cards?)\b/)) { closeSheets(); showView("invites"); showPane("cards"); return "Let's send a card. Pick a design and write your message."; }
     m = /^ ?(?:(?:add|put) (?:it )?(?:to|on) (?:the |my )?wish ?list:? )?(?:(?:for )?)([a-z][a-z ]{0,20}?) (?:wants|would like|wishes for|asked for|is wishing for|would love)(?: an?| some| the)? (.+?) ?$/.exec(t)
@@ -8632,7 +8642,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     // 7. Getting around the app
     if (has(/\b(trivia|quiz)\b/)) { showView("games"); startQuiz(); openSheet("quizSheet"); return "Opening the Christmas trivia quiz."; }
     if (has(/\bscore ?board\b|\bscores?\b/)) { showView("games"); renderTeams(); openSheet("scoreSheet"); return "Opening the scoreboard."; }
-    if (has(/\b(planner|checklist|to do|todo|tasks?)\b/)) { closeSheets(); showView("planner"); return "Here's your holiday planner."; }
+    if (has(/\b(planner|checklist|to do|todo|tasks?)\b/)) { closeSheets(); showView("tasks"); return "Here's your task list."; }
     if (has(/\b(alarms?|timers?|kitchen|duties)\b/)) { closeSheets(); showView("alarms"); return "Here are your duty timers."; }
     if (has(/\b(games?|activities|printables?|coloring|colouring|kids)\b/)) { closeSheets(); showView("games"); return "Here are the games and printables."; }
     return null;
@@ -13294,7 +13304,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${T.plannedGifts ? `<p>💡 <b>Gift ideas not bought yet:</b> ${money(T.plannedGifts)}${T.limit ? ` · ${T.spent + T.plannedGifts > T.limit ? "buying them all would go over budget" : "they still fit in your budget"}` : ""}</p>` : ""}
         ${last ? `<p>🗂️ <b>Last Christmas (${last.year}):</b> ${money(last.total)} in total · ${T.spent > last.total ? `${money(T.spent - last.total)} more so far this year` : `${money(last.total - T.spent)} less so far`}</p>` : ""}
         <p>📄 Want it on your computer? Open the <b>Spreadsheet</b> tab and tap <b>Spreadsheet (Excel)</b>.</p></div>
-      <button type="button" class="btn btn-ghost btn-block pt-print" data-print="budget">🖨️ Print my budget report</button>`;
+      <button type="button" class="btn btn-ghost btn-block pt-print" data-print="budget">🖨️ Print my budget report</button>
+      <button type="button" class="btn btn-green btn-block bud-next" data-btab="set" data-bnext="1">Set budget next ›</button>`;
   }
   function budSheet(T) {
     const f = budget.filter || "all", s = budget.sort || "date";
@@ -13330,7 +13341,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
     return `<details class="fold" id="budCatFold"${budCatOpen ? " open" : ""}><summary>More budgets (optional)</summary>
       <div class="card pt-card"><h3>Budget for each category</h3>
-        ${BUD_CATS.filter(([k]) => k !== "gifts").map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>`;
+        ${BUD_CATS.filter(([k]) => k !== "gifts").map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>
+      <button type="button" class="btn btn-green btn-block bud-next" data-goview="planner">Let's plan ›</button>`;
   }
 
   // ---------- spreadsheet file & printed report ----------
@@ -13450,7 +13462,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   // ---------- taps & typing ----------
   $("#view-budget").addEventListener("click", e => {
     const t = e.target;
-    const tb = t.closest("[data-btab]"); if (tb) { budget.tab = tb.dataset.btab; saveBudget(); renderBudget(); return; }
+    const tb = t.closest("[data-btab]"); if (tb) { budget.tab = tb.dataset.btab; saveBudget(); renderBudget(); if (tb.dataset.bnext) scrollTo(0, 0); return; }
     const fl = t.closest("[data-bfilter]"); if (fl) { budget.filter = fl.dataset.bfilter; saveBudget(); renderBudget(); return; }
     const so = t.closest("[data-bsort]"); if (so) { budget.sort = so.dataset.bsort; saveBudget(); renderBudget(); return; }
     const del = t.closest("[data-bdel]"); if (del) { budget.expenses = budget.expenses.filter(x => x.id !== del.dataset.bdel); saveBudget(); renderBudget(); return; }
