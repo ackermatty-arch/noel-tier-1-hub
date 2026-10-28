@@ -2415,7 +2415,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
     <div class="card host-remind" id="hostRemind"></div>
     <div class="apps-filters host-tabs" id="hostTabs"></div>
     <div id="hostBody"></div>
-    <div class="card host-fridge">
+    <div class="card host-fridge" id="hostFridge">
       <span class="hf-ico">🧲</span>
       <span class="hf-txt"><b>Fridge sheet</b><small>Travel plans, guests, rooms, seating, cleaning days, supplies and house info, all on one printed page.</small></span>
       <button type="button" class="btn btn-red" data-print="fridge">🖨️ Print</button>
@@ -12219,7 +12219,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     table: { shape: "rect", seats: 10, names: [], kids: false, kseats: 6, knames: [], style: "casual" },
     house: { wifi: "", pass: "", parking: "", rules: "", kids: "" }
   };
-  host.trips = host.trips || []; host.out = host.out || { done: {}, custom: [] };
+  host.trips = host.trips || []; host.out = host.out || { done: {}, custom: [] }; host.leave = host.leave || { done: {}, custom: [] };
+  const HOST_LEAVE = [["alarm", "Turn on the house alarm"], ["appl", "Check all appliances are off (stove, oven, iron, coffee maker, space heaters)"], ["lock", "Lock every door and window"], ["heat", "Set the thermostat and turn off the lights"], ["trash", "Take out the garbage and empty the fridge of anything that will spoil"], ["mail", "Ask someone to collect the mail and check on the house"]];
   const HOST_OUT = [["test", "Test every string of lights before hanging"], ["buy", "Replace any burnt-out bulbs and buy what is missing"], ["cord", "Outdoor extension cord, timer and clips or hooks"], ["hang", "Hang the lights (roofline, trees, railings)"], ["deco", "Wreath, garland and other outdoor decorations"], ["plug", "Plug in and check the timer works"], ["walk", "Clear and light the walkway and steps"], ["porch", "Porch light and welcome mat ready for guests"]];
   host.who = host.who || {}; host.jobs = host.jobs || []; host.jobDone = host.jobDone || {};
   const HOST_JOBS = [   // jobs on the big day: [id, job, when]
@@ -12303,6 +12304,10 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   // ---------- screens ----------
   const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["house", "📶 House info"], ["out", "💡 Outdoor & lights"]];
   function renderHost() {
+    const fr = $("#hostFridge");
+    if (fr) fr.innerHTML = (host.tab || "away") === "away"
+      ? `<span class="hf-ico">✈️</span><span class="hf-txt"><b>Travel sheet</b><small>Flights and trains, guests' travel, pet care, passports and your leaving-home checklist, all on one printed page.</small></span><button type="button" class="btn btn-red" data-print="travel">🖨️ Print</button>`
+      : `<span class="hf-ico">🧲</span><span class="hf-txt"><b>Fridge sheet</b><small>Guests, rooms, seating, cleaning days, supplies and house info, all on one printed page.</small></span><button type="button" class="btn btn-red" data-print="fridge">🖨️ Print</button>`;
     const tab = host.tab || "away";
     $("#hostRemind").innerHTML = `<label class="host-switch"><input type="checkbox" id="hostRemindBox" ${host.remind ? "checked" : ""}><span><b>🔔 Helpful little reminders</b><small>${host.remind ? `On. Noël will nudge you at just the right moments, timed to your dinner on ${hostFmt(hostDinner())}.` : "Turn on for well-timed nudges for cleaning, guests and the little things that are easy to forget."}</small></span></label>`;
     $("#hostTabs").innerHTML = HOST_TABS.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-htab="${k}">${l}</button>`).join("");
@@ -12434,7 +12439,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
           <label><span class="meal-lab">${l1}</span><input class="input" name="a" maxlength="60" placeholder="${ph}" required></label>
           <label><span class="meal-lab">${l2}</span><input class="input" name="b" type="${t2}" ${t2 === "text" ? 'maxlength="60"' : ""}></label>
           <button class="btn btn-green btn-block" type="submit">Add</button></form></div>`;
-    }).join("");
+    }).join("") + hostLeaveHtml();
+  }
+  function hostLeaveHtml() {
+    const all = HOST_LEAVE.concat(host.leave.custom.map(c => [c.id, c.text, 1])), n = all.filter(([k]) => host.leave.done[k]).length;
+    return `<div class="card host-card"><h3>🔑 Before you leave home</h3><p class="host-rem">${n} of ${all.length} done. Tick each one on your way out the door.</p>
+      <ul class="host-list chore-list">${all.map(([k, t, mine]) => `<li><label class="${host.leave.done[k] ? "on" : ""}"><input type="checkbox" data-hleave="${k}" ${host.leave.done[k] ? "checked" : ""}><span>${esc(t)}</span></label>${mine ? `<button type="button" class="icon-btn" data-hdelleave="${k}" aria-label="Remove">✕</button>` : ""}</li>`).join("")}</ul>
+      <form class="host-away-form" id="hostLeaveForm" autocomplete="off"><label><span class="meal-lab">Add your own</span><input class="input" name="t" maxlength="80" placeholder="e.g. Water the plants" required></label><button class="btn btn-green btn-block" type="submit">Add</button></form></div>`;
   }
   function hostOutHtml() {
     const all = HOST_OUT.concat(host.out.custom.map(c => [c.id, c.text, 1])), n = all.filter(([k]) => host.out.done[k]).length;
@@ -12461,6 +12472,18 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       html: `<p class="pc-tip">Cut along the dashed lines and fold along the dotted line, so each card stands up like a little tent.</p><div class="pcs">${names.map(card).join("")}</div>` };
   }
   // ---------- 🧲 the fridge sheet: the whole hosting plan on one page ----------
+  function travelDoc() {
+    const kinds = [["trip", "✈️ Flights & trains"], ["gtrip", "🛬 Guests' travel"], ["pet", "🐾 Pet care"], ["pass", "🛂 Passports"], ["other", "🧳 Other"]];
+    const when = x => !x.b ? "" : x.k === "trip" || x.k === "gtrip" ? (x.k === "gtrip" ? "arrives " : "") + new Date(x.b).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : x.k === "pass" ? "expires " + x.b : x.b;
+    const sec = kinds.map(([k, l]) => { const it = host.trips.filter(x => x.k === k).sort((a, b) => (a.b || "").localeCompare(b.b || "")); return it.length ? `<h2>${l}</h2><table>${it.map(x => `<tr><td><b>${esc(x.a)}</b></td><td>${esc(when(x))}</td></tr>`).join("")}</table>` : ""; }).join("");
+    const all = HOST_LEAVE.concat(host.leave.custom.map(c => [c.id, c.text])), box = on => on ? "☑" : "☐";
+    const css = `.fr{font:11pt/1.4 Georgia,serif;color:#222} .fr h1{font-size:20pt;margin:0;color:#1E3A2F} .fr .fr-sub{margin:2px 0 10px;color:#8a6d3b;letter-spacing:.08em;text-transform:uppercase;font:600 8pt sans-serif}
+      .fr h2{font-size:12pt;color:#1E3A2F;border-bottom:1.5px solid #B8935A;margin:12px 0 4px;padding-bottom:2px} .fr table{border-collapse:collapse;width:100%} .fr td{text-align:left;padding:4px 6px;border-bottom:1px solid #e6e0d2} .fr ul{list-style:none;margin:0;padding:0} .fr li{margin:3px 0} .fr-foot{margin-top:14px;font:8pt sans-serif;color:#999;text-align:center}`;
+    const html = `<div class="fr"><h1>✈️ Our Travel Plans</h1><p class="fr-sub">Before we go</p>${sec || "<p>No travel added yet.</p>"}
+      <h2>🔑 Before we leave home</h2><ul>${all.map(([k, t]) => `<li>${box(host.leave.done[k])} ${esc(t)}</li>`).join("")}</ul>
+      <p class="fr-foot">Made with Noël Tier 1 Hub</p></div>`;
+    return { title: "Travel plans", css, html, margin: 0.5, file: "Travel-Plans" };
+  }
   function fridgeDoc() {
     const D = hostDinner(), day = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
     const room = id => { const r = host.rooms.find(x => x.id === id); return r ? r.name : ""; };
@@ -12477,7 +12500,6 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       .fr th{background:#f4efe3;font:600 8pt sans-serif;text-transform:uppercase;letter-spacing:.06em} .fr .fr-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 18px} .fr .fr-seats{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;font-size:9.5pt}
       .fr ul{list-style:none;margin:0;padding:0} .fr li{margin:1px 0;font-size:9.5pt} .fr .fr-day{font-weight:bold;margin-top:4px;font-size:9.5pt} .fr .fr-need{columns:3;column-gap:12px} .fr .fr-need li{font-size:8.5pt} .fr p{margin:0 0 3px} .fr .fr-clean td{font-size:8.5pt;padding:2px 4px} .fr .fr-clean td:first-child{white-space:nowrap;font-weight:bold;width:62px} .fr .fr-foot{margin-top:12px;text-align:center;color:#999;font:8pt sans-serif}`;
     const html = `<div class="fr"><h1>🎄 Our Christmas Hosting Plan</h1><p class="fr-sub">Dinner · ${esc(hostFmt(D))}</p>
-      ${trips.length ? `<h2>Travel plans</h2><table>${trips.map(x => `<tr><td style="width:110px"><b>${({ trip: "✈️ Trip", gtrip: "🛬 Guest travel", pet: "🐾 Pet care", pass: "🛂 Passport", other: "🧳 Other" })[x.k] || ""}</b></td><td>${esc(x.a)}${x.b ? " · " + esc(x.k === "trip" || x.k === "gtrip" ? new Date(x.b).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : x.k === "pass" ? "expires " + x.b : x.b) : ""}</td></tr>`).join("")}</table>` : ""}
       <h2>Guests &amp; arrivals</h2>${guests.length ? `<table><tr><th>Who</th><th>Arriving</th><th>Getting here</th><th>Sleeping</th><th>Notes</th></tr>${guests.map(g => `<tr><td><b>${esc(g.name)}</b> (${g.people || 1})</td><td>${g.arrive ? esc(hostFmt(new Date(g.arrive))) : "—"}</td><td>${g.travel === "fly" ? `✈️ ${esc(g.flight || "Flying")}` : "🚗 Driving"}${g.pickup ? "<br><b>Needs a pickup</b>" : ""}</td><td>${esc(room(g.room)) || "—"}</td><td>${esc(g.notes || "")}</td></tr>`).join("")}</table>` : `<p>No guests added yet.</p>`}
       <div class="fr-cols"><div><h2>Seating</h2>${main.some(Boolean) ? `<div class="fr-seats">${seatList(main)}</div>` : "<p>Not set yet.</p>"}${kids.some(Boolean) ? `<p class="fr-day">Kids' table</p><div class="fr-seats">${seatList(kids)}</div>` : ""}</div>
         <div><h2>Deep-clean countdown</h2><table class="fr-clean">${Object.entries(cleanByDay).map(([k, l]) => `<tr><td>${esc(k)}</td><td>${l.join("<br>")}</td></tr>`).join("")}</table></div></div>
@@ -12530,6 +12552,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       return;
     }
     if (t.closest("#hostShareCard")) { shareHouseCard(); return; }
+    const dlv = t.closest("[data-hdelleave]"); if (dlv) { host.leave.custom = host.leave.custom.filter(x => x.id !== dlv.dataset.hdelleave); delete host.leave.done[dlv.dataset.hdelleave]; saveHost(); renderHost(); return; }
     const dout = t.closest("[data-hdelout]"); if (dout) { host.out.custom = host.out.custom.filter(x => x.id !== dout.dataset.hdelout); delete host.out.done[dout.dataset.hdelout]; saveHost(); renderHost(); return; }
     const dt = t.closest("[data-hdeltrip]"); if (dt) { const id = dt.closest("[data-htrip]").dataset.htrip; host.trips = host.trips.filter(x => x.id !== id); saveHost(); renderHost(); hostSync(); return; }
     const dj = t.closest("[data-hdeljob]"); if (dj) { const id = dj.closest("[data-hjob]").dataset.hjob; host.jobs = host.jobs.filter(j => j.id !== id); delete host.who["j:" + id]; delete host.jobDone[id]; saveHost(); renderHost(); return; }
@@ -12552,6 +12575,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (t.dataset.hclean) { host.clean[t.dataset.hclean] = t.checked; saveHost(); hostSync(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hwho) { const v = t.value.trim(); if (v) host.who[t.dataset.hwho] = v; else delete host.who[t.dataset.hwho]; saveHost(); return; }
     if (t.dataset.hjobdone) { host.jobDone[t.dataset.hjobdone] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
+    if (t.dataset.hleave) { host.leave.done[t.dataset.hleave] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hout) { host.out.done[t.dataset.hout] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hsup) { host.supplies[t.dataset.hsup] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hhouse) { host.house[t.dataset.hhouse] = t.value.trim(); saveHost(); return; }
@@ -12559,6 +12583,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#hostWrap").addEventListener("submit", e => {
     e.preventDefault(); const f = e.target;
     if (f.dataset.htripform) { const n = f.a.value.trim(); if (!n) return; host.trips.push({ id: uid(), k: f.dataset.htripform, a: n, b: f.b.value.trim() }); saveHost(); renderHost(); hostSync(); return; }
+    if (f.id === "hostLeaveForm") { const n = f.t.value.trim(); if (!n) return; host.leave.custom.push({ id: uid(), text: n }); saveHost(); renderHost(); return; }
     if (f.id === "hostOutForm") { const n = f.t.value.trim(); if (!n) return; host.out.custom.push({ id: uid(), text: n }); saveHost(); renderHost(); return; }
     if (f.id === "hostGuestForm") { const n = f.gname.value.trim(); if (!n) return; host.guests.push({ id: uid(), name: n, people: 1, travel: "drive", room: "", pickup: false }); }
     if (f.id === "hostRoomForm") { const n = f.rname.value.trim(); if (!n) return; host.rooms.push({ id: uid(), name: n, icon: "🛏️", beds: 2, ready: {} }); }
@@ -14714,6 +14739,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     else if (key === "selfcare") d = selfCareDoc();
     else if (key === "place") d = placeDoc();
     else if (key === "fridge") d = fridgeDoc();
+    else if (key === "travel") d = travelDoc();
     else if (key === "chores") d = choresDoc();
     else if (key === "budget") d = budgetDoc();
     else if (key === "shared") d = shrDoc();

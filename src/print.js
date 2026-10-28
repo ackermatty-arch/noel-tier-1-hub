@@ -21,6 +21,7 @@
     else if (key === "selfcare") d = selfCareDoc();
     else if (key === "place") d = placeDoc();
     else if (key === "fridge") d = fridgeDoc();
+    else if (key === "travel") d = travelDoc();
     else if (key === "chores") d = choresDoc();
     else if (key === "budget") d = budgetDoc();
     else if (key === "shared") d = shrDoc();
