@@ -2137,6 +2137,9 @@ body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!impor
 /* Holiday Review stays hidden until Dec 26 (or until opened) */
 .nav-btn[data-view="review"]{display:none}
 body.rev-open .nav-btn[data-view="review"]{display:flex}
+
+/* Dinner countdown digits were white on white */
+.meal-master .mm-time{color:#000!important}
 </style>
 </head>
 <body>
@@ -2644,11 +2647,19 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
       <button type="button" class="btn btn-gold btn-block" id="nyePlan">See my plan</button>
     </div>
 
+    <button class="advent-banner nye-banner" data-open="appsSheet">
+      <span class="ab-ico">🥂</span>
+      <span class="ab-text"><b>Appetizer Ideas</b><small>30 party bites, make-ahead tips and a how-many guide</small></span>
+      <span class="ab-go">Open ›</span>
+    </button>
     <button type="button" class="advent-banner nye-banner pt-banner" id="ptOpen">
       <span class="ab-ico">🎭</span>
       <span class="ab-text"><b>Party Themes</b><small>Pajamas &amp; Champagne, Masquerade, Gala, Kids' Countdown, Casino, Neon and more: the whole night planned</small></span>
       <span class="ab-go">Open ›</span>
     </button>
+
+    <div class="section-label" id="nyeTasksLabel">New Year's Checklist</div>
+    <div id="nyeTasks"></div>
 
     <div class="section-label">Games &amp; Ideas</div>
     <button type="button" class="advent-banner nye-banner" id="wwiOpen">
@@ -2660,11 +2671,6 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
       <span class="ab-ico">🎆</span>
       <span class="ab-text"><b>New Year's Party Games</b><small>7 pass-the-phone games, plus the Year-in-Review quiz</small></span>
       <span class="ab-go">Play ›</span>
-    </button>
-    <button class="advent-banner nye-banner" data-open="appsSheet">
-      <span class="ab-ico">🥂</span>
-      <span class="ab-text"><b>Appetizer Ideas</b><small>30 party bites, make-ahead tips and a how-many guide</small></span>
-      <span class="ab-go">Open ›</span>
     </button>
     <button class="advent-banner nye-banner" id="nyeCard" type="button">
       <span class="ab-ico">✉️</span>
@@ -7821,11 +7827,12 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       .concat(customTasks.filter(c => c.phase === phase.id).map(c => ({ id: c.id, text: c.text, custom: true })));
   }
 
-  function renderPlanner() {
-    $("#phaseList").innerHTML = PHASES.map(p => {
-      const tasks = phaseTasks(p);
-      const done = tasks.filter(t => checks[t.id]).length;
-      return `<div class="card phase ${collapsed[p.id] ? "collapsed" : ""}" data-phase="${p.id}">
+  const NY_IDS = ["nyw", "nye"];   // the two New Year's task groups live on the NYE tab
+  const planPhases = () => PHASES.filter(p => !NY_IDS.includes(p.id)), nyPhases = () => PHASES.filter(p => NY_IDS.includes(p.id));
+  function phaseHtml(p) {
+    const tasks = phaseTasks(p);
+    const done = tasks.filter(t => checks[t.id]).length;
+    return `<div class="card phase ${collapsed[p.id] ? "collapsed" : ""}" data-phase="${p.id}">
         <button class="phase-head" data-toggle="${p.id}" aria-expanded="${!collapsed[p.id]}">
           <span class="phase-icon">${p.icon}</span>
           <span class="phase-title">${esc(p.title)}</span>
@@ -7843,12 +7850,15 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
           </li>`).join("")}
         </ul>
       </div>`;
-    }).join("");
+  }
+  function renderPlanner() {
+    $("#phaseList").innerHTML = planPhases().map(phaseHtml).join("");
+    const ny = nyPhases(), nt = $("#nyeTasks"); if (nt) { nt.innerHTML = ny.map(phaseHtml).join(""); $("#nyeTasksLabel").hidden = !ny.length; }
     updateProgress();
   }
 
   function updateProgress() {
-    const all = PHASES.flatMap(phaseTasks);
+    const all = planPhases().flatMap(phaseTasks);
     const done = all.filter(t => checks[t.id]).length;
     const pct = all.length ? Math.round(done / all.length * 100) : 0;
     $("#doneCount").textContent = done;
@@ -7866,7 +7876,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
                     "🎄 Let's get festive! Tap a task to tick it off.";
   }
 
-  $("#phaseList").addEventListener("change", e => {
+  ["#phaseList", "#nyeTasks"].forEach(sel => $(sel).addEventListener("change", e => {
     if (e.target.type !== "checkbox") return;
     const li = e.target.closest(".task");
     const id = li.dataset.id;
@@ -7884,9 +7894,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     updateProgress();
     if (navigator.vibrate) navigator.vibrate(12);
     if (e.target.checked && done === tasks.length) toast(`✅ ${phase.title} complete!`);
-  });
+  }));
 
-  $("#phaseList").addEventListener("click", e => {
+  ["#phaseList", "#nyeTasks"].forEach(sel => $(sel).addEventListener("click", e => {
     const tog = e.target.closest("[data-toggle]");
     if (tog) {
       const id = tog.dataset.toggle;
@@ -7904,7 +7914,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       save(KEYS.custom, customTasks); save(KEYS.checks, checks);
       renderPlanner();
     }
-  });
+  }));
 
   $("#phaseSelect").innerHTML = PHASES.map(p => `<option value="${p.id}">${p.icon} ${esc(p.title)}</option>`).join("");
 
