@@ -2125,6 +2125,15 @@ input[type=time], input[type=date], input[type=datetime-local] { cursor: pointer
 .fold[open]>summary::after{content:"\2212"}
 .fold>*:not(summary){margin-left:12px;margin-right:12px}
 .fold>summary+*{margin-top:12px}.fold>*:last-child{margin-bottom:12px}
+
+/* Calendar: clear arrows, month strip, visible chosen day */
+.cal-head .icon-btn{width:44px;height:44px;font-size:28px;line-height:1;color:#000!important;background:#fff;border:1px solid var(--c-gold)!important;border-radius:0!important}
+.mc-months{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.mc-months::-webkit-scrollbar{display:none}
+.mc-chip{flex:0 0 auto;min-width:46px;min-height:36px;background:#fff;border:1px solid var(--c-line);font:600 12px "Cinzel",serif;color:var(--c-ink);cursor:pointer}
+.mc-chip.on{background:#000;color:var(--c-gold2);border-color:#000}.mc-chip.now:not(.on){border-color:var(--c-gold)}
+.mc-hint{margin:-4px 0 8px;font-size:12px;color:var(--c-muted);text-align:center}
+body .cal-cell.sel{background:#000!important;box-shadow:inset 0 0 0 2px var(--c-gold)!important}
+body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!important}
 </style>
 </head>
 <body>
@@ -12551,6 +12560,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       ${evs.length ? `<h2>This month's plans</h2><div class="cl">${evs.map(e => `<i>${parseYmd(e.date).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</i><i>${e.time ? t12(e.time) : "All day"}</i><span>${esc(e.title)}${who(e) ? " · " + esc(who(e)) : ""}</span>`).join("")}</div>` : ""}</div>`;
     return { noBrand: 1, title: m0.toLocaleDateString(undefined, { month: "long", year: "numeric" }) + " calendar", css, html, margin: 0.5, file: "Calendar-" + pre };
   }
+  // 📅 every month of the year as a tap strip (swipe the grid works too)
+  const monthChips = (m0, attr) => { const y = m0.getFullYear(), now = new Date(); return `<div class="mc-months" data-mcscroll>${Array.from({ length: 12 }, (_, i) => `<button type="button" class="mc-chip${i === m0.getMonth() ? " on" : ""}${now.getFullYear() === y && now.getMonth() === i ? " now" : ""}" ${attr}="${ymd(new Date(y, i, 1))}">${new Date(y, i, 1).toLocaleDateString(undefined, { month: "short" })}</button>`).join("")}</div>`; };
   function orgCalHtml() {
     const today = new Date(), month = org.calMonth || calDefault();
     const m0 = parseYmd(month), y = m0.getFullYear(), mo = m0.getMonth(), first = new Date(y, mo, 1).getDay(), days = new Date(y, mo + 1, 0).getDate();
@@ -12561,6 +12572,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       cells.push(`<button type="button" class="cal-cell${k === sel ? " sel" : ""}${k === ymd(today) ? " today" : ""}${list.length ? " has" : ""}" data-oday="${k}"><span>${d}</span><i>${list.slice(0, 3).map(() => "●").join("")}</i></button>`); }
     const dayList = byDay[sel] || [];
     return `<div class="card org-card cal-card"><div class="cal-head"><button type="button" class="icon-btn" data-omonth="-1" aria-label="Previous month">‹</button><b>${m0.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</b><button type="button" class="icon-btn" data-omonth="1" aria-label="Next month">›</button></div>
+        ${monthChips(m0, "data-omgo")}<p class="mc-hint">Swipe left or right to change month</p>
         <div class="cal-grid">${["S", "M", "T", "W", "T", "F", "S"].map(d => `<span class="cal-dow">${d}</span>`).join("")}${cells.join("")}</div><div class="send-btns" style="margin-top:10px"><button type="button" class="btn btn-ghost" data-print="calendar">🖨️ Print this month</button></div></div>
       <div class="card org-card"><h3>${shortDate(sel)}</h3>
         ${dayList.length ? `<ul class="cal-list">${dayList.map(e => `<li class="${e.auto ? "auto" : ""}" ${e.mine ? `data-oev="${e.id}"` : ""}><span class="cl-time">${e.time ? mclock(parseYmd(e.date).setHours(...e.time.split(":").map(Number))) : "All day"}</span><span class="cl-txt">${e.mine ? memberEmoji(e.who) : e.icon} ${esc(e.title)}${e.notes ? `<small>${esc(e.notes)}</small>` : ""}${e.auto ? `<small>From your Noël plans</small>` : ""}</span>${e.mine ? `<button class="icon-btn" data-odelev aria-label="Remove">✕</button>` : ""}</li>`).join("")}</ul>` : `<p class="host-rem">Nothing planned yet.</p>`}
@@ -12584,6 +12596,14 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const b = $("#calBtn"); if (!b) return; const d = new Date().getDate();
     b.innerHTML = `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><text x="12" y="18" text-anchor="middle" font-size="8.5" font-family="Cinzel, serif" stroke="none" fill="currentColor">${d}</text></svg>`;
   }
+  // 👆 swipe the calendar grid left or right to change month (mini popup and full calendar)
+  (() => { let x0 = 0, y0 = 0, on = false;
+    document.addEventListener("touchstart", e => { const g = e.target.closest(".cal-grid"); on = !!g && !!(g.closest("#miniCal") || g.closest(".cal-card")); if (on) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; } }, { passive: true });
+    document.addEventListener("touchend", e => { if (!on) return; on = false; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) * .7) return;
+      const step = dx < 0 ? "1" : "-1", b = document.querySelector(`#miniCal [data-mcmonth="${step}"]`) || document.querySelector(`.cal-card [data-omonth="${step}"]`); if (b) b.click(); }, { passive: true });
+  })();
+  // keep the chosen month in view in the month strip
+  new MutationObserver(() => { document.querySelectorAll(".mc-months:not([data-ctr])").forEach(st => { const on = st.querySelector(".on"); if (!on) return; st.dataset.ctr = 1; st.scrollLeft = on.offsetLeft - (st.clientWidth - on.offsetWidth) / 2; }); }).observe(document.body, { childList: true, subtree: true });
   function closeMini() { const el = $("#miniCal"); if (el) el.remove(); }
   function openMiniCal() {
     if ($("#miniCal")) { closeMini(); return; }
@@ -12595,6 +12615,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       const t2 = e.target;
       if (t2 === el || t2.closest("[data-mcclose]")) { closeMini(); return; }
       const mo = t2.closest("[data-mcmonth]"); if (mo) { const m0 = parseYmd(miniM); miniM = ymd(new Date(m0.getFullYear(), m0.getMonth() + +mo.dataset.mcmonth, 1)); renderMini(); return; }
+      const go = t2.closest("[data-mcgo]"); if (go) { miniM = go.dataset.mcgo; renderMini(); return; }
       const dy = t2.closest("[data-mcday]"); if (dy) { miniD = dy.dataset.mcday; renderMini(); return; }
       const dl = t2.closest("[data-mcdel]"); if (dl) { if (confirm("Remove this event?")) { org.events = org.events.filter(x => x.id !== dl.dataset.mcdel); touched(); } return; }
       if (t2.closest("[data-mcfull]")) { closeMini(); org.view = "cal"; org.calDay = miniD; saveOrg(); showView("org"); renderOrg(); window.scrollTo(0, 0); }
@@ -12617,6 +12638,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     for (let d = 1; d <= days; d++) { const k = ymd(new Date(y, mo, d)), n = (byDay[k] || []).length; cells.push(`<button type="button" class="cal-cell${k === miniD ? " sel" : ""}${k === today ? " today" : ""}${n ? " has" : ""}" data-mcday="${k}"><span>${d}</span><i>${n ? "●" : ""}</i></button>`); }
     const list = byDay[miniD] || [], t12 = t => t ? mclock(parseYmd(miniD).setHours(...t.split(":").map(Number))) : "All day";
     el.innerHTML = `<div class="pr-card mc-card"><div class="cal-head"><button type="button" class="icon-btn" data-mcmonth="-1" aria-label="Previous month">‹</button><b>${m0.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</b><button type="button" class="icon-btn" data-mcmonth="1" aria-label="Next month">›</button><button type="button" class="icon-btn mc-x" data-mcclose aria-label="Close">✕</button></div>
+      ${monthChips(m0, "data-mcgo")}
       <div class="cal-grid">${["S", "M", "T", "W", "T", "F", "S"].map(d => `<span class="cal-dow">${d}</span>`).join("")}${cells.join("")}</div>
       <div class="mc-day"><h4>${shortDate(miniD)}</h4>
         ${list.length ? `<ul class="cal-list">${list.map(e => `<li><span class="cl-time">${t12(e.time)}</span><span class="cl-txt">${esc(e.title)}${e.auto ? `<small>${hubMode === "company" ? "From your plan" : "Added for you"}</small>` : `<small><label class="mc-mv">Move to <input type="date" class="input" data-mcmove="${e.id}" value="${e.date}"></label> <button type="button" class="of-lnk" data-mcdel="${e.id}">Remove</button></small>`}</span></li>`).join("")}</ul>` : `<p class="host-rem">Nothing booked.</p>`}
@@ -12733,6 +12755,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       const csv = ["Name,Street,City,Province/State,Postal/ZIP,Sent " + y + ",Received " + y].concat(org.contacts.map(c => [c.name, c.street, c.city, c.region, c.postal, (c.sent || {})[y] ? "yes" : "", (c.recv || {})[y] ? "yes" : ""].map(q).join(","))).join("\r\n");
       NoelMedia.share(new Blob([csv], { type: "text/csv" }), "Christmas-Card-List.csv", "Christmas card list").then(h => { if (h === "saved") toast("📄 Spreadsheet saved to your downloads"); }).catch(() => {}); return;
     }
+    const og = t.closest("[data-omgo]"); if (og) { org.calMonth = og.dataset.omgo; saveOrg(); renderOrg(); return; }
     const mo = t.closest("[data-omonth]"); if (mo) { const m0 = parseYmd(org.calMonth || calDefault()); org.calMonth = ymd(new Date(m0.getFullYear(), m0.getMonth() + +mo.dataset.omonth, 1)); saveOrg(); renderOrg(); return; }
     const day = t.closest("[data-oday]"); if (day) { org.calDay = day.dataset.oday; saveOrg(); renderOrg(); return; }
     const dm = t.closest("[data-odelmem]"); if (dm) { org.members = org.members.filter(m => m.id !== dm.dataset.odelmem); orgChanged(); return; }
