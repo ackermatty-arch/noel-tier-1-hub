@@ -9086,13 +9086,17 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function seasonReminders() {
     if (!window.NoelNative) return;
     const co = hubMode === "company", at = (y, m, d) => new Date(y, m, d, 9, 30).getTime(), y = season;
-    NoelNative.scheduleList(9300, 9310, [
-      { t: at(y, 10, 1), title: co ? "Time to plan the holiday party" : "Time to start planning Christmas", body: "Your plan is ready in Noël Tier 1 Hub" },
+    const list = co ? [
+      { t: at(y, 11, 27), title: "The season is wrapped", body: "Save this year and start fresh. Your event, vendors and budget carry over." },
+      { t: at(y + 1, 8, 1), title: "Book the holiday party early", body: "Venues and caterers fill up. Your plan is ready in Noël Tier 1 Hub." },
+      { t: at(y + 1, 9, 15), title: "The holiday party is ten weeks away", body: "Check your approval and vendor order dates." }
+    ] : [
+      { t: at(y, 10, 1), title: "Time to start planning Christmas", body: "Your plan is ready in Noël Tier 1 Hub" },
       { t: at(y, 11, 27), title: "The season is wrapped", body: "Save this year and start fresh. Your list, guests and budget carry over." },
-      { t: at(y + 1, 9, 15), title: co ? "The holiday party is ten weeks away" : "Christmas is ten weeks away", body: "Last year's list, guests and menus are saved and ready." },
-      { t: at(y + 1, 10, 1), title: co ? "Time to plan the holiday party" : "Time to start planning Christmas", body: "Open Noël Tier 1 Hub and set your budget" }
-    ]);
-  }
+      { t: at(y + 1, 9, 15), title: "Christmas is ten weeks away", body: "Last year's list, guests and menus are saved and ready." },
+      { t: at(y + 1, 10, 1), title: "Time to start planning Christmas", body: "Open Noël Tier 1 Hub and set your budget" }
+    ];
+    NoelNative.scheduleList(9300, 9310, list);  }
   function renderMemories() {
     $("#memoryYears").innerHTML = memories.map(m => {
       const all = m.gifts.people.flatMap(p => p.gifts), spent = all.filter(g => g.status !== "idea").reduce((a, g) => a + (+g.price || 0), 0);
