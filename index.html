@@ -9562,10 +9562,14 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (co) {
       const o = load("office", null); if (!o) return [];
       const ev = o.ev || {};
-      S.push({ name: "Event", widths: [22, 40], rows: [...T(ev.name || "Holiday Party", stamp), ...[["Date", ev.date], ["Time", [ev.start, ev.end].filter(Boolean).join(" to ")], ["Venue", ev.venue], ["Address", ev.address], ["Headcount", ev.headcount], ["Budget", ev.budget ? money(ev.budget) : ""], ["Event Coordinator", ev.organizer], ["Approver", ev.approver], ["Approval status", o.appr && o.appr.status]].filter(r => r[1] !== "" && r[1] != null).map(r => [{ v: r[0], s: 4 }, r[1]])] });
       const cs = (o.costs || []).map(c => [c.type || "", c.name || "", c.contact || "", c.url || "", c.orderBy || "", c.ordered ? "Yes" : "No", money(c.cost)]);
-      let cr = [...T("Event Costs", stamp), H(["Type", "Vendor", "Contact", "Order link", "Order by", "Ordered", "Cost"]), ...withTotal(cs, 6)];
-      if (ev.budget) { const sp = cs.reduce((a, r) => a + r[6].v, 0); cr.push([], [{ v: "Event budget", s: 4 }, "", "", "", "", "", money(ev.budget)], [{ v: "Remaining", s: 4 }, "", "", "", "", "", { v: Math.round((ev.budget - sp) * 100) / 100, s: 5 }]); }
+      const n = cs.length, tr = 5 + n, sp = cs.reduce((a, r) => a + r[6].v, 0), bud = +ev.budget || 0, ord = cs.filter(r => r[5] === "Yes").length;
+      const info = [["Date", ev.date], ["Time", [ev.start, ev.end].filter(Boolean).join(" to ")], ["Venue", ev.venue], ["Address", ev.address], ["Headcount", ev.headcount], ["Event Coordinator", ev.organizer], ["Approver", ev.approver], ["Approval status", ({ draft: "Draft", sent: "Sent for approval", changes: "Changes requested", approved: "Approved" })[(o.appr || {}).status] || ""]].filter(r => r[1] !== "" && r[1] != null).map(r => [{ v: r[0], s: 4 }, r[1]]);
+      S.push({ name: "Summary", widths: [24, 36], rows: [...T(ev.name || "Holiday Party", stamp), ...info, [],
+        [{ v: "Event budget", s: 4 }, money(bud)], [{ v: "Spent so far", s: 4 }, { f: `'Event Costs'!G${tr}`, v: sp, s: 2 }], [{ v: "Remaining", s: 4 }, { f: `B${info.length + 5}-B${info.length + 6}`, v: bud - sp, s: 7 }], [{ v: "Vendors ordered", s: 4 }, ord + " of " + n]] });
+      const cr = [...T("Event Costs", stamp), H(["Type", "Vendor", "Contact", "Order link", "Order by", "Ordered", "Cost"]), ...withTotal(cs, 6)];
+      cr[cr.length - 1][6] = { f: `SUM(G5:G${tr - 1})`, v: sp, s: 5 };
+      cr.push([{ v: "Event budget", s: 4 }, "", "", "", "", "", money(bud)], [{ v: "Remaining", s: 4 }, "", "", "", "", "", { f: `G${tr + 1}-G${tr}`, v: bud - sp, s: 7 }]);
       S.push({ name: "Event Costs", widths: [16, 26, 22, 30, 12, 10, 14], rows: cr });
       const gs = (o.guests || []).map(g => [g.name || "", ({ yes: "Coming", no: "Cannot come", maybe: "Maybe", pending: "Waiting", sent: "Invited" })[g.status] || g.status || "Waiting", g.diet || g.note || ""]);
       if (gs.length) S.push({ name: "Staff & Guests", widths: [26, 14, 30], rows: [...T("Staff & Guests", stamp), H(["Name", "RSVP", "Notes"]), ...gs] });
