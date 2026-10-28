@@ -2370,7 +2370,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
       <span class="ab-text"><b>Office Party Plan</b><small>Event details, vendors and order links, approval request, potluck, Silly Office Awards and the handover</small></span>
       <span class="ab-go">Open ›</span>
     </button>
-    <button class="advent-banner own-banner" data-goview="own">
+    <button class="advent-banner own-banner co-only" data-goview="own">
       <span class="ab-ico">📓</span>
       <span class="ab-text"><b data-co-title="My Own Event">My Own Dinner</b><small data-co-desc="Planning your own event? Type your menu or catering order, supplies with prices and a run of show">Cooking your own? Type your menu, shopping list with prices and cooking timeline</small></span>
       <span class="ab-go">Open ›</span>
@@ -2537,7 +2537,8 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
   </section>
 
   <section class="view" id="view-own" aria-labelledby="ownTitle">
-    <button type="button" class="meal-back" data-goview="planner">‹ Planner</button>
+    <button type="button" class="meal-back fam-only" data-goview="meals">‹ The Noël menu</button>
+    <button type="button" class="meal-back co-only" data-goview="planner">‹ Planner</button>
     <h2 class="view-title" id="ownTitle" data-co-title="My Own Event">My Own Dinner</h2>
     <p class="view-intro" data-co-desc="Planning your own event? Type in your menu or catering order, supplies, prices and run of show. It saves as you type, only on this phone.">Cooking your own dinner? Type in your menu, shopping list, prices and timeline. It saves as you type, only on this phone.</p>
     <div id="ownBody"></div>
@@ -11088,9 +11089,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     v.classList.toggle("on-menu", on); el.hidden = !on; if (!on) return;
     const hasPlan = mealPlans.some(p => !p.svc), sig = (hasPlan ? "plan" : "none") + savedMenus.length + "/" + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length;
     if (el.dataset.built === sig) return; el.dataset.built = sig;
-    const go = `<button type="button" class="menu-go" data-menugo>${hasPlan ? "My dinner plan" : "Plan my dinner"} <span>›</span></button>`;
+    const go = `<button type="button" class="menu-go" data-menugo>Noël's dinner plans <span>›</span></button>`;
     const svN = savedMenus.length + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length, sv = svN ? `<button type="button" class="menu-go menu-saved" data-menusaved>My saved menus (${svN}) <span>›</span></button>` : "";
-    el.innerHTML = `<div class="menu-top"><button type="button" class="menu-go menu-skip" data-menuskip>Don't plan my dinner</button>${go}</div>${sv ? `<div class="menu-top menu-top2">${sv}</div>` : ""}
+    el.innerHTML = `<div class="menu-top"><button type="button" class="menu-go menu-skip" data-menuskip>My own dinner plans</button>${go}</div>${sv ? `<div class="menu-top menu-top2">${sv}</div>` : ""}
       <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
       MENU_GROUPS.map(([g, ids, band]) => (band ? `<h3 class="menu-group">${band}</h3>` : "") + (band === g ? "" : `<h3 class="menu-subgroup">${g}</h3>`) + ids.map(id => {
         const m = mealById(id); if (!m || m.soon) return "";
@@ -11110,7 +11111,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }, true);
   $("#view-meals").addEventListener("click", e => {
     if (e.target.closest("[data-menugo]")) { mealScreen = "build"; renderMeals(); window.scrollTo(0, 0); }
-    if (e.target.closest("[data-menuskip]")) { const b = document.querySelector(".nav-btn[data-view=alarms]"); if (b) b.click(); return; }
+    if (e.target.closest("[data-menuskip]")) { showView("own"); window.scrollTo(0, 0); return; }
     if (e.target.closest("[data-menuown]")) { mealScreen = "build"; renderMeals(); setTimeout(() => { const o = $("#mealOwn"); if (o) o.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); }
     if (e.target.closest("[data-wzmenu]")) { mealScreen = "menu"; renderMeals(); window.scrollTo(0, 0); }
   });

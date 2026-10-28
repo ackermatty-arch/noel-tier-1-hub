@@ -629,9 +629,9 @@
     v.classList.toggle("on-menu", on); el.hidden = !on; if (!on) return;
     const hasPlan = mealPlans.some(p => !p.svc), sig = (hasPlan ? "plan" : "none") + savedMenus.length + "/" + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length;
     if (el.dataset.built === sig) return; el.dataset.built = sig;
-    const go = `<button type="button" class="menu-go" data-menugo>${hasPlan ? "My dinner plan" : "Plan my dinner"} <span>›</span></button>`;
+    const go = `<button type="button" class="menu-go" data-menugo>Noël's dinner plans <span>›</span></button>`;
     const svN = savedMenus.length + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length, sv = svN ? `<button type="button" class="menu-go menu-saved" data-menusaved>My saved menus (${svN}) <span>›</span></button>` : "";
-    el.innerHTML = `<div class="menu-top"><button type="button" class="menu-go menu-skip" data-menuskip>Don't plan my dinner</button>${go}</div>${sv ? `<div class="menu-top menu-top2">${sv}</div>` : ""}
+    el.innerHTML = `<div class="menu-top"><button type="button" class="menu-go menu-skip" data-menuskip>My own dinner plans</button>${go}</div>${sv ? `<div class="menu-top menu-top2">${sv}</div>` : ""}
       <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
       MENU_GROUPS.map(([g, ids, band]) => (band ? `<h3 class="menu-group">${band}</h3>` : "") + (band === g ? "" : `<h3 class="menu-subgroup">${g}</h3>`) + ids.map(id => {
         const m = mealById(id); if (!m || m.soon) return "";
@@ -651,7 +651,7 @@
   }, true);
   $("#view-meals").addEventListener("click", e => {
     if (e.target.closest("[data-menugo]")) { mealScreen = "build"; renderMeals(); window.scrollTo(0, 0); }
-    if (e.target.closest("[data-menuskip]")) { const b = document.querySelector(".nav-btn[data-view=alarms]"); if (b) b.click(); return; }
+    if (e.target.closest("[data-menuskip]")) { showView("own"); window.scrollTo(0, 0); return; }
     if (e.target.closest("[data-menuown]")) { mealScreen = "build"; renderMeals(); setTimeout(() => { const o = $("#mealOwn"); if (o) o.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); }
     if (e.target.closest("[data-wzmenu]")) { mealScreen = "menu"; renderMeals(); window.scrollTo(0, 0); }
   });
