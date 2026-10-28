@@ -2003,6 +2003,29 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .cl-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .cl-t b { display: block; font-size: 15px; color: #151515; }
 .cl-t small { display: block; color: #666; font-size: 12.5px; margin-top: 2px; }
+.co-dash { padding: 14px; margin-bottom: 12px; }
+.cd-head .cd-k { display: block; font: 600 11px Cinzel, serif; letter-spacing: .22em; text-transform: uppercase; color: #B08D4E; }
+.cd-head b { display: block; font: 600 19px Cinzel, serif; color: #151515; margin-top: 2px; }
+.cd-head small { display: block; color: #666; font-size: 13px; margin-top: 2px; }
+.cd-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.cd-tiles button, .cd-bud { background: #fff; border: 1px solid #C9A45C; border-radius: 0; padding: 10px 6px; text-align: center; font: inherit; color: #151515; cursor: pointer; }
+.cd-tiles b { display: block; font: 600 20px Cinzel, serif; line-height: 1.15; }
+.cd-tiles button:nth-child(3) b { font-size: 14px; padding-top: 4px; }
+.cd-tiles small { display: block; color: #666; font-size: 12px; margin-top: 3px; }
+.cd-bud { width: 100%; text-align: left; padding: 10px 12px; }
+.cd-bud span { display: block; font-size: 14px; margin-bottom: 7px; }
+.cd-bud i { display: block; height: 10px; background: #efe7d6; }
+.cd-bud u { display: block; height: 100%; background: #151515; text-decoration: none; }
+.cd-bud small { color: #666; font-size: 12.5px; }
+.cd-todo { margin-top: 12px; } .cd-todo h4 { font: 600 11px Cinzel, serif; letter-spacing: .22em; text-transform: uppercase; color: #B08D4E; margin: 0 0 6px; }
+.cd-ord { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid #ece4d2; }
+.cd-ord b { display: block; font-size: 14px; } .cd-ord small { color: #666; font-size: 12.5px; }
+.of-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.cd-ord .of-acts { margin: 0; justify-content: flex-end; }
+.of-lnk { display: inline-block; border: 1px solid #C9A45C; background: #fff; color: #151515; padding: 6px 10px; font: 600 12px Cinzel, serif; letter-spacing: .06em; text-decoration: none; cursor: pointer; }
+.of-lnk.of-done { background: #151515; color: #fff; border-color: #151515; }
+.off-ob { display: flex; align-items: center; gap: 8px; } .off-ob span { font-size: 13px; color: #666; white-space: nowrap; }
+.nye-offmenu { margin: 10px 0; }
 </style>
 </head>
 <body>
@@ -2224,12 +2247,18 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
        VIEW 2 — HOLIDAY PLANNER & CHECKLIST
        ============================================================ -->
   <section class="view" id="view-planner" aria-labelledby="plannerTitle">
-    <h2 class="view-title" id="plannerTitle">Holiday Planner</h2>
-    <p class="view-intro">Tick off each task as you go. Your progress saves automatically.</p>
+    <h2 class="view-title" id="plannerTitle" data-co-title="Event Coordinator">Holiday Planner</h2>
+    <p class="view-intro" data-co-desc="Your party plan, approvals, vendors and budget in one place. Everything saves automatically.">Tick off each task as you go. Your progress saves automatically.</p>
 
-    <button class="advent-banner own-banner fam-only" data-goview="own">
+    <div id="coDash" class="co-only"></div>
+    <button class="advent-banner office-banner" data-goview="office" id="officeBanner" hidden>
+      <span class="ab-ico">🏢</span>
+      <span class="ab-text"><b>Office Party Plan</b><small>Event details, vendors and order links, approval request, potluck, Silly Office Awards and the handover</small></span>
+      <span class="ab-go">Open ›</span>
+    </button>
+    <button class="advent-banner own-banner" data-goview="own">
       <span class="ab-ico">📓</span>
-      <span class="ab-text"><b>My Own Dinner</b><small>Cooking your own? Type your menu, shopping list with prices and cooking timeline</small></span>
+      <span class="ab-text"><b data-co-title="My Own Event">My Own Dinner</b><small data-co-desc="Planning your own event? Type your menu or catering order, supplies with prices and a run of show">Cooking your own? Type your menu, shopping list with prices and cooking timeline</small></span>
       <span class="ab-go">Open ›</span>
     </button>
 
@@ -2274,11 +2303,6 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
       </div>
     </article>
 
-    <button class="advent-banner office-banner" data-goview="office" id="officeBanner" hidden>
-      <span class="ab-ico">🏢</span>
-      <span class="ab-text"><b>Office Party Plan</b><small>Event details, approval request, potluck, Silly Office Awards and the handover</small></span>
-      <span class="ab-go">Open ›</span>
-    </button>
     <button class="advent-banner host-banner" data-goview="host" id="hostBanner">
       <span class="ab-ico">🏡</span>
       <span class="ab-text"><b>Hosting &amp; Logistics</b><small>Guest arrivals, rooms, seating &amp; place cards, deep cleaning and supplies</small></span>
@@ -2391,8 +2415,8 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 
   <section class="view" id="view-own" aria-labelledby="ownTitle">
     <button type="button" class="meal-back" data-goview="planner">‹ Planner</button>
-    <h2 class="view-title" id="ownTitle">My Own Dinner</h2>
-    <p class="view-intro">Cooking your own dinner? Type in your menu, shopping list, prices and timeline. It saves as you type, only on this phone.</p>
+    <h2 class="view-title" id="ownTitle" data-co-title="My Own Event">My Own Dinner</h2>
+    <p class="view-intro" data-co-desc="Planning your own event? Type in your menu or catering order, supplies, prices and run of show. It saves as you type, only on this phone.">Cooking your own dinner? Type in your menu, shopping list, prices and timeline. It saves as you type, only on this phone.</p>
     <div id="ownBody"></div>
   </section>
 
@@ -2478,8 +2502,8 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
   <section class="view" id="view-nye" aria-labelledby="nyeTitle">
     <div id="nyeMenu" hidden></div>
     <button type="button" class="meal-back" data-nyemenu>‹ The menu</button>
-    <h2 class="view-title" id="nyeTitle">New Year's Eve</h2>
-    <p class="view-intro">Plan the party, play the games, seal your wishes and count down to midnight together.</p>
+    <h2 class="view-title" id="nyeTitle" data-co-title="New Year's Party">New Year's Eve</h2>
+    <p class="view-intro" data-co-desc="Plan the party, use your office appetizer menu, play the games and count down to midnight together.">Plan the party, play the games, seal your wishes and count down to midnight together.</p>
 
     <div class="nye-count-card">
       <div id="nyeCount"></div>
@@ -2535,8 +2559,8 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
       </div>
     </article>
 
-    <div class="section-label">Wishes Jar</div>
-    <div class="card nye-wish-card">
+    <div class="section-label fam-only">Wishes Jar</div>
+    <div class="card nye-wish-card fam-only">
       <h3>💫 Seal a wish for next year</h3>
       <p class="review-sub">Pass the phone around. Each person writes a wish or resolution and seals it. They open next New Year's Eve.</p>
       <form id="jarForm" autocomplete="off">
@@ -7359,6 +7383,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (name === "meals") renderMeals();
     if (name === "own") renderOwn();
     if (name === "invites") renderCardBar();
+    if (name === "planner" && typeof renderCoDash === "function") renderCoDash();
     $$(".nav-btn").forEach(b => {
       const on = b.dataset.view === name;
       b.classList.toggle("active", on);
@@ -9293,7 +9318,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function applyFamily() {
     const t = familyTitle(family);
     $(".brand-title").textContent = t || "Noël Tier 1 Hub";          // ✏️ default title
-    $(".brand-sub").textContent = t ? "Noël Tier 1 Hub" : "Plan · Celebrate · Remember";  // ✏️ default subtitle
+    $(".brand-sub").textContent = t ? "Noël Tier 1 Hub" : hubMode === "company" ? "Event Coordinator" : "Plan · Celebrate · Remember";  // ✏️ default subtitle
     $(".app-footer").textContent = t ? `${t}${/s$/i.test(t) ? "'" : "'s"} Noël Hub` : "Noël Tier 1 Hub · Private & stored only on this device";   // ✏️ footer
     document.title = t ? `${t} · Noël Tier 1 Hub` : "Noël Tier 1 Hub";
     $("#navMeals").hidden = hubMode === "company";   // 🍽️ the big-dinner planner is for families
@@ -10955,7 +10980,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const ownCur = () => ownDinners.find(d => d.id === ownId);
   const ownNum = v => { const n = parseFloat(String(v).replace(/[^0-9.]/g, "")); return isFinite(n) ? n : 0; };
   const ownTotals = d => { let total = 0, spent = 0; d.shop.forEach(i => { const v = ownNum(i.price); total += v; if (i.got) spent += v; }); const lim = ownNum(d.limit); return { total, spent, left: total - spent, lim, over: lim ? total - lim : 0 }; };
-  const ownName = d => d.title.trim() || "My own dinner";
+  const ownName = d => d.title.trim() || (hubMode === "company" ? "My own event" : "My own dinner");
+  const coWords = s => hubMode !== "company" ? s : [["The dinner", "The event"], ["e.g. Christmas Day at our house", "e.g. Team lunch on Dec 18"], [">Menu<", ">Menu or catering order<"], ["Shopping list and prices", "Orders, supplies and prices"], ["Type each item and its price. Tick it when it is in your buggy.", "Type each order or supply and its price. Tick it when it is ordered or picked up."], ["In the buggy", "Ordered or picked up"], ["My budget for this dinner (optional)", "Approved budget for this event (optional)"], ["Cooking timeline", "Run of show"], ["Type a time and a step. Tap Timer to set a countdown for it (up to 24 hours ahead).", "Type a time and a step, like caterer arrives or doors open. Tap Timer to set a countdown for it."], ["Guest notes", "Notes"], [">Shopping list<", ">Orders and supplies<"], ["Allergies, who is coming, seating ideas", "Dietary needs, RSVPs, who is helping"], ["Delete this dinner", "Delete this event"], ["My own dinner", "My own event"]].reduce((a, [f, t]) => a.split(f).join(t), s);
   function ownTotHtml(d) {
     const t = ownTotals(d);
     return `<b>${cad(t.total)}</b> total · ${cad(t.spent)} bought · ${cad(t.left)} still to buy` + (t.lim ? `<br>${t.over > 0 ? `<span class="own-over">${cad(t.over)} over your ${cad(t.lim)} budget</span>` : `${cad(-t.over)} left of your ${cad(t.lim)} budget`}` : "");
@@ -10967,7 +10993,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (!ownCur()) { ownId = ownDinners[0].id; saveOwn(); }
     const d = ownCur();
     const row = (arr, id) => arr;
-    box.innerHTML = `<div class="ms-chips own-chips">${ownDinners.map(x => `<button type="button" class="ms-chip" data-ownpick="${x.id}" aria-pressed="${x.id === d.id}">${esc(ownName(x))}</button>`).join("")}<button type="button" class="ms-chip" data-ownnew>+ New dinner</button></div>
+    box.innerHTML = coWords(`<div class="ms-chips own-chips">${ownDinners.map(x => `<button type="button" class="ms-chip" data-ownpick="${x.id}" aria-pressed="${x.id === d.id}">${esc(ownName(x))}</button>`).join("")}<button type="button" class="ms-chip" data-ownnew>+ New dinner</button></div>
       <div class="card own-card"><h4 class="ms-h">The dinner</h4>
         <label class="calc-field"><span>Name</span><input class="input" data-ownf="title" maxlength="50" placeholder="e.g. Christmas Day at our house" value="${esc(d.title)}"></label>
         <div class="own-row own-r3"><label class="calc-field"><span>Guests</span><input class="input" data-ownf="guests" inputmode="numeric" maxlength="3" value="${esc(d.guests)}"></label>
@@ -10986,7 +11012,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${d.steps.map(r => `<div class="own-row own-r5"><input class="input" type="time" data-own="steps" data-id="${r.id}" data-k="time" value="${esc(r.time)}"><input class="input" data-own="steps" data-id="${r.id}" data-k="text" placeholder="e.g. Turkey into the oven" value="${esc(r.text)}"><button type="button" class="btn btn-ghost btn-sm own-tm" data-owntimer="${r.id}">Timer</button><button type="button" class="icon-btn" data-owndel="steps:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
         <button type="button" class="btn btn-ghost btn-block" data-ownadd="steps">+ Add a step</button></div>
       <div class="card own-card"><h4 class="ms-h">Guest notes</h4><textarea class="input" rows="3" data-ownf="notes" placeholder="Allergies, who is coming, seating ideas">${esc(d.notes)}</textarea></div>
-      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button></div>`;
+      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button></div>`);
   }
   function ownDinnerDoc(id) {
     const d = ownDinners.find(x => x.id === id); if (!d) return { error: "That dinner isn't here any more" };
@@ -10997,13 +11023,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const bring = d.bring.filter(r => r.who || r.dish);
     const shop = d.shop.filter(r => r.name || r.price);
     const steps = d.steps.filter(r => r.time || r.text);
-    const html = `<div class="od"><h1>${esc(ownName(d))}</h1><p class="pm-sub">${[dateTxt, d.time, d.guests ? d.guests + " guests" : ""].filter(Boolean).map(esc).join(" · ")}</p>
+    const html = coWords(`<div class="od"><h1>${esc(ownName(d))}</h1><p class="pm-sub">${[dateTxt, d.time, d.guests ? d.guests + " guests" : ""].filter(Boolean).map(esc).join(" · ")}</p>
       <h3>Menu</h3>${menu}
       <h3>Who is bringing what</h3><ul>${bring.length ? bring.map(r => `<li>${esc(r.who)}: ${esc(r.dish)}</li>`).join("") : blank(4)}</ul>
       <h3>Shopping list</h3><ul>${shop.length ? shop.map(r => `<li>${r.got ? "☑" : "☐"} ${esc(r.name)}${ownNum(r.price) ? `<span class="pr">${cad(ownNum(r.price))}</span>` : ""}</li>`).join("") + `<li><b>Total ${cad(t.total)}</b>${t.lim ? ` of ${cad(t.lim)} budget` : ""}</li>` : blank(8)}</ul>
       <h3>Cooking timeline</h3><ul>${steps.length ? steps.map(r => `<li><b>${esc(r.time)}</b> ${esc(r.text)}</li>`).join("") : blank(6)}</ul>
-      <h3>Guest notes</h3><p>${d.notes ? esc(d.notes).replace(/\n/g, "<br>") : "________________________________"}</p></div><p class="pm-foot">Made with Noël Tier 1 Hub.</p>`;
-    return { title: ownName(d), css, html, margin: 0.5, file: "My-Own-Dinner" };
+      <h3>Guest notes</h3><p>${d.notes ? esc(d.notes).replace(/\n/g, "<br>") : "________________________________"}</p></div><p class="pm-foot">Made with Noël Tier 1 Hub.</p>`);
+    return { title: ownName(d), css, html, margin: 0.5, file: hubMode === "company" ? "My-Own-Event" : "My-Own-Dinner" };
   }
   $("#view-own").addEventListener("input", e => {
     const t = e.target, d = ownCur(); if (!d) return;
@@ -11055,7 +11081,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const nyeSeason = (d = new Date()) => (d.getMonth() === 11 && d.getDate() >= 26) || (d.getMonth() === 0 && d.getDate() <= 6);
   function applySeasonNav() {
     const nye = nyeSeason();
-    $("#navNye").hidden = hubMode === "company";   // New Year's has its own tab (a family thing); Meals stays put
+    $("#navNye").hidden = false;   // New Year's has its own tab on both sides; Meals stays family-only
     $("#navMeals").hidden = hubMode === "company";
   }
   const midnightTarget = () => { const n = new Date(); return new Date(n.getFullYear() + 1, 0, 1).getTime(); };
@@ -11151,7 +11177,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       <label class="wz-time"><span class="wz-lab">Party starts</span><input class="input" type="time" id="nyeTime" value="${esc(c.time)}"></label></div>
       <div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Will you serve dinner too?">
         <button type="button" data-nyemode="meal" aria-pressed="${c.mode !== "before"}"><b>Appetizers are the meal</b><small>About 12 bites per guest</small></button><button type="button" data-nyemode="before" aria-pressed="${c.mode === "before"}"><b>Light bites before dinner</b><small>About 5 bites per guest</small></button></div>
-      <p class="party-total">About <b>${cad0(ps.total)}</b> · ${cad(ps.total / c.guests)} per guest<small>${currency} · our set New Year's Eve menu, includes the midnight toast.</small></p>` +
+      <p class="party-total">About <b>${cad0(ps.total)}</b> · ${cad(ps.total / c.guests)} per guest<small>${currency} · ${c.picks ? "your own appetizer menu" : "our set New Year's Eve menu"}, includes the midnight toast.</small></p>` +
+      (hubMode === "company" && window.__offPicks ? `<div class="seg sub-tabs meal-done pm-two nye-offmenu" role="group" aria-label="Which appetizer menu">
+        <button type="button" data-nyeoff="set" aria-pressed="${!c.picks}"><b>Set New Year's menu</b><small>Our ready-made list</small></button><button type="button" data-nyeoff="office" aria-pressed="${!!c.picks}"><b>My office party menu</b><small>${window.__offPicks().length} appetizers from Food</small></button></div>` : "") +
       (active ? `<p class="nye-on">✅ Party alarms are set</p>` : "") + (savedMenus.length ? `<button type="button" class="btn btn-ghost btn-block" data-nyesaved>My saved menus (${savedMenus.length})</button>` : "");
   }
 
@@ -11167,6 +11195,12 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#jarReveal").innerHTML = ready.length ? `<h4>🎁 Your wishes from last year</h4>` + ready.map(w => `<p class="wish-open"><b>${esc(w.name)}</b> (${w.y + 1}): “${esc(w.text)}”</p>`).join("") :
       sealed.length ? `<p class="wish-wait">🔒 ${sealed.length} older ${sealed.length === 1 ? "wish is" : "wishes are"} still sealed.</p>` : "";
   }
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-nyeoff]"); if (!b) return;
+    const c = cfgFor("nyeparty"); c.picks = b.dataset.nyeoff === "office" && window.__offPicks ? window.__offPicks() : null;
+    mealCfg.nyeparty = c; save("mealCfg", mealCfg); renderNyeParty();
+    toast(c.picks ? "🥂 Using your office party menu" : "🥂 Back to the set New Year's menu");
+  });
   $("#jarForm").addEventListener("submit", e => {
     e.preventDefault(); const f = e.target, name = f.wname.value.trim(), text = f.wtext.value.trim();
     if (!name || !text) { toast("💫 Add your name and your wish"); return; }
@@ -12675,8 +12709,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   // ---------- screens ----------
   function renderBudget() {
     budRecordDay();
-    const T = budTotals(), tab = budget.tab || "overview";
-    $("#budTabs").innerHTML = [["overview", "📊 Overview"], ["sheet", "🧾 Spreadsheet"], ["set", "🎯 Budgets"], ["shared", "🤝 Shared costs"]].map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
+    const T = budTotals(), tab = hubMode === "company" && budget.tab === "shared" ? "overview" : (budget.tab || "overview");
+    $("#budTabs").innerHTML = [["overview", "📊 Overview"], ["sheet", "🧾 Spreadsheet"], ["set", "🎯 Budgets"], ["shared", "🤝 Shared costs"]].filter(([k]) => !(k === "shared" && hubMode === "company")).map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
     $("#budBody").innerHTML = ({ overview: budOverview, sheet: budSheet, set: budSet, shared: budShared })[tab](T);
   }
   function budOverview(T) {
@@ -13106,6 +13140,41 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const offActs = () => offActList().filter(([k]) => off.acts[k]).map(([k, l]) => k === "gifts" && off.ev.giftLimit ? `${l} (${money(+off.ev.giftLimit)} limit)` : l);
   const offYear = () => (off.ev.date ? +off.ev.date.slice(0, 4) : new Date().getFullYear());
 
+  // ---------- 🔗 vendor links + order-by dates ----------
+  const offUrl = u => /^https?:\/\//i.test(u) ? u : "https://" + u;
+  const offDays = ymd => Math.ceil((new Date(ymd + "T12:00").getTime() - Date.now()) / 864e5);
+  function offLinks(c) {
+    const ct = (c.contact || "").trim(), out = [];
+    if (/@/.test(ct)) out.push(`<a class="of-lnk" href="mailto:${esc(ct.split(/[\s,;]+/).find(x => /@/.test(x)) || ct)}">Email</a>`);
+    else if (/\d{3}[\s.\-)]*\d{3,4}/.test(ct)) out.push(`<a class="of-lnk" href="tel:${esc(ct.replace(/[^\d+]/g, ""))}">Call</a>`);
+    if (c.url) out.push(`<a class="of-lnk" href="${esc(offUrl(c.url))}" target="_blank" rel="noopener">Order online</a>`);
+    return out.join("");
+  }
+  function offOrderHtml(c) {
+    let by = "";
+    if (c.orderBy) { const d = offDays(c.orderBy); by = c.ordered ? `<small>✓ Ordered</small>` : `<small>Order by ${esc(offDate(c.orderBy, { month: "short", day: "numeric" }))}${d < 0 ? " · date has passed" : d <= 7 ? ` · ${d} ${d === 1 ? "day" : "days"} left` : ""}</small>`; }
+    const links = offLinks(c);
+    return by + (links || c.orderBy ? `<span class="of-acts">${links}${c.orderBy || c.url ? `<button type="button" class="of-lnk of-done" data-ocdone="${c.id}">${c.ordered ? "Undo" : "Mark ordered"}</button>` : ""}</span>` : "");
+  }
+  const OFF_STATUS = { draft: "Not sent yet", sent: "Waiting", changes: "Changes asked", approved: "Approved", declined: "Declined" };
+  function renderCoDash() {
+    const el = $("#coDash"); if (!el || hubMode !== "company") return;
+    const e = off.ev, hc = Math.max(0, +e.headcount || 0), total = offTotal(), lim = +e.budget || 0, pct = lim ? Math.min(100, Math.round(total / lim * 100)) : 0;
+    const d = e.date ? offDays(e.date) : null;
+    const todo = off.costs.filter(c => c.orderBy && !c.ordered).sort((a, b) => a.orderBy < b.orderBy ? -1 : 1).slice(0, 3);
+    el.innerHTML = `<div class="card co-dash"><div class="cd-head"><span class="cd-k">Your event</span><b>${esc(e.name || "Holiday Party")}</b><small>${e.date ? esc(offDate(e.date)) + (e.start ? " · " + esc(offTime(e.start)) : "") : "Set the date to start the countdown"}</small></div>
+      <div class="cd-tiles"><button type="button" data-coto="event"><b>${d == null ? "–" : d < 0 ? "Done" : d}</b><small>${d == null ? "date" : d < 0 ? "event over" : d === 1 ? "day to go" : "days to go"}</small></button>
+      <button type="button" data-coto="event"><b>${hc || "–"}</b><small>guests</small></button>
+      <button type="button" data-coto="approval"><b>${esc(OFF_STATUS[off.appr.status] || off.appr.status)}</b><small>approval</small></button></div>
+      <button type="button" class="cd-bud" data-coto="event"><span><b>${money(total)}</b> planned${lim ? ` of <b>${money(lim)}</b> approved` : ""}</span>${lim ? `<i><u style="width:${pct}%"></u></i>` : `<small>Add the approved budget on the Event tab</small>`}</button>
+      ${todo.length ? `<div class="cd-todo"><h4>To order</h4>${todo.map(c => `<div class="cd-ord"><div><b>${esc(c.name || c.type)}</b><small>Order by ${esc(offDate(c.orderBy, { month: "short", day: "numeric" }))}${offDays(c.orderBy) < 0 ? " · date has passed" : ""}</small></div><span class="of-acts">${offLinks(c)}<button type="button" class="of-lnk of-done" data-ocdone="${c.id}">Mark ordered</button></span></div>`).join("")}</div>` : ""}</div>`;
+  }
+  window.__offPicks = () => { const F = offFoodCfg(); return F.picks && F.picks.length ? F.picks.slice() : OFF_DEFAULT_PICKS.slice(); };
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-coto]"); if (b) { off.tab = b.dataset.coto; saveOff(); showView("office"); return; }
+    const od = e.target.closest("#coDash [data-ocdone]"); if (od) { const c = off.costs.find(x => x.id === od.dataset.ocdone); if (c) { c.ordered = !c.ordered; saveOff(); renderCoDash(); } }
+  });
+
   function renderOffice() {
     renderOffMenu();
     const tab = off.tab || "event";
@@ -13132,11 +13201,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       <div class="card pt-card"><h3>✨ What's planned</h3><div class="apps-filters">${offActList().map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div>
         ${off.acts.gifts ? `<div class="off-grid" style="margin-top:8px">${fld("giftLimit", "Gift exchange limit", "number", "$")}</div>` : ""}</div>
       <div class="card pt-card"><h3>💵 Costs & vendors</h3>
-        ${off.costs.map(c => `<div class="off-cost" data-oc="${c.id}"><div><b>${esc(c.type)}</b>${c.name ? ` · ${esc(c.name)}` : ""}${c.contact ? `<small>📞 ${esc(c.contact)}</small>` : ""}</div><span>${money(+c.cost || 0)}</span><button type="button" class="icon-btn" data-ocdel aria-label="Remove">✕</button></div>`).join("") || `<p class="host-rem">Add the venue, caterer, drinks, prizes… Vendors' names and numbers are kept for next year too.</p>`}
+        ${off.costs.map(c => `<div class="off-cost" data-oc="${c.id}"><div><b>${esc(c.type)}</b>${c.name ? ` · ${esc(c.name)}` : ""}${c.contact ? `<small>📞 ${esc(c.contact)}</small>` : ""}${offOrderHtml(c)}</div><span>${money(+c.cost || 0)}</span><button type="button" class="icon-btn" data-ocdel aria-label="Remove">✕</button></div>`).join("") || `<p class="host-rem">Add the venue, caterer, drinks, prizes… Vendors' names and numbers are kept for next year too.</p>`}
         ${off.costs.length ? `<div class="off-cost total"><div><b>Estimated total</b><small>about ${money(Math.round(total / hc * 100) / 100)} per person</small></div><span>${money(total)}</span><i></i></div>` : ""}
         ${+off.ev.budget && total > +off.ev.budget ? `<p class="org-warn">⚠️ ${money(total - off.ev.budget)} over the approved budget.</p>` : ""}
         <form class="org-ev-form" id="offCostForm" autocomplete="off"><div class="org-addr-row"><select class="input" name="type">${OFF_COSTS.map(c => `<option>${c}</option>`).join("")}</select><input class="input" name="cost" type="number" inputmode="decimal" min="0" placeholder="$" style="max-width:96px"></div>
-          <input class="input" name="name" maxlength="50" placeholder="Vendor or item (optional), e.g. Sunrise Catering"><input class="input" name="contact" maxlength="60" placeholder="Phone or email (optional)">
+          <input class="input" name="name" maxlength="50" placeholder="Vendor or item (optional), e.g. Sunrise Catering"><input class="input" name="contact" maxlength="60" placeholder="Phone or email (optional)"><input class="input" name="url" maxlength="120" inputmode="url" placeholder="Website to order from (optional)"><label class="off-ob"><span>Order by</span><input class="input" name="orderBy" type="date"></label>
           <button class="btn btn-green btn-block" type="submit">➕ Add cost</button></form>
         ${offNear("Find vendors near me", [["🎧 DJs", "DJ for parties"], ["📸 Photo booth rentals", "photo booth rental"], ["🪑 Party rentals (tables, chairs)", "party rentals"], ["💐 Florists", "florist"]].concat(off.ev.who === "family" ? [["🎅 Santa for hire", "santa claus for hire"], ["🎈 Kids' entertainers", "kids party entertainer"]] : []))}</div>
       <div class="card pt-card"><h3>📝 Notes</h3>${fld("notes", "", "area", "Anything the approver should know, e.g. half-day Friday, partners welcome")}</div>
@@ -13328,6 +13397,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       document.body.classList.toggle("co-kids", k === "family"); saveOff(); renderOffice(); window.scrollTo({ top: 0 }); return;
     }
     const ac = t.closest("[data-ofact]"); if (ac) { off.acts[ac.dataset.ofact] = off.acts[ac.dataset.ofact] ? 0 : 1; saveOff(); renderOffice(); return; }
+    const od = t.closest("[data-ocdone]"); if (od) { const c = off.costs.find(x => x.id === od.dataset.ocdone); if (c) { c.ordered = !c.ordered; saveOff(); renderOffice(); renderCoDash(); } return; }
     const cd = t.closest("[data-ocdel]"); if (cd) { off.costs = off.costs.filter(c => c.id !== cd.closest("[data-oc]").dataset.oc); saveOff(); renderOffice(); return; }
     const pd = t.closest("[data-opdel]"); if (pd) { off.pot = off.pot.filter(p => p.id !== pd.closest("[data-op]").dataset.op); saveOff(); renderOffice(); return; }
     const ad = t.closest("[data-awdel]"); if (ad) { off.awards = off.awards.filter(a => a.id !== ad.closest("[data-oa]").dataset.oa); saveOff(); renderOffice(); return; }
@@ -13371,7 +13441,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   });
   $("#view-office").addEventListener("submit", async e => {
     e.preventDefault(); const f = e.target;
-    if (f.id === "offCostForm") { const c = parseFloat(f.cost.value) || 0; if (!c && !f.name.value.trim()) { toast("💵 Add an amount or a vendor"); return; } off.costs.push({ id: uid(), type: f.type.value, name: f.name.value.trim(), contact: f.contact.value.trim(), cost: c }); }
+    if (f.id === "offCostForm") { const c = parseFloat(f.cost.value) || 0; if (!c && !f.name.value.trim()) { toast("💵 Add an amount or a vendor"); return; } off.costs.push({ id: uid(), type: f.type.value, name: f.name.value.trim(), contact: f.contact.value.trim(), url: f.url.value.trim(), orderBy: f.orderBy.value, cost: c }); }
     if (f.id === "offPotForm") { const who = f.who.value.trim(), dish = f.dish.value.trim(); if (!who || !dish) { toast("🥘 Add a name and a dish"); return; } off.pot.push({ id: uid(), who, dish, cat: f.cat.value, diet: [...f.querySelectorAll("[name=diet]:checked")].map(x => x.value) }); }
     if (f.id === "offAwardForm") { const tt = f.t.value.trim(); if (!tt) return; off.awards.push({ id: uid(), t: tt, w: "" }); }
     if (f.id === "offExportForm") { const pw = f.pw.value; if (pw.length < 4) { toast("🔒 Use at least 4 characters"); return; } try { const r = await offExport(pw); if (r === "saved") toast("📦 Handover file saved to your downloads"); } catch (err) { toast("Couldn't make the file"); } f.pw.value = ""; renderOffice(); return; }
@@ -13582,12 +13652,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   /* ---------- 🍽️ FOOD: appetizers we make, catered, potluck or the venue ---------- */
   const OFF_FOOD = [["apps", "🍢", "Appetizers we make", "Pick the bites. Noël works out how many, the cost and the shopping list."], ["catered", "🍽️", "Catered or ordered in", "How much to order for your group."], ["potluck", "🥘", "Potluck", "Everyone brings something."], ["venue", "🍴", "The venue provides it", "Just note the menu and cost."]];
   const KID_APPS = ["Pigs in a Blanket", "Pinwheel Roll-Ups", "Veggie Cups", "Mini Sliders", "Cookie Platter", "Party Snack Mix", "Chocolate-Dipped Strawberries"];
+  const OFF_DEFAULT_PICKS = ["Caprese Skewers", "Charcuterie Board", "Mini Sliders", "Spinach Artichoke Dip", "Pinwheel Roll-Ups", "Mini Cheesecake Bites"];
   const offFoodCfg = () => (off.food = off.food || { style: "", mode: "meal", picks: null, got: {} });
   function offPeople() { const a = Math.max(1, +off.ev.headcount || 1), k = off.ev.who === "family" ? Math.max(0, +off.ev.kids || 0) : 0; return { a, k, eq: a + k * 0.6, all: a + k }; }
   function offFoodPlan() {
     const F = offFoodCfg(), MD2 = window.NOEL_MEALS || {}, SHOP = MD2.appShop || {}, DR = MD2.drinkApps || [], P = offPeople();
     const all = (window.NOEL_APPS || []).map(r => r[1]);
-    let picks = F.picks || (off.ev.who === "family" ? ["Pigs in a Blanket", "Pinwheel Roll-Ups", "Veggie Cups", "Mini Sliders", "Charcuterie Board", "Cookie Platter", "Sparkling Punch"] : ["Caprese Skewers", "Charcuterie Board", "Mini Sliders", "Spinach Artichoke Dip", "Pinwheel Roll-Ups", "Mini Cheesecake Bites"]);
+    let picks = F.picks || (off.ev.who === "family" ? ["Pigs in a Blanket", "Pinwheel Roll-Ups", "Veggie Cups", "Mini Sliders", "Charcuterie Board", "Cookie Platter", "Sparkling Punch"] : OFF_DEFAULT_PICKS);
     picks = picks.filter(n => all.includes(n));
     const food = picks.filter(n => !DR.includes(n)), drinks = picks.filter(n => DR.includes(n));
     const per = F.mode === "meal" ? 12 : 5, total = Math.ceil(P.eq * per), each = food.length ? Math.ceil(total / food.length) : 0;

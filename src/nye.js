@@ -10,7 +10,7 @@
   const nyeSeason = (d = new Date()) => (d.getMonth() === 11 && d.getDate() >= 26) || (d.getMonth() === 0 && d.getDate() <= 6);
   function applySeasonNav() {
     const nye = nyeSeason();
-    $("#navNye").hidden = hubMode === "company";   // New Year's has its own tab (a family thing); Meals stays put
+    $("#navNye").hidden = false;   // New Year's has its own tab on both sides; Meals stays family-only
     $("#navMeals").hidden = hubMode === "company";
   }
   const midnightTarget = () => { const n = new Date(); return new Date(n.getFullYear() + 1, 0, 1).getTime(); };
@@ -106,7 +106,9 @@
       <label class="wz-time"><span class="wz-lab">Party starts</span><input class="input" type="time" id="nyeTime" value="${esc(c.time)}"></label></div>
       <div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Will you serve dinner too?">
         <button type="button" data-nyemode="meal" aria-pressed="${c.mode !== "before"}"><b>Appetizers are the meal</b><small>About 12 bites per guest</small></button><button type="button" data-nyemode="before" aria-pressed="${c.mode === "before"}"><b>Light bites before dinner</b><small>About 5 bites per guest</small></button></div>
-      <p class="party-total">About <b>${cad0(ps.total)}</b> · ${cad(ps.total / c.guests)} per guest<small>${currency} · our set New Year's Eve menu, includes the midnight toast.</small></p>` +
+      <p class="party-total">About <b>${cad0(ps.total)}</b> · ${cad(ps.total / c.guests)} per guest<small>${currency} · ${c.picks ? "your own appetizer menu" : "our set New Year's Eve menu"}, includes the midnight toast.</small></p>` +
+      (hubMode === "company" && window.__offPicks ? `<div class="seg sub-tabs meal-done pm-two nye-offmenu" role="group" aria-label="Which appetizer menu">
+        <button type="button" data-nyeoff="set" aria-pressed="${!c.picks}"><b>Set New Year's menu</b><small>Our ready-made list</small></button><button type="button" data-nyeoff="office" aria-pressed="${!!c.picks}"><b>My office party menu</b><small>${window.__offPicks().length} appetizers from Food</small></button></div>` : "") +
       (active ? `<p class="nye-on">✅ Party alarms are set</p>` : "") + (savedMenus.length ? `<button type="button" class="btn btn-ghost btn-block" data-nyesaved>My saved menus (${savedMenus.length})</button>` : "");
   }
 
@@ -122,6 +124,12 @@
     $("#jarReveal").innerHTML = ready.length ? `<h4>🎁 Your wishes from last year</h4>` + ready.map(w => `<p class="wish-open"><b>${esc(w.name)}</b> (${w.y + 1}): “${esc(w.text)}”</p>`).join("") :
       sealed.length ? `<p class="wish-wait">🔒 ${sealed.length} older ${sealed.length === 1 ? "wish is" : "wishes are"} still sealed.</p>` : "";
   }
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-nyeoff]"); if (!b) return;
+    const c = cfgFor("nyeparty"); c.picks = b.dataset.nyeoff === "office" && window.__offPicks ? window.__offPicks() : null;
+    mealCfg.nyeparty = c; save("mealCfg", mealCfg); renderNyeParty();
+    toast(c.picks ? "🥂 Using your office party menu" : "🥂 Back to the set New Year's menu");
+  });
   $("#jarForm").addEventListener("submit", e => {
     e.preventDefault(); const f = e.target, name = f.wname.value.trim(), text = f.wtext.value.trim();
     if (!name || !text) { toast("💫 Add your name and your wish"); return; }

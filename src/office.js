@@ -33,6 +33,41 @@
   const offActs = () => offActList().filter(([k]) => off.acts[k]).map(([k, l]) => k === "gifts" && off.ev.giftLimit ? `${l} (${money(+off.ev.giftLimit)} limit)` : l);
   const offYear = () => (off.ev.date ? +off.ev.date.slice(0, 4) : new Date().getFullYear());
 
+  // ---------- 🔗 vendor links + order-by dates ----------
+  const offUrl = u => /^https?:\/\//i.test(u) ? u : "https://" + u;
+  const offDays = ymd => Math.ceil((new Date(ymd + "T12:00").getTime() - Date.now()) / 864e5);
+  function offLinks(c) {
+    const ct = (c.contact || "").trim(), out = [];
+    if (/@/.test(ct)) out.push(`<a class="of-lnk" href="mailto:${esc(ct.split(/[\s,;]+/).find(x => /@/.test(x)) || ct)}">Email</a>`);
+    else if (/\d{3}[\s.\-)]*\d{3,4}/.test(ct)) out.push(`<a class="of-lnk" href="tel:${esc(ct.replace(/[^\d+]/g, ""))}">Call</a>`);
+    if (c.url) out.push(`<a class="of-lnk" href="${esc(offUrl(c.url))}" target="_blank" rel="noopener">Order online</a>`);
+    return out.join("");
+  }
+  function offOrderHtml(c) {
+    let by = "";
+    if (c.orderBy) { const d = offDays(c.orderBy); by = c.ordered ? `<small>✓ Ordered</small>` : `<small>Order by ${esc(offDate(c.orderBy, { month: "short", day: "numeric" }))}${d < 0 ? " · date has passed" : d <= 7 ? ` · ${d} ${d === 1 ? "day" : "days"} left` : ""}</small>`; }
+    const links = offLinks(c);
+    return by + (links || c.orderBy ? `<span class="of-acts">${links}${c.orderBy || c.url ? `<button type="button" class="of-lnk of-done" data-ocdone="${c.id}">${c.ordered ? "Undo" : "Mark ordered"}</button>` : ""}</span>` : "");
+  }
+  const OFF_STATUS = { draft: "Not sent yet", sent: "Waiting", changes: "Changes asked", approved: "Approved", declined: "Declined" };
+  function renderCoDash() {
+    const el = $("#coDash"); if (!el || hubMode !== "company") return;
+    const e = off.ev, hc = Math.max(0, +e.headcount || 0), total = offTotal(), lim = +e.budget || 0, pct = lim ? Math.min(100, Math.round(total / lim * 100)) : 0;
+    const d = e.date ? offDays(e.date) : null;
+    const todo = off.costs.filter(c => c.orderBy && !c.ordered).sort((a, b) => a.orderBy < b.orderBy ? -1 : 1).slice(0, 3);
+    el.innerHTML = `<div class="card co-dash"><div class="cd-head"><span class="cd-k">Your event</span><b>${esc(e.name || "Holiday Party")}</b><small>${e.date ? esc(offDate(e.date)) + (e.start ? " · " + esc(offTime(e.start)) : "") : "Set the date to start the countdown"}</small></div>
+      <div class="cd-tiles"><button type="button" data-coto="event"><b>${d == null ? "–" : d < 0 ? "Done" : d}</b><small>${d == null ? "date" : d < 0 ? "event over" : d === 1 ? "day to go" : "days to go"}</small></button>
+      <button type="button" data-coto="event"><b>${hc || "–"}</b><small>guests</small></button>
+      <button type="button" data-coto="approval"><b>${esc(OFF_STATUS[off.appr.status] || off.appr.status)}</b><small>approval</small></button></div>
+      <button type="button" class="cd-bud" data-coto="event"><span><b>${money(total)}</b> planned${lim ? ` of <b>${money(lim)}</b> approved` : ""}</span>${lim ? `<i><u style="width:${pct}%"></u></i>` : `<small>Add the approved budget on the Event tab</small>`}</button>
+      ${todo.length ? `<div class="cd-todo"><h4>To order</h4>${todo.map(c => `<div class="cd-ord"><div><b>${esc(c.name || c.type)}</b><small>Order by ${esc(offDate(c.orderBy, { month: "short", day: "numeric" }))}${offDays(c.orderBy) < 0 ? " · date has passed" : ""}</small></div><span class="of-acts">${offLinks(c)}<button type="button" class="of-lnk of-done" data-ocdone="${c.id}">Mark ordered</button></span></div>`).join("")}</div>` : ""}</div>`;
+  }
+  window.__offPicks = () => { const F = offFoodCfg(); return F.picks && F.picks.length ? F.picks.slice() : OFF_DEFAULT_PICKS.slice(); };
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-coto]"); if (b) { off.tab = b.dataset.coto; saveOff(); showView("office"); return; }
+    const od = e.target.closest("#coDash [data-ocdone]"); if (od) { const c = off.costs.find(x => x.id === od.dataset.ocdone); if (c) { c.ordered = !c.ordered; saveOff(); renderCoDash(); } }
+  });
+
   function renderOffice() {
     renderOffMenu();
     const tab = off.tab || "event";
@@ -59,11 +94,11 @@
       <div class="card pt-card"><h3>✨ What's planned</h3><div class="apps-filters">${offActList().map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div>
         ${off.acts.gifts ? `<div class="off-grid" style="margin-top:8px">${fld("giftLimit", "Gift exchange limit", "number", "$")}</div>` : ""}</div>
       <div class="card pt-card"><h3>💵 Costs & vendors</h3>
-        ${off.costs.map(c => `<div class="off-cost" data-oc="${c.id}"><div><b>${esc(c.type)}</b>${c.name ? ` · ${esc(c.name)}` : ""}${c.contact ? `<small>📞 ${esc(c.contact)}</small>` : ""}</div><span>${money(+c.cost || 0)}</span><button type="button" class="icon-btn" data-ocdel aria-label="Remove">✕</button></div>`).join("") || `<p class="host-rem">Add the venue, caterer, drinks, prizes… Vendors' names and numbers are kept for next year too.</p>`}
+        ${off.costs.map(c => `<div class="off-cost" data-oc="${c.id}"><div><b>${esc(c.type)}</b>${c.name ? ` · ${esc(c.name)}` : ""}${c.contact ? `<small>📞 ${esc(c.contact)}</small>` : ""}${offOrderHtml(c)}</div><span>${money(+c.cost || 0)}</span><button type="button" class="icon-btn" data-ocdel aria-label="Remove">✕</button></div>`).join("") || `<p class="host-rem">Add the venue, caterer, drinks, prizes… Vendors' names and numbers are kept for next year too.</p>`}
         ${off.costs.length ? `<div class="off-cost total"><div><b>Estimated total</b><small>about ${money(Math.round(total / hc * 100) / 100)} per person</small></div><span>${money(total)}</span><i></i></div>` : ""}
         ${+off.ev.budget && total > +off.ev.budget ? `<p class="org-warn">⚠️ ${money(total - off.ev.budget)} over the approved budget.</p>` : ""}
         <form class="org-ev-form" id="offCostForm" autocomplete="off"><div class="org-addr-row"><select class="input" name="type">${OFF_COSTS.map(c => `<option>${c}</option>`).join("")}</select><input class="input" name="cost" type="number" inputmode="decimal" min="0" placeholder="$" style="max-width:96px"></div>
-          <input class="input" name="name" maxlength="50" placeholder="Vendor or item (optional), e.g. Sunrise Catering"><input class="input" name="contact" maxlength="60" placeholder="Phone or email (optional)">
+          <input class="input" name="name" maxlength="50" placeholder="Vendor or item (optional), e.g. Sunrise Catering"><input class="input" name="contact" maxlength="60" placeholder="Phone or email (optional)"><input class="input" name="url" maxlength="120" inputmode="url" placeholder="Website to order from (optional)"><label class="off-ob"><span>Order by</span><input class="input" name="orderBy" type="date"></label>
           <button class="btn btn-green btn-block" type="submit">➕ Add cost</button></form>
         ${offNear("Find vendors near me", [["🎧 DJs", "DJ for parties"], ["📸 Photo booth rentals", "photo booth rental"], ["🪑 Party rentals (tables, chairs)", "party rentals"], ["💐 Florists", "florist"]].concat(off.ev.who === "family" ? [["🎅 Santa for hire", "santa claus for hire"], ["🎈 Kids' entertainers", "kids party entertainer"]] : []))}</div>
       <div class="card pt-card"><h3>📝 Notes</h3>${fld("notes", "", "area", "Anything the approver should know, e.g. half-day Friday, partners welcome")}</div>
@@ -255,6 +290,7 @@
       document.body.classList.toggle("co-kids", k === "family"); saveOff(); renderOffice(); window.scrollTo({ top: 0 }); return;
     }
     const ac = t.closest("[data-ofact]"); if (ac) { off.acts[ac.dataset.ofact] = off.acts[ac.dataset.ofact] ? 0 : 1; saveOff(); renderOffice(); return; }
+    const od = t.closest("[data-ocdone]"); if (od) { const c = off.costs.find(x => x.id === od.dataset.ocdone); if (c) { c.ordered = !c.ordered; saveOff(); renderOffice(); renderCoDash(); } return; }
     const cd = t.closest("[data-ocdel]"); if (cd) { off.costs = off.costs.filter(c => c.id !== cd.closest("[data-oc]").dataset.oc); saveOff(); renderOffice(); return; }
     const pd = t.closest("[data-opdel]"); if (pd) { off.pot = off.pot.filter(p => p.id !== pd.closest("[data-op]").dataset.op); saveOff(); renderOffice(); return; }
     const ad = t.closest("[data-awdel]"); if (ad) { off.awards = off.awards.filter(a => a.id !== ad.closest("[data-oa]").dataset.oa); saveOff(); renderOffice(); return; }
@@ -298,7 +334,7 @@
   });
   $("#view-office").addEventListener("submit", async e => {
     e.preventDefault(); const f = e.target;
-    if (f.id === "offCostForm") { const c = parseFloat(f.cost.value) || 0; if (!c && !f.name.value.trim()) { toast("💵 Add an amount or a vendor"); return; } off.costs.push({ id: uid(), type: f.type.value, name: f.name.value.trim(), contact: f.contact.value.trim(), cost: c }); }
+    if (f.id === "offCostForm") { const c = parseFloat(f.cost.value) || 0; if (!c && !f.name.value.trim()) { toast("💵 Add an amount or a vendor"); return; } off.costs.push({ id: uid(), type: f.type.value, name: f.name.value.trim(), contact: f.contact.value.trim(), url: f.url.value.trim(), orderBy: f.orderBy.value, cost: c }); }
     if (f.id === "offPotForm") { const who = f.who.value.trim(), dish = f.dish.value.trim(); if (!who || !dish) { toast("🥘 Add a name and a dish"); return; } off.pot.push({ id: uid(), who, dish, cat: f.cat.value, diet: [...f.querySelectorAll("[name=diet]:checked")].map(x => x.value) }); }
     if (f.id === "offAwardForm") { const tt = f.t.value.trim(); if (!tt) return; off.awards.push({ id: uid(), t: tt, w: "" }); }
     if (f.id === "offExportForm") { const pw = f.pw.value; if (pw.length < 4) { toast("🔒 Use at least 4 characters"); return; } try { const r = await offExport(pw); if (r === "saved") toast("📦 Handover file saved to your downloads"); } catch (err) { toast("Couldn't make the file"); } f.pw.value = ""; renderOffice(); return; }
@@ -509,12 +545,13 @@
   /* ---------- 🍽️ FOOD: appetizers we make, catered, potluck or the venue ---------- */
   const OFF_FOOD = [["apps", "🍢", "Appetizers we make", "Pick the bites. Noël works out how many, the cost and the shopping list."], ["catered", "🍽️", "Catered or ordered in", "How much to order for your group."], ["potluck", "🥘", "Potluck", "Everyone brings something."], ["venue", "🍴", "The venue provides it", "Just note the menu and cost."]];
   const KID_APPS = ["Pigs in a Blanket", "Pinwheel Roll-Ups", "Veggie Cups", "Mini Sliders", "Cookie Platter", "Party Snack Mix", "Chocolate-Dipped Strawberries"];
+  const OFF_DEFAULT_PICKS = ["Caprese Skewers", "Charcuterie Board", "Mini Sliders", "Spinach Artichoke Dip", "Pinwheel Roll-Ups", "Mini Cheesecake Bites"];
   const offFoodCfg = () => (off.food = off.food || { style: "", mode: "meal", picks: null, got: {} });
   function offPeople() { const a = Math.max(1, +off.ev.headcount || 1), k = off.ev.who === "family" ? Math.max(0, +off.ev.kids || 0) : 0; return { a, k, eq: a + k * 0.6, all: a + k }; }
   function offFoodPlan() {
     const F = offFoodCfg(), MD2 = window.NOEL_MEALS || {}, SHOP = MD2.appShop || {}, DR = MD2.drinkApps || [], P = offPeople();
     const all = (window.NOEL_APPS || []).map(r => r[1]);
-    let picks = F.picks || (off.ev.who === "family" ? ["Pigs in a Blanket", "Pinwheel Roll-Ups", "Veggie Cups", "Mini Sliders", "Charcuterie Board", "Cookie Platter", "Sparkling Punch"] : ["Caprese Skewers", "Charcuterie Board", "Mini Sliders", "Spinach Artichoke Dip", "Pinwheel Roll-Ups", "Mini Cheesecake Bites"]);
+    let picks = F.picks || (off.ev.who === "family" ? ["Pigs in a Blanket", "Pinwheel Roll-Ups", "Veggie Cups", "Mini Sliders", "Charcuterie Board", "Cookie Platter", "Sparkling Punch"] : OFF_DEFAULT_PICKS);
     picks = picks.filter(n => all.includes(n));
     const food = picks.filter(n => !DR.includes(n)), drinks = picks.filter(n => DR.includes(n));
     const per = F.mode === "meal" ? 12 : 5, total = Math.ceil(P.eq * per), each = food.length ? Math.ceil(total / food.length) : 0;

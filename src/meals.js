@@ -897,7 +897,8 @@
   const ownCur = () => ownDinners.find(d => d.id === ownId);
   const ownNum = v => { const n = parseFloat(String(v).replace(/[^0-9.]/g, "")); return isFinite(n) ? n : 0; };
   const ownTotals = d => { let total = 0, spent = 0; d.shop.forEach(i => { const v = ownNum(i.price); total += v; if (i.got) spent += v; }); const lim = ownNum(d.limit); return { total, spent, left: total - spent, lim, over: lim ? total - lim : 0 }; };
-  const ownName = d => d.title.trim() || "My own dinner";
+  const ownName = d => d.title.trim() || (hubMode === "company" ? "My own event" : "My own dinner");
+  const coWords = s => hubMode !== "company" ? s : [["The dinner", "The event"], ["e.g. Christmas Day at our house", "e.g. Team lunch on Dec 18"], [">Menu<", ">Menu or catering order<"], ["Shopping list and prices", "Orders, supplies and prices"], ["Type each item and its price. Tick it when it is in your buggy.", "Type each order or supply and its price. Tick it when it is ordered or picked up."], ["In the buggy", "Ordered or picked up"], ["My budget for this dinner (optional)", "Approved budget for this event (optional)"], ["Cooking timeline", "Run of show"], ["Type a time and a step. Tap Timer to set a countdown for it (up to 24 hours ahead).", "Type a time and a step, like caterer arrives or doors open. Tap Timer to set a countdown for it."], ["Guest notes", "Notes"], [">Shopping list<", ">Orders and supplies<"], ["Allergies, who is coming, seating ideas", "Dietary needs, RSVPs, who is helping"], ["Delete this dinner", "Delete this event"], ["My own dinner", "My own event"]].reduce((a, [f, t]) => a.split(f).join(t), s);
   function ownTotHtml(d) {
     const t = ownTotals(d);
     return `<b>${cad(t.total)}</b> total · ${cad(t.spent)} bought · ${cad(t.left)} still to buy` + (t.lim ? `<br>${t.over > 0 ? `<span class="own-over">${cad(t.over)} over your ${cad(t.lim)} budget</span>` : `${cad(-t.over)} left of your ${cad(t.lim)} budget`}` : "");
@@ -909,7 +910,7 @@
     if (!ownCur()) { ownId = ownDinners[0].id; saveOwn(); }
     const d = ownCur();
     const row = (arr, id) => arr;
-    box.innerHTML = `<div class="ms-chips own-chips">${ownDinners.map(x => `<button type="button" class="ms-chip" data-ownpick="${x.id}" aria-pressed="${x.id === d.id}">${esc(ownName(x))}</button>`).join("")}<button type="button" class="ms-chip" data-ownnew>+ New dinner</button></div>
+    box.innerHTML = coWords(`<div class="ms-chips own-chips">${ownDinners.map(x => `<button type="button" class="ms-chip" data-ownpick="${x.id}" aria-pressed="${x.id === d.id}">${esc(ownName(x))}</button>`).join("")}<button type="button" class="ms-chip" data-ownnew>+ New dinner</button></div>
       <div class="card own-card"><h4 class="ms-h">The dinner</h4>
         <label class="calc-field"><span>Name</span><input class="input" data-ownf="title" maxlength="50" placeholder="e.g. Christmas Day at our house" value="${esc(d.title)}"></label>
         <div class="own-row own-r3"><label class="calc-field"><span>Guests</span><input class="input" data-ownf="guests" inputmode="numeric" maxlength="3" value="${esc(d.guests)}"></label>
@@ -928,7 +929,7 @@
         ${d.steps.map(r => `<div class="own-row own-r5"><input class="input" type="time" data-own="steps" data-id="${r.id}" data-k="time" value="${esc(r.time)}"><input class="input" data-own="steps" data-id="${r.id}" data-k="text" placeholder="e.g. Turkey into the oven" value="${esc(r.text)}"><button type="button" class="btn btn-ghost btn-sm own-tm" data-owntimer="${r.id}">Timer</button><button type="button" class="icon-btn" data-owndel="steps:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
         <button type="button" class="btn btn-ghost btn-block" data-ownadd="steps">+ Add a step</button></div>
       <div class="card own-card"><h4 class="ms-h">Guest notes</h4><textarea class="input" rows="3" data-ownf="notes" placeholder="Allergies, who is coming, seating ideas">${esc(d.notes)}</textarea></div>
-      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button></div>`;
+      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button></div>`);
   }
   function ownDinnerDoc(id) {
     const d = ownDinners.find(x => x.id === id); if (!d) return { error: "That dinner isn't here any more" };
@@ -939,13 +940,13 @@
     const bring = d.bring.filter(r => r.who || r.dish);
     const shop = d.shop.filter(r => r.name || r.price);
     const steps = d.steps.filter(r => r.time || r.text);
-    const html = `<div class="od"><h1>${esc(ownName(d))}</h1><p class="pm-sub">${[dateTxt, d.time, d.guests ? d.guests + " guests" : ""].filter(Boolean).map(esc).join(" · ")}</p>
+    const html = coWords(`<div class="od"><h1>${esc(ownName(d))}</h1><p class="pm-sub">${[dateTxt, d.time, d.guests ? d.guests + " guests" : ""].filter(Boolean).map(esc).join(" · ")}</p>
       <h3>Menu</h3>${menu}
       <h3>Who is bringing what</h3><ul>${bring.length ? bring.map(r => `<li>${esc(r.who)}: ${esc(r.dish)}</li>`).join("") : blank(4)}</ul>
       <h3>Shopping list</h3><ul>${shop.length ? shop.map(r => `<li>${r.got ? "☑" : "☐"} ${esc(r.name)}${ownNum(r.price) ? `<span class="pr">${cad(ownNum(r.price))}</span>` : ""}</li>`).join("") + `<li><b>Total ${cad(t.total)}</b>${t.lim ? ` of ${cad(t.lim)} budget` : ""}</li>` : blank(8)}</ul>
       <h3>Cooking timeline</h3><ul>${steps.length ? steps.map(r => `<li><b>${esc(r.time)}</b> ${esc(r.text)}</li>`).join("") : blank(6)}</ul>
-      <h3>Guest notes</h3><p>${d.notes ? esc(d.notes).replace(/\n/g, "<br>") : "________________________________"}</p></div><p class="pm-foot">Made with Noël Tier 1 Hub.</p>`;
-    return { title: ownName(d), css, html, margin: 0.5, file: "My-Own-Dinner" };
+      <h3>Guest notes</h3><p>${d.notes ? esc(d.notes).replace(/\n/g, "<br>") : "________________________________"}</p></div><p class="pm-foot">Made with Noël Tier 1 Hub.</p>`);
+    return { title: ownName(d), css, html, margin: 0.5, file: hubMode === "company" ? "My-Own-Event" : "My-Own-Dinner" };
   }
   $("#view-own").addEventListener("input", e => {
     const t = e.target, d = ownCur(); if (!d) return;

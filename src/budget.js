@@ -90,8 +90,8 @@
   // ---------- screens ----------
   function renderBudget() {
     budRecordDay();
-    const T = budTotals(), tab = budget.tab || "overview";
-    $("#budTabs").innerHTML = [["overview", "📊 Overview"], ["sheet", "🧾 Spreadsheet"], ["set", "🎯 Budgets"], ["shared", "🤝 Shared costs"]].map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
+    const T = budTotals(), tab = hubMode === "company" && budget.tab === "shared" ? "overview" : (budget.tab || "overview");
+    $("#budTabs").innerHTML = [["overview", "📊 Overview"], ["sheet", "🧾 Spreadsheet"], ["set", "🎯 Budgets"], ["shared", "🤝 Shared costs"]].filter(([k]) => !(k === "shared" && hubMode === "company")).map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
     $("#budBody").innerHTML = ({ overview: budOverview, sheet: budSheet, set: budSet, shared: budShared })[tab](T);
   }
   function budOverview(T) {
