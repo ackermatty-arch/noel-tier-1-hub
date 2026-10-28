@@ -310,17 +310,17 @@
   function planReview(ids, from) {
     const old = document.getElementById("planReview"); if (old) old.remove();
     const now = Date.now(), clock = t => new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-    let allOk = true;
+    let allOk = true, grand = 0;
     const blocks = ids.map(id => {
       const m = mealById(id); if (!m) return "";
       const c = cfgFor(id), D = dinnerAt(c), past = D < now; if (past) allOk = false;
-      const adds = activeAddons(m);
+      const adds = activeAddons(m), cost = msBuild([id]).total; grand += cost;
       return `<div class="pr-meal"><h4>${esc(m.name)}</h4>
         <p class="pr-when">${past ? "That time has passed. Go back and pick a later time." : `<b>${c.guests}</b> guest${c.guests > 1 ? "s" : ""}<br>${esc(whenLong(D))}`}</p>
-        ${adds.length ? `<p class="pr-add"><b>Vegan add-on${adds.length > 1 ? "s" : ""}</b></p><ul class="pr-steps">${adds.map(x => `<li><span>${esc(x.a.name)} <small>(${x.c.guests} portion${x.c.guests > 1 ? "s" : ""})</small></span></li>`).join("")}</ul>` : ""}</div>`;
+        ${adds.length ? `<p class="pr-add"><b>Vegan add-on${adds.length > 1 ? "s" : ""}</b></p><ul class="pr-steps">${adds.map(x => `<li><span>${esc(x.a.name)} <small>(${x.c.guests} portion${x.c.guests > 1 ? "s" : ""})</small></span></li>`).join("")}</ul>` : ""}${cost ? `<p class="pr-cost">Estimated cost <b>${cad0(cost)} ${esc(currency)}</b></p>` : ""}</div>`;
     }).join("");
     const el = document.createElement("div"); el.id = "planReview"; el.className = "pr-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
-    el.innerHTML = `<div class="pr-card"><p class="menu-star">✦</p><h3 class="pr-title">Your plan</h3><p class="pr-sub">Here is what you planned. Next you will see your full menu and shopping list.</p>${blocks}
+    el.innerHTML = `<div class="pr-card"><p class="menu-star">✦</p><h3 class="pr-title">Your plan</h3><p class="pr-sub">Here is what you planned. Next you will see your full menu and shopping list.</p>${blocks}${grand && ids.length > 1 ? `<p class="pr-cost pr-grand">All dinners together <b>${cad0(grand)} ${esc(currency)}</b></p>` : ""}
       <div class="pr-btns"><button type="button" class="btn btn-ghost" data-prback>Go back</button><button type="button" class="btn btn-gold" data-prok ${allOk ? "" : "disabled"}>Confirm</button></div></div>`;
     document.body.appendChild(el);
     el.addEventListener("click", e => {
