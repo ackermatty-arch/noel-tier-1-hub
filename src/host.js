@@ -9,6 +9,7 @@
      ============================================================ */
   const HOST_ROOM_CHECKS = [["sheets", "Fresh sheets"], ["towels", "Towels"], ["blanket", "Extra blanket"], ["light", "Nightlight"], ["charger", "Phone charger"], ["wifi", "Wi-Fi card"], ["water", "Water glass"]];
   const HOST_CLEAN = [   // [id, days before dinner, task]
+    ["outdoor", 21, "Put up the outdoor decorations and lights (test the lights first)"],
     ["entry", 14, "Declutter the entryway and make space for coats and boots"],
     ["bedding", 10, "Wash the guest bedding and towels"],
     ["oven", 7, "Clean the oven (before the big roast!)"],
@@ -27,6 +28,7 @@
     ["Just in case", ["Flashlight", "Batteries (AA, AAA, 9V, C)", "Extension cord", "First-aid kit and pain reliever", "Candles and a lighter", "Stain remover"]],
     ["Kitchen & table", ["Napkins", "Paper towels", "Foil and plastic wrap", "Containers for leftovers", "Dish soap and dishwasher pods", "Ice", "Coffee, tea and creamer"]],
     ["Bathroom & cleaning", ["Toilet paper", "Hand soap", "Garbage bags", "Recycling bags"]],
+    ["Outdoor decor & lights", ["Outdoor lights (test them first)", "Outdoor extension cord and timer", "Clips and hooks for lights", "Wreath and outdoor decorations", "Ladder or step stool"]],
     ["For guests", ["Extra chairs", "Extra blankets and pillows", "Air mattress pump", "Phone chargers", "Coat hangers", "Kids' activities: colouring, puzzles, games"]]
   ];
   let host = load("hosting", null) || {
