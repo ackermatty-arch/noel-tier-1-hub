@@ -8945,7 +8945,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#giftCounts").innerHTML = STATUSES.map(s => `<span>${s.icon} ${all.filter(g => g.status === s.key).length} ${s.label.toLowerCase()}</span>`).join("");
     const list = $("#peopleList");
     if (!gifts.people.length) {
-      list.innerHTML = `<div class="card empty">🎁 Add the first person on your list below.<br>Then add gift ideas with prices, and tap each gift's status as you shop.</div>`;
+      list.innerHTML = `<div class="card empty">🎁 Add the first person on your list below.<br>Then add a name and an amount for each thing you plan to spend.</div>`;
       return;
     }
     list.innerHTML = gifts.people.map(p => `
@@ -8965,8 +8965,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
             <button class="icon-btn" data-act="del-gift" aria-label="Delete ${esc(g.name)}">✕</button>
           </li>`; }).join("")}</ul>
         <form class="add-gift" autocomplete="off">
-          <input class="input" name="gift" maxlength="40" placeholder="Gift idea" aria-label="Gift for ${esc(p.name)}" required>
-          <input class="input price" name="price" type="number" inputmode="decimal" min="0" step="0.01" placeholder="${CUR} price" aria-label="Price">
+          <input class="input" name="gift" maxlength="40" placeholder="Name" aria-label="Name for ${esc(p.name)}" required>
+          <input class="input price" name="price" type="number" inputmode="decimal" min="0" step="0.01" placeholder="${CUR} amount" aria-label="Amount">
           <button class="btn btn-green btn-sm" type="submit">Add</button>
         </form>
       </div>`).join("");
@@ -13301,12 +13301,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
   // 🎯 Budget tab = "Add your budget" + Gift tracker (moved in from Gifts). Other budgets sit in an optional fold underneath.
   let budCatOpen = false;
+  if (budget.limit) { budget.limit = 0; saveBudget(); }   // the separate "total holiday budget" box is gone; the total is the sum of the budgets
   function budSet(T) { return ""; }
   function budSetMore(T) {
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
     return `<details class="fold" id="budCatFold"${budCatOpen ? " open" : ""}><summary>More budgets (optional)</summary>
-      <div class="card pt-card"><h3>Total holiday budget</h3>${inp("total", budget.limit, T.catSum ? "Total of categories: " + money(T.catSum) : "$")}
-        <p class="host-rem">Leave it empty and Noël adds up your category budgets for you.</p></div>
       <div class="card pt-card"><h3>Budget for each category</h3>
         ${BUD_CATS.filter(([k]) => k !== "gifts").map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>`;
   }

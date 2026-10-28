@@ -144,12 +144,11 @@
   }
   // 🎯 Budget tab = "Add your budget" + Gift tracker (moved in from Gifts). Other budgets sit in an optional fold underneath.
   let budCatOpen = false;
+  if (budget.limit) { budget.limit = 0; saveBudget(); }   // the separate "total holiday budget" box is gone; the total is the sum of the budgets
   function budSet(T) { return ""; }
   function budSetMore(T) {
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
     return `<details class="fold" id="budCatFold"${budCatOpen ? " open" : ""}><summary>More budgets (optional)</summary>
-      <div class="card pt-card"><h3>Total holiday budget</h3>${inp("total", budget.limit, T.catSum ? "Total of categories: " + money(T.catSum) : "$")}
-        <p class="host-rem">Leave it empty and Noël adds up your category budgets for you.</p></div>
       <div class="card pt-card"><h3>Budget for each category</h3>
         ${BUD_CATS.filter(([k]) => k !== "gifts").map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>`;
   }
