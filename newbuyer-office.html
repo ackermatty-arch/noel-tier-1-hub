@@ -2151,6 +2151,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 .bud-next{margin-top:14px}
 .bottom-nav .nav-btn{font-size:8.5px!important;letter-spacing:0!important;padding-left:1px!important;padding-right:1px!important}
 #giftTabs{grid-template-columns:repeat(2,1fr)!important} body.co #giftTabs{display:none!important}
+#view-gifts{position:relative}.gift-tasks-btn{position:absolute;top:2px;right:0;z-index:2}.wish-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 </style>
 </head>
 <body>
@@ -2709,12 +2710,13 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
        VIEW — 🎁 GIFT TRACKER (live budget, saved on the phone)
        ============================================================ -->
   <section class="view" id="view-gifts" aria-labelledby="giftsTitle">
+    <button type="button" class="btn btn-green btn-sm gift-tasks-btn" data-goview="tasks">Tasks ›</button>
     <h2 class="view-title" id="giftsTitle">Gifts</h2>
     <p class="view-intro">Jot down wishes as you hear them, then track what you buy against your budget.</p>
 
     <div class="seg seg3 sub-tabs" id="giftTabs" role="group" aria-label="Wish list or Santa's secret list">
       <button type="button" data-gpane="wish" aria-pressed="true">📝 Wishes</button>
-      <button type="button" data-gpane="santa" aria-pressed="false" class="fam-only">🎅 Santa</button>
+      <button type="button" data-gpane="santa" aria-pressed="false" class="fam-only">🎅 Santa's secret list</button>
     </div>
 
     <!-- 📝 WISH LIST: quick notes of what family & friends would love -->
@@ -2732,7 +2734,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
           <label class="wish-lab">Notes (optional)
             <input class="input" name="note" maxlength="60" placeholder="Size, colour, store…"></label>
         </div>
-        <button class="btn btn-red btn-block" type="submit">➕ Add to wish list</button>
+        <div class="wish-btns"><button class="btn btn-red" type="submit">Add to wish list</button><button class="btn btn-red" type="button" id="wishBought">Purchased</button></div>
         <p class="wish-tip">🎤 Or tap the mic and say: <i>"Mom wants cozy slippers"</i></p>
       </form>
       <div class="wish-summary" id="wishSummary"></div>
@@ -9395,6 +9397,17 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (!w) return;
     toast(`💭 Added to ${w.who}'s wish list`);
     f.what.value = ""; f.price.value = ""; f.note.value = ""; f.what.focus();   // keep the name for the next wish
+  });
+  $("#wishBought").addEventListener("click", () => {   // 🛍️ bought it: straight into the Gift Tracker under that person, as Bought
+    const f = $("#wishForm"); if (!f.reportValidity()) return;
+    let who = f.who.value.trim(), what = f.what.value.trim(); if (!who || !what) return;
+    who = who.charAt(0).toUpperCase() + who.slice(1); what = what.charAt(0).toUpperCase() + what.slice(1);
+    let p = findPerson(who);
+    if (!p) { p = { id: uid(), name: who, gifts: [] }; gifts.people.push(p); }
+    p.gifts.push({ id: uid(), name: what + (f.note.value.trim() ? ` (${f.note.value.trim()})` : ""), price: parseFloat(f.price.value) || 0, status: "bought" });
+    save("gifts", gifts); renderGifts(); renderWishes();
+    toast(`🛍️ Added to ${p.name}'s gifts as purchased. It counts in your budget.`);
+    f.what.value = ""; f.price.value = ""; f.note.value = ""; f.what.focus();
   });
   $("#wishList").addEventListener("click", e => {
     const b = e.target.closest("[data-wact]"); if (!b) return;
