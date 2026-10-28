@@ -28,7 +28,7 @@
     gifts.people.forEach(p => p.gifts.forEach(g => { if (isSpent(g) && +g.price) rows.push({ src: "Gift Tracker", cat: "gifts", name: `${g.name} for ${p.name}`, amt: +g.price, date: g.boughtAt || "" }); }));
     const santa = sum(santaGifts(), isSpent); if (santa) rows.push({ src: "Santa's list", cat: "gifts", name: "🎅 Santa's gifts (kept secret)", amt: santa, date: "" });
     foodBudget.items.forEach(x => { if (+x.amt) rows.push({ src: "Food budget", cat: "food", name: x.name, amt: +x.amt, date: x.date || "" }); });
-    if (typeof org !== "undefined") org.giving.forEach(x => { if (+x.amt) rows.push({ src: "Giving", cat: "giving", name: x.what, amt: +x.amt, date: x.date || "" }); });
+    if (typeof org !== "undefined" && hubMode === "company") org.giving.forEach(x => { if (+x.amt) rows.push({ src: "Giving", cat: "giving", name: x.what, amt: +x.amt, date: x.date || "" }); });
     budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "", mine: !!x.mine }));
     return rows;
   }
@@ -124,13 +124,13 @@
     const total = rows.reduce((a, r) => a + r.amt, 0), N = NoelNative.isNative();
     return `<form class="card pt-card org-ev-form" id="budAddForm" autocomplete="off"><h3>➕ Add spending</h3>
         <input class="input" name="name" maxlength="60" placeholder="What was it? e.g. Tree lights" aria-label="What">
-        ${fillChips((SPACE === "office" ? [["Decorations", "decor"], ["Prizes", "party"], ["Gift cards", "other"], ["Venue deposit", "party"], ["Catering", "food"], ["Drinks", "food"], ["Plates & napkins", "hosting"], ["Charity donation", "other"]] : [["Tree", "decor"], ["Lights", "decor"], ["Wrapping paper", "other"], ["Christmas cards", "cards"], ["Stamps & postage", "cards"], ["Groceries", "food"], ["Restaurant", "food"], ["Gas", "travel"], ["Flights", "travel"], ["Outfits", "other"], ["Babysitter", "other"], ["Event tickets", "party"], ["Hosting supplies", "hosting"]]).map(([n, c]) => [n, n, { "#budAddForm [name=cat]": c }]), "#budAddForm [name=name]")}
+        ${fillChips((SPACE === "office" ? [["Decorations", "decor"], ["Prizes", "party"], ["Gift cards", "other"], ["Venue deposit", "party"], ["Catering", "food"], ["Drinks", "food"], ["Plates & napkins", "hosting"], ["Charity donation", "other"]] : [["Tree", "decor"], ["Lights", "decor"], ["Wrapping paper", "other"], ["Christmas cards", "cards"], ["Stamps & postage", "cards"], ["Groceries", "food"], ["Restaurant", "food"], ["Gas", "travel"], ["Flights", "travel"], ["Outfits", "other"], ["Babysitter", "other"], ["Event tickets", "party"], ["Hosting supplies", "hosting"], ["Charity / donation", "other"]]).map(([n, c]) => [n, n, { "#budAddForm [name=cat]": c }]), "#budAddForm [name=name]")}
         <div class="org-addr-row"><select class="input" name="cat" aria-label="Category">${BUD_CATS.filter(([k]) => k !== "gifts" && k !== "food" && k !== "giving").concat(BUD_CATS.filter(([k]) => k === "food")).map(([k, i, l]) => `<option value="${k}">${i} ${l}</option>`).join("")}</select>
           <input class="input" name="amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="$" aria-label="Amount" style="max-width:96px"></div>
         <input class="input" name="date" type="date" value="${budToday()}" aria-label="Date">
         ${SPACE === "office" ? `<label class="host-check"><input type="checkbox" name="mine" checked> 💳 I paid for this myself (add it to my reimbursement list)</label>` : ""}
         <button class="btn btn-green btn-block" type="submit">Add</button>
-        <p class="host-rem">Gifts come in when you mark them Bought in the Gift Tracker. Food and giving come from their own pages too.</p></form>
+        <p class="host-rem">Gifts come in when you mark them Bought in the Gift Tracker. Food comes from the Menu page too.</p></form>
       <div class="apps-filters">${[["all", "All"]].concat(BUD_CATS.filter(([k]) => T.by[k] > 0).map(([k, i, l]) => [k, i + " " + l])).map(([k, l]) => `<button type="button" class="chip${k === f ? " on" : ""}" data-bfilter="${k}">${l}</button>`).join("")}</div>
       <div class="card bud-sheet"><table><thead><tr><th data-bsort="date">Date${s === "date" ? " ▾" : ""}</th><th data-bsort="cat">Item${s === "cat" ? " ▾" : ""}</th><th data-bsort="amt" class="num">Amount${s === "amt" ? " ▾" : ""}</th></tr></thead>
         <tbody>${rows.map(r => { const c = budCat(r.cat); return `<tr><td class="bs-date">${r.date ? new Date(r.date + "T12:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "—"}</td>
@@ -151,7 +151,7 @@
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
     return `<details class="fold" id="budCatFold"${budCatOpen ? " open" : ""}><summary>More budgets (optional)</summary>
       <div class="card pt-card"><h3>Budget for each category</h3>
-        ${BUD_CATS.filter(([k]) => k !== "gifts").map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>
+        ${BUD_CATS.filter(([k]) => k !== "gifts" && (k !== "giving" || hubMode === "company")).map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>
       <button type="button" class="btn btn-green btn-block bud-next" data-goview="planner">Let's plan ›</button>`;
   }
 

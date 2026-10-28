@@ -16,7 +16,7 @@
   const shortDate = s => parseYmd(s).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
   const MEMBER_EMOJI = ["★", "◆", "●", "▲", "■", "✦", "☾", "✿", "❖", "✚"];   // plain gold-style symbols (coloured emoji are stripped app-wide, which left this picker empty)
   const ORG_ALL = [["cards", "✉️", "Card List"], ["cal", "📅", "Calendar"], ["thanks", "🙏", "Thank-Yous"], ["packages", "📦", "Packages"], ["giving", "⭐", "Giving"], ["spend", "🗂️", "Spending"]];
-  const ORG_TOOLS = { get length() { return this.list().length; }, list: () => hubMode === "company" ? ORG_ALL.filter(t => ["cards", "cal", "thanks", "packages"].includes(t[0])).map(t => t[0] === "cards" ? [t[0], t[1], "Client Card List"] : t) : ORG_ALL, map(f) { return this.list().map(f); }, find(f) { return this.list().find(f); } };
+  const ORG_TOOLS = { get length() { return this.list().length; }, list: () => hubMode === "company" ? ORG_ALL.filter(t => ["cards", "cal", "thanks", "packages"].includes(t[0])).map(t => t[0] === "cards" ? [t[0], t[1], "Client Card List"] : t) : ORG_ALL.filter(t => t[0] !== "giving"), map(f) { return this.list().map(f); }, find(f) { return this.list().find(f); } };
 
   function orgStatus(k) {
     const y = orgYear();
