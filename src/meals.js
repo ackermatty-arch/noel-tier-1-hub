@@ -627,10 +627,10 @@
     const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
     const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);
     v.classList.toggle("on-menu", on); el.hidden = !on; if (!on) return;
-    const hasPlan = mealPlans.some(p => !p.svc), sig = (hasPlan ? "plan" : "none") + savedMenus.length + "/" + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length;
+    const hasPlan = mealPlans.some(p => !p.svc), sig = (hasPlan ? "plan" : "none") + savedMenus.length + "/" + ownDinners.filter(o => o.title || o.shop.some(r => r.name) || (o.dishes || []).some(x => x.name)).length;
     if (el.dataset.built === sig) return; el.dataset.built = sig;
     const go = `<button type="button" class="menu-go" data-menugo>Noël's dinner plans <span>›</span></button>`;
-    const svN = savedMenus.length + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length, sv = svN ? `<button type="button" class="menu-go menu-saved" data-menusaved>My saved menus (${svN}) <span>›</span></button>` : "";
+    const svN = savedMenus.length + ownDinners.filter(o => o.title || o.shop.some(r => r.name) || (o.dishes || []).some(x => x.name)).length, sv = svN ? `<button type="button" class="menu-go menu-saved" data-menusaved>My saved menus (${svN}) <span>›</span></button>` : "";
     el.innerHTML = `<div class="menu-top"><button type="button" class="menu-go menu-skip" data-menuskip>My own dinner plans</button>${go}</div>${sv ? `<div class="menu-top menu-top2">${sv}</div>` : ""}
       <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
       MENU_GROUPS.map(([g, ids, band]) => (band ? `<h3 class="menu-group">${band}</h3>` : "") + (band === g ? "" : `<h3 class="menu-subgroup">${g}</h3>`) + ids.map(id => {
@@ -892,13 +892,92 @@
   let ownDinners = load("ownDinners", []), ownId = load("ownId", null);
   const saveOwn = () => { save("ownDinners", ownDinners); save("ownId", ownId); };
   const OWN_COURSES = [["app", "Appetizers"], ["main", "Main"], ["sides", "Sides"], ["dessert", "Dessert"], ["drinks", "Drinks"]];
-  const ownNew = () => ({ id: "od" + Date.now().toString(36), title: "", guests: "", date: dayYmd(), time: "17:00", course: {}, bring: [{ id: uid(), who: "", dish: "" }],
+  const ownNew = () => ({ id: "od" + Date.now().toString(36), title: "", guests: "", date: dayYmd(), time: "17:00", course: {}, dishes: [ownDish("main")], ticks: {}, bring: [{ id: uid(), who: "", dish: "" }],
     shop: [{ id: uid(), name: "", price: "", got: false }], limit: "", steps: [{ id: uid(), time: "", text: "" }], notes: "", updated: Date.now() });
   const ownCur = () => ownDinners.find(d => d.id === ownId);
   const ownNum = v => { const n = parseFloat(String(v).replace(/[^0-9.]/g, "")); return isFinite(n) ? n : 0; };
   const ownTotals = d => { let total = 0, spent = 0; d.shop.forEach(i => { const v = ownNum(i.price); total += v; if (i.got) spent += v; }); const lim = ownNum(d.limit); return { total, spent, left: total - spent, lim, over: lim ? total - lim : 0 }; };
+
+  // ---- dishes -> menu, shopping list by aisle, and a cook timeline worked back from serving time ----
+  const OWN_UNITS = ["", "g", "kg", "ml", "l", "cup", "tbsp", "tsp", "oz", "lb", "can", "bunch", "clove"];
+  const OWN_AISLES = ["Produce", "Meat & fish", "Dairy & eggs", "Bakery", "Pantry & other", "Spices", "Frozen", "Drinks"];
+  const OWN_AISLE_RX = [["Frozen", /\b(frozen|ice cream|sorbet)\b/], ["Drinks", /\b(wine|juice|cider|soda|sparkling|water|coffee|tea|beer|eggnog|champagne|cocoa|tonic|punch)\b/],
+    ["Spices", /\b(salt|(?<!bell |red |green |hot |chili |sweet )pepper|cinnamon|nutmeg|paprika|cumin|allspice|spices?|seasoning|vanilla|cloves|bay leaf|bay leaves|oregano|chili powder|cayenne|turmeric)\b/],
+    ["Meat & fish", /\b(turkey|chicken|beef|pork|ham|lamb|bacon|sausages?|salmon|shrimp|prawns?|fish|prime rib|roast|steaks?|duck|crab|lobster|scallops?|cod|tuna)\b/],
+    ["Dairy & eggs", /\b(milk|cream|butter|cheese|eggs?|yogh?urt|cheddar|parmesan|feta|brie|mozzarella)\b/],
+    ["Bakery", /\b(bread|rolls?|buns?|baguette|tortillas?|pastry|pie crust|croissants?|stuffing mix|breadcrumbs)\b/],
+    ["Produce", /\b(onions?|shallots?|garlic|potato(es)?|carrots?|celery|lettuce|spinach|kale|tomato(es)?|peppers?|cucumbers?|mushrooms?|apples?|lemons?|limes?|oranges?|berries|berry|cranberr(y|ies)|herbs?|parsley|thyme|rosemary|sage|basil|cilantro|dill|chives?|squash|pumpkin|broccoli|cauliflower|asparagus|green beans?|corn|avocados?|ginger|fruit|salad|cabbage|beets?|parsnips?|turnips?|pears?|grapes|leeks?|zucchini|brussels sprouts?|peas|pomegranate|mint|arugula)\b/]];
+  const ownAisle = nm => { const n = String(nm).toLowerCase(); for (const [a, rx] of OWN_AISLE_RX) if (rx.test(n)) return a; return "Pantry & other"; };
+  const ownAmt = v => { const s = String(v || "").trim().replace(",", "."); if (!s) return 0; const m = s.match(/^(?:(\d+)\s+)?(\d+)\/(\d+)$/); if (m && +m[3]) return (+m[1] || 0) + (+m[2]) / (+m[3]); const n = parseFloat(s); return isFinite(n) && n > 0 ? n : 0; };
+  const ownFmt = n => { if (n >= 10) return String(Math.round(n)); const q = Math.round(n * 4) / 4; if (q < 0.25) return String(Math.round(n * 100) / 100); const w = Math.floor(q), f = q - w, fr = f === 0.25 ? "¼" : f === 0.5 ? "½" : f === 0.75 ? "¾" : ""; return (w ? w : "") + (w && fr ? " " : "") + fr; };
+  const ownDish = course => ({ id: uid(), course: course || "main", name: "", prep: "", cook: "", ings: [{ id: uid(), name: "", per: "", unit: "" }] });
+  function ownDishes(d) {   // older dinners kept dishes as lines of text per course: turn those into dishes once
+    if (!d.dishes) {
+      d.dishes = [];
+      OWN_COURSES.forEach(([k]) => String((d.course || {})[k] || "").split("\n").map(x => x.trim()).filter(Boolean).forEach(nm => { const x = ownDish(k); x.name = nm; d.dishes.push(x); }));
+      if (!d.dishes.length) d.dishes.push(ownDish("main"));
+      saveOwn();
+    }
+    if (!d.ticks) d.ticks = {};
+    return d.dishes;
+  }
+  const ownGuests = d => Math.max(1, parseInt(d.guests, 10) || 0);
+  function ownShopList(d) {
+    const g = ownGuests(d), map = {};
+    ownDishes(d).forEach(ds => ds.ings.forEach(i => {
+      const nm = i.name.trim(); if (!nm) return;
+      const key = nm.toLowerCase().replace(/\s+/g, " ").replace(/(es|s)$/, "") + "|" + (i.unit || "");
+      const o = map[key] || (map[key] = { key, name: nm, unit: i.unit || "", amt: 0, aisle: ownAisle(nm) });
+      o.amt += ownAmt(i.per) * g;
+    }));
+    const out = {}; Object.values(map).forEach(o => (out[o.aisle] = out[o.aisle] || []).push(o));
+    OWN_AISLES.forEach(a => out[a] && out[a].sort((x, y) => x.name.localeCompare(y.name)));
+    return OWN_AISLES.filter(a => out[a]).map(a => [a, out[a]]);
+  }
+  const ownAmtTxt = o => o.amt ? ownFmt(o.amt) + (o.unit ? " " + o.unit : "") : "";
+  function ownTimeline(d) {
+    const [y, mo, da] = (d.date || dayYmd()).split("-").map(Number), [h, mi] = (d.time || "17:00").split(":").map(Number);
+    const serve = new Date(y, mo - 1, da, h, mi).getTime(), ev = [];
+    ownDishes(d).forEach(ds => {
+      const nm = ds.name.trim(); if (!nm) return;
+      const c = parseInt(ds.cook, 10) || 0, p = parseInt(ds.prep, 10) || 0;
+      if (c) ev.push({ id: ds.id + "c", t: serve - c * 60000, text: "Start cooking " + nm });
+      if (p) ev.push({ id: ds.id + "p", t: serve - (c + p) * 60000, text: "Start preparing " + nm });
+    });
+    if (!ev.length) return [];
+    ev.push({ id: "serve", t: serve, text: "Dinner is served" });
+    return ev.sort((a, b) => a.t - b.t).map(e => ({ ...e, when: ownWhen(e.t, serve) }));
+  }
+  function ownWhen(t, serve) {
+    const dt = new Date(t), tm = dt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    return dt.toDateString() === new Date(serve).toDateString() ? tm : dt.toLocaleDateString([], { weekday: "short" }) + " " + tm;
+  }
+  function ownShopHtml(d) {
+    const g = ownShopList(d);
+    if (!g.length) return `<p class="cf-fine">Add ingredients under your dishes and your list builds itself here.</p>`;
+    return (d.guests ? "" : `<p class="cf-fine">Type your number of guests above. Until then, amounts are for 1 person.</p>`) +
+      g.map(([a, items]) => `<h5 class="own-aisle">${a}</h5>` + items.map(o => `<label class="own-gl"><input type="checkbox" data-ownck="${esc(o.key)}" ${d.ticks[o.key] ? "checked" : ""}><span>${esc(o.name)}</span><b>${esc(ownAmtTxt(o))}</b></label>`).join("")).join("");
+  }
+  function ownTlHtml(d) {
+    const tl = ownTimeline(d);
+    if (!tl.length) return `<p class="cf-fine">Add a cook time (and a prep time if you like) to a dish and your timeline builds itself here.</p>`;
+    return tl.map(e => `<div class="own-tl"><b>${esc(e.when)}</b><span>${esc(e.text)}</span><button type="button" class="btn btn-ghost btn-sm own-tm" data-owngen="${e.id}">Timer</button></div>`).join("") +
+      `<button type="button" class="btn btn-gold btn-block" data-owngenall>Set all my alarms</button>`;
+  }
+  const ownPaintGen = () => { const d = ownCur(); if (!d) return; const a = $("#ownShopGen"), b = $("#ownTlGen"); if (a) a.innerHTML = ownShopHtml(d); if (b) b.innerHTML = ownTlHtml(d); };
+  function ownSetTimer(e, d, quiet) {
+    const secs = (e.t - Date.now()) / 1000;
+    if (secs <= 10) { if (!quiet) toast("That time has passed"); return false; }
+    if (secs > 86400) { if (!quiet) toast("Timers can run up to 24 hours. Set these the day before."); return false; }
+    getAudio(); calcTimer("owng-" + d.id + "-" + e.id, e.text, "⏰", Math.round(secs)); return true;
+  }
+  const ownDishHtml = ds => `<div class="own-dish"><div class="own-row own-dh"><select class="input" data-dish="${ds.id}" data-k="course" aria-label="Course">${OWN_COURSES.map(([k, n]) => `<option value="${k}" ${ds.course === k ? "selected" : ""}>${n}</option>`).join("")}</select><input class="input" data-dish="${ds.id}" data-k="name" maxlength="60" placeholder="Dish name" value="${esc(ds.name)}"><button type="button" class="icon-btn" data-owndishdel="${ds.id}" aria-label="Remove this dish">✕</button></div>
+      <div class="own-row own-dt"><label class="calc-field"><span>Prep (minutes)</span><input class="input" data-dish="${ds.id}" data-k="prep" inputmode="numeric" maxlength="4" placeholder="e.g. 30" value="${esc(ds.prep)}"></label><label class="calc-field"><span>Cook (minutes)</span><input class="input" data-dish="${ds.id}" data-k="cook" inputmode="numeric" maxlength="4" placeholder="e.g. 180" value="${esc(ds.cook)}"></label></div>
+      <span class="own-lab">Ingredients, amount for 1 person</span>
+      ${ds.ings.map(i => `<div class="own-row own-ing"><input class="input" data-ing="${ds.id}:${i.id}" data-k="name" placeholder="Ingredient" value="${esc(i.name)}"><input class="input" data-ing="${ds.id}:${i.id}" data-k="per" inputmode="decimal" placeholder="Amt" aria-label="Amount per person" value="${esc(i.per)}"><select class="input" data-ing="${ds.id}:${i.id}" data-k="unit" aria-label="Unit">${OWN_UNITS.map(u => `<option value="${u}" ${i.unit === u ? "selected" : ""}>${u || "each"}</option>`).join("")}</select><button type="button" class="icon-btn" data-owningdel="${ds.id}:${i.id}" aria-label="Remove">✕</button></div>`).join("")}
+      <button type="button" class="btn btn-ghost btn-sm" data-owningadd="${ds.id}">+ Add an ingredient</button></div>`;
   const ownName = d => d.title.trim() || (hubMode === "company" ? "My own event" : "My own dinner");
-  const coWords = s => hubMode !== "company" ? s : [["The dinner", "The event"], ["e.g. Christmas Day at our house", "e.g. Team lunch on Dec 18"], [">Menu<", ">Menu or catering order<"], ["Shopping list and prices", "Orders, supplies and prices"], ["Type each item and its price. Tick it when it is in your cart at the grocery store.", "Type each order or supply and its price. Tick it when it is ordered or picked up."], ["In the cart", "Ordered or picked up"], ["My budget for this dinner (optional)", "Approved budget for this event (optional)"], ["Cooking timeline", "Run of show"], ["Type a time and a step. Tap Timer to set a countdown for it (up to 24 hours ahead).", "Type a time and a step, like caterer arrives or doors open. Tap Timer to set a countdown for it."], ["Guest notes", "Notes"], [">Shopping list<", ">Orders and supplies<"], ["Allergies, who is coming, seating ideas", "Dietary needs, RSVPs, who is helping"], ["Delete this dinner", "Delete this event"], ["My own dinner", "My own event"]].reduce((a, [f, t]) => a.split(f).join(t), s);
+  const coWords = s => hubMode !== "company" ? s : [["The dinner", "The event"], ["e.g. Christmas Day at our house", "e.g. Team lunch on Dec 18"], [">Menu<", ">Menu or catering order<"], ["Prices and budget", "Orders, supplies and prices"], ["Type each item and its price. Tick it when it is in your cart at the grocery store.", "Type each order or supply and its price. Tick it when it is ordered or picked up."], ["In the cart", "Ordered or picked up"], ["My budget for this dinner (optional)", "Approved budget for this event (optional)"], ["Cooking timeline", "Run of show"], ["Type a time and a step. Tap Timer to set a countdown for it (up to 24 hours ahead).", "Type a time and a step, like caterer arrives or doors open. Tap Timer to set a countdown for it."], ["Guest notes", "Notes"], [">Shopping list<", ">Orders and supplies<"], ["Allergies, who is coming, seating ideas", "Dietary needs, RSVPs, who is helping"], ["Delete this dinner", "Delete this event"], ["My own dinner", "My own event"]].reduce((a, [f, t]) => a.split(f).join(t), s);
   function ownTotHtml(d) {
     const t = ownTotals(d);
     return `<b>${cad(t.total)}</b> total · ${cad(t.spent)} bought · ${cad(t.left)} still to buy` + (t.lim ? `<br>${t.over > 0 ? `<span class="own-over">${cad(t.over)} over your ${cad(t.lim)} budget</span>` : `${cad(-t.over)} left of your ${cad(t.lim)} budget`}` : "");
@@ -916,45 +995,57 @@
         <div class="own-row own-r3"><label class="calc-field"><span>Guests</span><input class="input" data-ownf="guests" inputmode="numeric" maxlength="3" value="${esc(d.guests)}"></label>
         <label class="calc-field"><span>Date</span><input class="input" type="date" data-ownf="date" value="${esc(d.date)}"></label>
         <label class="calc-field"><span>Time</span><input class="input" type="time" data-ownf="time" value="${esc(d.time)}"></label></div></div>
-      <div class="card own-card"><h4 class="ms-h">Menu</h4><p class="cf-fine">One dish per line.</p>${OWN_COURSES.map(([k, n]) => `<label class="calc-field"><span>${n}</span><textarea class="input" rows="2" data-ownc="${k}" placeholder="Type your dishes">${esc(d.course[k] || "")}</textarea></label>`).join("")}</div>
+      <div class="card own-card"><h4 class="ms-h">Menu</h4><p class="cf-fine">Add each dish. Prep time is the time before it goes on to cook. Both are in minutes, and you can leave them blank.</p>
+        ${ownDishes(d).map(ownDishHtml).join("")}
+        <button type="button" class="btn btn-ghost btn-block" data-owndishadd>+ Add a dish</button></div>
+      <div class="card own-card"><h4 class="ms-h">Shopping list</h4><div id="ownShopGen">${ownShopHtml(d)}</div></div>
+      <div class="card own-card"><h4 class="ms-h">Cooking timeline</h4><p class="cf-fine">Worked back from your serving time. Tap Timer for one alarm, or set them all.</p><div id="ownTlGen">${ownTlHtml(d)}</div></div>
+      <div class="card own-card"><h4 class="ms-h">Extra steps</h4><p class="cf-fine">Type a time and a step. Tap Timer to set a countdown for it (up to 24 hours ahead).</p>
+        ${d.steps.map(r => `<div class="own-row own-r5"><input class="input" type="time" data-own="steps" data-id="${r.id}" data-k="time" value="${esc(r.time)}"><input class="input" data-own="steps" data-id="${r.id}" data-k="text" placeholder="e.g. Set the table" value="${esc(r.text)}"><button type="button" class="btn btn-ghost btn-sm own-tm" data-owntimer="${r.id}">Timer</button><button type="button" class="icon-btn" data-owndel="steps:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
+        <button type="button" class="btn btn-ghost btn-block" data-ownadd="steps">+ Add a step</button></div>
       <div class="card own-card"><h4 class="ms-h">Who is bringing what</h4>${d.bring.map(r => `<div class="own-row own-r2"><input class="input" data-own="bring" data-id="${r.id}" data-k="who" placeholder="Name" value="${esc(r.who)}"><input class="input" data-own="bring" data-id="${r.id}" data-k="dish" placeholder="Dish" value="${esc(r.dish)}"><button type="button" class="icon-btn" data-owndel="bring:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
         <button type="button" class="btn btn-ghost btn-block" data-ownadd="bring">+ Add a person</button></div>
-      <div class="card own-card"><h4 class="ms-h">Shopping list and prices</h4><p class="cf-fine">Type each item and its price. Tick it when it is in your cart at the grocery store.</p>
+      <div class="card own-card"><h4 class="ms-h">Prices and budget</h4><p class="cf-fine">Optional. Type each item and its price to keep track of what you spend. Tick it when it is in your cart at the grocery store.</p>
         <div class="cf-stats own-tot" id="ownTot">${ownTotHtml(d)}</div>
         ${d.shop.map(r => `<div class="own-row own-r4"><input type="checkbox" data-own="shop" data-id="${r.id}" data-k="got" ${r.got ? "checked" : ""} aria-label="In the cart"><input class="input" data-own="shop" data-id="${r.id}" data-k="name" placeholder="Item" value="${esc(r.name)}"><input class="input own-price" data-own="shop" data-id="${r.id}" data-k="price" inputmode="decimal" placeholder="$" value="${esc(r.price)}"><button type="button" class="icon-btn" data-owndel="shop:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
         <button type="button" class="btn btn-ghost btn-block" data-ownadd="shop">+ Add an item</button>
         <label class="calc-field own-lim"><span>My budget for this dinner (optional)</span><input class="input" data-ownf="limit" inputmode="decimal" placeholder="e.g. 150" value="${esc(d.limit)}"></label>
         <button type="button" class="btn btn-gold btn-block" data-ownbudget>Add this total to my Budget</button></div>
-      <div class="card own-card"><h4 class="ms-h">Cooking timeline</h4><p class="cf-fine">Type a time and a step. Tap Timer to set a countdown for it (up to 24 hours ahead).</p>
-        ${d.steps.map(r => `<div class="own-row own-r5"><input class="input" type="time" data-own="steps" data-id="${r.id}" data-k="time" value="${esc(r.time)}"><input class="input" data-own="steps" data-id="${r.id}" data-k="text" placeholder="e.g. Turkey into the oven" value="${esc(r.text)}"><button type="button" class="btn btn-ghost btn-sm own-tm" data-owntimer="${r.id}">Timer</button><button type="button" class="icon-btn" data-owndel="steps:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
-        <button type="button" class="btn btn-ghost btn-block" data-ownadd="steps">+ Add a step</button></div>
       <div class="card own-card"><h4 class="ms-h">Guest notes</h4><textarea class="input" rows="3" data-ownf="notes" placeholder="Allergies, who is coming, seating ideas">${esc(d.notes)}</textarea></div>
-      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button></div>`);
+      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print Dinner day sheet</button><button type="button" class="btn btn-gold" data-print="ownmenu:${d.id}">Print menu page</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button></div>`);
   }
-  function ownDinnerDoc(id) {
+  function ownDateTxt(d) { return d.date ? new Date(d.date + "T12:00").toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" }) : ""; }
+  function ownDinnerDoc(id) {   // the one-page "Dinner day" sheet: menu, timeline and shopping list
     const d = ownDinners.find(x => x.id === id); if (!d) return { error: "That dinner isn't here any more" };
-    const t = ownTotals(d), blank = n => Array.from({ length: n }, () => `<li class="own-bl">&nbsp;</li>`).join("");
-    const css = PRINT_CSS + ` .od h3{font:600 9pt sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#B08D4E;border-bottom:1px solid #C9A45C;padding-bottom:3px;margin:14px 0 5px} .od ul{list-style:none;padding:0;margin:0} .od li{margin:4px 0;font-size:11pt} .own-bl{border-bottom:1px solid #ccc;height:16px} .od .pr{float:right}`;
-    const dateTxt = d.date ? new Date(d.date + "T12:00").toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" }) : "";
-    const menu = OWN_COURSES.map(([k, n]) => { const lines = String(d.course[k] || "").split("\n").map(x => x.trim()).filter(Boolean); return `<p><b>${n}:</b> ${lines.length ? lines.map(esc).join(" · ") : "________________________________"}</p>`; }).join("");
-    const bring = d.bring.filter(r => r.who || r.dish);
-    const shop = d.shop.filter(r => r.name || r.price);
-    const steps = d.steps.filter(r => r.time || r.text);
-    const html = coWords(`<div class="od"><h1>${esc(ownName(d))}</h1><p class="pm-sub">${[dateTxt, d.time, d.guests ? d.guests + " guests" : ""].filter(Boolean).map(esc).join(" · ")}</p>
-      <h3>Menu</h3>${menu}
-      <h3>Who is bringing what</h3><ul>${bring.length ? bring.map(r => `<li>${esc(r.who)}: ${esc(r.dish)}</li>`).join("") : blank(4)}</ul>
-      <h3>Shopping list</h3><ul>${shop.length ? shop.map(r => `<li>${r.got ? "☑" : "☐"} ${esc(r.name)}${ownNum(r.price) ? `<span class="pr">${cad(ownNum(r.price))}</span>` : ""}</li>`).join("") + `<li><b>Total ${cad(t.total)}</b>${t.lim ? ` of ${cad(t.lim)} budget` : ""}</li>` : blank(8)}</ul>
-      <h3>Cooking timeline</h3><ul>${steps.length ? steps.map(r => `<li><b>${esc(r.time)}</b> ${esc(r.text)}</li>`).join("") : blank(6)}</ul>
-      <h3>Guest notes</h3><p>${d.notes ? esc(d.notes).replace(/\n/g, "<br>") : "________________________________"}</p></div><p class="pm-foot">Made with Noël Tier 1 Hub.</p>`);
-    return { title: ownName(d), css, html, margin: 0.5, file: hubMode === "company" ? "My-Own-Event" : "My-Own-Dinner" };
+    const css = PRINT_CSS + ` body{font-size:10pt;line-height:1.35} .od h1{font-size:19pt} .od h3{font:600 8.5pt sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#B08D4E;border-bottom:1px solid #C9A45C;padding-bottom:2px;margin:11px 0 4px} .od ul{list-style:none;padding:0;margin:0} .od li{margin:2px 0;font-size:10pt} .od .tl b{display:inline-block;min-width:74px} .od .sh{column-count:2;column-gap:22px} .od .ai{break-inside:avoid;margin:0 0 6px} .od .ai h4{font:600 8pt sans-serif;letter-spacing:.14em;text-transform:uppercase;margin:0 0 2px} .od .pr{float:right} .od .mc{margin:2px 0}`;
+    const menu = OWN_COURSES.map(([k, n]) => { const ds = ownDishes(d).filter(x => x.course === k && x.name.trim()); return ds.length ? `<p class="mc"><b>${n}:</b> ${ds.map(x => esc(x.name.trim())).join(" · ")}</p>` : ""; }).join("");
+    const tl = ownTimeline(d), shop = ownShopList(d);
+    const extra = d.steps.filter(r => r.time || r.text), bring = d.bring.filter(r => r.who || r.dish);
+    const html = coWords(`<div class="od"><h1>${esc(ownName(d))}</h1><p class="pm-sub">Dinner day · ${[ownDateTxt(d), d.time, d.guests ? d.guests + " guests" : ""].filter(Boolean).map(esc).join(" · ")}</p>
+      <h3>Menu</h3>${menu || `<p class="mc">________________________________</p>`}
+      <h3>Cooking timeline</h3><ul class="tl">${tl.length ? tl.map(e => `<li><b>${esc(e.when)}</b> ${esc(e.text)}</li>`).join("") : `<li>Add cook times to your dishes to fill this in.</li>`}${extra.map(r => `<li><b>${esc(r.time)}</b> ${esc(r.text)}</li>`).join("")}</ul>
+      <h3>Shopping list</h3>${shop.length ? `<div class="sh">${shop.map(([a, items]) => `<div class="ai"><h4>${a}</h4><ul>${items.map(o => `<li>${d.ticks[o.key] ? "☑" : "☐"} ${esc(o.name)}<span class="pr">${esc(ownAmtTxt(o))}</span></li>`).join("")}</ul></div>`).join("")}</div>` : `<p class="mc">Add ingredients to your dishes to fill this in.</p>`}
+      ${bring.length ? `<h3>Who is bringing what</h3><ul>${bring.map(r => `<li>${esc(r.who)}: ${esc(r.dish)}</li>`).join("")}</ul>` : ""}
+      ${d.notes ? `<h3>Guest notes</h3><p class="mc">${esc(d.notes).replace(/\n/g, "<br>")}</p>` : ""}</div><p class="pm-foot">Made with Noël Tier 1 Hub.</p>`);
+    return { title: ownName(d), css, html, margin: 0.5, file: hubMode === "company" ? "Event-Day-Sheet" : "Dinner-Day-Sheet" };
+  }
+  function ownMenuDoc(id) {   // a clean menu page for the table
+    const d = ownDinners.find(x => x.id === id); if (!d) return { error: "That dinner isn't here any more" };
+    const css = PRINT_CSS + ` body{text-align:center} .om{padding:40px 30px} .om h1{font-size:30pt;letter-spacing:.06em;margin:0 0 6px} .om .sub{font-size:11pt;letter-spacing:.2em;text-transform:uppercase;margin:0 0 4px} .om .orn{margin:18px auto 26px;width:90px;border-top:1px solid #C9A45C} .om h3{font:600 10pt sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#B08D4E;margin:26px 0 10px} .om p{font-size:15pt;margin:6px 0}`;
+    const body = OWN_COURSES.map(([k, n]) => { const ds = ownDishes(d).filter(x => x.course === k && x.name.trim()); return ds.length ? `<h3>${n}</h3>` + ds.map(x => `<p>${esc(x.name.trim())}</p>`).join("") : ""; }).join("");
+    const html = `<div class="om"><h1>${esc(ownName(d))}</h1><p class="sub">${[ownDateTxt(d), d.time].filter(Boolean).map(esc).join(" · ")}</p><div class="orn"></div>${body || `<p>Add your dishes to fill in the menu.</p>`}</div>`;
+    return { title: ownName(d) + " menu", css, html, margin: 0.6, file: "Menu" };
   }
   $("#view-own").addEventListener("input", e => {
     const t = e.target, d = ownCur(); if (!d) return;
-    if (t.dataset.ownf) d[t.dataset.ownf] = t.value;
-    else if (t.dataset.ownc) d.course[t.dataset.ownc] = t.value;
+    let gen = false;
+    if (t.dataset.ownf) { d[t.dataset.ownf] = t.value; gen = true; }
+    else if (t.dataset.dish) { const x = ownDishes(d).find(z => z.id === t.dataset.dish); if (!x) return; x[t.dataset.k] = t.value; gen = true; }
+    else if (t.dataset.ing) { const [di, ii] = t.dataset.ing.split(":"), x = ownDishes(d).find(z => z.id === di), g = x && x.ings.find(z => z.id === ii); if (!g) return; g[t.dataset.k] = t.value; gen = true; }
+    else if (t.dataset.ownck) { d.ticks[t.dataset.ownck] = t.checked; }
     else if (t.dataset.own) { const r = d[t.dataset.own].find(x => x.id === t.dataset.id); if (!r) return; r[t.dataset.k] = t.type === "checkbox" ? t.checked : t.value; }
     else return;
-    d.updated = Date.now(); saveOwn(); ownPaintTot();
+    d.updated = Date.now(); saveOwn(); ownPaintTot(); if (gen) ownPaintGen();
     if (t.dataset.ownf === "title") { const c = $(`[data-ownpick="${d.id}"]`); if (c) c.textContent = ownName(d); }
   });
   $("#view-own").addEventListener("click", e => {
@@ -965,6 +1056,12 @@
     const ad = t.closest("[data-ownadd]");
     if (ad) { const k = ad.dataset.ownadd; d[k].push(k === "bring" ? { id: uid(), who: "", dish: "" } : k === "shop" ? { id: uid(), name: "", price: "", got: false } : { id: uid(), time: "", text: "" }); saveOwn(); renderOwn(); return; }
     const dl = t.closest("[data-owndel]"); if (dl) { const [k, id] = dl.dataset.owndel.split(":"); d[k] = d[k].filter(x => x.id !== id); if (!d[k].length) d[k].push(k === "bring" ? { id: uid(), who: "", dish: "" } : k === "shop" ? { id: uid(), name: "", price: "", got: false } : { id: uid(), time: "", text: "" }); saveOwn(); renderOwn(); return; }
+    if (t.closest("[data-owndishadd]")) { ownDishes(d).push(ownDish("main")); saveOwn(); renderOwn(); return; }
+    const dd = t.closest("[data-owndishdel]"); if (dd) { d.dishes = ownDishes(d).filter(x => x.id !== dd.dataset.owndishdel); if (!d.dishes.length) d.dishes.push(ownDish("main")); saveOwn(); renderOwn(); return; }
+    const ia = t.closest("[data-owningadd]"); if (ia) { const x = ownDishes(d).find(z => z.id === ia.dataset.owningadd); if (x) { x.ings.push({ id: uid(), name: "", per: "", unit: "" }); saveOwn(); renderOwn(); } return; }
+    const idl = t.closest("[data-owningdel]"); if (idl) { const [di, ii] = idl.dataset.owningdel.split(":"), x = ownDishes(d).find(z => z.id === di); if (x) { x.ings = x.ings.filter(z => z.id !== ii); if (!x.ings.length) x.ings.push({ id: uid(), name: "", per: "", unit: "" }); saveOwn(); renderOwn(); } return; }
+    const gt = t.closest("[data-owngen]"); if (gt) { const e = ownTimeline(d).find(z => z.id === gt.dataset.owngen); if (e && ownSetTimer(e, d)) toast("Timer set for " + e.when); return; }
+    if (t.closest("[data-owngenall]")) { const n = ownTimeline(d).filter(e => ownSetTimer(e, d, true)).length; toast(n ? `${n} alarm${n > 1 ? "s" : ""} set` : "Nothing to set. Times have passed, or are more than 24 hours away."); return; }
     const tm = t.closest("[data-owntimer]");
     if (tm) {
       const r = d.steps.find(x => x.id === tm.dataset.owntimer); if (!r || !r.time) { toast("Type a time first"); return; }
