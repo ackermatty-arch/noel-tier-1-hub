@@ -2000,6 +2000,9 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .own-lim { margin-top: 6px; }
 .own-chips { margin-bottom: 12px; }
 .own-banner { margin-bottom: 12px; }
+.cl-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.cl-t b { display: block; font-size: 15px; color: #151515; }
+.cl-t small { display: block; color: #666; font-size: 12.5px; margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -2651,11 +2654,12 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 
     <!-- 🎄 SEND A CARD -->
     <div id="paneCards">
+      <div class="card cl-bar fam-only" id="clBar"></div>
       <div class="card inv-form">
         <div class="step">1 · Pick a card</div>
         <div class="dpick-row" id="cardPick"></div>
         <div class="step">2 · Write your message</div>
-        <label class="calc-field"><span>To</span><input class="input" id="cardTo" maxlength="30" placeholder="e.g. Grandma Rose"></label>
+        <label class="calc-field"><span>To</span><input class="input" id="cardTo" maxlength="30" list="cardNames" placeholder="e.g. Grandma Rose"><datalist id="cardNames"></datalist></label>
         <label class="calc-field"><span>Message</span><textarea class="input" id="cardMsg" rows="4" maxlength="220"></textarea></label>
         <div id="cardMsgIdeas"></div>
         <label class="calc-field"><span>From</span><input class="input" id="cardFrom" maxlength="40"></label>
@@ -7354,6 +7358,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (name !== "gifts") santaLock();   // 🎅 leaving Gifts always locks Santa's list
     if (name === "meals") renderMeals();
     if (name === "own") renderOwn();
+    if (name === "invites") renderCardBar();
     $$(".nav-btn").forEach(b => {
       const on = b.dataset.view === name;
       b.classList.toggle("active", on);
@@ -9626,7 +9631,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function outMarkSent(x) {
     x.sent = Date.now();
     const nm = String(x.d.to || "").trim().toLowerCase();   // tick them off the Christmas card list too
-    if (nm && window.__orgTickSent) window.__orgTickSent(nm);
+    if (nm && window.__orgTickSent && window.__orgTickSent(nm)) toast("✅ Ticked off your card list");
     saveOut();
   }
   async function outSend(x) {
@@ -12229,7 +12234,16 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function orgAlertItem(id) { if (!String(id).startsWith("org:")) return null; const r = orgReminders().find(x => "org:" + x.k === id); return r ? { icon: r.icon, name: r.text } : null; }
 
   // ---------- taps & typing ----------
-  const orgChanged = () => { saveOrg(); renderOrg(); orgSync(); };
+  function renderCardBar() {
+    const el = $("#clBar"); if (!el) return;
+    const y = orgYear(), on = org.contacts.filter(c => c.list !== false), sent = on.filter(c => (c.sent || {})[y]).length;
+    el.innerHTML = org.contacts.length
+      ? `<span class="cl-t"><b>${sent} of ${on.length}</b> Christmas cards sent<small>${on.length - sent ? `${on.length - sent} still to send` : "Everyone on your list is done"}</small></span><button type="button" class="btn btn-ghost btn-sm" data-clopen>My card list ›</button>`
+      : `<span class="cl-t"><b>Your Christmas card list</b><small>Add names and addresses, then tick people off as you send</small></span><button type="button" class="btn btn-ghost btn-sm" data-clopen>Start my list ›</button>`;
+    const dl = $("#cardNames"); if (dl) dl.innerHTML = org.contacts.map(c => `<option value="${esc(c.name)}">`).join("");
+  }
+  document.addEventListener("click", e => { if (e.target.closest("[data-clopen]")) { org.view = "cards"; org.editing = null; saveOrg(); showView("org"); renderOrg(); window.scrollTo(0, 0); } });
+  const orgChanged = () => { saveOrg(); renderOrg(); orgSync(); renderCardBar(); };
   $("#view-org").addEventListener("click", e => {
     const t = e.target, y = orgYear();
     const tool = t.closest("[data-otool]"); if (tool) { org.view = tool.dataset.otool; org.editing = null; saveOrg(); renderOrg(); window.scrollTo({ top: 0 }); return; }
@@ -12284,7 +12298,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     orgChanged();
   });
   // ✉️ a card sent from the Outbox ticks that person off the Christmas card list
-  window.__orgTickSent = name => { const ct = org.contacts.find(c => String(c.name || "").trim().toLowerCase() === name); if (ct) { ct.sent = ct.sent || {}; ct.sent[orgYear()] = true; orgChanged(); } };
+  window.__orgTickSent = name => { const ct = org.contacts.find(c => String(c.name || "").trim().toLowerCase() === name); if (ct) { ct.sent = ct.sent || {}; ct.sent[orgYear()] = true; orgChanged(); return true; } return false; };
+  renderCardBar();
   /* @org-end */
   /* @themes-start */
   /* ============================================================

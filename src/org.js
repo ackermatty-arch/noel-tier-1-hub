@@ -226,7 +226,16 @@
   function orgAlertItem(id) { if (!String(id).startsWith("org:")) return null; const r = orgReminders().find(x => "org:" + x.k === id); return r ? { icon: r.icon, name: r.text } : null; }
 
   // ---------- taps & typing ----------
-  const orgChanged = () => { saveOrg(); renderOrg(); orgSync(); };
+  function renderCardBar() {
+    const el = $("#clBar"); if (!el) return;
+    const y = orgYear(), on = org.contacts.filter(c => c.list !== false), sent = on.filter(c => (c.sent || {})[y]).length;
+    el.innerHTML = org.contacts.length
+      ? `<span class="cl-t"><b>${sent} of ${on.length}</b> Christmas cards sent<small>${on.length - sent ? `${on.length - sent} still to send` : "Everyone on your list is done"}</small></span><button type="button" class="btn btn-ghost btn-sm" data-clopen>My card list ›</button>`
+      : `<span class="cl-t"><b>Your Christmas card list</b><small>Add names and addresses, then tick people off as you send</small></span><button type="button" class="btn btn-ghost btn-sm" data-clopen>Start my list ›</button>`;
+    const dl = $("#cardNames"); if (dl) dl.innerHTML = org.contacts.map(c => `<option value="${esc(c.name)}">`).join("");
+  }
+  document.addEventListener("click", e => { if (e.target.closest("[data-clopen]")) { org.view = "cards"; org.editing = null; saveOrg(); showView("org"); renderOrg(); window.scrollTo(0, 0); } });
+  const orgChanged = () => { saveOrg(); renderOrg(); orgSync(); renderCardBar(); };
   $("#view-org").addEventListener("click", e => {
     const t = e.target, y = orgYear();
     const tool = t.closest("[data-otool]"); if (tool) { org.view = tool.dataset.otool; org.editing = null; saveOrg(); renderOrg(); window.scrollTo({ top: 0 }); return; }
@@ -281,5 +290,6 @@
     orgChanged();
   });
   // ✉️ a card sent from the Outbox ticks that person off the Christmas card list
-  window.__orgTickSent = name => { const ct = org.contacts.find(c => String(c.name || "").trim().toLowerCase() === name); if (ct) { ct.sent = ct.sent || {}; ct.sent[orgYear()] = true; orgChanged(); } };
+  window.__orgTickSent = name => { const ct = org.contacts.find(c => String(c.name || "").trim().toLowerCase() === name); if (ct) { ct.sent = ct.sent || {}; ct.sent[orgYear()] = true; orgChanged(); return true; } return false; };
+  renderCardBar();
   /* @org-end */
