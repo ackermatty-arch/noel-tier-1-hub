@@ -9,7 +9,6 @@
      ============================================================ */
   const HOST_ROOM_CHECKS = [["sheets", "Fresh sheets"], ["towels", "Towels"], ["blanket", "Extra blanket"], ["light", "Nightlight"], ["charger", "Phone charger"], ["wifi", "Wi-Fi card"], ["water", "Water glass"]];
   const HOST_CLEAN = [   // [id, days before dinner, task]
-    ["outdoor", 21, "Put up the outdoor decorations and lights (test the lights first)"],
     ["entry", 14, "Declutter the entryway and make space for coats and boots"],
     ["bedding", 10, "Wash the guest bedding and towels"],
     ["oven", 7, "Clean the oven (before the big roast!)"],
@@ -28,7 +27,6 @@
     ["Just in case", ["Flashlight", "Batteries (AA, AAA, 9V, C)", "Extension cord", "First-aid kit and pain reliever", "Candles and a lighter", "Stain remover"]],
     ["Kitchen & table", ["Napkins", "Paper towels", "Foil and plastic wrap", "Containers for leftovers", "Dish soap and dishwasher pods", "Ice", "Coffee, tea and creamer"]],
     ["Bathroom & cleaning", ["Toilet paper", "Hand soap", "Garbage bags", "Recycling bags"]],
-    ["Outdoor decor & lights", ["Outdoor lights (test them first)", "Outdoor extension cord and timer", "Clips and hooks for lights", "Wreath and outdoor decorations", "Ladder or step stool"]],
     ["For guests", ["Extra chairs", "Extra blankets and pillows", "Air mattress pump", "Phone chargers", "Coat hangers", "Kids' activities: colouring, puzzles, games"]]
   ];
   let host = load("hosting", null) || {
@@ -37,7 +35,8 @@
     table: { shape: "rect", seats: 10, names: [], kids: false, kseats: 6, knames: [], style: "casual" },
     house: { wifi: "", pass: "", parking: "", rules: "", kids: "" }
   };
-  host.trips = host.trips || [];
+  host.trips = host.trips || []; host.out = host.out || { done: {}, custom: [] };
+  const HOST_OUT = [["test", "Test every string of lights before hanging"], ["buy", "Replace any burnt-out bulbs and buy what is missing"], ["cord", "Outdoor extension cord, timer and clips or hooks"], ["hang", "Hang the lights (roofline, trees, railings)"], ["deco", "Wreath, garland and other outdoor decorations"], ["plug", "Plug in and check the timer works"], ["walk", "Clear and light the walkway and steps"], ["porch", "Porch light and welcome mat ready for guests"]];
   host.who = host.who || {}; host.jobs = host.jobs || []; host.jobDone = host.jobDone || {};
   const HOST_JOBS = [   // jobs on the big day: [id, job, when]
     ["greet", "Greet guests and take coats", "As guests arrive"], ["drinks", "Pour drinks and refill glasses", "All evening"], ["kids", "Keep the kids busy (games, crafts, a movie)", "All day"],
@@ -118,12 +117,12 @@
   }
 
   // ---------- screens ----------
-  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["house", "📶 House info"]];
+  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["house", "📶 House info"], ["out", "💡 Outdoor & lights"]];
   function renderHost() {
     const tab = host.tab || "away";
     $("#hostRemind").innerHTML = `<label class="host-switch"><input type="checkbox" id="hostRemindBox" ${host.remind ? "checked" : ""}><span><b>🔔 Helpful little reminders</b><small>${host.remind ? `On. Noël will nudge you at just the right moments, timed to your dinner on ${hostFmt(hostDinner())}.` : "Turn on for well-timed nudges for cleaning, guests and the little things that are easy to forget."}</small></span></label>`;
     $("#hostTabs").innerHTML = HOST_TABS.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-htab="${k}">${l}</button>`).join("");
-    $("#hostBody").innerHTML = ({ guests: hostGuestsHtml, rooms: hostRoomsHtml, table: hostTableHtml, clean: hostCleanHtml, supplies: hostSuppliesHtml, house: hostHouseHtml, away: hostAwayHtml })[tab]();
+    $("#hostBody").innerHTML = ({ guests: hostGuestsHtml, rooms: hostRoomsHtml, table: hostTableHtml, clean: hostCleanHtml, supplies: hostSuppliesHtml, house: hostHouseHtml, away: hostAwayHtml, out: hostOutHtml })[tab]();
   }
   const roomOpts = sel => `<option value="">Not staying over</option>` + host.rooms.map(r => `<option value="${r.id}" ${r.id === sel ? "selected" : ""}>${r.icon} ${esc(r.name)}</option>`).join("");
   function hostGuestsHtml() {
@@ -253,6 +252,12 @@
           <button class="btn btn-green btn-block" type="submit">Add</button></form></div>`;
     }).join("");
   }
+  function hostOutHtml() {
+    const all = HOST_OUT.concat(host.out.custom.map(c => [c.id, c.text, 1])), n = all.filter(([k]) => host.out.done[k]).length;
+    return `<div class="card host-card"><h3>💡 Outdoor decor &amp; lights</h3><p class="host-rem">${n} of ${all.length} done. Do the lights first, while it is still warm enough to stand on a ladder.</p>
+      <ul class="host-list chore-list">${all.map(([k, t, mine]) => `<li><label class="${host.out.done[k] ? "on" : ""}"><input type="checkbox" data-hout="${k}" ${host.out.done[k] ? "checked" : ""}><span>${esc(t)}</span></label>${mine ? `<button type="button" class="icon-btn" data-hdelout="${k}" aria-label="Remove">✕</button>` : ""}</li>`).join("")}</ul>
+      <form class="host-away-form" id="hostOutForm" autocomplete="off"><label><span class="meal-lab">Add your own</span><input class="input" name="t" maxlength="80" placeholder="e.g. Inflatable snowman" required></label><button class="btn btn-green btn-block" type="submit">Add</button></form></div>`;
+  }
   function hostHouseHtml() {
     const h = host.house, f = (k, l, ph, area) => `<label><span class="meal-lab">${l}</span>${area ? `<textarea class="input" rows="2" data-hhouse="${k}" maxlength="200" placeholder="${ph}">${esc(h[k] || "")}</textarea>` : `<input class="input" data-hhouse="${k}" maxlength="60" value="${esc(h[k] || "")}" placeholder="${ph}">`}</label>`;
     return `<div class="card host-card host-house"><p class="host-rem">Everything guests ask about, on one pretty card. Share it as a picture by text before they arrive.</p>
@@ -341,6 +346,7 @@
       return;
     }
     if (t.closest("#hostShareCard")) { shareHouseCard(); return; }
+    const dout = t.closest("[data-hdelout]"); if (dout) { host.out.custom = host.out.custom.filter(x => x.id !== dout.dataset.hdelout); delete host.out.done[dout.dataset.hdelout]; saveHost(); renderHost(); return; }
     const dt = t.closest("[data-hdeltrip]"); if (dt) { const id = dt.closest("[data-htrip]").dataset.htrip; host.trips = host.trips.filter(x => x.id !== id); saveHost(); renderHost(); hostSync(); return; }
     const dj = t.closest("[data-hdeljob]"); if (dj) { const id = dj.closest("[data-hjob]").dataset.hjob; host.jobs = host.jobs.filter(j => j.id !== id); delete host.who["j:" + id]; delete host.jobDone[id]; saveHost(); renderHost(); return; }
   });
@@ -362,12 +368,14 @@
     if (t.dataset.hclean) { host.clean[t.dataset.hclean] = t.checked; saveHost(); hostSync(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hwho) { const v = t.value.trim(); if (v) host.who[t.dataset.hwho] = v; else delete host.who[t.dataset.hwho]; saveHost(); return; }
     if (t.dataset.hjobdone) { host.jobDone[t.dataset.hjobdone] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
+    if (t.dataset.hout) { host.out.done[t.dataset.hout] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hsup) { host.supplies[t.dataset.hsup] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hhouse) { host.house[t.dataset.hhouse] = t.value.trim(); saveHost(); return; }
   });
   $("#hostWrap").addEventListener("submit", e => {
     e.preventDefault(); const f = e.target;
     if (f.dataset.htripform) { const n = f.a.value.trim(); if (!n) return; host.trips.push({ id: uid(), k: f.dataset.htripform, a: n, b: f.b.value.trim() }); saveHost(); renderHost(); hostSync(); return; }
+    if (f.id === "hostOutForm") { const n = f.t.value.trim(); if (!n) return; host.out.custom.push({ id: uid(), text: n }); saveHost(); renderHost(); return; }
     if (f.id === "hostGuestForm") { const n = f.gname.value.trim(); if (!n) return; host.guests.push({ id: uid(), name: n, people: 1, travel: "drive", room: "", pickup: false }); }
     if (f.id === "hostRoomForm") { const n = f.rname.value.trim(); if (!n) return; host.rooms.push({ id: uid(), name: n, icon: "🛏️", beds: 2, ready: {} }); }
     if (f.id === "hostJobForm") { const n = f.job.value.trim(); if (!n) return; host.jobs.push({ id: uid(), text: n, when: f.when.value.trim() }); }
