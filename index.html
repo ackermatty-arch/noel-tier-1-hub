@@ -2171,6 +2171,22 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 .pv-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; background: #121212; color: #fff; border-bottom: 1px solid #C9A45C; }
 .pv-bar b { font: 600 14px Cinzel, serif; letter-spacing: .06em; }
 .pv-frame { flex: 1; width: 100%; border: 0; background: #fff; }
+
+/* Advent: one squared box of doors, gold and black */
+.adv-box { border: 2px solid #C9A45C; padding: 10px; background: #fff; }
+.adv-g { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.adv-g .door { aspect-ratio: 1 / 1; border-radius: 0 !important; font: 600 24px Cinzel, serif; box-shadow: none !important; border: 1px solid #C9A45C !important; max-width: none; width: 100%; animation: none; }
+.adv-g .door.ag-b { background: #151515 !important; color: #E3C98A !important; }
+.adv-g .door.ag-g { background: linear-gradient(150deg, #E3C98A, #C9A45C) !important; color: #151515 !important; }
+.adv-g .door.locked { opacity: 1 !important; filter: none !important; }
+.adv-g .door-lock { display: none; }
+.adv-g .door.open { background: #fff !important; color: #151515 !important; border: 2px solid #C9A45C !important; }
+.adv-g .door.today { outline: 3px solid #151515; outline-offset: 2px; animation: glow 1s ease-in-out infinite alternate; }
+.adv-xmas { display: grid; place-items: center; gap: 2px; width: 100%; margin-top: 10px; padding: 16px 8px; border: 1px solid #C9A45C; border-radius: 0; background: #151515; color: #E3C98A; font: 600 18px Cinzel, serif; letter-spacing: .14em; text-transform: uppercase; }
+.adv-xmas small { font: 600 11px Cinzel, serif; letter-spacing: .2em; color: #fff; }
+.adv-xmas.locked { opacity: 1; }
+.adv-xmas.today { animation: glow 1s ease-in-out infinite alternate; outline: 3px solid #C9A45C; outline-offset: 2px; }
+.adv-xmas.open { background: #fff; color: #151515; border: 2px solid #C9A45C; } .adv-xmas.open small { color: #6b5a30; }
 </style>
 </head>
 <body>
@@ -9509,8 +9525,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function renderAdvent() {
     const n = adventToday();
     $("#adventIntro").textContent = n
-      ? "Tap a door to open it. A new one unlocks every day, and the bow on top opens on Christmas morning."
-      : "The first door opens on December 1. Come back then for a little surprise every day, and the bow on top opens on Christmas morning!";
+      ? "Tap a door to open it. A new one unlocks every day, and the Christmas Day box opens on Christmas morning."
+      : "The first door opens on December 1. Come back then for a little surprise every day, and the Christmas Day box opens on Christmas morning!";
     const door = (d, shade) => {
       const a = ADVENT[d - 1], unlocked = d <= n, isOpen = unlocked && opened[d];
       const cls = ["door", shade, isOpen ? "open" : "", unlocked ? "" : "locked", d === n && !isOpen ? "today" : ""].join(" ");
@@ -9520,10 +9536,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     };
     const shades = ["red", "gold", "cream"];
     const bowOpen = n >= 25 && opened[25];
-    $("#adventGrid").innerHTML = `<div class="adv-tree">
-      <button class="adv-bow${n >= 25 ? (bowOpen ? " open" : " today") : " locked"}" data-door="25" aria-label="The bow: opens on Christmas Day">${bowOpen ? "🎄" : "🎀"}<small>${bowOpen ? "Merry Christmas!" : "Dec 25"}</small></button>
-      ${ADVENT_TREE.map((row, r) => `<div class="adv-row">${row.map((d, i) => door(d, shades[(r + i) % 3])).join("")}</div>`).join("")}
-      <div class="adv-row adv-trunk">${ADVENT_TRUNK.map(d => door(d, "trunk")).join("")}</div></div>`;
+    const xOpen = n >= 25 && opened[25], xCls = "adv-xmas" + (n >= 25 ? (xOpen ? " open" : " today") : " locked");
+    $("#adventGrid").innerHTML = `<div class="adv-box"><div class="adv-g">${Array.from({ length: 24 }, (_, i) => door(i + 1, (Math.floor(i / 4) + i) % 2 ? "ag-g" : "ag-b")).join("")}</div>
+      <button class="${xCls}" data-door="25" aria-label="Christmas Day: opens on Christmas morning"><span>${xOpen ? "Merry Christmas" : "Christmas Day"}</span><small>Dec 25</small></button></div>`;
   }
   function showDoor(d) {
     const a = ADVENT[d - 1];
