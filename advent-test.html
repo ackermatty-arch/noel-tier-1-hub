@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Advent tree test</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A45C;--ink:#151515}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden}body{margin:0;background:#fff;color:var(--ink);font-family:Cinzel,serif;padding:16px 16px 40px;border:6px solid var(--gold);min-height:100vh}
+h1{font-size:22px;letter-spacing:.06em;margin:4px 0 4px;text-transform:uppercase}
+p.n{font-size:13px;letter-spacing:.04em;color:#6b5a30;margin:0 0 14px;line-height:1.5}
+.tabs{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--gold);margin:0 0 16px}
+.tabs button{font:600 13px Cinzel,serif;letter-spacing:.08em;text-transform:uppercase;padding:12px 6px;border:0;background:#fff;color:var(--ink)}
+.tabs button[aria-pressed=true]{background:var(--ink);color:#fff}
+.tree{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 0 0}
+.tree:before{content:"";position:absolute;left:-9%;right:-9%;top:40px;bottom:58px;clip-path:polygon(50% 0,100% 100%,0 100%);z-index:0}
+.row{position:relative;z-index:1;display:flex;justify-content:center;gap:6px;width:100%}
+.door{width:calc((100% - 30px)/6);max-width:58px;aspect-ratio:1;border:1px solid transparent;font:700 19px Cinzel,serif;display:grid;place-items:center;padding:0}
+.top{position:relative;z-index:2;width:80px;height:80px;border-radius:50%;border:3px solid var(--gold);background:#fff;display:grid;place-items:center;font:700 11px Cinzel,serif;letter-spacing:.06em;margin-bottom:-6px}
+.top i{font-style:normal;font-size:26px;line-height:1;display:block;text-align:center}
+.trunk .door{border-radius:0}
+/* A: soft gold tree, black doors */
+.A .tree:before{background:linear-gradient(180deg,#E6CF98,#C9A45C)}
+.A .door{background:var(--ink);color:#fff;border-color:var(--ink)}
+.A .door.open{background:#fff;color:var(--ink);border-color:var(--ink)}
+.A .door.today{background:#fff;color:var(--ink);border:3px solid var(--ink)}
+.A .trunk .door{background:#fff;color:var(--ink);border-color:var(--ink)}
+/* B: pale champagne tree with a fine gold outline, white doors */
+.B .tree:before{background:#F7EDD2}
+.B .tree:after{content:"";position:absolute;left:-9%;right:-9%;top:40px;bottom:58px;clip-path:polygon(50% 0,100% 100%,0 100%);background:transparent;z-index:0;box-shadow:none}
+.B .door{background:#fff;color:var(--ink);border-color:var(--gold)}
+.B .door.open{background:var(--ink);color:#fff;border-color:var(--ink)}
+.B .door.today{background:#fff;color:var(--ink);border:3px solid var(--ink)}
+.B .trunk .door{background:var(--ink);color:#fff;border-color:var(--ink)}
+.note{margin-top:18px;font-size:12px;letter-spacing:.05em;color:#6b5a30;line-height:1.6}
+</style></head><body>
+<h1>Advent tree test</h1>
+<p class="n">Pretend today is December 12. Doors 1 to 8 have been opened, 12 is today's door, and the rest are still locked. Tap A or B to compare.</p>
+<div class="tabs"><button data-v="A" aria-pressed="true">A · Gold tree</button><button data-v="B" aria-pressed="false">B · Pale gold tree</button></div>
+<div id="stage" class="A"><div class="tree" id="tree"></div></div>
+<p class="note"><b>A</b>: a warm gold tree shape with black doors. Opened doors turn white. Today's door is white with a thick black edge.<br><b>B</b>: a soft champagne tree, white doors with a gold edge. Opened doors turn black.</p>
+<script>
+const T=[[17],[5,21],[12,1,9],[20,8,15,3],[6,23,11,18,2],[14,4,22,10,19,7]],TR=[13,24,16],TODAY=12,OPEN=[1,2,3,5,8];
+const d=n=>`<button class="door ${OPEN.includes(n)?'open':''} ${n===TODAY?'today':''}">${n}</button>`;
+document.getElementById('tree').innerHTML=`<div class="top"><span><i>✦</i>Dec 25</span></div>`+T.map(r=>`<div class="row">${r.map(d).join('')}</div>`).join('')+`<div class="row trunk">${TR.map(d).join('')}</div>`;
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.getElementById('stage').className=b.dataset.v;document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+</script></body></html>
