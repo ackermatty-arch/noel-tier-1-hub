@@ -97,6 +97,7 @@
   }
 
   // ---------- 🎉 party planner card ----------
+  const nyeSaved = () => savedMenus.filter(x => x.names.some(n => /new year/i.test(n)));
   function renderNyeParty() {
     const m = mealById("nyeparty"); if (!m) return;
     const c = cfgFor("nyeparty"), p = mealSizes(m, c), active = !!planOf("nyeparty");
@@ -109,7 +110,7 @@
       <p class="party-total">About <b>${cad0(ps.total)}</b> · ${cad(ps.total / c.guests)} per guest<small>${currency} · ${c.picks ? "your own appetizer menu" : "our set New Year's Eve menu"}, includes the midnight toast.</small></p>` +
       (hubMode === "company" && window.__offPicks ? `<div class="seg sub-tabs meal-done pm-two nye-offmenu" role="group" aria-label="Which appetizer menu">
         <button type="button" data-nyeoff="set" aria-pressed="${!c.picks}"><b>Set New Year's menu</b><small>Our ready-made list</small></button><button type="button" data-nyeoff="office" aria-pressed="${!!c.picks}"><b>My office party menu</b><small>${window.__offPicks().length} appetizers from Food</small></button></div>` : "") +
-      (active ? `<p class="nye-on">✅ Party alarms are set</p><button type="button" class="btn btn-ghost btn-block" data-nyestop>Cancel this plan and turn alarms off</button>` : "") + (savedMenus.length ? `<button type="button" class="btn btn-ghost btn-block" data-nyesaved>My saved menus (${savedMenus.length})</button>` : "");
+      (active ? `<p class="nye-on">✅ Party alarms are set</p>` : "") + (active || nyeSaved().length ? `<button type="button" class="btn btn-ghost btn-block" data-nyestop>Cancel my New Year's plan</button>` : "") + (savedMenus.length ? `<button type="button" class="btn btn-ghost btn-block" data-nyesaved>My saved menus (${savedMenus.length})</button>` : "");
   }
 
   // ---------- 💫 wishes jar ----------
@@ -157,7 +158,7 @@
     if (g) { const c = cfgFor("nyeparty"); c.guests = Math.min(20, Math.max(1, c.guests + +g.dataset.nyeg)); mealCfg.nyeparty = c; save("mealCfg", mealCfg); if (planOf("nyeparty")) startMealPlan(mealById("nyeparty"), true); renderNyeParty(); return; }
     const md = e.target.closest("[data-nyemode]");
     if (md) { const c = cfgFor("nyeparty"); c.mode = md.dataset.nyemode; mealCfg.nyeparty = c; save("mealCfg", mealCfg); if (planOf("nyeparty")) startMealPlan(mealById("nyeparty"), true); renderNyeParty(); return; }
-    if (e.target.closest("[data-nyestop]")) { if (confirm("Cancel this New Year's Eve plan and turn its alarms off?")) { mealPlans = mealPlans.filter(p => p.id !== "nyeparty"); saveMealPlans(); syncMealNative(); renderNyeParty(); toast("Plan cancelled. Alarms are off."); } return; }
+    if (e.target.closest("[data-nyestop]")) { if (confirm("Cancel your New Year's Eve plan? This turns off its alarms and deletes the saved New Year's menu.")) { mealPlans = mealPlans.filter(p => p.id !== "nyeparty"); saveMealPlans(); syncMealNative(); savedMenus = savedMenus.filter(x => !nyeSaved().includes(x)); saveSaved(); renderNyeParty(); toast("Your New Year's plan is cancelled."); } return; }
     if (e.target.closest("[data-nyesaved]")) { mealView = "saved"; showView("meals"); window.scrollTo(0, 0); }
   });
   $("#view-nye").addEventListener("change", e => {
