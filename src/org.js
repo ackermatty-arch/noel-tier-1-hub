@@ -15,29 +15,15 @@
   const parseYmd = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
   const shortDate = s => parseYmd(s).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
   const MEMBER_EMOJI = ["★", "◆", "●", "▲", "■", "✦", "☾", "✿", "❖", "✚"];   // plain gold-style symbols (coloured emoji are stripped app-wide, which left this picker empty)
-  const ORG_ALL = [["cards", "✉️", "Card List"], ["cal", "📅", "Calendar"], ["thanks", "🙏", "Thank-Yous"], ["packages", "📦", "Packages"], ["giving", "⭐", "Giving"], ["spend", "🗂️", "Spending"]];
-  const ORG_TOOLS = { get length() { return this.list().length; }, list: () => hubMode === "company" ? ORG_ALL.filter(t => ["cards", "cal", "thanks", "packages"].includes(t[0])).map(t => t[0] === "cards" ? [t[0], t[1], "Client Card List"] : t) : ORG_ALL.filter(t => t[0] !== "giving"), map(f) { return this.list().map(f); }, find(f) { return this.list().find(f); } };
-
-  function orgStatus(k) {
-    const y = orgYear();
-    if (k === "cards") { const on = org.contacts.filter(c => c.list !== false), sent = on.filter(c => (c.sent || {})[y]).length; return org.contacts.length ? `${sent} of ${on.length} sent` : "Add your list"; }
-    if (k === "cal") { const today = ymd(new Date()), up = calEvents().filter(e => e.date >= today).length; return up ? `${up} coming up` : "Add events"; }
-    if (k === "thanks") { const d = org.thanks.filter(t => t.done).length; return org.thanks.length ? `${d} of ${org.thanks.length} sent` : "After Christmas"; }
-    if (k === "packages") { const w = org.packages.filter(p => !p.arrived).length; return org.packages.length ? (w ? `${w} on the way` : "All arrived ✓") : "Track orders"; }
-    if (k === "giving") return org.giving.length ? `${money(org.giving.reduce((a, g) => a + (+g.amt || 0), 0))} given` : "Spread kindness";
-    return money(budTotals().spent) + " spent";
+  function renderOrg() {   // Calendar tab (calendar + packages); Card list and Thank-yous live in the Cards tab
+    if (org.view !== "packages") org.view = "cal";
+    const tabs = $("#orgTabs"); if (tabs) tabs.innerHTML = [["cal", "Calendar"], ["packages", "Packages"]].map(([k, l]) => `<button type="button" data-otool="${k}" aria-pressed="${org.view === k}">${l}</button>`).join("");
+    const tool = $("#orgTool"); if (tool) tool.innerHTML = org.view === "packages" ? orgPackagesHtml() : orgCalHtml();
+    const cl = $("#paneCardList"), th = $("#paneThanks");
+    if (cl && !cl.hidden) cl.innerHTML = orgCardsHtml();
+    if (th && !th.hidden) th.innerHTML = orgThanksHtml();
   }
-  function renderOrg() {
-    const v = org.view || "home";
-    $("#orgHome").hidden = v !== "home"; $("#orgTool").hidden = v === "home"; $("#view-org").classList.toggle("in-tool", v !== "home");
-    if (v === "home") {
-      $("#orgHome").innerHTML = `<div class="org-tiles">${ORG_TOOLS.map(([k, i, l]) => `<button type="button" class="org-tile" data-otool="${k}"><span class="ot-ico">${i}</span><b>${l}</b><small>${esc(orgStatus(k))}</small></button>`).join("")}</div>`;
-      return;
-    }
-    const t = ORG_TOOLS.find(x => x[0] === v);
-    $("#orgTool").innerHTML = `<button type="button" class="meal-back" data-otool="home">‹ Organizer</button><h3 class="meal-title">${t[1]} ${t[2]}</h3>` +
-      ({ cards: orgCardsHtml, cal: orgCalHtml, thanks: orgThanksHtml, packages: orgPackagesHtml, giving: orgGivingHtml, spend: orgSpendHtml })[v]();
-  }
+  const orgRoots = () => ["#view-org", "#paneCardList", "#paneThanks"].map(x => $(x)).filter(Boolean);
 
   // ---------- ✉️ Card list ----------
   function orgCardsHtml() {
@@ -309,9 +295,9 @@
       : `<span class="cl-t"><b>${co ? "Your client card list" : "Your Christmas card list"}</b><small>${co ? "Add clients, vendors and staff with their addresses, then tick them off as you send" : "Add names and addresses, then tick people off as you send"}</small></span><button type="button" class="btn btn-ghost btn-sm" data-clopen>Start my list ›</button>`;
     const dl = $("#cardNames"); if (dl) dl.innerHTML = org.contacts.map(c => `<option value="${esc(c.name)}">`).join("");
   }
-  document.addEventListener("click", e => { if (e.target.closest("[data-clopen]")) { org.view = "cards"; org.editing = null; saveOrg(); showView("org"); renderOrg(); window.scrollTo(0, 0); } });
+  document.addEventListener("click", e => { if (e.target.closest("[data-clopen]")) { org.editing = null; saveOrg(); showView("invites"); showPane("cardlist"); window.scrollTo(0, 0); } });
   const orgChanged = () => { saveOrg(); renderOrg(); orgSync(); renderCardBar(); };
-  $("#view-org").addEventListener("click", e => {
+  const orgH_click = e => {
     const t = e.target, y = orgYear();
     const tool = t.closest("[data-otool]"); if (tool) { org.view = tool.dataset.otool; org.editing = null; saveOrg(); renderOrg(); window.scrollTo({ top: 0 }); return; }
     if (t.closest("#orgCsv")) {
@@ -346,15 +332,17 @@
       if (ot) org.other = org.other.filter(x => x.id !== ot.dataset.oo);
       orgChanged();
     }
-  });
-  $("#view-org").addEventListener("change", e => {
+  };
+  orgRoots().forEach(r => r.addEventListener("click", orgH_click));
+  const orgH_change = e => {
     const t = e.target;
     const af = t.closest("[data-oaf]");
     if (af && t.dataset.oa) { const tgt = af.dataset.oaf === "me" ? org.me : org.contacts.find(x => x.id === t.closest("[data-oc]").dataset.oc); if (tgt) { tgt[t.dataset.oa] = t.value.trim(); saveOrg(); } return; }
     if (t.dataset.otdone != null) { const x = org.thanks.find(z => z.id === t.closest("[data-ot]").dataset.ot); x.done = t.checked; saveOrg(); renderOrg(); return; }
     if (t.dataset.ogdone != null) { const x = org.giving.find(z => z.id === t.closest("[data-og]").dataset.og); x.done = t.checked; saveOrg(); renderOrg(); return; }
-  });
-  $("#view-org").addEventListener("submit", e => {
+  };
+  orgRoots().forEach(r => r.addEventListener("change", orgH_change));
+  const orgH_submit = e => {
     e.preventDefault(); const f = e.target;
     if (f.id === "orgContactForm") { const n = f.cname.value.trim(); if (!n) return; const c = { id: uid(), name: n, sent: {}, recv: {} }; org.contacts.push(c); org.editing = c.id; }
     if (f.id === "orgEventForm") { const ti = f.title.value.trim(); if (!ti) { toast("📅 Give the event a name"); return; } org.events.push({ id: uid(), date: org.calDay || ymd(new Date()), time: f.time.value, title: ti, who: f.who.value, notes: f.notes.value.trim(), remind: f.remind.checked }); toast("📅 Added to your calendar"); }
@@ -364,7 +352,8 @@
     if (f.id === "orgGiveForm") { const w = f.what.value.trim(); if (!w) return; org.giving.push({ id: uid(), what: w, amt: parseFloat(f.amt.value) || 0, done: false, date: budToday() }); }
     if (f.id === "orgOtherForm") { const n = f.name.value.trim(); if (!n) return; org.other.push({ id: uid(), name: n, amt: parseFloat(f.amt.value) || 0 }); }
     orgChanged();
-  });
+  };
+  orgRoots().forEach(r => r.addEventListener("submit", orgH_submit));
   // ✉️ a card sent from the Outbox ticks that person off the Christmas card list
   window.__orgTickSent = name => { const ct = org.contacts.find(c => String(c.name || "").trim().toLowerCase() === name); if (ct) { ct.sent = ct.sent || {}; ct.sent[orgYear()] = true; orgChanged(); return true; } return false; };
   renderCardBar();
