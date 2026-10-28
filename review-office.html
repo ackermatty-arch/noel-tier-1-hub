@@ -431,7 +431,7 @@ main {
 .add-duty { padding: 16px; margin-top: 18px; }
 .add-duty h3 { font-size: 16px; color: var(--pine-dark); margin-bottom: 10px; }
 .add-duty .row { display: flex; gap: 10px; flex-wrap: wrap; }
-.add-duty .row .input[name="icon"] { flex: 0 0 80px; }
+.add-duty .row .input[name="icon"] { flex: 1 1 100%; min-height: 44px; }
 .add-duty .row .input[name="minutes"] { flex: 0 0 96px; }
 .add-duty .row .input[name="name"] { flex: 1 1 160px; }
 .tip { font-size: 13px; color: var(--muted); margin: 14px 2px 0; }
@@ -2900,9 +2900,9 @@ input[type=time], input[type=date], input[type=datetime-local] { cursor: pointer
       <h3>➕ My own timer</h3>
       <div class="row">
         <select class="input" name="icon" aria-label="Icon">
-          <option>⏰</option><option>🍗</option><option>🥧</option><option>🍷</option>
-          <option>🎁</option><option>🕯️</option><option>🚗</option><option>📞</option>
-          <option>🧦</option><option>❄️</option>
+          <option value="⏰">Timer</option><option value="🍗">Meat</option><option value="🥧">Pie or dessert</option><option value="🍷">Drinks</option>
+          <option value="🎁">Gifts</option><option value="🕯️">Candles</option><option value="🚗">Leave or drive</option><option value="📞">Call</option>
+          <option value="🧦">Stockings</option><option value="❄️">Chill</option>
         </select>
         <input class="input" name="name" maxlength="40" placeholder="Duty name" aria-label="Duty name" required>
         <input class="input" name="minutes" type="number" min="1" max="1440" value="10" inputmode="numeric" aria-label="Minutes" required>
