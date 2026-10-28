@@ -2151,7 +2151,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 .bud-next{margin-top:14px}
 .bottom-nav .nav-btn{font-size:8.5px!important;letter-spacing:0!important;padding-left:1px!important;padding-right:1px!important}
 #giftTabs{grid-template-columns:repeat(2,1fr)!important} body.co #giftTabs{display:none!important}
-#view-gifts,#view-planner,#view-org{position:relative}.gift-tasks-btn{position:absolute;top:2px;right:0;z-index:2}.wish-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#view-gifts,#view-planner,#view-org,#view-tasks{position:relative}.gift-tasks-btn{position:absolute;top:2px;right:0;z-index:2}.wish-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .bottom-nav .nav-btn{font-size:8px!important}#invTabs button{font-size:11px;padding:0 2px}
 </style>
 </head>
@@ -2425,7 +2425,8 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 
   <!-- ✅ TASKS: the checklist, printables and extras that used to sit under Hosting -->
   <section class="view" id="view-tasks" aria-labelledby="tasksTitle">
-    <h2 class="view-title" id="tasksTitle">Tasks</h2>
+    <button type="button" class="btn btn-green btn-sm gift-tasks-btn fam-only" data-goview="meals">Menu ›</button>
+    <h2 class="view-title" id="tasksTitle">Task list</h2>
     <p class="view-intro">Tick off each task as you go. Your progress saves automatically.</p>
 
 
