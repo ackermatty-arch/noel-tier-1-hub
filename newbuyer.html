@@ -3057,14 +3057,14 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
      BOTTOM NAVIGATION
      ============================================================ -->
 <nav class="bottom-nav" aria-label="Main">
-  <button class="nav-btn" data-view="games"><span class="nav-ico">🎮</span>Games</button>
+  <button class="nav-btn" data-view="budget"><span class="nav-ico">💰</span>Budget</button>
   <button class="nav-btn" data-view="planner"><span class="nav-ico">📝</span>Planner</button>
   <button class="nav-btn" data-view="meals" id="navMeals"><span class="nav-ico">🍽️</span>Meals</button>
-  <button class="nav-btn" data-view="nye" id="navNye"><span class="nav-ico">🥂</span>NYE</button>
   <button class="nav-btn" data-view="gifts"><span class="nav-ico">🎁</span>Gifts</button>
-  <button class="nav-btn" data-view="budget"><span class="nav-ico">💰</span>Budget</button>
   <button class="nav-btn" data-view="invites"><span class="nav-ico">✉️</span>Cards</button>
   <button class="nav-btn" data-view="alarms"><span class="nav-ico">⏰</span>Timers<span class="nav-badge" id="alarmBadge">0</span></button>
+  <button class="nav-btn" data-view="nye" id="navNye"><span class="nav-ico">🥂</span>NYE</button>
+  <button class="nav-btn" data-view="games"><span class="nav-ico">🎮</span>Games</button>
   <button class="nav-btn" data-view="review"><span class="nav-ico">✨</span>Review</button>
 </nav>
 
@@ -7520,7 +7520,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
      NAVIGATION
      ============================================================ */
   function showView(name, slide) {
-    if (!$("#view-" + name)) name = "games";
+    if (!$("#view-" + name)) name = "planner";
     $$(".view").forEach(v => { v.classList.toggle("active", v.id === "view-" + name); v.classList.remove("slide-left", "slide-right"); });
     if (slide) $("#view-" + name).classList.add("slide-" + slide);
     if (name === "nye") renderNye();
@@ -7548,7 +7548,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   /* 👆 SWIPE between tabs (left = next tab, right = previous tab)
      Ignores up/down scrolling, edge swipes (Android "back"), text boxes,
      sliders and anything inside a pop-up or full-screen page. */
-  const VIEW_ORDER = ["games", "planner", "office", "host", "org", "own", "meals", "nye", "gifts", "budget", "invites", "alarms", "review"];
+  const VIEW_ORDER = ["budget", "planner", "office", "host", "org", "own", "meals", "gifts", "invites", "alarms", "nye", "games", "review"];
   let swipe = null;
   document.querySelector("main").addEventListener("touchstart", e => {
     const t = e.touches[0];
@@ -7561,8 +7561,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const t = e.changedTouches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y, ms = Date.now() - swipe.at;
     swipe = null;
     if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8 || ms > 700) return;
-    const order = VIEW_ORDER.filter(v => (hubMode === "company" ? !["meals", "host", "org", "nye"].includes(v) : v !== "office"));   // meals & hosting are Family-only
-    const cur = order.indexOf(load(KEYS.view, "games")), next = cur + (dx < 0 ? 1 : -1);
+    const order = VIEW_ORDER.filter(v => (hubMode === "company" ? !["meals", "host", "org"].includes(v) : v !== "office"));   // meals & hosting are Family-only
+    const cur = order.indexOf(load(KEYS.view, "planner")), next = cur + (dx < 0 ? 1 : -1);
     if (next < 0 || next >= order.length) return;
     showView(order[next], dx < 0 ? "left" : "right");
   }, { passive: true });
@@ -9540,9 +9540,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $$(".sv-desc").forEach(x => { x.textContent = hubMode === "company" ? "Six tongue-in-cheek tips for surviving the office party." : "Six tongue-in-cheek tips for surviving the holidays."; });
     $("#selfCareCard").hidden = hubMode === "company";   // 🕯️ self-care is family only
     $$(".sc-desc").forEach(x => { x.textContent = hubMode === "company" ? "Five gentle reminders, a calm plan and your own permission slip." : "Five gentle reminders for a calmer, merrier season."; });
-    if (hubMode === "company" && load(KEYS.view, "games") === "host") showView("planner");
+    if (hubMode === "company" && load(KEYS.view, "planner") === "host") showView("planner");
     applySeasonNav();                                 // 🥂 New Year button takes over from Dec 26
-    if (hubMode === "company" && load(KEYS.view, "games") === "meals") showView("planner");
+    if (hubMode === "company" && load(KEYS.view, "planner") === "meals") showView("planner");
   }
   // 🏢 the space bar (Office Edition) · switching saves everything, then reopens in the other space
   if (EDITION === "office") {
@@ -14970,7 +14970,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   renderNye();
   orgSync();   // 📒 organizer reminders
   hostSync();   // 🏡 keep phone reminders in step with the plan
-  showView(hubMode === "company" && typeof offHasWork === "function" && offHasWork() ? "planner" : load(KEYS.view, "games"));
+  showView(hubMode === "company" && typeof offHasWork === "function" && offHasWork() ? "planner" : load(KEYS.view, "planner"));
   setInterval(tick, 250);
   tick(); // catches timers that finished while the app was closed
   afterUnlock();
