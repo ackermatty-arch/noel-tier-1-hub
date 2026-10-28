@@ -13138,7 +13138,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${top ? `<p>🏷️ <b>Biggest purchase:</b> ${esc(top.name)} · ${money(top.amt)}</p>` : ""}
         ${T.plannedGifts ? `<p>💡 <b>Gift ideas not bought yet:</b> ${money(T.plannedGifts)}${T.limit ? ` · ${T.spent + T.plannedGifts > T.limit ? "buying them all would go over budget" : "they still fit in your budget"}` : ""}</p>` : ""}
         ${last ? `<p>🗂️ <b>Last Christmas (${last.year}):</b> ${money(last.total)} in total · ${T.spent > last.total ? `${money(T.spent - last.total)} more so far this year` : `${money(last.total - T.spent)} less so far`}</p>` : ""}
-        <p>📄 Want it on your computer? Open the <b>🧾 Spreadsheet</b> tab and tap <b>Download spreadsheet</b>.</p></div>
+        <p>📄 Want it on your computer? Open the <b>Spreadsheet</b> tab and tap <b>Spreadsheet (Excel)</b>.</p></div>
       <button type="button" class="btn btn-ghost btn-block pt-print" data-print="budget">🖨️ Print my budget report</button>`;
   }
   function budSheet(T) {
@@ -13164,8 +13164,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       ${SPACE === "office" ? (() => { const mine = T.rows.filter(r => r.mine), tot = mine.reduce((a, r) => a + r.amt, 0);
         return `<div class="card pt-card"><h3>💳 Reimbursement list</h3><p class="host-rem">${mine.length ? `<b>${mine.length}</b> ${mine.length === 1 ? "purchase" : "purchases"} you paid for yourself · <b>${money(tot)}</b> to be paid back.` : "Tick “I paid for this myself” when you add a purchase, and it lands here."}</p>
           ${mine.length ? `<button type="button" class="btn btn-ghost btn-block" data-print="reimburse">🖨️ Reimbursement list for the boss</button>` : ""}</div>`; })() : ""}
-      <div class="card pt-card"><button type="button" class="btn btn-red btn-block" id="budCsv">📄 Download spreadsheet</button>
-        <p class="host-rem">${N ? "Choose AirDrop, Mail or Save to Files to get it onto your computer." : "It saves to your downloads."} It opens in Excel, Google Sheets or Numbers, with every purchase and the totals by category.</p></div>`;
+      <div class="card pt-card"><button type="button" class="btn btn-red btn-block" id="budCsv">Spreadsheet (Excel)</button>
+        <p class="host-rem">${N ? "Choose AirDrop, Mail or Save to Files to get it onto your computer." : "It saves to your downloads."} Preview it first, then save. It opens in Excel, Google Sheets or Numbers, with a summary, your budget by category and every purchase.</p></div>`;
   }
   function budSet(T) {
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
@@ -13297,7 +13297,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const fl = t.closest("[data-bfilter]"); if (fl) { budget.filter = fl.dataset.bfilter; saveBudget(); renderBudget(); return; }
     const so = t.closest("[data-bsort]"); if (so) { budget.sort = so.dataset.bsort; saveBudget(); renderBudget(); return; }
     const del = t.closest("[data-bdel]"); if (del) { budget.expenses = budget.expenses.filter(x => x.id !== del.dataset.bdel); saveBudget(); renderBudget(); return; }
-    if (t.closest("#budCsv")) { NoelMedia.share(new Blob([budCsv()], { type: "text/csv" }), "Holiday-Budget.csv", "Holiday budget").then(h => { if (h === "saved") toast("📄 Spreadsheet saved to your downloads"); }).catch(() => {}); }
+    if (t.closest("#budCsv")) { const x = $("#xlOpen"); if (x) x.click(); }
   });
   $("#view-budget").addEventListener("change", e => {
     const t = e.target; if (t.dataset.blim == null) return;
