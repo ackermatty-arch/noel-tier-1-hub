@@ -2062,6 +2062,17 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .mc-day .classy-link { display: block; margin: 10px auto 0; }
 .mc-card .cal-cell { aspect-ratio: 1.2 !important; } .mc-card .cal-cell.sel { background: #151515 !important; color: #fff !important; }
 .mc-day .cal-list li { display: grid; grid-template-columns: 64px 1fr; gap: 8px; text-align: left; } .mc-day .cl-txt { text-align: left; } .mc-day .cl-txt small { display: block; margin-top: 4px; }
+input[type=time] { cursor: pointer; }
+.wp-overlay { position: fixed; inset: 0; z-index: 10001; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; }
+.wp-sheet { background: #fff; width: 100%; max-width: 440px; border-top: 2px solid #C9A45C; padding: 16px 16px 20px; }
+.wp-title { text-align: center; font: 600 13px Cinzel, serif; letter-spacing: .22em; text-transform: uppercase; color: #B08D4E; margin-bottom: 8px; }
+.wp-wheels { position: relative; display: flex; justify-content: center; align-items: center; gap: 6px; height: 200px; }
+.wp-band { position: absolute; left: 6%; right: 6%; top: 80px; height: 40px; border-top: 1px solid #C9A45C; border-bottom: 1px solid #C9A45C; background: rgba(201,164,92,.1); pointer-events: none; }
+.wp-col { height: 200px; width: 84px; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; text-align: center; mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent); -webkit-mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent); }
+.wp-col::-webkit-scrollbar { display: none; }
+.wp-pad { height: 80px; } .wp-it { height: 40px; line-height: 40px; scroll-snap-align: center; font: 500 22px Cinzel, serif; color: #999; } .wp-it.on { color: #151515; font-weight: 700; }
+.wp-colon { font: 700 24px Cinzel, serif; color: #151515; }
+.wp-btns { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 8px; margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -14575,6 +14586,38 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     el.addEventListener("click", () => el.remove()); document.body.appendChild(el); setTimeout(() => el.classList.add("out"), 6000); setTimeout(() => el.remove(), 6800);
   }
   setTimeout(xmasNotify, 1500);
+  // 🕐 a rolling (wheel) time picker that replaces the phone's clock-face picker everywhere
+  (function () {
+    const H = 40, two = n => String(n).padStart(2, "0");
+    function col(items, sel, id) { return `<div class="wp-col" data-wpcol="${id}"><div class="wp-pad"></div>${items.map((t, i) => `<div class="wp-it${i === sel ? " on" : ""}">${t}</div>`).join("")}<div class="wp-pad"></div></div>`; }
+    function openWheel(inp) {
+      const old = document.getElementById("wheelPick"); if (old) old.remove();
+      let h24, mi; const m = /^(\d{1,2}):(\d{2})/.exec(inp.value || "");
+      if (m) { h24 = +m[1]; mi = +m[2]; } else { const n = new Date(); h24 = n.getHours(); mi = Math.round(n.getMinutes() / 5) * 5 % 60; }
+      const h12 = h24 % 12 === 0 ? 12 : h24 % 12, pm = h24 >= 12 ? 1 : 0;
+      const hours = Array.from({ length: 12 }, (_, i) => String(i + 1)), mins = Array.from({ length: 60 }, (_, i) => two(i));
+      const el = document.createElement("div"); el.id = "wheelPick"; el.className = "wp-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+      el.innerHTML = `<div class="wp-sheet"><div class="wp-title">Set the time</div><div class="wp-wheels"><div class="wp-band"></div>${col(hours, h12 - 1, "h")}<span class="wp-colon">:</span>${col(mins, mi, "m")}${col(["AM", "PM"], pm, "p")}</div>
+        <div class="wp-btns"><button type="button" class="btn btn-ghost" data-wpclear>Clear</button><button type="button" class="btn btn-ghost" data-wpcancel>Cancel</button><button type="button" class="btn btn-gold" data-wpset>Set</button></div></div>`;
+      document.body.appendChild(el);
+      const pick = id => { const c = el.querySelector(`[data-wpcol=${id}]`); return Math.max(0, Math.round(c.scrollTop / H)); };
+      [["h", h12 - 1], ["m", mi], ["p", pm]].forEach(([id, idx]) => { el.querySelector(`[data-wpcol=${id}]`).scrollTop = idx * H; });
+      el.querySelectorAll(".wp-col").forEach(c => c.addEventListener("scroll", () => { const i = Math.round(c.scrollTop / H); c.querySelectorAll(".wp-it").forEach((x, k) => x.classList.toggle("on", k === i)); }, { passive: true }));
+      el.addEventListener("click", e => {
+        const it = e.target.closest(".wp-it"); if (it) { const c = it.parentNode; c.scrollTo({ top: [...c.querySelectorAll(".wp-it")].indexOf(it) * H, behavior: "smooth" }); return; }
+        if (e.target === el || e.target.closest("[data-wpcancel]")) { el.remove(); return; }
+        const fire = () => { inp.dispatchEvent(new Event("input", { bubbles: true })); inp.dispatchEvent(new Event("change", { bubbles: true })); };
+        if (e.target.closest("[data-wpclear]")) { inp.value = ""; fire(); el.remove(); return; }
+        if (e.target.closest("[data-wpset]")) { const hh = Math.min(11, pick("h")) + 1, mm = Math.min(59, pick("m")), ap = Math.min(1, pick("p")); inp.value = `${two((hh % 12) + ap * 12)}:${two(mm)}`; fire(); el.remove(); }
+      });
+    }
+    const isT = t => t && t.matches && t.matches("input[type=time]");
+    const stop = e => { const t = e.target; if (isT(t) && !t.disabled) { e.preventDefault(); if (e.type === "click") { t.blur(); openWheel(t); } } };
+    document.addEventListener("click", stop, true); document.addEventListener("mousedown", stop, true);
+    document.addEventListener("keydown", e => { if (isT(e.target) && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openWheel(e.target); } }, true);
+    const lock = root => (root.querySelectorAll ? root.querySelectorAll("input[type=time]") : []).forEach(i => { i.readOnly = true; });
+    lock(document); new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) { if (isT(n)) n.readOnly = true; lock(n); } }))).observe(document.body, { childList: true, subtree: true });
+  })();
   renderTeams();
   renderPlanner();
   renderDuties();
