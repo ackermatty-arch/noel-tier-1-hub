@@ -9081,7 +9081,18 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     checkin.done = 0; checkin.snooze = 0; save("checkin", checkin);
     season = Math.max(year + 1, seasonOf(new Date())); save("season", season);
     renderGifts(); renderWishes(); renderPlanner(); renderGuests(); renderTeams(); renderMemories(); renderReview();
-    toast(`🗂️ Christmas ${year} saved. Fresh start for ${season}!`);
+    toast(`🗂️ Christmas ${year} saved. Fresh start for ${season}!`); seasonReminders();
+  }
+  // phone reminders that bring people back: wrap-up on Dec 27, then next year's planning (Oct 15, Nov 1)
+  function seasonReminders() {
+    if (!window.NoelNative) return;
+    const co = hubMode === "company", at = (y, m, d) => new Date(y, m, d, 9, 30).getTime(), y = season;
+    NoelNative.scheduleList(9300, 9310, [
+      { t: at(y, 10, 1), title: co ? "Time to plan the holiday party" : "Time to start planning Christmas", body: "Your plan is ready in Noël Tier 1 Hub" },
+      { t: at(y, 11, 27), title: "The season is wrapped", body: "Save this year and start fresh. Your list, guests and budget carry over." },
+      { t: at(y + 1, 9, 15), title: co ? "The holiday party is ten weeks away" : "Christmas is ten weeks away", body: "Last year's list, guests and menus are saved and ready." },
+      { t: at(y + 1, 10, 1), title: co ? "Time to plan the holiday party" : "Time to start planning Christmas", body: "Open Noël Tier 1 Hub and set your budget" }
+    ]);
   }
   function renderMemories() {
     $("#memoryYears").innerHTML = memories.map(m => {
@@ -9129,6 +9140,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (!confirm(`Save Christmas ${season} and start fresh?\n\nYour gifts, wish list and checklist ticks will be saved to Past Christmases, then cleared. Your people, budget, guests and your own tasks stay.`)) return;
     startFresh();
   });
+  setTimeout(seasonReminders, 3000);
   function maybeNewYear() {
     const now = new Date();
     if (now < new Date(season + 1, 0, 2) || now < (load("newYearLater", 0) || 0)) return;
@@ -9506,6 +9518,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   let shOpen = false;
   function renderStartHere() {
     const el = $("#startHere"); if (!el) return;
+    const nowD = new Date(), wrap = nowD >= new Date(season, 11, 26) && nowD < new Date(season + 1, 11, 1) && !load("memories", []).some(m => m.year === season);
+    if (wrap) { el.innerHTML = `<div class="sh-card"><div class="sh-top"><div><h3>Christmas ${season} is wrapped</h3><small>Save it and start fresh. Your people, guests and budget carry over.</small></div></div><button class="sh-item" data-shwrap><span class="sh-box">+</span><span class="t">Save this year and start fresh</span></button></div>`; return; }
     if (load("shHide", false)) { el.innerHTML = ""; return; }
     const co = hubMode === "company", sn = load("seen", {});
     const items = co ? [["Open the Office plan","office"],["Look at Guests and Cards","invites"],["Check the Budget","budget"],["Open Timers","alarms"],["Try a game or the NYE party","games"]]
@@ -9519,6 +9533,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
   document.addEventListener("click", e => {
     const g = e.target.closest("[data-shgo]"); if (g) { showView(g.dataset.shgo); return; }
+    if (e.target.closest("[data-shwrap]")) { $("#memorySave").click(); return; }
     if (e.target.closest("[data-shmore]")) { shOpen = !shOpen; renderStartHere(); return; }
     if (e.target.closest("[data-shtour]")) { openTour(); return; }
     if (e.target.closest("[data-shhide]")) { save("shHide", true); renderStartHere(); }
