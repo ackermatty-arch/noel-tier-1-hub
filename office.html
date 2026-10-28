@@ -11965,15 +11965,14 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const cat = GIDEA_CATS.find(c => c[0] === gi.cat) || gCats()[0];
     const stores = giStores();
     $("#giStores").innerHTML = stores.map(([n, home]) => `<button type="button" class="gi-store" data-gihome="${home}">${esc(n)}</button>`).join("");
-    $("#giCats").innerHTML = GIDEA_CATS.map(c => `<button type="button" class="gi-cat${c[0] === gi.cat ? " on" : ""}" data-gicat="${c[0]}"><span>${c[1]}</span><b>${esc(c[2])}</b><small>${esc(c[3])}</small></button>`).join("") +
-      `<button type="button" class="gi-cat${gi.cat === "saved" ? " on" : ""}" data-gicat="saved"><span>★</span><b>Saved</b><small>${Object.keys(gi.saved).length} ideas</small></button>`;
+    $("#giCats").innerHTML = `<button type="button" class="gi-cat${gi.cat === "saved" ? " on" : ""}" data-gicat="saved"><span>★</span><b>Saved</b><small>${Object.keys(gi.saved).length} ${Object.keys(gi.saved).length === 1 ? "idea" : "ideas"}</small></button>` + GIDEA_CATS.map(c => `<button type="button" class="gi-cat${c[0] === gi.cat ? " on" : ""}" data-gicat="${c[0]}"><span>${c[1]}</span><b>${esc(c[2])}</b><small>${esc(c[3])}</small></button>`).join("");
     $("#giFilters").innerHTML = GI_BUDGETS.map(([k, l]) => `<button type="button" class="chip${gi.budget === k ? " on" : ""}" data-gibudget="${k}">${l}</button>`).join("") +
       `<button type="button" class="chip${gi.eco ? " on" : ""}" data-gieco="1">🌿 Eco picks</button>` +
       `<span class="gi-break"></span>` + GI_INTERESTS.map(([k, l]) => `<button type="button" class="chip${gi.interest === k ? " on" : ""}" data-giint="${k}">${l}</button>`).join("");
     let list = gi.cat === "saved"
       ? Object.keys(gi.saved).map(k => { const [c, n] = k.split("|"); const x = (GIDEAS[c] || []).find(y => y[0] === n); return x ? [c, x] : null; }).filter(Boolean)
       : (GIDEAS[cat[0]] || []).map(x => [cat[0], x]);
-    list = list.filter(([, x]) => giInBudget(x) && (!gi.eco || x[5]) && (!gi.interest || x[4].split(" ").includes(gi.interest)));
+    if (gi.cat !== "saved") list = list.filter(([, x]) => giInBudget(x) && (!gi.eco || x[5]) && (!gi.interest || x[4].split(" ").includes(gi.interest)));
     const people = gifts.people;
     $("#giList").innerHTML = list.length ? list.map(([c, x]) => {
       const k = giKey(c, x), suffix = (GIDEA_CATS.find(z => z[0] === c) || [])[4] || "", q = (x[0] + " " + suffix).trim(), adding = giAddFor === k;
@@ -12002,7 +12001,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const i = t.closest("[data-giint]"); if (i) { gi.interest = gi.interest === i.dataset.giint ? "" : i.dataset.giint; save1(); renderIdeas(); return; }
     const card = t.closest("[data-gik]"); if (!card) return;
     const k = card.dataset.gik;
-    if (t.closest("[data-gisave]")) { if (gi.saved[k]) delete gi.saved[k]; else { gi.saved[k] = 1; toast("★ Saved to your ideas"); } save1(); renderIdeas(); return; }
+    if (t.closest("[data-gisave]")) { if (gi.saved[k]) delete gi.saved[k]; else { gi.saved[k] = 1; toast("★ Saved. Find it under ★ Saved at the top of the list"); } save1(); renderIdeas(); return; }
     if (t.closest("[data-giadd]")) { giAddFor = k; renderIdeas(); return; }
     if (t.closest("[data-giaddgo]")) {
       const [cat, name] = k.split("|"), x = (GIDEAS[cat] || []).find(y => y[0] === name); if (!x) return;
