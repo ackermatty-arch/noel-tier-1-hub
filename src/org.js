@@ -15,7 +15,8 @@
   const parseYmd = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
   const shortDate = s => parseYmd(s).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
   const MEMBER_EMOJI = ["★", "◆", "●", "▲", "■", "✦", "☾", "✿", "❖", "✚"];   // plain gold-style symbols (coloured emoji are stripped app-wide, which left this picker empty)
-  const ORG_TOOLS = [["cards", "✉️", "Card List"], ["cal", "📅", "Calendar"], ["thanks", "🙏", "Thank-Yous"], ["packages", "📦", "Packages"], ["giving", "⭐", "Giving"], ["spend", "🗂️", "Spending"]];
+  const ORG_ALL = [["cards", "✉️", "Card List"], ["cal", "📅", "Calendar"], ["thanks", "🙏", "Thank-Yous"], ["packages", "📦", "Packages"], ["giving", "⭐", "Giving"], ["spend", "🗂️", "Spending"]];
+  const ORG_TOOLS = { get length() { return this.list().length; }, list: () => hubMode === "company" ? ORG_ALL.filter(t => ["cards", "cal", "thanks", "packages"].includes(t[0])).map(t => t[0] === "cards" ? [t[0], t[1], "Client Card List"] : t) : ORG_ALL, map(f) { return this.list().map(f); }, find(f) { return this.list().find(f); } };
 
   function orgStatus(k) {
     const y = orgYear();
@@ -54,7 +55,7 @@
             <button type="button" class="chip${c.list === false ? "" : " on"}" data-olist>${c.list === false ? "Not this year" : "📮 On this year's list"}</button><button type="button" class="chip" data-oedit>✏️</button></div>
           ${ls || lr ? `<p class="host-rem">Last year: ${[ls && "we sent", lr && "they sent"].filter(Boolean).join(" · ")}</p>` : ""}
           ${org.editing === c.id ? orgAddrForm(c, "oc") : ""}</div>`; }).join("")}
-      <form class="card add-task host-add" id="orgContactForm" autocomplete="off"><h3>➕ Add a household</h3><div class="santa-kid-row"><input class="input" name="cname" maxlength="50" placeholder="e.g. The Patel Family" aria-label="Name"><button class="btn btn-green" type="submit">Add</button></div></form>
+      <form class="card add-task host-add" id="orgContactForm" autocomplete="off"><h3>${hubMode === "company" ? "➕ Add a client, vendor or team member" : "➕ Add a household"}</h3><div class="santa-kid-row"><input class="input" name="cname" maxlength="50" placeholder="${hubMode === "company" ? "e.g. Smith &amp; Co. or Jane Smith" : "e.g. The Patel Family"}" aria-label="Name"><button class="btn btn-green" type="submit">Add</button></div></form>
       <div class="card org-card"><h3>🏠 Your return address</h3>${orgAddrForm(org.me, "me")}</div>`;
   }
   const orgAddrForm = (c, kind) => `<div class="org-addr-form" data-oaf="${kind}">${kind === "me" ? `<input class="input" data-oa="name" maxlength="50" placeholder="Your name (e.g. The Smith Family)" value="${esc(c.name || "")}">` : ""}
@@ -129,7 +130,7 @@
           <input class="input" name="notes" maxlength="80" placeholder="Notes, e.g. bring 24 cupcakes, wear red" aria-label="Notes">
           <label class="host-check"><input type="checkbox" name="remind" checked> 🔔 Remind me the evening before${" "}and 1 hour before</label>
           <button class="btn btn-green btn-block" type="submit">➕ Add to ${shortDate(sel)}</button></form></div>
-      <div class="card org-card"><h3>👪 Family members</h3><div class="apps-filters">${org.members.map(m => `<span class="chip on">${m.emoji} ${esc(m.name)} <button type="button" class="chip-x" data-odelmem="${m.id}" aria-label="Remove ${esc(m.name)}">✕</button></span>`).join("")}</div>
+      <div class="card org-card"><h3>${hubMode === "company" ? "👥 Team members" : "👪 Family members"}</h3><div class="apps-filters">${org.members.map(m => `<span class="chip on">${m.emoji} ${esc(m.name)} <button type="button" class="chip-x" data-odelmem="${m.id}" aria-label="Remove ${esc(m.name)}">✕</button></span>`).join("")}</div>
         <form id="orgMemberForm" class="org-addr-row" autocomplete="off"><select class="input" name="emoji" aria-label="Emoji">${MEMBER_EMOJI.map(e => `<option>${e}</option>`).join("")}</select><input class="input" name="mname" maxlength="20" placeholder="Name" aria-label="Name"><button class="btn btn-green" type="submit">Add</button></form>
         <p class="host-rem">Each person's symbol shows on their days, so you can see whose event it is at a glance.</p></div>`;
   }
@@ -229,9 +230,10 @@
   function renderCardBar() {
     const el = $("#clBar"); if (!el) return;
     const y = orgYear(), on = org.contacts.filter(c => c.list !== false), sent = on.filter(c => (c.sent || {})[y]).length;
+    const co = hubMode === "company";
     el.innerHTML = org.contacts.length
-      ? `<span class="cl-t"><b>${sent} of ${on.length}</b> Christmas cards sent<small>${on.length - sent ? `${on.length - sent} still to send` : "Everyone on your list is done"}</small></span><button type="button" class="btn btn-ghost btn-sm" data-clopen>My card list ›</button>`
-      : `<span class="cl-t"><b>Your Christmas card list</b><small>Add names and addresses, then tick people off as you send</small></span><button type="button" class="btn btn-ghost btn-sm" data-clopen>Start my list ›</button>`;
+      ? `<span class="cl-t"><b>${sent} of ${on.length}</b> ${co ? "client and staff cards" : "Christmas cards"} sent<small>${on.length - sent ? `${on.length - sent} still to send` : "Everyone on your list is done"}</small></span><button type="button" class="btn btn-ghost btn-sm" data-clopen>${co ? "Client list" : "My card list"} ›</button>`
+      : `<span class="cl-t"><b>${co ? "Your client card list" : "Your Christmas card list"}</b><small>${co ? "Add clients, vendors and staff with their addresses, then tick them off as you send" : "Add names and addresses, then tick people off as you send"}</small></span><button type="button" class="btn btn-ghost btn-sm" data-clopen>Start my list ›</button>`;
     const dl = $("#cardNames"); if (dl) dl.innerHTML = org.contacts.map(c => `<option value="${esc(c.name)}">`).join("");
   }
   document.addEventListener("click", e => { if (e.target.closest("[data-clopen]")) { org.view = "cards"; org.editing = null; saveOrg(); showView("org"); renderOrg(); window.scrollTo(0, 0); } });
