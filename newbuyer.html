@@ -2150,6 +2150,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 .host-away-form{display:grid;gap:8px;margin-top:10px}.host-away-form .input{width:100%}.host-card .host-list li[data-htrip]{display:flex;align-items:center;gap:8px;justify-content:space-between;border-bottom:1px solid #eee;padding:6px 0}.host-card li[data-htrip] small{display:block;color:#8A6D3B}
 .bud-next{margin-top:14px}
 .bottom-nav .nav-btn{font-size:8.5px!important;letter-spacing:0!important;padding-left:1px!important;padding-right:1px!important}
+#giftTabs{grid-template-columns:repeat(2,1fr)!important} body.co #giftTabs{display:none!important}
 </style>
 </head>
 <body>
@@ -2711,9 +2712,8 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
     <h2 class="view-title" id="giftsTitle">Gifts</h2>
     <p class="view-intro">Jot down wishes as you hear them, then track what you buy against your budget.</p>
 
-    <div class="seg seg3 sub-tabs" id="giftTabs" role="group" aria-label="Wish list, gift ideas or Santa's secret list">
+    <div class="seg seg3 sub-tabs" id="giftTabs" role="group" aria-label="Wish list or Santa's secret list">
       <button type="button" data-gpane="wish" aria-pressed="true">📝 Wishes</button>
-      <button type="button" data-gpane="ideas" aria-pressed="false">💡 Ideas</button>
       <button type="button" data-gpane="santa" aria-pressed="false" class="fam-only">🎅 Santa</button>
     </div>
 
@@ -9412,7 +9412,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     catch (err) { location.href = INVITE.smsHref("", text); }
   });
   function showGiftPane(p) {
-    if (p === "track" || (p === "santa" && hubMode === "company")) p = "wish";   // the gift tracker now lives on the Budget page; Santa's list is family only
+    if (p === "track" || p === "ideas" || (p === "santa" && hubMode === "company")) p = "wish";   // the gift tracker now lives on the Budget page; Santa's list is family only
     $("#paneWish").hidden = p !== "wish"; $("#paneIdeas").hidden = p !== "ideas"; $("#paneSanta").hidden = p !== "santa";
     if (p === "ideas") renderIdeas();
     if (p === "santa") renderSanta2(); else santaLock();
