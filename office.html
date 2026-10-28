@@ -11302,7 +11302,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
      ✏️ Edit freely: [name, why it's great, low $, high $, interests, eco (1 = yes)]
      interests: creative outdoors science reading games cozy kitchen music tech active
      ============================================================ */
-  const GIDEA_CATS = [
+  const GIDEA_FAM = [
     ["little", "🧸", "Little Ones", "Ages 2–5", "for toddlers"],
     ["kids", "🪁", "Kids", "Ages 6–10", "for kids"],
     ["tweens", "🎧", "Tweens", "Ages 11–14", "for tweens"],
@@ -11315,7 +11315,77 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     ["pets", "🐾", "Pets", "Dogs & cats", "for pets"],
     ["experience", "🎟️", "Experiences", "No clutter", ""]
   ];
+  const GIDEA_OFF = [
+    ["oclient", "💼", "Client Thank-Yous", "$25–60", "client gift"],
+    ["ovip", "🤝", "Key Clients & VIPs", "$75 and up", "executive gift"],
+    ["ostaff", "👥", "Team Gifts", "For employees", "employee gift"],
+    ["osmall", "✨", "Small Thank-Yous", "Under $25", "small thank you gift"],
+    ["ofood", "🧺", "Food & Baskets", "Easy to give", "gift basket"],
+    ["oexchange", "🎁", "Office Gift Exchange", "$20–30", "gift"]
+  ];
+  const GIDEA_CATS = { find: f => gCats().find(f), map: f => gCats().map(f), 0: null };
+  const gCats = () => hubMode === "company" ? GIDEA_OFF : GIDEA_FAM;
   const GIDEAS = {
+    oclient: [
+      ["Local honey and tea set", "A calm, shareable gift that suits almost any client.", 25, 45, "cozy kitchen", 1],
+      ["Premium nut and dried fruit tin", "Easy to keep on a desk and share with the team.", 25, 45, "kitchen", 0],
+      ["Handmade chocolate box", "A small luxury, boxed and ready to hand over.", 25, 50, "kitchen", 0],
+      ["Scented soy candle", "Neutral, tasteful and safe for any office.", 25, 45, "cozy", 1],
+      ["Gourmet popcorn tin", "Fun, giftable and nicely packaged.", 20, 40, "kitchen", 0],
+      ["Local coffee beans and mug", "A thoughtful pairing from a local roaster.", 30, 55, "kitchen cozy", 1],
+      ["Hardcover notebook and pen set", "Practical and stays on the desk all year.", 25, 50, "creative", 0],
+      ["Potted succulent or mini plant", "Lasts long after the holidays and looks great on a desk.", 20, 40, "outdoors", 1],
+      ["Charity donation in their name", "A card telling them you gave in their honour. No clutter.", 25, 100, "", 1]
+    ],
+    ovip: [
+      ["Curated gift basket", "Cheese, crackers, chocolate and preserves, beautifully presented.", 80, 150, "kitchen", 0],
+      ["Wine or sparkling gift set with glasses", "A classic for key clients. Check preferences first.", 75, 140, "kitchen", 0],
+      ["Leather desk set or cardholder", "A lasting gift they will see every day.", 70, 140, "creative", 0],
+      ["Engraved glass or ceramic mug set", "Personal without being too personal.", 60, 110, "cozy", 0],
+      ["Restaurant gift card", "Lets them pick a night out on you.", 75, 150, "", 0],
+      ["Spa or wellness gift set", "Bath salts, candle and tea in one box.", 70, 130, "cozy", 1],
+      ["Local artisan board with cheese knives", "Handmade and useful, with a local story.", 80, 160, "kitchen", 1],
+      ["Experience voucher", "Tickets, a class or a tasting to share with a guest.", 100, 200, "", 0]
+    ],
+    ostaff: [
+      ["Insulated tumbler or water bottle", "Useful every day and easy to personalize.", 20, 40, "outdoors active", 1],
+      ["Gift card for coffee or lunch", "Always welcome, no guessing needed.", 20, 50, "", 0],
+      ["Cozy blanket or throw", "A warm thank-you for a hard-working year.", 35, 70, "cozy", 0],
+      ["Desk plant with pot", "Brightens the workspace.", 20, 40, "outdoors", 1],
+      ["Personalized notebook", "A small gift with their name on it.", 20, 35, "creative", 0],
+      ["Wireless charger or phone stand", "Practical tech for the desk.", 25, 50, "tech", 0],
+      ["Team lunch or dinner", "Everyone together, with no gift to carry home.", 25, 60, "", 0],
+      ["Handwritten card with a bonus", "Personal words go a long way.", 5, 100, "", 1]
+    ],
+    osmall: [
+      ["Candy cane bundle with a card", "Cheap, cheerful and easy for a big list.", 5, 12, "", 0],
+      ["Hot chocolate jar", "Cocoa, marshmallows and a bow.", 8, 15, "kitchen cozy", 0],
+      ["Mini succulent in a jar", "Cute and desk-sized.", 8, 15, "outdoors", 1],
+      ["Homemade cookies or fudge tin", "Personal and affordable.", 8, 18, "kitchen", 0],
+      ["Tea sampler", "A few bags of something special.", 10, 20, "kitchen cozy", 1],
+      ["Scratch-off lottery ticket in a card", "A little fun for the vendor or courier.", 5, 15, "games", 0],
+      ["Pocket notebook and pen", "Always gets used.", 8, 15, "creative", 0],
+      ["Lip balm and hand cream set", "A small treat for anyone.", 10, 20, "cozy", 1]
+    ],
+    ofood: [
+      ["Fruit and snack basket", "Easy to share in a lobby or break room.", 40, 90, "kitchen", 0],
+      ["Cheese and charcuterie box", "Instant party for the team.", 40, 100, "kitchen", 0],
+      ["Cookie assortment tin", "Always disappears fast.", 25, 50, "kitchen", 0],
+      ["Fresh baked goods from a local bakery", "Supports a neighbour and feels special.", 25, 70, "kitchen", 1],
+      ["Hot cocoa or coffee bar basket", "A cozy station for the office.", 30, 70, "cozy kitchen", 0],
+      ["Pastry platter delivered on the day", "No pickup needed.", 40, 90, "kitchen", 0],
+      ["Mixed nuts and chocolate tray", "Safe for most guests. Check for nut allergies.", 25, 60, "kitchen", 0]
+    ],
+    oexchange: [
+      ["Insulated mug with a treat", "Practical and fun to unwrap.", 20, 30, "cozy", 0],
+      ["Desk game or puzzle", "A short break for the team.", 20, 30, "games", 0],
+      ["Plant in a nice pot", "Fits any desk.", 20, 30, "outdoors", 1],
+      ["Gourmet snack box", "Sweet and savoury in one.", 20, 30, "kitchen", 0],
+      ["Scented candle set", "Neutral and festive.", 20, 30, "cozy", 1],
+      ["Fun socks and chocolate", "Silly, warm and easy to wrap.", 20, 30, "cozy", 0],
+      ["Cozy reading set", "A paperback, tea and a bookmark.", 20, 30, "reading cozy", 1],
+      ["Coffee shop gift card", "Everyone loves one.", 20, 30, "", 0]
+    ],
     little: [
       ["Magnetic building tiles", "Open-ended building that grows with them for years.", 35, 70, "creative science", 0],
       ["Wooden balance board", "Rocks, bridges and slides: burns energy indoors.", 50, 100, "active", 1],
@@ -11513,7 +11583,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const giRange = x => { const lo = Math.round(x[2] * fx()), hi = Math.round(x[3] * fx()); return lo === hi ? `$${lo}` : `$${lo}–${hi}`; };
 
   function renderIdeas() {
-    const cat = GIDEA_CATS.find(c => c[0] === gi.cat) || GIDEA_CATS[0];
+    if (gi.cat !== "saved" && !gCats().some(c => c[0] === gi.cat)) gi.cat = gCats()[0][0];
+    const cat = GIDEA_CATS.find(c => c[0] === gi.cat) || gCats()[0];
     const stores = giStores();
     $("#giStores").innerHTML = stores.map(([n, home]) => `<button type="button" class="gi-store" data-gihome="${home}">${esc(n)}</button>`).join("");
     $("#giCats").innerHTML = GIDEA_CATS.map(c => `<button type="button" class="gi-cat${c[0] === gi.cat ? " on" : ""}" data-gicat="${c[0]}"><span>${c[1]}</span><b>${esc(c[2])}</b><small>${esc(c[3])}</small></button>`).join("") +
