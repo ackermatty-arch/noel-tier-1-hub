@@ -2135,7 +2135,7 @@ input[type=time], input[type=date], input[type=datetime-local] { cursor: pointer
 body .cal-cell.sel{background:#000!important;box-shadow:inset 0 0 0 2px var(--c-gold)!important}
 body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!important}
 
-/* Holiday Review stays hidden until Jan 2 (or until opened) */
+/* Holiday Review stays hidden until Dec 26 (or until opened) */
 .nav-btn[data-view="review"]{display:none}
 body.rev-open .nav-btn[data-view="review"]{display:flex}
 </style>
@@ -9177,17 +9177,17 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   setTimeout(seasonReminders, 3000);
 
   /* ============================================================
-     HOLIDAY REVIEW · hidden until Jan 2, then pops up
+     HOLIDAY REVIEW · hidden until Dec 26, then pops up
      "Remind me later" offers: later today (5 hours) or tomorrow 9:00
      ============================================================ */
   const revState = () => { const st = load("reviewState", {}); return st.s === season ? st : { s: season }; };
-  const revWindow = () => { const n = new Date(); return n >= new Date(season + 1, 0, 2) && n < new Date(season + 1, 10, 1); };
+  const revWindow = () => { const n = new Date(); return n >= new Date(season, 11, 26) && n < new Date(season + 1, 10, 1); };
   const reviewPending = () => revWindow() && !revState().opened;
   function reviewDue() { const st = revState(); return reviewPending() && !(st.later && Date.now() < st.later); }
   function syncReviewNav() { document.body.classList.toggle("rev-open", !!revState().opened); }
   function reviewNotify() {
     if (!window.NoelNative) return;
-    const st = revState(), jan2 = new Date(season + 1, 0, 2, 9, 30).getTime(), t = st.later || jan2;
+    const st = revState(), first = new Date(season, 11, 26, 9, 30).getTime(), t = st.later || first;
     NoelNative.scheduleList(9310, 9316, st.opened ? [] : [{ t, title: "Your Holiday Review is ready", body: "Take a few minutes to look back on this season." }]);
   }
   function maybeReview() {
@@ -9582,7 +9582,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   let shOpen = false;
   function renderStartHere() {
     const el = $("#startHere"); if (!el) return;
-    const nowD = new Date(), wrap = nowD >= new Date(season, 11, 26) && nowD < new Date(season + 1, 11, 1) && !load("memories", []).some(m => m.year === season);
+    const nowD = new Date(), wrap = nowD >= new Date(season, 11, 26) && nowD < new Date(season + 1, 11, 1) && !load("memories", []).some(m => m.year === season) && !reviewPending();
     if (wrap) { el.innerHTML = `<div class="sh-card"><div class="sh-top"><div><h3>Christmas ${season} is wrapped</h3><small>Save it and start fresh. Your people, guests and budget carry over.</small></div></div><button class="sh-item" data-shwrap><span class="sh-box">+</span><span class="t">Save this year and start fresh</span></button></div>`; return; }
     if (load("shHide", false)) { el.innerHTML = ""; return; }
     const co = hubMode === "company", sn = load("seen", {});
