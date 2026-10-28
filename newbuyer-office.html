@@ -2372,8 +2372,8 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
        VIEW 2 — HOLIDAY PLANNER & CHECKLIST
        ============================================================ -->
   <section class="view" id="view-planner" aria-labelledby="plannerTitle">
-    <h2 class="view-title" id="plannerTitle" data-co-title="Event Coordinator">Holiday Planner</h2>
-    <p class="view-intro" data-co-desc="Your party plan, approvals, vendors and budget in one place. Everything saves automatically.">Tick off each task as you go. Your progress saves automatically.</p>
+    <h2 class="view-title" id="plannerTitle" data-co-title="Event Coordinator">Plan</h2>
+    <p class="view-intro" data-co-desc="Your party plan, approvals, vendors and budget in one place. Everything saves automatically.">Travel plans, guests, rooms, seating, cleaning and supplies, all in one place, so the house is ready before the doorbell rings.</p>
 
     <div id="startHere"></div>
     <div id="coDash" class="co-only"></div>
@@ -2388,11 +2388,16 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
       <span class="ab-go">Open ›</span>
     </button>
 
-<button class="advent-banner host-banner" data-goview="host" id="hostBanner">
-      <span class="ab-ico">🏡</span>
-      <span class="ab-text"><b>Hosting &amp; Logistics</b><small>Guest arrivals, rooms, seating &amp; place cards, deep cleaning and supplies</small></span>
-      <span class="ab-go">Open ›</span>
-    </button>
+<div class="fam-only" id="hostWrap">
+    <div class="card host-remind" id="hostRemind"></div>
+    <div class="apps-filters host-tabs" id="hostTabs"></div>
+    <div id="hostBody"></div>
+    <div class="card host-fridge">
+      <span class="hf-ico">🧲</span>
+      <span class="hf-txt"><b>Fridge sheet</b><small>Guests, rooms, seating, cleaning days, supplies and house info, all on one printed page.</small></span>
+      <button type="button" class="btn btn-red" data-print="fridge">🖨️ Print</button>
+    </div>
+    </div>
   </section>
 
   <!-- ✅ TASKS: the checklist, printables and extras that used to sit under Hosting -->
@@ -2554,19 +2559,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
     <div id="ownBody"></div>
   </section>
 
-  <section class="view" id="view-host" aria-labelledby="hostTitle">
-    <button type="button" class="meal-back" data-goview="planner">‹ Planner</button>
-    <h2 class="view-title" id="hostTitle">Hosting</h2>
-    <p class="view-intro">Guests, rooms, seating, cleaning and supplies, all in one place, so the house is ready before the doorbell rings.</p>
-    <div class="card host-remind" id="hostRemind"></div>
-    <div class="apps-filters host-tabs" id="hostTabs"></div>
-    <div id="hostBody"></div>
-    <div class="card host-fridge">
-      <span class="hf-ico">🧲</span>
-      <span class="hf-txt"><b>Fridge sheet</b><small>Guests, rooms, seating, cleaning days, supplies and house info, all on one printed page.</small></span>
-      <button type="button" class="btn btn-red" data-print="fridge">🖨️ Print</button>
-    </div>
-  </section>
+
 
   <section class="view" id="view-org" aria-labelledby="orgTitle">
     <button type="button" class="meal-back" data-goview="planner">‹ Planner</button>
@@ -3083,7 +3076,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
      ============================================================ -->
 <nav class="bottom-nav" aria-label="Main">
   <button class="nav-btn" data-view="budget"><span class="nav-ico">💰</span>Budget</button>
-  <button class="nav-btn" data-view="planner"><span class="nav-ico">📝</span>Planner</button>
+  <button class="nav-btn" data-view="planner"><span class="nav-ico">📝</span>Plan</button>
   <button class="nav-btn" data-view="tasks"><span class="nav-ico">✅</span>Tasks</button>
   <button class="nav-btn" data-view="meals" id="navMeals"><span class="nav-ico">🍽️</span>Menu</button>
   <button class="nav-btn" data-view="gifts"><span class="nav-ico">🎁</span>Gifts</button>
@@ -7550,7 +7543,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $$(".view").forEach(v => { v.classList.toggle("active", v.id === "view-" + name); v.classList.remove("slide-left", "slide-right"); });
     if (slide) $("#view-" + name).classList.add("slide-" + slide);
     if (name === "nye") renderNye();
-    if (name === "host") renderHost();
+    if (name === "planner" && typeof renderHost === "function") renderHost();
     if (name === "org") renderOrg();
     if (name === "office") renderOffice();
     if (name === "budget") renderBudget();
@@ -9549,7 +9542,6 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $(".app-footer").textContent = t ? `${t}${/s$/i.test(t) ? "'" : "'s"} Noël Hub` : "Noël Tier 1 Hub · Private & stored only on this device";   // ✏️ footer
     document.title = t ? `${t} · Noël Tier 1 Hub` : "Noël Tier 1 Hub";
     $("#navMeals").hidden = hubMode === "company";   // 🍽️ the big-dinner planner is for families
-    $("#hostBanner").hidden = hubMode === "company";   // 🏡 hosting is for families too
     $("#orgBanner b").textContent = hubMode === "company" ? "Client & Staff Cards" : "Organizer";
     $("#orgBanner small").textContent = hubMode === "company" ? "Client card list & labels, calendar, thank-yous and package tracking" : "Card list & labels, family calendar, thank-yous, packages, giving and spending";
     $("#giftsTitle").textContent = "Gifts";
@@ -12209,7 +12201,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     ["For guests", ["Extra chairs", "Extra blankets and pillows", "Air mattress pump", "Phone chargers", "Coat hangers", "Kids' activities: colouring, puzzles, games"]]
   ];
   let host = load("hosting", null) || {
-    remind: false, fired: {}, guests: [], clean: {}, supplies: {}, custom: [], tab: "guests",
+    remind: false, fired: {}, guests: [], clean: {}, supplies: {}, custom: [], tab: "away",
     rooms: [["Guest room", "🛏️", 2], ["Kids' room", "🧸", 2], ["Basement", "🛋️", 2], ["Couch", "🛋️", 1], ["Air mattress", "🌬️", 2]].map(([name, icon, beds]) => ({ id: uid(), name, icon, beds, ready: {} })),
     table: { shape: "rect", seats: 10, names: [], kids: false, kseats: 6, knames: [], style: "casual" },
     house: { wifi: "", pass: "", parking: "", rules: "", kids: "" }
@@ -12284,9 +12276,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
 
   // ---------- screens ----------
-  const HOST_TABS = [["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["house", "📶 House info"], ["away", "✈️ Traveling away"]];
+  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["house", "📶 House info"]];
   function renderHost() {
-    const tab = host.tab || "guests";
+    const tab = host.tab || "away";
     $("#hostRemind").innerHTML = `<label class="host-switch"><input type="checkbox" id="hostRemindBox" ${host.remind ? "checked" : ""}><span><b>🔔 Helpful little reminders</b><small>${host.remind ? `On. Noël will nudge you at just the right moments, timed to your dinner on ${hostFmt(hostDinner())}.` : "Turn on for well-timed nudges for cleaning, guests and the little things that are easy to forget."}</small></span></label>`;
     $("#hostTabs").innerHTML = HOST_TABS.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-htab="${k}">${l}</button>`).join("");
     $("#hostBody").innerHTML = ({ guests: hostGuestsHtml, rooms: hostRoomsHtml, table: hostTableHtml, clean: hostCleanHtml, supplies: hostSuppliesHtml, house: hostHouseHtml, away: hostAwayHtml })[tab]();
@@ -12476,7 +12468,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
 
   // ---------- taps & typing ----------
-  $("#view-host").addEventListener("click", e => {
+  $("#hostWrap").addEventListener("click", e => {
     const t = e.target;
     const tb = t.closest("[data-htab]"); if (tb) { host.tab = tb.dataset.htab; saveHost(); renderHost(); return; }
     const card = t.closest("[data-hg]"), room = t.closest("[data-hr]");
@@ -12496,7 +12488,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       const kid = seat.dataset.hseat[0] === "k", i = +seat.dataset.hseat.slice(1), arr = kid ? host.table.knames : host.table.names;
       const box = document.createElement("div"); box.className = "seat-edit";
       box.innerHTML = `<input class="input" list="hostNameList" maxlength="30" placeholder="Seat ${i + 1}: name" value="${esc(arr[i] || "")}"><button type="button" class="btn btn-green">OK</button>`;
-      const old = $("#view-host .seat-edit"); if (old) old.remove();
+      const old = $("#hostWrap .seat-edit"); if (old) old.remove();
       seat.closest(".seat-map").after(box); const inp = box.querySelector("input"); inp.focus();
       const done = () => { arr[i] = inp.value.trim(); saveHost(); renderHost(); };
       box.querySelector("button").onclick = done; inp.onkeydown = ev => { if (ev.key === "Enter") done(); };
@@ -12506,7 +12498,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const dt = t.closest("[data-hdeltrip]"); if (dt) { const id = dt.closest("[data-htrip]").dataset.htrip; host.trips = host.trips.filter(x => x.id !== id); saveHost(); renderHost(); return; }
     const dj = t.closest("[data-hdeljob]"); if (dj) { const id = dj.closest("[data-hjob]").dataset.hjob; host.jobs = host.jobs.filter(j => j.id !== id); delete host.who["j:" + id]; delete host.jobDone[id]; saveHost(); renderHost(); return; }
   });
-  $("#view-host").addEventListener("change", async e => {
+  $("#hostWrap").addEventListener("change", async e => {
     const t = e.target;
     if (t.id === "hostRemindBox") {
       host.remind = t.checked; saveHost(); renderHost(); getAudio();
@@ -12527,7 +12519,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (t.dataset.hsup) { host.supplies[t.dataset.hsup] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hhouse) { host.house[t.dataset.hhouse] = t.value.trim(); saveHost(); return; }
   });
-  $("#view-host").addEventListener("submit", e => {
+  $("#hostWrap").addEventListener("submit", e => {
     e.preventDefault(); const f = e.target;
     if (f.dataset.htripform) { const n = f.a.value.trim(); if (!n) return; host.trips.push({ id: uid(), k: f.dataset.htripform, a: n, b: f.b.value.trim() }); saveHost(); renderHost(); return; }
     if (f.id === "hostGuestForm") { const n = f.gname.value.trim(); if (!n) return; host.guests.push({ id: uid(), name: n, people: 1, travel: "drive", room: "", pickup: false }); }

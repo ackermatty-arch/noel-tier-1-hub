@@ -30,7 +30,7 @@
     ["For guests", ["Extra chairs", "Extra blankets and pillows", "Air mattress pump", "Phone chargers", "Coat hangers", "Kids' activities: colouring, puzzles, games"]]
   ];
   let host = load("hosting", null) || {
-    remind: false, fired: {}, guests: [], clean: {}, supplies: {}, custom: [], tab: "guests",
+    remind: false, fired: {}, guests: [], clean: {}, supplies: {}, custom: [], tab: "away",
     rooms: [["Guest room", "🛏️", 2], ["Kids' room", "🧸", 2], ["Basement", "🛋️", 2], ["Couch", "🛋️", 1], ["Air mattress", "🌬️", 2]].map(([name, icon, beds]) => ({ id: uid(), name, icon, beds, ready: {} })),
     table: { shape: "rect", seats: 10, names: [], kids: false, kseats: 6, knames: [], style: "casual" },
     house: { wifi: "", pass: "", parking: "", rules: "", kids: "" }
@@ -105,9 +105,9 @@
   }
 
   // ---------- screens ----------
-  const HOST_TABS = [["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["house", "📶 House info"], ["away", "✈️ Traveling away"]];
+  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["house", "📶 House info"]];
   function renderHost() {
-    const tab = host.tab || "guests";
+    const tab = host.tab || "away";
     $("#hostRemind").innerHTML = `<label class="host-switch"><input type="checkbox" id="hostRemindBox" ${host.remind ? "checked" : ""}><span><b>🔔 Helpful little reminders</b><small>${host.remind ? `On. Noël will nudge you at just the right moments, timed to your dinner on ${hostFmt(hostDinner())}.` : "Turn on for well-timed nudges for cleaning, guests and the little things that are easy to forget."}</small></span></label>`;
     $("#hostTabs").innerHTML = HOST_TABS.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-htab="${k}">${l}</button>`).join("");
     $("#hostBody").innerHTML = ({ guests: hostGuestsHtml, rooms: hostRoomsHtml, table: hostTableHtml, clean: hostCleanHtml, supplies: hostSuppliesHtml, house: hostHouseHtml, away: hostAwayHtml })[tab]();
@@ -297,7 +297,7 @@
   }
 
   // ---------- taps & typing ----------
-  $("#view-host").addEventListener("click", e => {
+  $("#hostWrap").addEventListener("click", e => {
     const t = e.target;
     const tb = t.closest("[data-htab]"); if (tb) { host.tab = tb.dataset.htab; saveHost(); renderHost(); return; }
     const card = t.closest("[data-hg]"), room = t.closest("[data-hr]");
@@ -317,7 +317,7 @@
       const kid = seat.dataset.hseat[0] === "k", i = +seat.dataset.hseat.slice(1), arr = kid ? host.table.knames : host.table.names;
       const box = document.createElement("div"); box.className = "seat-edit";
       box.innerHTML = `<input class="input" list="hostNameList" maxlength="30" placeholder="Seat ${i + 1}: name" value="${esc(arr[i] || "")}"><button type="button" class="btn btn-green">OK</button>`;
-      const old = $("#view-host .seat-edit"); if (old) old.remove();
+      const old = $("#hostWrap .seat-edit"); if (old) old.remove();
       seat.closest(".seat-map").after(box); const inp = box.querySelector("input"); inp.focus();
       const done = () => { arr[i] = inp.value.trim(); saveHost(); renderHost(); };
       box.querySelector("button").onclick = done; inp.onkeydown = ev => { if (ev.key === "Enter") done(); };
@@ -327,7 +327,7 @@
     const dt = t.closest("[data-hdeltrip]"); if (dt) { const id = dt.closest("[data-htrip]").dataset.htrip; host.trips = host.trips.filter(x => x.id !== id); saveHost(); renderHost(); return; }
     const dj = t.closest("[data-hdeljob]"); if (dj) { const id = dj.closest("[data-hjob]").dataset.hjob; host.jobs = host.jobs.filter(j => j.id !== id); delete host.who["j:" + id]; delete host.jobDone[id]; saveHost(); renderHost(); return; }
   });
-  $("#view-host").addEventListener("change", async e => {
+  $("#hostWrap").addEventListener("change", async e => {
     const t = e.target;
     if (t.id === "hostRemindBox") {
       host.remind = t.checked; saveHost(); renderHost(); getAudio();
@@ -348,7 +348,7 @@
     if (t.dataset.hsup) { host.supplies[t.dataset.hsup] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hhouse) { host.house[t.dataset.hhouse] = t.value.trim(); saveHost(); return; }
   });
-  $("#view-host").addEventListener("submit", e => {
+  $("#hostWrap").addEventListener("submit", e => {
     e.preventDefault(); const f = e.target;
     if (f.dataset.htripform) { const n = f.a.value.trim(); if (!n) return; host.trips.push({ id: uid(), k: f.dataset.htripform, a: n, b: f.b.value.trim() }); saveHost(); renderHost(); return; }
     if (f.id === "hostGuestForm") { const n = f.gname.value.trim(); if (!n) return; host.guests.push({ id: uid(), name: n, people: 1, travel: "drive", room: "", pickup: false }); }
