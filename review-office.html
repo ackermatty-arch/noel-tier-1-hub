@@ -2038,6 +2038,10 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .pl-n { font: 600 18px Cinzel, serif; } .pl-opt i { display: block; height: 8px; background: #efe7d6; margin-top: 4px; } .pl-opt u { display: block; height: 100%; background: #151515; text-decoration: none; }
 .pl-opt.win .pl-top b::after { content: "  ✦ leading"; color: #B08D4E; font-size: 12px; font-weight: 600; }
 .sv-sum { margin: 10px 0; } .sv-sum b { font: 600 26px Cinzel, serif; } .sv-sum small { margin-left: 8px; color: #666; }
+.we-order { margin: 10px 0 8px 20px; font-size: 16px; } .we-order li { margin: 4px 0; }
+.tb-idea { border-top: 1px solid #ece4d2; padding: 10px 0; } .tb-idea.on { background: #faf6ec; }
+.tb-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; } .tb-top span { color: #666; font-size: 12.5px; white-space: nowrap; }
+.tb-idea p { margin: 4px 0; font-size: 14px; } .tb-idea small { color: #666; font-size: 12.5px; }
 </style>
 </head>
 <body>
@@ -13209,7 +13213,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
      - Handover: Year-End Report, a password-locked handover file for the
        next coordinator, and "remove the office plans from this phone"
      ============================================================ */
-  const OFF_ACTS = [["potluck", "🥘 Potluck"], ["catered", "🍽️ Catered meal"], ["gifts", "🎁 Gift exchange"], ["awards", "🏆 Silly Office Awards"], ["games", "🎲 Games & trivia"], ["sweater", "🧶 Ugly sweater contest"], ["charity", "⭐ Charity drive"], ["booth", "📸 Photo booth"], ["music", "🎶 Music / DJ"], ["outing", "⛸️ Team outing"]];
+  const OFF_ACTS = [["potluck", "🥘 Potluck"], ["catered", "🍽️ Catered meal"], ["gifts", "🎁 Gift exchange"], ["awards", "🏆 Silly Office Awards"], ["games", "🎲 Games & trivia"], ["sweater", "🧶 Ugly sweater contest"], ["charity", "⭐ Charity drive"], ["booth", "📸 Photo booth"], ["elephant", "🎁 White elephant"], ["santa", "🎅 Santa visit"], ["teamb", "🧩 Team building"], ["music", "🎶 Music / DJ"], ["outing", "⛸️ Team outing"]];
   // 👥 who's invited shapes the whole party
   const OFF_WHO = [["staff", "💼", "Staff only", "Just the team. Great for a lunch, an after-work party or a team outing."],
     ["partners", "🥂", "Staff + partners", "Spouses and partners welcome. Usually an evening party, a little dressier."],
@@ -13230,7 +13234,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const offTime = hm => hm ? mclock(new Date(`2026-01-01T${hm}`)) : "";
   const offTotal = () => off.costs.reduce((a, c) => a + (+c.cost || 0), 0);
   const offActList = () => OFF_ACTS.concat(off.ev.who === "family" ? OFF_KID_ACTS : []);
-  const offActs = () => offActList().filter(([k]) => off.acts[k]).map(([k, l]) => k === "gifts" && off.ev.giftLimit ? `${l} (${money(+off.ev.giftLimit)} limit)` : l);
+  const offActs = () => offActList().filter(([k]) => off.acts[k]).map(([k, l]) => k === "gifts" && off.ev.giftLimit ? `${l} (${money(+off.ev.giftLimit)} limit)` : k === "teamb" && (off.tbPick || []).length ? `${l}: ${off.tbPick.join(", ")}` : l);
   const offYear = () => (off.ev.date ? +off.ev.date.slice(0, 4) : new Date().getFullYear());
 
   // ---------- 🔗 vendor links + order-by dates ----------
@@ -13271,9 +13275,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function renderOffice() {
     renderOffMenu();
     const tab = off.tab || "event";
-    $("#offTabs").innerHTML = [["event", "📋 Event"], ["guests", "👥 Guests"], ["polls", "🗳️ Votes"], ["food", "🍽️ Food"], ["approval", "📨 Approval"], ["plan", "📄 Plan"], ["potluck", "🥘 Potluck"], ["santa", "🎅 Secret Santa"], ["awards", "🏆 Awards"], ["auction", "🔨 Auction"], ["charity", "⭐ Charity"], ["handover", "📦 Handover"]].map(([k, l]) =>
+    $("#offTabs").innerHTML = [["event", "📋 Event"], ["guests", "👥 Guests"], ["polls", "🗳️ Votes"], ["food", "🍽️ Food"], ["acts", "🎭 Activities"], ["approval", "📨 Approval"], ["plan", "📄 Plan"], ["potluck", "🥘 Potluck"], ["santa", "🎅 Secret Santa"], ["awards", "🏆 Awards"], ["auction", "🔨 Auction"], ["charity", "⭐ Charity"], ["handover", "📦 Handover"]].map(([k, l]) =>
       `<button type="button" class="chip${k === tab ? " on" : ""}" data-oftab="${k}">${l}${k === "approval" ? ` <span class="ap-dot ${off.appr.status}"></span>` : ""}</button>`).join("");
-    $("#offBody").innerHTML = ({ event: offEventHtml, guests: offGuestsHtml, polls: offPollsHtml, food: offFoodHtml, approval: offApprovalHtml, plan: offPlanHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml })[tab]();
+    $("#offBody").innerHTML = ({ event: offEventHtml, guests: offGuestsHtml, polls: offPollsHtml, food: offFoodHtml, acts: offActsHtml, approval: offApprovalHtml, plan: offPlanHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml })[tab]();
   }
   const fld = (k, label, type, ph, extra) => `<label class="off-f${extra === "wide" ? " wide" : ""}"><span class="meal-lab">${label}</span>${type === "area" ? `<textarea class="input" rows="2" data-ev="${k}" maxlength="300" placeholder="${ph || ""}">${esc(off.ev[k] || "")}</textarea>` : `<input class="input" type="${type || "text"}" data-ev="${k}" value="${esc(off.ev[k] ?? "")}" placeholder="${ph || ""}" ${type === "number" ? 'inputmode="decimal" min="0"' : 'maxlength="80"'}>`}</label>`;
   function offEventHtml() {
@@ -13504,7 +13508,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (off.acts.booth) add(S + 15, "Photo booth opens");
     let t = S + 20;
     if (F) { add(t, "Food is served"); t += 40; }
-    [["games", "Games and icebreakers"], ["sweater", "Ugly sweater contest and voting"], ["gifts", "Gift exchange"], ["awards", "Silly Office Awards"], ["charity", "Charity drive update and thank-you"]].forEach(([k, l]) => { if (off.acts[k] && t < E - 30) { add(t, l); t += 30; } });
+    [["games", "Games and icebreakers"], ["teamb", "Team-building activity"], ["sweater", "Ugly sweater contest and voting"], ["gifts", "Gift exchange"], ["elephant", "White elephant gift swap"], ["awards", "Silly Office Awards"], ["charity", "Charity drive update and thank-you"]].forEach(([k, l]) => { if (off.acts[k] && t < E - 30) { add(t, l); t += 30; } });
+    if (off.acts.santa) { const sv = off.santa || {}, label = "Santa visit and photos" + (sv.who ? ` (${sv.who})` : ""); if (sv.time) { const [a, b] = sv.time.split(":").map(Number); add(a * 60 + b, label); } else if (t < E - 30) { add(t, label); t += 30; } }
     add(E - 20, "Thank everyone, group photo and leftovers");
     add(E, "Party ends");
     add(E + 30, "Clean up and return borrowed items");
@@ -13571,6 +13576,69 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (e.target.closest("[data-plsave]")) { offSavePlan(); saveOff(); renderOffice(); toast("📁 Saved to My saved plans"); return; }
     const d = e.target.closest("[data-plsvdel]"); if (d) { if (confirm("Delete this saved plan?")) { off.saved = (off.saved || []).filter(x => x.id !== d.closest("[data-plsv]").dataset.plsv); saveOff(); renderOffice(); } }
   });
+
+  // ---------- 🎭 activities: white elephant · photo booth · Santa · team building ----------
+  const TB_IDEAS = [
+    ["Two truths and a holiday", 15, "Free", "Everyone shares two true holiday facts and one made-up one. The team guesses.", "Pen and paper"],
+    ["Gift-wrap relay", 20, "About $10", "Teams race to wrap a box. Judge on speed and style.", "Wrapping paper, tape, boxes"],
+    ["Holiday trivia face-off", 25, "Free", "Two teams, a quizmaster and a buzzer. Use the printable trivia in Games.", "Printed trivia, a bell"],
+    ["Cookie decorating contest", 30, "About $40", "Plain cookies, icing and sprinkles. Vote for the best design.", "Cookies, icing, sprinkles, plates"],
+    ["Office holiday bingo", 20, "Free", "Spot the classic party moments. First to a line wins a small prize. Printable in Games.", "Printed cards, pens"],
+    ["Festive hat or sweater contest", 15, "Free", "Quick runway walk, then everyone votes. Add silly awards.", "Ballot slips"],
+    ["Paper snowball toss", 15, "Free", "Crumple paper into snowballs and toss them into a bucket. Teams take turns.", "Paper, a bucket"],
+    ["Guess whose holiday photo", 20, "Free", "Ask staff for a childhood holiday photo ahead of time. Guess who is who.", "Printed photos"],
+    ["Charity wrap drive", 30, "Donated gifts", "Wrap gifts for a local charity together. Team building and giving back.", "Paper, tape, tags"],
+    ["Holiday charades", 20, "Free", "Teams act out holiday words and movies. Prepare the slips in advance.", "Slips of paper, a hat"],
+    ["Gingerbread house challenge", 40, "About $60", "Small teams build with candy kits. Judge on creativity.", "Gingerbread kits, icing"],
+    ["Gratitude wall", 15, "About $5", "Everyone writes a thank-you to a coworker on a sticky note and posts it on a wall.", "Sticky notes, pens"]
+  ];
+  const WE_RULES = ["Everyone brings one wrapped gift, no names on it. Keep it under the limit.", "Draw numbers. Number 1 goes first and opens a gift from the pile.", "Next players choose: open a new gift, or steal an opened gift from someone.", "If your gift is stolen, you may steal another or open a new one. You cannot steal the same gift straight back.", "A gift can be stolen up to 2 times. After that it is locked with its owner.", "The last player can swap with any gift that is not locked. Then the game is over."];
+  const PB_CHECK = ["A backdrop (fabric, tinsel curtain or wrapping paper)", "A box of props: hats, glasses, signs, scarves", "Good light on faces, not behind the backdrop", "A phone stand or tripod and a timer", "A small table or basket for the props", "A sign with the event name and a hashtag", "Someone in charge of the booth", "A shared folder or album so everyone can get the pictures"];
+  const PB_SIGNS = ["Merry and Bright", "Naughty List", "Nice List", "Santa's Helpers", "Team Cheer", "Ho Ho Ho", "Cheers to the Year", "Best Team Ever", "Elf on a Shelf", "Dashing Through the Snow", "Sweater Weather", "Peace, Love and Cookies"];
+  const offWE = () => (off.wep = off.wep || { players: [], order: null });
+  const offPB = () => (off.pb = off.pb || {});
+  const offSanta = () => (off.santa = off.santa || { time: "", who: "" });
+  const offTB = () => (off.tbPick = off.tbPick || []);
+  function offActsHtml() {
+    const W = offWE(), PB = offPB(), SN = offSanta(), TB = offTB();
+    return `<div class="card pt-card"><h3>🎭 Activities</h3><p class="host-rem">Pick what to add. Everything you add shows up in your plan and the run of show.</p>
+        <div class="apps-filters">${[["elephant", "🎁 White elephant"], ["booth", "📸 Photo booth"], ["santa", "🎅 Santa visit"], ["teamb", "🧩 Team building"]].map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div></div>
+      <details class="card pt-card ss-swap" data-dk="we" ${(off.open || {}).we ? "open" : ""}><summary>🎁 White elephant game</summary>
+        <p class="host-rem">Gift limit: <b>${+off.ev.giftLimit ? money(+off.ev.giftLimit) : "set it on the Event tab"}</b></p><ol>${WE_RULES.map(r => `<li>${r}</li>`).join("")}</ol>
+        <h4 class="ms-h">Draw the order</h4>
+        <form class="org-ev-form" id="weForm" autocomplete="off"><div class="santa-kid-row"><input class="input" name="n" maxlength="30" placeholder="Player's name"><button class="btn btn-green" type="submit">Add</button></div></form>
+        ${W.players.length ? `<div class="apps-filters">${W.players.map((n, i) => `<span class="chip on">${esc(n)} <button type="button" class="chip-x" data-wedel="${i}" aria-label="Remove ${esc(n)}">✕</button></span>`).join("")}</div>` : ""}
+        ${W.players.length > 1 ? `<button type="button" class="btn btn-gold btn-block" data-wedraw style="margin-top:8px">🎲 Draw the numbers</button>` : ""}
+        ${W.order ? `<ol class="we-order">${W.order.map(n => `<li>${esc(n)}</li>`).join("")}</ol><button type="button" class="btn btn-ghost btn-block" data-weclear>Start over</button>` : ""}
+        <button type="button" class="btn btn-red btn-block" data-print="wecard" style="margin-top:8px">🖨️ Print the rules card</button></details>
+      <details class="card pt-card ss-swap" data-dk="pb" ${(off.open || {}).pb ? "open" : ""}><summary>📸 Photo booth set-up</summary>
+        <ul class="host-list">${PB_CHECK.map((t, i) => `<li><label class="${PB[i] ? "on" : ""}"><input type="checkbox" data-pbtick="${i}" ${PB[i] ? "checked" : ""}><span>${t}</span></label></li>`).join("")}</ul>
+        <p class="host-rem">Tip: put it near the entrance but away from the food, so people can queue without blocking anyone.</p>
+        <button type="button" class="btn btn-red btn-block" data-print="pbsigns">🖨️ Print the prop signs</button>
+        ${offNear("Rent or buy for it", [["📸 Photo booth rentals", "photo booth rental"], ["🎈 Party supply stores", "party supply store"], ["🪟 Backdrop and props", "photo backdrop party supplies"]])}</details>
+      <details class="card pt-card ss-swap" data-dk="sn" ${(off.open || {}).sn ? "open" : ""}><summary>🎅 Santa visit and photos</summary>
+        <ol><li>Decide who plays Santa: a hired Santa, a team member or a volunteer.</li><li>Choose a 30-minute window and a photo spot with a chair and a simple backdrop.</li><li>Have a small gift or candy canes ready for each child or guest.</li><li>If children are there, get a parent's OK before photos are shared.</li><li>Use the photo booth set-up, or ask a coworker to take photos on their phone.</li></ol>
+        <form class="org-ev-form" id="santaForm" autocomplete="off"><div class="org-addr-row"><label class="off-ob"><span>Santa arrives</span><input class="input" name="time" type="time" value="${esc(SN.time)}"></label><input class="input" name="who" maxlength="40" placeholder="Who is Santa?" value="${esc(SN.who)}"></div><button class="btn btn-green btn-block" type="submit">Save</button></form>
+        ${offNear("Find a Santa", [["🎅 Santa for hire", "santa claus for hire"], ["📸 Event photographers", "event photographer"]])}</details>
+      <div class="card pt-card"><h3>🧩 Team-building ideas</h3><p class="host-rem">For 5 to 20 people. Tap Add to put one in your plan.</p>
+        ${TB_IDEAS.map(([n, m, c, how, sup]) => `<div class="tb-idea${TB.includes(n) ? " on" : ""}"><div class="tb-top"><b>${n}</b><span>${m} min · ${c}</span></div><p>${how}</p><small>You need: ${sup}</small><div class="of-acts"><button type="button" class="of-lnk${TB.includes(n) ? " of-done" : ""}" data-tbpick="${esc(n)}">${TB.includes(n) ? "✓ In my plan" : "Add to my plan"}</button></div></div>`).join("")}</div>`;
+  }
+  const offWEdoc = () => ({ title: "White elephant rules", css: OFF_PLAN_CSS + ` .pl ol{font-size:13pt;line-height:1.6} .pl li{margin:8px 0}`, html: `<div class="pl"><h1>White Elephant</h1><p class="pl-s">${esc(off.ev.name || "Holiday Party")}${+off.ev.giftLimit ? " · gift limit " + money(+off.ev.giftLimit) : ""}</p><ol>${WE_RULES.map(r => `<li>${r}</li>`).join("")}</ol></div>`, margin: 0.75, file: "White-Elephant-Rules" });
+  const offPBdoc = () => ({ title: "Photo booth signs", css: OFF_PLAN_CSS + ` .pb{display:flex;flex-wrap:wrap;gap:12px} .pb div{width:46%;border:2px solid #B8935A;padding:26px 8px;text-align:center;font:600 20pt Georgia,serif;color:#1E3A2F}`, html: `<div class="pl"><h1>Photo Booth Signs</h1><p class="pl-s">Cut out and glue to sticks</p><div class="pb">${PB_SIGNS.map(t => `<div>${t}</div>`).join("")}</div></div>`, margin: 0.5, file: "Photo-Booth-Signs" });
+  $("#view-office").addEventListener("toggle", e => { const d = e.target.closest && e.target.closest("[data-dk]"); if (d) { off.open = off.open || {}; off.open[d.dataset.dk] = d.open; saveOff(); } }, true);
+  $("#view-office").addEventListener("click", e => {
+    const t = e.target, again = () => { saveOff(); renderOffice(); renderCoDash(); };
+    const tb = t.closest("[data-tbpick]"); if (tb) { const n = tb.dataset.tbpick, L = offTB(); off.tbPick = L.includes(n) ? L.filter(x => x !== n) : L.concat(n); off.acts.teamb = off.tbPick.length ? 1 : 0; again(); return; }
+    const wd = t.closest("[data-wedel]"); if (wd) { const W = offWE(); W.players.splice(+wd.dataset.wedel, 1); W.order = null; again(); return; }
+    if (t.closest("[data-wedraw]")) { const W = offWE(), a = W.players.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } W.order = a; off.acts.elephant = 1; again(); return; }
+    if (t.closest("[data-weclear]")) { offWE().order = null; again(); return; }
+    const pt = t.closest("[data-pbtick]"); if (pt) { offPB()[pt.dataset.pbtick] = pt.checked; saveOff(); return; }
+  });
+  $("#view-office").addEventListener("submit", e => {
+    const f = e.target;
+    if (f.id === "weForm") { e.preventDefault(); e.stopImmediatePropagation(); const n = f.n.value.trim(); if (n) { const W = offWE(); W.players.push(n); W.order = null; saveOff(); renderOffice(); } return; }
+    if (f.id === "santaForm") { e.preventDefault(); e.stopImmediatePropagation(); off.santa = { time: f.time.value, who: f.who.value.trim() }; off.acts.santa = 1; saveOff(); renderOffice(); renderCoDash(); toast("🎅 Santa visit saved"); return; }
+  }, true);
 
   // ---------- 📦 handover ----------
   function offHandoverHtml() {
@@ -14117,6 +14185,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     else if (key === "bidsheets") d = bidSheetsDoc();
     else if (key === "aucwinners") d = aucWinnersDoc();
     else if (key === "offplan") d = offPlanDoc();
+    else if (key === "wecard") d = offWEdoc();
+    else if (key === "pbsigns") d = offPBdoc();
     else if (key.startsWith("offsaved:")) d = offSavedDoc(key.slice(9));
     else if (key === "labels" || key === "return") d = labelDoc(key);
     else if (key === "calendar") d = calendarDoc();
