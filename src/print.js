@@ -202,7 +202,7 @@
     const meal = key.startsWith("meal:") && mealById(key.slice(5)), inTray = tray.includes(key), N = NoelNative.isNative();
     $("#printAskTitle").textContent = d.title;
     $("#printAskSub").textContent = `About ${pagesTxt(estPages(d))}${d.note ? " · " + d.note : ""}`;
-    $("#printAskBtns").innerHTML = `<button type="button" class="btn btn-red btn-block" data-pa="now">🖨️ Print now</button>
+    $("#printAskBtns").innerHTML = `<button type="button" class="btn btn-ghost btn-block" data-pa="view">Look at it first</button><button type="button" class="btn btn-red btn-block" data-pa="now">🖨️ Print now</button>
       ${N ? `<button type="button" class="btn btn-ghost btn-block" data-pa="share">📤 Send or save as a PDF</button>` : ""}
       ${meal && !meal.addon ? `<button type="button" class="btn btn-ghost btn-block" data-pa="shop">🛒 Just the shopping list</button>` : ""}
       <button type="button" class="btn btn-green btn-block" data-pa="tray" ${inTray ? "disabled" : ""}>${inTray ? "✓ Already in your Print Tray" : "＋ Add to Print Tray"}</button>`;
@@ -210,6 +210,15 @@
     $("#printAsk").classList.add("show");
   }
   const closeAsk = () => $("#printAsk").classList.remove("show");
+  // 👁 look at the page first, before printing or saving
+  function printPreview(d) {
+    const old = document.getElementById("printView"); if (old) old.remove();
+    const el = document.createElement("div"); el.id = "printView"; el.className = "pv-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+    el.innerHTML = `<div class="pv-bar"><b>${esc(d.title)}</b><button type="button" class="btn btn-ghost btn-sm" data-pvclose>Back</button></div><iframe class="pv-frame" title="Preview"></iframe>`;
+    document.body.appendChild(el);
+    el.querySelector("iframe").srcdoc = fullHtml(d);
+    el.addEventListener("click", e => { if (e.target.closest("[data-pvclose]")) el.remove(); });
+  }
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-print]"); if (b) { e.preventDefault(); printAsk(b.dataset.print); }
   });
@@ -218,6 +227,7 @@
     const b = e.target.closest("[data-pa]"); if (!b || !printKey) return;
     const act = b.dataset.pa;
     if (act === "tray") { trayAdd(printKey); closeAsk(); return; }
+    if (act === "view") { const dv = printDoc(printKey); if (dv.error) { toast(dv.error); return; } printPreview(dv); return; }
     if (act === "shop") { printKey = "shop:" + printKey.slice(5); printAsk(printKey); return; }
     const d = printDoc(printKey); if (d.error) { toast(d.error); return; }
     closeAsk(); await runPrint([d], act === "share" ? "share" : "print", d.file || "Noel-Printable");

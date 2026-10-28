@@ -2167,6 +2167,11 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 .pr-cost { margin: 10px 0 0; font-size: 15px; letter-spacing: .04em; }
 .pr-cost b { font-weight: 700; }
 .pr-grand { border-top: 1px solid #D9BF86; padding-top: 10px; }
+
+.pv-overlay { position: fixed; inset: 0; z-index: 100000; background: #fff; display: flex; flex-direction: column; }
+.pv-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; background: #121212; color: #fff; border-bottom: 1px solid #C9A45C; }
+.pv-bar b { font: 600 14px Cinzel, serif; letter-spacing: .06em; }
+.pv-frame { flex: 1; width: 100%; border: 0; background: #fff; }
 </style>
 </head>
 <body>
@@ -2267,7 +2272,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
         <div class="print-info">
           <h3>Holiday Self-Care</h3>
           <p class="sc-desc">Five gentle reminders for a calmer, merrier season.</p>
-          <button type="button" class="btn btn-red btn-sm" data-print="selfcare">🖨️ Print</button>
+          <button type="button" class="btn btn-red btn-sm" data-print="selfcare">⬇ Download PDF</button>
         </div>
       </article>
 
@@ -2276,7 +2281,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
         <div class="print-info">
           <h3 class="sv-title">Advanced Family &amp; Social Survival</h3>
           <p class="sv-desc">Six tongue-in-cheek tips for surviving the holidays.</p>
-          <button type="button" class="btn btn-red btn-sm" data-print="survival">🖨️ Print</button>
+          <button type="button" class="btn btn-red btn-sm" data-print="survival">⬇ Download PDF</button>
         </div>
       </article>
 
@@ -14933,7 +14938,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const meal = key.startsWith("meal:") && mealById(key.slice(5)), inTray = tray.includes(key), N = NoelNative.isNative();
     $("#printAskTitle").textContent = d.title;
     $("#printAskSub").textContent = `About ${pagesTxt(estPages(d))}${d.note ? " · " + d.note : ""}`;
-    $("#printAskBtns").innerHTML = `<button type="button" class="btn btn-red btn-block" data-pa="now">🖨️ Print now</button>
+    $("#printAskBtns").innerHTML = `<button type="button" class="btn btn-ghost btn-block" data-pa="view">Look at it first</button><button type="button" class="btn btn-red btn-block" data-pa="now">🖨️ Print now</button>
       ${N ? `<button type="button" class="btn btn-ghost btn-block" data-pa="share">📤 Send or save as a PDF</button>` : ""}
       ${meal && !meal.addon ? `<button type="button" class="btn btn-ghost btn-block" data-pa="shop">🛒 Just the shopping list</button>` : ""}
       <button type="button" class="btn btn-green btn-block" data-pa="tray" ${inTray ? "disabled" : ""}>${inTray ? "✓ Already in your Print Tray" : "＋ Add to Print Tray"}</button>`;
@@ -14941,6 +14946,15 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#printAsk").classList.add("show");
   }
   const closeAsk = () => $("#printAsk").classList.remove("show");
+  // 👁 look at the page first, before printing or saving
+  function printPreview(d) {
+    const old = document.getElementById("printView"); if (old) old.remove();
+    const el = document.createElement("div"); el.id = "printView"; el.className = "pv-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+    el.innerHTML = `<div class="pv-bar"><b>${esc(d.title)}</b><button type="button" class="btn btn-ghost btn-sm" data-pvclose>Back</button></div><iframe class="pv-frame" title="Preview"></iframe>`;
+    document.body.appendChild(el);
+    el.querySelector("iframe").srcdoc = fullHtml(d);
+    el.addEventListener("click", e => { if (e.target.closest("[data-pvclose]")) el.remove(); });
+  }
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-print]"); if (b) { e.preventDefault(); printAsk(b.dataset.print); }
   });
@@ -14949,6 +14963,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const b = e.target.closest("[data-pa]"); if (!b || !printKey) return;
     const act = b.dataset.pa;
     if (act === "tray") { trayAdd(printKey); closeAsk(); return; }
+    if (act === "view") { const dv = printDoc(printKey); if (dv.error) { toast(dv.error); return; } printPreview(dv); return; }
     if (act === "shop") { printKey = "shop:" + printKey.slice(5); printAsk(printKey); return; }
     const d = printDoc(printKey); if (d.error) { toast(d.error); return; }
     closeAsk(); await runPrint([d], act === "share" ? "share" : "print", d.file || "Noel-Printable");
