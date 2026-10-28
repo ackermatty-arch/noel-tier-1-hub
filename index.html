@@ -1936,8 +1936,8 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .run-now { margin: 0 0 22px; }
 .run-now[hidden] { display: none; }
 .run-h { font-family: var(--font-display); letter-spacing: .3em; text-transform: uppercase; font-size: 12.5px; color: #fff; background: #151515; padding: 9px 12px; margin: 0 0 14px; }
-#view-alarms .duty.running { box-shadow: 0 0 0 2px #151515, 0 0 0 4px #C9A24A, 0 0 20px rgba(201,162,74,.6); }
-#view-alarms .duty.running .duty-status { color: #8a6a1f; font-weight: 800; }
+#view-org .duty.running { box-shadow: 0 0 0 2px #151515, 0 0 0 4px #C9A24A, 0 0 20px rgba(201,162,74,.6); }
+#view-org .duty.running .duty-status { color: #8a6a1f; font-weight: 800; }
 .tm-box { margin: 0 0 12px; overflow: hidden; }
 .tm-box summary { list-style: none; cursor: pointer; padding: 14px 16px; font-family: var(--font-display); letter-spacing: .12em; text-transform: uppercase; font-size: 15px; color: #111; display: flex; justify-content: space-between; }
 .tm-box summary::-webkit-details-marker { display: none; }
@@ -2561,6 +2561,103 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
     <p class="view-intro">Everything coming up, and the orders on their way.</p>
     <div class="seg sub-tabs" id="orgTabs" role="group" aria-label="Calendar or packages"></div>
     <div id="orgTool"></div>
+
+    <div class="section-label" id="timersBlock">Timers</div>
+    <p class="view-intro">Set your own timers. Your alarm sound plays when time's up.</p>
+    <div class="run-now" id="runNow" hidden>
+      <h3 class="run-h">Running now</h3>
+      <div class="duty-grid" id="runGrid"></div>
+    </div>
+
+    <!-- 🔔 WEEKLY CHECK-IN REMINDERS (Nov 1 → one week before New Year's) -->
+    <div class="card checkin-card" id="checkinCard">
+      <h3>🔔 Weekly check-in reminders</h3>
+      <p>A gentle "Time to check in!" once a week from <b>November 1</b> until <b>one week before New Year's</b>, with your alarm sound.</p>
+      <label class="wish-lab">Remind me at
+        <select class="input" id="checkinHour">
+          <option value="9">9:00 in the morning</option>
+          <option value="12">12:00 noon</option>
+          <option value="18">6:00 in the evening</option>
+          <option value="19">7:00 in the evening</option>
+        </select></label>
+      <p class="checkin-step" id="checkinStep"><b>One-time setup:</b> add the reminders to your phone's calendar so they pop up even when Noël is closed.</p>
+      <div class="send-btns">
+        <a class="btn btn-green" id="checkinGoogle" target="_blank" rel="noopener">📅 Google Calendar</a>
+        <button class="btn btn-ghost" id="checkinIcs" type="button">📅 Apple / other</button>
+      </div>
+      <p class="checkin-next" id="checkinNext"></p>
+    </div>
+
+    <!-- ============================================================
+         🦃 TURKEY & HAM CALCULATOR (guide times from USDA charts)
+         ============================================================ -->
+    <details class="card calc fam-only" id="calcCard">
+      <summary>
+        <span class="calc-ico">🦃</span>
+        <span><b>Holiday Roast Calculator</b><small>Roast beef, turkey or ham: thaw, cook and rest times, with every timer in one tap</small></span>
+        <span class="chev">▾</span>
+      </summary>
+      <div class="calc-body">
+        <p class="calc-hint">Tap every dish you are cooking. Each one gets its own weight and its own timers.</p>
+        <div class="seg seg-meat" id="meatPick" role="group" aria-label="What are you cooking?">
+          <button type="button" data-meat="roast" aria-pressed="false">Roast beef</button>
+          <button type="button" data-meat="turkey" aria-pressed="true">Turkey</button>
+          <button type="button" data-meat="stuffed" aria-pressed="false">Stuffed turkey</button>
+          <button type="button" data-meat="ham" aria-pressed="false">Cooked ham</button>
+        </div>
+        <div class="calc-row">
+          <div class="calc-weights" id="calcMeals"></div>
+          <div class="seg seg-unit" id="unitPick" role="group" aria-label="Weight unit">
+            <button type="button" data-unit="lb" aria-pressed="true">lb</button>
+            <button type="button" data-unit="kg" aria-pressed="false">kg</button>
+          </div>
+        </div>
+        <label class="calc-field"><span>Dinner is served at</span>
+          <input class="input" id="calcDinner" type="datetime-local"></label>
+        <div class="calc-results" id="calcResults" aria-live="polite"></div>
+        <div class="calc-actions">
+          <button type="button" class="btn btn-green btn-block" id="calcCookBtn">⏰ Start all the timers</button>
+        </div>
+        <p class="calc-note">Guide times at 325°F / 160°C, based on USDA charts. Ovens vary, so always check with a meat thermometer before serving.</p>
+      </div>
+    </details>
+
+
+    <!-- ✏️ ALARM SOUND choice (saved per phone). Default is the song. -->
+    <div class="card sound-card">
+      <div class="sound-label">Alarm sound</div>
+      <div class="seg" id="soundPick" role="group" aria-label="Alarm sound">
+        <button data-sound="song" aria-pressed="true">🎵 Merry Xmas song</button>
+        <button data-sound="bell" aria-pressed="false">🔔 Bell chime</button>
+      </div>
+      <!-- ✏️ Music credit -->
+      <p class="sound-credit">Music: “Merry Xmas” by angelika728 via Pixabay</p>
+    </div>
+
+    <div class="alarm-toolbar">
+      <button class="btn btn-gold" id="testChime">🔊 Test sound</button>
+      <button class="btn btn-ghost" id="stopAllTimers">⏸ Pause all</button>
+    </div>
+
+    <div class="duty-grid" id="dutyGrid"></div>
+
+    <form class="card add-duty" id="addDutyForm" autocomplete="off">
+      <h3>➕ My own timer</h3>
+      <div class="row">
+        <select class="input" name="icon" aria-label="Icon">
+          <option value="⏰">Timer</option><option value="🍗">Meat</option><option value="🥧">Pie or dessert</option><option value="🍷">Drinks</option>
+          <option value="🎁">Gifts</option><option value="🕯️">Candles</option><option value="🚗">Leave or drive</option><option value="📞">Call</option>
+          <option value="🧦">Stockings</option><option value="❄️">Chill</option>
+        </select>
+        <input class="input" name="name" maxlength="40" placeholder="Duty name" aria-label="Duty name" required>
+        <input class="input" name="minutes" type="number" min="1" max="1440" value="10" inputmode="numeric" aria-label="Minutes" required>
+        <button class="btn btn-green" type="submit">Add</button>
+      </div>
+    </form>
+
+    <p class="tip fam-only">🎤 Hands busy? Tap the gold mic button and say “Start the turkey timer” or “How long on the cookies?”. The app answers out loud.</p>
+    <p class="tip co-only">🎤 Hands busy? Tap the gold mic button and say “Start the catering timer” or “How long on the gift exchange?”. The app answers out loud.</p>
+    <p class="tip">💡 Tip: keep the app open on screen while timers run. Phones may silence sounds when the app is in the background or on silent mode.</p>
   </section>
 
   <!-- ============================================================
@@ -2887,104 +2984,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
   <!-- ============================================================
        VIEW 3 — PREPPING & DUTY ALARMS
        ============================================================ -->
-  <section class="view" id="view-alarms" aria-labelledby="alarmsTitle">
-    <h2 class="view-title" id="alarmsTitle">My Timers</h2>
-    <p class="view-intro">Set your own timers. Your alarm sound plays when time's up.</p>
-    <div class="run-now" id="runNow" hidden>
-      <h3 class="run-h">Running now</h3>
-      <div class="duty-grid" id="runGrid"></div>
-    </div>
 
-    <!-- 🔔 WEEKLY CHECK-IN REMINDERS (Nov 1 → one week before New Year's) -->
-    <div class="card checkin-card" id="checkinCard">
-      <h3>🔔 Weekly check-in reminders</h3>
-      <p>A gentle "Time to check in!" once a week from <b>November 1</b> until <b>one week before New Year's</b>, with your alarm sound.</p>
-      <label class="wish-lab">Remind me at
-        <select class="input" id="checkinHour">
-          <option value="9">9:00 in the morning</option>
-          <option value="12">12:00 noon</option>
-          <option value="18">6:00 in the evening</option>
-          <option value="19">7:00 in the evening</option>
-        </select></label>
-      <p class="checkin-step" id="checkinStep"><b>One-time setup:</b> add the reminders to your phone's calendar so they pop up even when Noël is closed.</p>
-      <div class="send-btns">
-        <a class="btn btn-green" id="checkinGoogle" target="_blank" rel="noopener">📅 Google Calendar</a>
-        <button class="btn btn-ghost" id="checkinIcs" type="button">📅 Apple / other</button>
-      </div>
-      <p class="checkin-next" id="checkinNext"></p>
-    </div>
-
-    <!-- ============================================================
-         🦃 TURKEY & HAM CALCULATOR (guide times from USDA charts)
-         ============================================================ -->
-    <details class="card calc fam-only" id="calcCard">
-      <summary>
-        <span class="calc-ico">🦃</span>
-        <span><b>Holiday Roast Calculator</b><small>Roast beef, turkey or ham: thaw, cook and rest times, with every timer in one tap</small></span>
-        <span class="chev">▾</span>
-      </summary>
-      <div class="calc-body">
-        <p class="calc-hint">Tap every dish you are cooking. Each one gets its own weight and its own timers.</p>
-        <div class="seg seg-meat" id="meatPick" role="group" aria-label="What are you cooking?">
-          <button type="button" data-meat="roast" aria-pressed="false">Roast beef</button>
-          <button type="button" data-meat="turkey" aria-pressed="true">Turkey</button>
-          <button type="button" data-meat="stuffed" aria-pressed="false">Stuffed turkey</button>
-          <button type="button" data-meat="ham" aria-pressed="false">Cooked ham</button>
-        </div>
-        <div class="calc-row">
-          <div class="calc-weights" id="calcMeals"></div>
-          <div class="seg seg-unit" id="unitPick" role="group" aria-label="Weight unit">
-            <button type="button" data-unit="lb" aria-pressed="true">lb</button>
-            <button type="button" data-unit="kg" aria-pressed="false">kg</button>
-          </div>
-        </div>
-        <label class="calc-field"><span>Dinner is served at</span>
-          <input class="input" id="calcDinner" type="datetime-local"></label>
-        <div class="calc-results" id="calcResults" aria-live="polite"></div>
-        <div class="calc-actions">
-          <button type="button" class="btn btn-green btn-block" id="calcCookBtn">⏰ Start all the timers</button>
-        </div>
-        <p class="calc-note">Guide times at 325°F / 160°C, based on USDA charts. Ovens vary, so always check with a meat thermometer before serving.</p>
-      </div>
-    </details>
-
-
-    <!-- ✏️ ALARM SOUND choice (saved per phone). Default is the song. -->
-    <div class="card sound-card">
-      <div class="sound-label">Alarm sound</div>
-      <div class="seg" id="soundPick" role="group" aria-label="Alarm sound">
-        <button data-sound="song" aria-pressed="true">🎵 Merry Xmas song</button>
-        <button data-sound="bell" aria-pressed="false">🔔 Bell chime</button>
-      </div>
-      <!-- ✏️ Music credit -->
-      <p class="sound-credit">Music: “Merry Xmas” by angelika728 via Pixabay</p>
-    </div>
-
-    <div class="alarm-toolbar">
-      <button class="btn btn-gold" id="testChime">🔊 Test sound</button>
-      <button class="btn btn-ghost" id="stopAllTimers">⏸ Pause all</button>
-    </div>
-
-    <div class="duty-grid" id="dutyGrid"></div>
-
-    <form class="card add-duty" id="addDutyForm" autocomplete="off">
-      <h3>➕ My own timer</h3>
-      <div class="row">
-        <select class="input" name="icon" aria-label="Icon">
-          <option value="⏰">Timer</option><option value="🍗">Meat</option><option value="🥧">Pie or dessert</option><option value="🍷">Drinks</option>
-          <option value="🎁">Gifts</option><option value="🕯️">Candles</option><option value="🚗">Leave or drive</option><option value="📞">Call</option>
-          <option value="🧦">Stockings</option><option value="❄️">Chill</option>
-        </select>
-        <input class="input" name="name" maxlength="40" placeholder="Duty name" aria-label="Duty name" required>
-        <input class="input" name="minutes" type="number" min="1" max="1440" value="10" inputmode="numeric" aria-label="Minutes" required>
-        <button class="btn btn-green" type="submit">Add</button>
-      </div>
-    </form>
-
-    <p class="tip fam-only">🎤 Hands busy? Tap the gold mic button and say “Start the turkey timer” or “How long on the cookies?”. The app answers out loud.</p>
-    <p class="tip co-only">🎤 Hands busy? Tap the gold mic button and say “Start the catering timer” or “How long on the gift exchange?”. The app answers out loud.</p>
-    <p class="tip">💡 Tip: keep the app open on screen while timers run. Phones may silence sounds when the app is in the background or on silent mode.</p>
-  </section>
 
   <!-- ============================================================
        VIEW — ✨ HOLIDAY REVIEW (sit down after New Year's)
@@ -3070,8 +3070,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
   <button class="nav-btn" data-view="tasks"><span class="nav-ico">✅</span>Tasks</button>
   <button class="nav-btn" data-view="meals" id="navMeals"><span class="nav-ico">🍽️</span>Menu</button>
   <button class="nav-btn" data-view="invites"><span class="nav-ico">✉️</span>Cards</button>
-  <button class="nav-btn" data-view="org"><span class="nav-ico">📅</span>Calendar</button>
-  <button class="nav-btn" data-view="alarms"><span class="nav-ico">⏰</span>Timers<span class="nav-badge" id="alarmBadge">0</span></button>
+  <button class="nav-btn" data-view="org"><span class="nav-ico">📅</span>Calendar<span class="nav-badge" id="alarmBadge">0</span></button>
   <button class="nav-btn" data-view="nye" id="navNye"><span class="nav-ico">🥂</span>NYE</button>
   <button class="nav-btn" data-view="games"><span class="nav-ico">🎮</span>Games</button>
   <button class="nav-btn" data-view="review"><span class="nav-ico">✨</span>Review</button>
@@ -7529,6 +7528,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
      NAVIGATION
      ============================================================ */
   function showView(name, slide) {
+    let toTimers = false; if (name === "alarms") { name = "org"; toTimers = true; }   // timers now live at the bottom of the Calendar tab
     if (!$("#view-" + name)) name = "planner";
     $$(".view").forEach(v => { v.classList.toggle("active", v.id === "view-" + name); v.classList.remove("slide-left", "slide-right"); });
     if (slide) $("#view-" + name).classList.add("slide-" + slide);
@@ -7550,6 +7550,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       b.setAttribute("aria-current", on ? "page" : "false");
     });
     save(KEYS.view, name);
+    if (toTimers) setTimeout(() => { const t = $("#timersBlock"); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
     window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
   }
   $$(".nav-btn").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
@@ -7557,7 +7558,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   /* 👆 SWIPE between tabs (left = next tab, right = previous tab)
      Ignores up/down scrolling, edge swipes (Android "back"), text boxes,
      sliders and anything inside a pop-up or full-screen page. */
-  const VIEW_ORDER = ["budget", "planner", "gifts", "tasks", "office", "host", "own", "meals", "invites", "org", "alarms", "nye", "games", "review"];
+  const VIEW_ORDER = ["budget", "planner", "gifts", "tasks", "office", "host", "own", "meals", "invites", "org", "nye", "games", "review"];
   let swipe = null;
   document.querySelector("main").addEventListener("touchstart", e => {
     const t = e.touches[0];
@@ -7946,9 +7947,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const RING_C = 2 * Math.PI * 44; // circle circumference (r = 44)
   let duties = load(KEYS.duties, null);
   // 🧹 the starter timers (Check the Turkey, Move the Elf…) are gone for good; clear them once from phones that still have them
-  if (Array.isArray(duties) && !load("dutiesCleaned", false)) {
+  if (Array.isArray(duties) && !load("dutiesCleaned2", false)) {
     const starter = new Set(DEFAULT_DUTIES.map(d => d.name).concat(OFFICE_DUTIES.map(d => d.name), OLD_OFFICE_DUTIES));
-    duties = duties.filter(d => d.custom || !starter.has(d.name)); save(KEYS.duties, duties); save("dutiesCleaned", true);
+    duties = duties.filter(d => (d.custom || !starter.has(d.name)) && !(d.name === "Fun" && d.custom && d.status !== "running")); save(KEYS.duties, duties); save("dutiesCleaned2", true);
   }
   // 🏢 the Office space starts with office timers (and swaps out family starters that were never changed)
   const dutyNames = l => (l || []).map(x => x.name).join("|"), idleAll = l => l.every(x => x.status === "idle" || !x.status);
