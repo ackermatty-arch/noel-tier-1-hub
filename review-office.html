@@ -13156,7 +13156,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     ["travel", "🚗", "Travel", "#6B5A3A"], ["giving", "⭐", "Giving", "#A8A8A8"], ["other", "📦", "Other", "#2B2B2B"]
   ];
   const budCat = k => BUD_CATS.find(c => c[0] === k) || BUD_CATS[BUD_CATS.length - 1];
-  let budget = load("budget", null) || { limit: 0, cats: {}, expenses: [], daily: {}, past: [], tab: "overview", sort: "date", filter: "all" };
+  let budget = load("budget", null) || { limit: 0, cats: {}, expenses: [], daily: {}, past: [], tab: "set", sort: "date", filter: "all" };
   // the Organizer's old "other costs" move in here once
   if (typeof org !== "undefined" && org.other && org.other.length) { org.other.forEach(x => budget.expenses.push({ id: x.id, cat: "other", name: x.name, amt: +x.amt || 0, date: "" })); org.other = []; save("organizer", org); }
   const saveBudget = () => save("budget", budget);
@@ -13231,7 +13231,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function renderBudget() {
     budRecordDay();
     const T = budTotals(), tab = hubMode === "company" && budget.tab === "shared" ? "overview" : (budget.tab || "overview");
-    $("#budTabs").innerHTML = [["overview", "📊 Overview"], ["sheet", "🧾 Spreadsheet"], ["set", "🎯 Budgets"], ["shared", "🤝 Shared costs"]].filter(([k]) => !(k === "shared" && hubMode === "company")).map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
+    $("#budTabs").innerHTML = [["set", "🎯 Budgets"], ["overview", "📊 Overview"], ["sheet", "🧾 Spreadsheet"], ["shared", "🤝 Shared costs"]].filter(([k]) => !(k === "shared" && hubMode === "company")).map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-btab="${k}">${l}</button>`).join("");
     $("#budBody").innerHTML = ({ overview: budOverview, sheet: budSheet, set: budSet, shared: budShared })[tab](T);
   }
   function budOverview(T) {
