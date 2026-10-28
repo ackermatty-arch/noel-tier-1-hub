@@ -69,12 +69,21 @@
     const od = e.target.closest("#coDash [data-ocdone]"); if (od) { const c = off.costs.find(x => x.id === od.dataset.ocdone); if (c) { c.ordered = !c.ordered; saveOff(); renderCoDash(); } }
   });
 
+  const OFF_GROUP = { event: "plan", guests: "plan", food: "plan", acts: "plan", approval: "approve", plan: "run", more: "more", polls: "more", potluck: "more", santa: "more", awards: "more", auction: "more", charity: "more", handover: "more" };
+  const OFF_SUB = [["event", "📋 Event"], ["guests", "👥 Guests"], ["food", "🍽️ Food"], ["acts", "🎭 Activities"]];
+  const OFF_MORE = [["polls", "🗳️", "Votes", "Pick a date or a caterer"], ["potluck", "🥘", "Potluck", "Who brings what"], ["santa", "🎅", "Secret Santa", "Draw names"], ["awards", "🏆", "Awards", "Silly office awards"], ["auction", "🔨", "Auction", "Silent auction"], ["charity", "⭐", "Charity", "Give back"], ["handover", "📦", "Handover", "Survey, report, next year"]];
+  function offMoreHtml() {
+    return `<div class="org-tiles">${OFF_MORE.map(([k, i, l, d]) => `<button type="button" class="org-tile" data-oftab="${k}"><span class="ot-ico">${i}</span><b>${l}</b><small>${d}</small></button>`).join("")}</div>`;
+  }
   function renderOffice() {
     renderOffMenu();
-    const tab = off.tab || "event";
-    $("#offTabs").innerHTML = [["event", "📋 Event"], ["guests", "👥 Guests"], ["polls", "🗳️ Votes"], ["food", "🍽️ Food"], ["acts", "🎭 Activities"], ["approval", "📨 Approval"], ["plan", "📄 Plan"], ["potluck", "🥘 Potluck"], ["santa", "🎅 Secret Santa"], ["awards", "🏆 Awards"], ["auction", "🔨 Auction"], ["charity", "⭐ Charity"], ["handover", "📦 Handover"]].map(([k, l]) =>
-      `<button type="button" class="chip${k === tab ? " on" : ""}" data-oftab="${k}">${l}${k === "approval" ? ` <span class="ap-dot ${off.appr.status}"></span>` : ""}</button>`).join("");
-    $("#offBody").innerHTML = ({ event: offEventHtml, guests: offGuestsHtml, polls: offPollsHtml, food: offFoodHtml, acts: offActsHtml, approval: offApprovalHtml, plan: offPlanHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml })[tab]();
+    const tab = off.tab || "event", G = OFF_GROUP[tab] || "plan", st = off.appr.status, ok = st === "approved";
+    const steps = [["plan", "event", "1", "Plan", !!off.confirmed || st !== "draft"], ["approve", "approval", "2", "Approve", ok], ["run", "plan", "3", "Run it", false], ["more", "more", "", "More", false]];
+    let sub = "";
+    if (G === "plan") sub = `<div class="off-sub">${OFF_SUB.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-oftab="${k}">${l}</button>`).join("")}</div>`;
+    else if (G === "more" && tab !== "more") sub = `<div class="off-sub"><button type="button" class="chip" data-oftab="more">‹ More</button><span class="off-subt">${(OFF_MORE.find(m => m[0] === tab) || [0, "", ""])[1]} ${(OFF_MORE.find(m => m[0] === tab) || [0, 0, ""])[2]}</span></div>`;
+    $("#offTabs").innerHTML = `<div class="off-steps">${steps.map(([g, t, n, l, done]) => `<button type="button" class="off-step${g === G ? " on" : ""}${done ? " done" : ""}" data-oftab="${t}">${n ? `<i>${done ? "✓" : n}</i>` : ""}<span>${l}</span></button>`).join("")}</div>${sub}`;
+    $("#offBody").innerHTML = ({ event: offEventHtml, guests: offGuestsHtml, polls: offPollsHtml, food: offFoodHtml, acts: offActsHtml, approval: offApprovalHtml, plan: offPlanHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml, more: offMoreHtml })[tab]() + (G === "plan" && tab !== "event" ? `<button type="button" class="btn btn-gold btn-block" data-offreview style="margin-top:12px">📄 See my plan ›</button>` : "");
   }
   const fld = (k, label, type, ph, extra) => `<label class="off-f${extra === "wide" ? " wide" : ""}"><span class="meal-lab">${label}</span>${type === "area" ? `<textarea class="input" rows="2" data-ev="${k}" maxlength="300" placeholder="${ph || ""}">${esc(off.ev[k] || "")}</textarea>` : `<input class="input" type="${type || "text"}" data-ev="${k}" value="${esc(off.ev[k] ?? "")}" placeholder="${ph || ""}" ${type === "number" ? 'inputmode="decimal" min="0"' : 'maxlength="80"'}>`}</label>`;
   function offEventHtml() {
@@ -349,7 +358,7 @@
     document.body.appendChild(el);
     el.addEventListener("click", ev => {
       if (ev.target === el || ev.target.closest("[data-prback]")) { el.remove(); return; }
-      if (ev.target.closest("[data-prok]")) { el.remove(); off.tab = "approval"; saveOff(); showView("office"); renderOffice(); window.scrollTo(0, 0); toast("✅ Plan confirmed. Now send it for approval"); }
+      if (ev.target.closest("[data-prok]")) { el.remove(); off.confirmed = Date.now(); off.tab = "approval"; saveOff(); showView("office"); renderOffice(); window.scrollTo(0, 0); toast("✅ Plan confirmed. Now send it for approval"); }
     });
   }
   function offPlanHtml() {
