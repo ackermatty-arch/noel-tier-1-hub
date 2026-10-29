@@ -7,7 +7,10 @@
 (function () {
   try {
     if (!window.NOEL_FORCE_FRESH && !window.NOEL_REVIEW && !/[?&]fresh\b/.test(location.search)) return;
-    var ss = window.sessionStorage, id = ss.getItem("noel_fresh_id");
+    var ss = window.sessionStorage, tm = /[?&]t=([^&]*)/.exec(location.search), tv = tm ? tm[1] : null;
+    if (tv !== null && ss.getItem("noel_fresh_t") !== tv) { ss.clear(); }   // a new ?t=… link always starts completely empty
+    if (tv !== null) ss.setItem("noel_fresh_t", tv);
+    var id = ss.getItem("noel_fresh_id");
     if (!id) { id = Math.random().toString(36).slice(2, 8); ss.setItem("noel_fresh_id", id); }
     Object.defineProperty(window, "localStorage", { configurable: true, get: function () { return ss; } });
     var open = IDBFactory.prototype.open;
