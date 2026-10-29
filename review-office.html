@@ -2151,6 +2151,11 @@ body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!impor
 /* Holiday Review stays hidden until Dec 26 (or until opened) */
 .nav-btn[data-view="review"]{display:none}
 body.rev-open .nav-btn[data-view="review"]{display:flex}
+.rev-stars{display:flex;gap:6px}
+.rev-stars button{width:46px;height:46px;border:1px solid var(--gold,#C9A45C);background:#fff;color:var(--gold,#C9A45C);font-size:24px;line-height:1;cursor:pointer;border-radius:0}
+.rev-stars button.on{background:#16130E;color:#E3C98A}
+.rev-quote{display:flex;gap:8px;align-items:center;margin:10px 0;font-size:14px}
+#view-review a.btn{display:block;text-align:center;margin-top:8px;text-decoration:none}
 
 /* Dinner countdown digits were white on white */
 .meal-master .mm-time{color:#000!important}
@@ -3122,12 +3127,25 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
        ============================================================ -->
   <section class="view" id="view-review" aria-labelledby="reviewTitle">
     <h2 class="view-title" id="reviewTitle">Holiday Review</h2>
-    <p class="view-intro">Pour a cup of something warm and look back. What made this season special, and what should future-you remember?</p>
+    <p class="view-intro fam-only">Pour a cup of something warm and look back. What made this season special, and what should future-you remember?</p>
+    <p class="view-intro co-only">Your office year is wrapped. Look back at what went well, so next year's events are even easier.</p>
+
+    <!-- ⭐ How was your season? -->
+    <div class="card review-card">
+      <h3>How was your season?</h3>
+      <p class="review-sub">How much did Noël help?</p>
+      <div class="rev-stars" id="revStars" role="group" aria-label="Rating"><button type="button" data-n="1" aria-label="1 star">★</button><button type="button" data-n="2" aria-label="2 stars">★</button><button type="button" data-n="3" aria-label="3 stars">★</button><button type="button" data-n="4" aria-label="4 stars">★</button><button type="button" data-n="5" aria-label="5 stars">★</button></div>
+      <h3 style="margin-top:14px">What helped most?</h3>
+      <div class="apps-filters" id="helpChips">
+        <button type="button" class="chip">Meal plans</button><button type="button" class="chip">Budget</button><button type="button" class="chip">Gift list</button><button type="button" class="chip">Timers</button><button type="button" class="chip">E-cards</button><button type="button" class="chip">Printables</button><button type="button" class="chip">Party invites</button><button type="button" class="chip">Voice</button><button type="button" class="chip">Games</button>
+      </div>
+    </div>
 
     <!-- ⭐ Best moments -->
     <div class="card review-card">
       <h3>⭐ Best moments</h3>
-      <p class="hand-note">You did it. The determination and passion you set out with to bring magic to this holiday season, for everyone, will always be remembered.</p>
+      <p class="hand-note fam-only">Before the new year begins, look back. What made you smile, and what do you want next year to hold?</p>
+      <p class="hand-note co-only">Your team's year is wrapped. Note what went well so next year is even easier.</p>
       <form class="review-add" id="momentForm" autocomplete="off">
         <textarea class="input" name="text" rows="2" maxlength="280" placeholder="e.g. Grandma winning Bingo and doing a victory dance" required></textarea>
         <div class="fill-chips"><button type="button" class="chip fill-chip" data-fill="The best moment was " data-fill-to="#momentForm textarea">Best moment was…</button><button type="button" class="chip fill-chip" data-fill="The funniest thing was " data-fill-to="#momentForm textarea">Funniest thing…</button><button type="button" class="chip fill-chip" data-fill="The kids loved " data-fill-to="#momentForm textarea">The kids loved…</button><button type="button" class="chip fill-chip" data-fill="Best gift given: " data-fill-to="#momentForm textarea">Best gift given…</button><button type="button" class="chip fill-chip" data-fill="Best gift received: " data-fill-to="#momentForm textarea">Best gift received…</button><button type="button" class="chip fill-chip" data-fill="A new tradition we started: " data-fill-to="#momentForm textarea">New tradition…</button></div>
@@ -3150,7 +3168,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 
     <!-- 💡 Ideas for next year's Hub -->
     <div class="card review-card">
-      <h3>💡 What should next year's Noël have?</h3>
+      <h3>💡 What would make it better?</h3>
       <p class="review-sub">Tap anything you'd love, add your own idea, and send it to me. I read every one!</p>
       <div class="apps-filters" id="ideaChips">
         <button type="button" class="chip">More party games</button>
@@ -3164,7 +3182,12 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
         <button type="button" class="chip">Birthday edition</button>
       </div>
       <textarea class="input review-idea" id="ideaText" rows="3" maxlength="500" placeholder="Your idea, wish or anything that could be better…"></textarea>
-      <button class="btn btn-green btn-block" id="ideaSend" type="button">📨 Send my ideas</button>
+      <input class="input" id="revName" type="text" maxlength="40" placeholder="First name (optional)" autocomplete="off" style="margin-top:10px">
+      <label class="rev-quote"><input type="checkbox" id="revQuote"> You may quote me, first name only</label>
+      <p class="review-sub">Your best moments and notes stay on your phone. Only your rating and the words above are sent.</p>
+      <button class="btn btn-green btn-block" id="ideaSend" type="button">📨 Send my review</button>
+      <a class="btn btn-block" id="revStore" href="#" target="_blank" rel="noopener" hidden>Rate on the App Store</a>
+      <a class="btn btn-block" id="revForm" href="#" target="_blank" rel="noopener" hidden>Fill in the short review form</a>
     </div>
   
     <div class="section-label">Past Christmases</div>
@@ -9596,23 +9619,23 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   setTimeout(seasonReminders, 3000);
 
   /* ============================================================
-     HOLIDAY REVIEW · hidden until Dec 26, then pops up
+     HOLIDAY REVIEW · hidden until Dec 28, then pops up
      "Remind me later" offers: later today (5 hours) or tomorrow 9:00
      ============================================================ */
   const revState = () => { const st = load("reviewState", {}); return st.s === season ? st : { s: season }; };
-  const revWindow = () => { const n = new Date(); return n >= new Date(season, 11, 26) && n < new Date(season + 1, 10, 1); };
+  const revWindow = () => { const n = new Date(); return n >= new Date(season, 11, 28) && n < new Date(season + 1, 10, 1); };
   const reviewPending = () => revWindow() && !revState().opened;
   function reviewDue() { const st = revState(); return reviewPending() && !(st.later && Date.now() < st.later); }
   function syncReviewNav() { document.body.classList.toggle("rev-open", !!revState().opened); }
   function reviewNotify() {
     if (!window.NoelNative) return;
-    const st = revState(), first = new Date(season, 11, 26, 9, 30).getTime(), t = st.later || first;
-    NoelNative.scheduleList(9310, 9316, st.opened ? [] : [{ t, title: "Your Holiday Review is ready", body: "Take a few minutes to look back on this season." }]);
+    const st = revState(), first = new Date(season, 11, 28, 10, 0).getTime(), t = st.later || first;
+    NoelNative.scheduleList(9310, 9316, st.opened ? [] : [{ t, title: "Your Holiday Review is ready", body: "Look back at your Christmas before the new year begins." }]);
   }
   function maybeReview() {
     if (!reviewDue()) return false;
     if ($("#reviewOverlay").classList.contains("show") || $("#welcomeOverlay").classList.contains("show") || $("#alertOverlay").classList.contains("show")) return true;
-    $("#reviewPopText").textContent = `Christmas ${season} is wrapped. Take a few minutes to look back on this season.`;
+    $("#reviewPopText").textContent = document.body.classList.contains("co") ? "Wrap up your office year. Look back at what went well and send your review." : `Christmas ${season} is wrapped. Look back at your Christmas before the new year begins.`;
     $("#reviewPopMain").hidden = false; $("#reviewPopWhen").hidden = true; $("#reviewOverlay").classList.add("show"); return true;
   }
   const revLater = (ts, label) => { save("reviewState", Object.assign(revState(), { later: ts })); $("#reviewOverlay").classList.remove("show"); toast(label); reviewNotify(); };
@@ -10005,7 +10028,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   let shOpen = false;
   function renderStartHere() {
     const el = $("#startHere"); if (!el) return;
-    const nowD = new Date(), wrap = nowD >= new Date(season, 11, 26) && nowD < new Date(season + 1, 11, 1) && !load("memories", []).some(m => m.year === season) && !reviewPending();
+    const nowD = new Date(), wrap = nowD >= new Date(season, 11, 28) && nowD < new Date(season + 1, 11, 1) && !load("memories", []).some(m => m.year === season) && !reviewPending();
     if (wrap) { el.innerHTML = `<div class="sh-card"><div class="sh-top"><div><h3>Christmas ${season} is wrapped</h3><small>Save it and start fresh. Your people, guests and budget carry over.</small></div></div><button class="sh-item" data-shwrap><span class="sh-box">+</span><span class="t">Save this year and start fresh</span></button></div>`; return; }
     if (load("shHide", false)) { el.innerHTML = ""; return; }
     const co = hubMode === "company", sn = load("seen", {});
@@ -10314,16 +10337,28 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     else { yearNotes = yearNotes.filter(x => x.id !== id); save("yearNotes", yearNotes); }
     renderReview();
   }));
+  const REVIEW_STORE_URL = "";   // ✏️ paste the App Store link here after launch
+  const REVIEW_FORM_URL = "";    // ✏️ paste a Google Form link here (optional)
+  if (REVIEW_STORE_URL) { $("#revStore").href = REVIEW_STORE_URL; $("#revStore").hidden = false; }
+  if (REVIEW_FORM_URL) { $("#revForm").href = REVIEW_FORM_URL; $("#revForm").hidden = false; }
+  let revStars = 0;
+  $("#revStars").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; revStars = +b.dataset.n; $$("#revStars button").forEach(x => x.classList.toggle("on", +x.dataset.n <= revStars)); });
+  $("#helpChips").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) c.classList.toggle("on"); });
   $("#ideaChips").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) c.classList.toggle("on"); });
   $("#ideaSend").addEventListener("click", async () => {
-    const picks = $$("#ideaChips .chip.on").map(c => c.textContent), own = $("#ideaText").value.trim();
-    if (!picks.length && !own) { toast("💡 Tap an idea or type your own first"); return; }
-    const body = "Ideas for next year's Noël Tier 1 Hub:\n" + picks.map(p => "• " + p).join("\n") + (own ? (picks.length ? "\n\n" : "") + own : "");
-    if (FEEDBACK_EMAIL) { location.href = INVITE.mailHref(FEEDBACK_EMAIL, "Noël Tier 1 Hub ideas 💡", body); }
+    const helped = $$("#helpChips .chip.on").map(c => c.textContent), picks = $$("#ideaChips .chip.on").map(c => c.textContent), own = $("#ideaText").value.trim();
+    if (!revStars && !helped.length && !picks.length && !own) { toast("Tap a star or type a few words first"); return; }
+    const ed = document.body.classList.contains("co") ? "Office" : "Family", name = $("#revName").value.trim();
+    const body = `Noël Tier 1 Hub review ${season} (${ed} edition)\n` + (revStars ? `Rating: ${revStars} of 5\n` : "") +
+      (helped.length ? "\nHelped most:\n" + helped.map(p => "• " + p).join("\n") + "\n" : "") +
+      (picks.length ? "\nWould love next year:\n" + picks.map(p => "• " + p).join("\n") + "\n" : "") +
+      (own ? "\n" + own + "\n" : "") + (name ? "\nFirst name: " + name : "") + ($("#revQuote").checked ? "\nYou may quote me: yes" : "");
+    const subject = `Noël Tier 1 Hub review ${season}${revStars ? " · " + revStars + " star" + (revStars > 1 ? "s" : "") : ""}`;
+    if (FEEDBACK_EMAIL) { location.href = INVITE.mailHref(FEEDBACK_EMAIL, subject, body); }
     else {
-      try { await navigator.clipboard.writeText(body); toast("📋 Ideas copied! Thank you for helping make Noël better."); } catch (err) { toast("Thank you! Your ideas are ready to send."); }
+      try { await navigator.clipboard.writeText(body); toast("Review copied. Thank you!"); } catch (err) { toast("Thank you! Your review is ready to send."); }
     }
-    $$("#ideaChips .chip.on").forEach(c => c.classList.remove("on")); $("#ideaText").value = "";
+    $$("#helpChips .chip.on, #ideaChips .chip.on").forEach(c => c.classList.remove("on")); $("#ideaText").value = ""; revStars = 0; $$("#revStars button").forEach(x => x.classList.remove("on"));
   });
   const CARD_LIST = [["noel", "✨"], ["tree", "🎄"], ["garland", "🎀"], ["mountain", "🏔️"], ["nordic", "⭐"], ["nyc", "🥂"], ["spring", "🌸"], ["easter", "🐣"], ["valentine", "💌"], ["summer", "☀️"], ["thanksgiving", "🍂"], ["birthday", "🎂"], ["thanks", "🌼"]];
   let ecard = load("ecard", { d: "noel", to: "", msg: "Wishing you a season full of warmth, laughter and love.", fr: "" });
