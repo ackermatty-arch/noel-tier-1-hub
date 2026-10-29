@@ -2302,6 +2302,22 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
       </article>
 
       <article class="game-card green">
+        <div class="game-emoji">🌍</div>
+        <h3>Around the World</h3>
+        <p>Capitals, mountains, oceans and more. A trivia quiz for all ages.</p>
+        <div class="game-meta"><span class="pill">15 questions</span><span class="pill">All ages</span></div>
+        <button class="btn btn-gold" data-open="quizSheet" data-quiz="world">▶ Play Now</button>
+      </article>
+
+      <article class="game-card red">
+        <div class="game-emoji">🔭</div>
+        <h3>Science &amp; Nature</h3>
+        <p>Animals, planets and how the world works. Fun for every age.</p>
+        <div class="game-meta"><span class="pill">15 questions</span><span class="pill">All ages</span></div>
+        <button class="btn btn-gold" data-open="quizSheet" data-quiz="science">▶ Play Now</button>
+      </article>
+
+      <article class="game-card green">
         <div class="game-emoji">🏆</div>
         <h3 id="scoreTitle">Family Scoreboard</h3>
         <p>Add teams and track points across every party game.</p>
@@ -7707,9 +7723,45 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     {"q": "Which film won Best Picture at the 2026 Oscars?", "options": ["Sinners", "Hamnet", "One Battle After Another", "Wicked: For Good"], "answer": "One Battle After Another", "fact": "Michael B. Jordan won Best Actor for Sinners, and Jessie Buckley won Best Actress for Hamnet."},
     {"q": "The 2026 World Cup final was played near which big city?", "options": ["Los Angeles", "Toronto", "Mexico City", "New York"], "answer": "New York", "fact": "MetLife Stadium is in East Rutherford, New Jersey, just outside New York City."}
   ];
+  const WORLD_QUIZ = [
+    {"q": "What is the largest country in the world by area?", "options": ["Russia", "Canada", "China", "United States"], "answer": "Russia", "fact": "Russia spans 11 time zones and covers about one-eighth of the world's land."},
+    {"q": "What is the capital city of Australia?", "options": ["Canberra", "Sydney", "Melbourne", "Perth"], "answer": "Canberra", "fact": "Canberra was purpose-built as the capital as a compromise between Sydney and Melbourne."},
+    {"q": "Which river flows through Paris?", "options": ["The Seine", "The Thames", "The Rhine", "The Danube"], "answer": "The Seine", "fact": "The Seine runs about 777 kilometres from Burgundy to the English Channel."},
+    {"q": "What is the highest mountain above sea level?", "options": ["Mount Everest", "K2", "Kilimanjaro", "Denali"], "answer": "Mount Everest", "fact": "Everest stands about 8,849 metres tall on the border of Nepal and Tibet."},
+    {"q": "Which country has the most time zones, counting its overseas territories?", "options": ["France", "Russia", "United States", "China"], "answer": "France", "fact": "France spans 12 time zones thanks to its overseas territories."},
+    {"q": "What is the smallest country in the world?", "options": ["Vatican City", "Monaco", "San Marino", "Liechtenstein"], "answer": "Vatican City", "fact": "Vatican City covers only about 0.44 square kilometres."},
+    {"q": "On which continent is the Sahara Desert?", "options": ["Africa", "Asia", "Australia", "South America"], "answer": "Africa", "fact": "The Sahara is roughly the size of the United States."},
+    {"q": "What is the capital city of Canada?", "options": ["Ottawa", "Toronto", "Montreal", "Vancouver"], "answer": "Ottawa", "fact": "Ottawa sits on the border between Ontario and Quebec."},
+    {"q": "Which is the largest ocean on Earth?", "options": ["The Pacific Ocean", "The Atlantic Ocean", "The Indian Ocean", "The Arctic Ocean"], "answer": "The Pacific Ocean", "fact": "The Pacific covers more area than all of Earth's land combined."},
+    {"q": "In which country is the ancient city of Machu Picchu?", "options": ["Peru", "Mexico", "Chile", "Bolivia"], "answer": "Peru", "fact": "The Inca citadel sits high in the Andes, about 2,430 metres above sea level."},
+    {"q": "What is the currency of Japan?", "options": ["The yen", "The won", "The yuan", "The baht"], "answer": "The yen", "fact": "The yen has been Japan's currency since 1871."},
+    {"q": "Which famous city sits on two continents?", "options": ["Istanbul", "Cairo", "Moscow", "Athens"], "answer": "Istanbul", "fact": "Istanbul spans both Europe and Asia, divided by the Bosphorus strait."},
+    {"q": "Mount Kilimanjaro, Africa's tallest mountain, is in which country?", "options": ["Tanzania", "Kenya", "Uganda", "Ethiopia"], "answer": "Tanzania", "fact": "Kilimanjaro rises about 5,895 metres and is a dormant volcano."},
+    {"q": "The Great Barrier Reef lies off the coast of which country?", "options": ["Australia", "Brazil", "Mexico", "Indonesia"], "answer": "Australia", "fact": "It is the world's largest coral reef system and can be seen from space."},
+    {"q": "Which country has the most lakes in the world?", "options": ["Canada", "Finland", "Russia", "United States"], "answer": "Canada", "fact": "Canada has millions of lakes, more than the rest of the world's countries combined by many counts."}
+  ];
+  const SCIENCE_QUIZ = [
+    {"q": "Which planet is closest to the Sun?", "options": ["Mercury", "Venus", "Mars", "Earth"], "answer": "Mercury", "fact": "Mercury is also the smallest planet in our solar system."},
+    {"q": "What is the hardest natural substance on Earth?", "options": ["Diamond", "Gold", "Quartz", "Iron"], "answer": "Diamond", "fact": "Diamond is made of carbon atoms arranged in a very strong crystal structure."},
+    {"q": "What is the chemical symbol for gold?", "options": ["Au", "Ag", "Go", "Gd"], "answer": "Au", "fact": "Au comes from the Latin word for gold, aurum."},
+    {"q": "How many hearts does an octopus have?", "options": ["Three", "One", "Two", "Eight"], "answer": "Three", "fact": "Two pump blood through the gills and one pumps it around the body."},
+    {"q": "Which gas do plants take in from the air to make food?", "options": ["Carbon dioxide", "Oxygen", "Nitrogen", "Hydrogen"], "answer": "Carbon dioxide", "fact": "Plants use sunlight to turn carbon dioxide and water into sugar and oxygen."},
+    {"q": "What is the largest animal on Earth?", "options": ["The blue whale", "The African elephant", "The giraffe", "The great white shark"], "answer": "The blue whale", "fact": "Blue whales can grow to about 30 metres long."},
+    {"q": "How many bones are in an adult human body?", "options": ["206", "106", "306", "412"], "answer": "206", "fact": "Babies are born with around 300 bones, and many fuse together as they grow."},
+    {"q": "Which planet is best known for its rings?", "options": ["Saturn", "Mars", "Mercury", "Venus"], "answer": "Saturn", "fact": "Saturn's rings are made mostly of chunks of ice and rock."},
+    {"q": "At sea level, at what temperature in Celsius does water boil?", "options": ["100 degrees", "90 degrees", "80 degrees", "120 degrees"], "answer": "100 degrees", "fact": "Water boils at a lower temperature high up in the mountains."},
+    {"q": "What is the tallest animal in the world?", "options": ["The giraffe", "The elephant", "The ostrich", "The camel"], "answer": "The giraffe", "fact": "A giraffe can be about 5 metres tall."},
+    {"q": "What is the closest star to Earth?", "options": ["The Sun", "Proxima Centauri", "Sirius", "The North Star"], "answer": "The Sun", "fact": "The Sun is about 150 million kilometres away."},
+    {"q": "What do bees collect from flowers to make honey?", "options": ["Nectar", "Pollen only", "Sap", "Water"], "answer": "Nectar", "fact": "A single bee makes only about one twelfth of a teaspoon of honey in its lifetime."},
+    {"q": "How many legs does a spider have?", "options": ["Eight", "Six", "Ten", "Four"], "answer": "Eight", "fact": "Spiders are arachnids, not insects, and insects have six legs."},
+    {"q": "What is the largest organ of the human body?", "options": ["The skin", "The liver", "The heart", "The brain"], "answer": "The skin", "fact": "An adult's skin weighs around 4 kilograms and covers about 2 square metres."},
+    {"q": "Which force keeps our feet on the ground?", "options": ["Gravity", "Magnetism", "Friction", "Static electricity"], "answer": "Gravity", "fact": "Gravity is also what keeps the Moon in orbit around the Earth."}
+  ];
   const QUIZ_SETS = {
     xmas: { list: () => QUIZ, title: "Christmas Trivia", best: KEYS.best },
-    yir:  { list: () => YIR_QUIZ, title: "2026 Year in Review", best: "quizBestYir" }
+    yir:  { list: () => YIR_QUIZ, title: "2026 Year in Review", best: "quizBestYir" },
+    world: { list: () => WORLD_QUIZ, title: "Around the World", best: "quizBestWorld" },
+    science: { list: () => SCIENCE_QUIZ, title: "Science & Nature", best: "quizBestScience" }
   };
   function startQuiz(set) {
     quiz.set = QUIZ_SETS[set] ? set : (quiz.set || "xmas");
@@ -7772,7 +7824,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $("#finalScore").textContent = `${quiz.score}/${total}`;
     const pct = quiz.score / total;
     // ✏️ Edit the end-of-quiz messages here
-    $("#finalMsg").textContent = quiz.set === "yir" ? (
+    $("#finalMsg").textContent = quiz.set === "world" || quiz.set === "science" ? (
+      pct === 1 ? "Perfect score! You're a trivia champion! 🏆" :
+      pct >= .7 ? "Brilliant! You really know your stuff. ✨" :
+      pct >= .4 ? "Nice try! Play again and beat your best. 🌍" :
+                  "Good effort! Every round makes you sharper. 🔭") : quiz.set === "yir" ? (
       pct === 1 ? "Perfect! You're the Year-in-Review Champion! 🏆" :
       pct >= .7 ? "Sharp as a sparkler! You remember it all. ✨" :
       pct >= .4 ? "Not bad! 2026 was a busy year. 🥂" :
@@ -8697,6 +8753,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       if (has(/\btoday/) && n) { opened[n] = true; save(adventKey(), opened); renderAdvent(); updateAdventBanner(); showDoor(n); return `Here's door ${n}. ${ADVENT[n - 1][2]}`; }
       return n ? `Door ${n} is ready to open.` : "The first advent door opens on December 1.";
     }
+    if (has(/\b(around the world|geography|world trivia)\b/)) { closeSheets(); showView("games"); openSheet("quizSheet"); startQuiz("world"); return "Let's see how well you know the world!"; }
+    if (has(/\b(science|nature) (trivia|quiz)\b|\bscience and nature\b|\bscience trivia\b/)) { closeSheets(); showView("games"); openSheet("quizSheet"); startQuiz("science"); return "Science and nature trivia, here we go!"; }
     if (has(/\b(year in review|2026 trivia|this years? trivia)\b/)) { closeSheets(); showView("games"); openSheet("quizSheet"); startQuiz("yir"); return "Let's see how well you remember 2026!"; }
     if (has(/\b(activities|activity ideas|things to do|bucket list|sleigh rides?|what (can|should) we do)\b/)) { closeSheets(); showView("planner"); renderActs(); openSheet("actsSheet"); return "Here are holiday activities, indoors and out. Tap the star to add one to your list."; }
     if (has(/\b(party games?|would you rather|most likely|two truths|guess the resolution|draw the countdown|categories|10 second|ten second)\b/)) {
@@ -10466,7 +10524,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   let partyGame = null, partyDeck = [], partyIdx = 0, partyTimerId = null, partyLeft = 0;
   function renderPartyMenu() {
     $("#partyGrid").innerHTML = PARTY_GAMES.map(g => `<button class="party-tile" data-game="${g.id}"><span class="pt-ico">${g.ico}</span><b>${g.name}</b><small>${g.blurb}</small></button>`).join("") +
-      `<button class="party-tile" data-open="quizSheet" data-quiz="yir"><span class="pt-ico">📰</span><b>2026 Year in Review</b><small>15 trivia questions about the year</small></button>`;
+      `<button class="party-tile" data-open="quizSheet" data-quiz="yir"><span class="pt-ico">📰</span><b>2026 Year in Review</b><small>15 trivia questions about the year</small></button>` +
+      `<button class="party-tile" data-open="quizSheet" data-quiz="world"><span class="pt-ico">🌍</span><b>Around the World</b><small>15 geography trivia questions</small></button>` +
+      `<button class="party-tile" data-open="quizSheet" data-quiz="science"><span class="pt-ico">🔭</span><b>Science &amp; Nature</b><small>15 science trivia questions</small></button>`;
     $("#partyMenu").hidden = false; $("#partyPlay").hidden = true; $("#partyTitle").textContent = "Party Games";
     stopPartyTimer();
   }
