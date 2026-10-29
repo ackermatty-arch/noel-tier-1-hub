@@ -7774,21 +7774,23 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   /* 👆 SWIPE between tabs (left = next tab, right = previous tab)
      Ignores up/down scrolling, edge swipes (Android "back"), text boxes,
      sliders and anything inside a pop-up or full-screen page. */
-  const VIEW_ORDER = ["budget", "planner", "gifts", "tasks", "office", "host", "own", "meals", "nye", "invites", "org", "games", "review"];
+  const VIEW_ORDER = ["budget", "planner", "gifts", "tasks", "meals", "nye", "invites", "games", "review"];   // same order as the bottom bar
   let swipe = null;
   document.querySelector("main").addEventListener("touchstart", e => {
     const t = e.touches[0];
-    if (e.touches.length !== 1 || document.body.classList.contains("lock") || t.clientX < 24 || t.clientX > innerWidth - 24 ||
-        e.target.closest("input, textarea, select, [contenteditable], .no-swipe")) { swipe = null; return; }
+    if (e.touches.length !== 1 || document.body.classList.contains("lock") || t.clientX < 14 || t.clientX > innerWidth - 14 ||
+        e.target.closest("input, textarea, select, [contenteditable], .no-swipe, .cal-grid, .pc-pick, .scroll-x")) { swipe = null; return; }
     swipe = { x: t.clientX, y: t.clientY, at: Date.now() };
   }, { passive: true });
   document.querySelector("main").addEventListener("touchend", e => {
     if (!swipe) return;
     const t = e.changedTouches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y, ms = Date.now() - swipe.at;
     swipe = null;
-    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8 || ms > 700) return;
-    const order = VIEW_ORDER.filter(v => (hubMode === "company" ? !["meals", "host"].includes(v) : v !== "office"));   // meals & hosting are Family-only
-    const cur = order.indexOf(load(KEYS.view, "planner")), next = cur + (dx < 0 ? 1 : -1);
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.15 || ms > 1000) return;   // a short, clearly sideways flick
+    const shown = $$(".nav-btn").filter(b => b.getClientRects().length).map(b => b.dataset.view);
+    const order = shown.length ? shown : VIEW_ORDER.filter(v => (hubMode === "company" ? !["meals", "host"].includes(v) : v !== "office"));
+    const cur = order.indexOf(load(KEYS.view, "planner")); if (cur < 0) return;
+    const next = cur + (dx < 0 ? 1 : -1);
     if (next < 0 || next >= order.length) return;
     showView(order[next], dx < 0 ? "left" : "right");
   }, { passive: true });
