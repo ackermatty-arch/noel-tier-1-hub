@@ -10204,8 +10204,11 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const fam = [["⭐ Warm", "Wishing you a Christmas filled with warmth, laughter and the people you love most. Merry Christmas!"], ["🕊️ Peaceful", "May your home be filled with joy and your heart with peace this holiday season."],
       ["😄 Funny", "Merry Christmas! May your coffee be strong, your cookies plentiful and your in-laws on their best behaviour. 😄"], ["🎅 Naughty list", "We tried to be good this year. Santa's still reviewing the footage. Merry Christmas! 🎅"],
       ["✨ Faith", "Wishing you the peace, hope and joy of Christmas. May the blessings of this season stay with you all year."], ["🤗 Miss you", "Sending big hugs and Christmas wishes your way. We miss you and can't wait to see you!"],
-      ["🙏 Thank you", "Thank you for being such a wonderful part of our year. Wishing you a very Merry Christmas!"], ["🥂 New Year", "Happy New Year! Here's to fresh starts, big dreams and wonderful days ahead. 🥂"]];
-    $("#cardMsgIdeas").innerHTML = `<p class="fill-lab">✨ Tap a message, then make it yours:</p>` + fillChips(hubMode === "company" ? office.concat(fam) : fam.concat(office), "#cardMsg");
+      ["🙏 Thank you", "Thank you for being such a wonderful part of our year. Wishing you a very Merry Christmas!"], ["🥂 New Year", "Happy New Year! Here's to fresh starts, big dreams and wonderful days ahead. 🥂"],
+      ["🏡 Family", "To our wonderful family: may your home be full of laughter, good food and cozy moments this Christmas. We are so grateful for you."], ["🤝 Friends", "Merry Christmas to a very special friend! Thank you for all the good times this year. Here's to many more."],
+      ["🏘️ Neighbours", "Merry Christmas to our wonderful neighbours! Thank you for being so kind this year. Wishing you a warm and happy holiday season."], ["👵 Grandparents", "Merry Christmas, Grandma and Grandpa! Thank you for all the love and memories. We can't wait to celebrate together."],
+      ["🎁 Gift thanks", "Thank you so much for the thoughtful gift. It was just perfect, and it made our Christmas extra special."], ["❄️ Cozy", "Wishing you snowy evenings, hot cocoa and a very cozy Christmas with the people you love."]];
+    $("#cardMsgIdeas").innerHTML = `<p class="fill-lab">✨ Tap a message, then make it yours:</p>` + fillChips(hubMode === "company" ? office.concat(fam) : fam, "#cardMsg");
     $("#cardFrom").placeholder = defaultFrom() || "e.g. Love, the Smith Family";
     if (SHOP_URL === "#") $("#shopLink").hidden = true; else $("#shopLink").href = SHOP_URL;
     syncCards();
