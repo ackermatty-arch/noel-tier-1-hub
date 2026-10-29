@@ -2153,6 +2153,13 @@ body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!impor
 /* Holiday Review stays hidden until Dec 26 (or until opened) */
 .nav-btn[data-view="review"]{display:none}
 body.rev-open .nav-btn[data-view="review"]{display:flex}
+.mic-intro{position:fixed;left:14px;right:14px;bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:9000;background:#16130E;color:#F6EFD9;border:1px solid #C9A45C;padding:14px 16px;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.mic-intro[hidden]{display:none}
+.mic-intro b{display:block;font-family:"Cinzel",serif;letter-spacing:.08em;text-transform:uppercase;color:#E3C98A;font-size:14px;margin-bottom:4px}
+.mic-intro p{margin:0 0 10px;font-size:14px;line-height:1.5}
+.mic-intro .mi-btns{display:flex;gap:8px}
+.mic-intro .mi-btns button{flex:1;min-height:42px;border:1px solid #C9A45C;background:#16130E;color:#E3C98A;font:700 13px "Cinzel",serif;letter-spacing:.08em;text-transform:uppercase}
+.mic-intro .mi-btns button#micIntroTry{background:#E3C98A;color:#16130E}
 .rev-stars{display:flex;gap:6px}
 .rev-stars button{width:46px;height:46px;border:1px solid var(--gold,#C9A45C);background:#fff;color:var(--gold,#C9A45C);font-size:24px;line-height:1;cursor:pointer;border-radius:0}
 .rev-stars button.on{background:#16130E;color:#E3C98A}
@@ -3641,6 +3648,11 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
      ✏️ Edit the example chips below if you like (tapping one runs it).
      ============================================================ -->
 <button class="mic-fab" id="micBtn" aria-label="Voice commands" hidden>🎤</button>
+<div class="mic-intro" id="micIntro" role="dialog" aria-labelledby="micIntroT" hidden>
+  <b id="micIntroT">Meet your voice helper</b>
+  <p>Tap the microphone, then just say what you need, like <i class="fam-only">"Start the turkey timer"</i><i class="co-only">"Start the catering timer"</i> or "Add a gift book for Dad". It shows examples you can tap, and it keeps listening if it misses a word.</p>
+  <div class="mi-btns"><button type="button" id="micIntroTry">Try it</button><button type="button" id="micIntroOk">Got it</button></div>
+</div>
 <div class="voice-panel" id="voicePanel" role="dialog" aria-modal="true" aria-labelledby="voiceStatus" hidden>
   <div class="voice-card">
     <button class="voice-orb" id="voiceOrb" aria-label="Tap to speak">🎤</button>
@@ -8609,7 +8621,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   }
 
   function openVoice() {
-    clearTimeout(closeTimer);
+    clearTimeout(closeTimer); voiceMiss = 0;
     vPanel.hidden = false;
     document.body.classList.add("lock");
     duckMusic(true);
@@ -8624,12 +8636,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (!$(".sheet.open") && !$("#alertOverlay").classList.contains("show")) document.body.classList.remove("lock");
   }
 
-  function listen() {
+  let voiceMiss = 0;   // 🎤 times in a row it didn't understand (it listens again by itself, up to 3 times)
+  function listen(keep) {
     if (!SR) return;
     clearTimeout(closeTimer);
     try { speechSynthesis.cancel(); } catch (e) {}
     stopListening();
-    vHeard.textContent = ""; vReply.textContent = "";
+    if (keep !== true) { vHeard.textContent = ""; vReply.textContent = ""; voiceMiss = 0; }
     vStatus.textContent = "Listening…";
     const me = rec = new SR();
     me.lang = navigator.language || "en-US";
@@ -8654,7 +8667,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         "network": "Voice needs an internet connection.",
         "audio-capture": "I couldn't find a microphone."
       }[e.error] || "Voice stopped. Tap the mic to try again.";
-      handled = true; showReply(msg, false);
+      handled = true; showReply(msg, false, e.error === "no-speech");
     };
     me.onend = () => {
       if (rec !== me) return;
@@ -8667,17 +8680,19 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function runCommand(alternatives) {
     let reply = null;
     for (const t of alternatives) { reply = handleCommand(t); if (reply) break; }
-    if (reply) showReply(reply, true);
-    else showReply(`Sorry, I didn't catch that. Try “${hubMode === "company" ? "Start the catering timer" : "Start the turkey timer"}”.`, false);
+    if (reply) { voiceMiss = 0; showReply(reply, true); }
+    else showReply(`Sorry, I didn't catch that. Try again, or tap an example below.`, false, true);
   }
 
-  function showReply(text, ok) {
+  function showReply(text, ok, retry) {
     vOrb.classList.remove("listening");
     vStatus.textContent = ok ? "Done!" : "Hmm…";
     vReply.textContent = text;
-    speak(text);
     clearTimeout(closeTimer);
-    if (ok) closeTimer = setTimeout(closeVoice, 4500);
+    if (ok) { speak(text); closeTimer = setTimeout(closeVoice, 4500); return; }
+    if (retry && ++voiceMiss <= 3 && !vPanel.hidden) {   // didn't catch it: stay open and listen again, no need to close and tap the mic
+      closeTimer = setTimeout(() => { if (!vPanel.hidden) listen(true); }, 900);
+    } else { speak(text); if (retry) vStatus.textContent = "Tap the mic to try again"; }
   }
 
   // ---------- understanding what was said ----------
@@ -9083,6 +9098,19 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     vOrb.addEventListener("click", listen);
   }
   $("#voiceClose").addEventListener("click", closeVoice);
+  // 👋 first time in: a small box that explains the mic (shown once, after the welcome page)
+  (function () {
+    const box = $("#micIntro"); if (!box || !SR || load("micIntro", false)) return;
+    const done = () => { save("micIntro", true); box.hidden = true; clearInterval(poll); };
+    const poll = setInterval(() => {
+      if ($("#welcomeOverlay").classList.contains("show") || micBtn.hidden || !vPanel.hidden || $(".sheet.open")) return;
+      if (!load("welcomed", false)) return;
+      box.hidden = false; clearInterval(poll);
+    }, 2500);
+    $("#micIntroOk").addEventListener("click", done);
+    $("#micIntroTry").addEventListener("click", () => { done(); getAudio(); openVoice(); });
+    micBtn.addEventListener("click", () => { if (!box.hidden) done(); });
+  })();
   vPanel.addEventListener("click", e => { if (e.target === vPanel) closeVoice(); });
   $("#voiceChips").addEventListener("click", e => {
     const chip = e.target.closest("[data-cmd]");
