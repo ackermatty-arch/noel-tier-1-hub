@@ -3505,10 +3505,6 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
   <div class="xl-head"><span>SPREADSHEET PREVIEW</span><button type="button" id="xlClose">CLOSE</button></div>
   <div class="xl-tabs" id="xlTabs"></div><div class="xl-body" id="xlBody"></div>
   <div class="xl-foot"><button type="button" id="xlSave">SAVE SPREADSHEET</button></div></div>
-<div class="tour-ov" id="tourOverlay" role="dialog" aria-modal="true" aria-label="Quick tour"><div class="tour-box">
-  <div class="tour-n" id="tourN"></div><div class="tour-sq" id="tourSq"></div><h3 id="tourH"></h3><p id="tourP"></p>
-  <div class="tour-dots" id="tourDots"></div><button class="tour-btn" id="tourNext" type="button">NEXT</button>
-  <button class="tour-skip" id="tourSkip" type="button">Skip tour</button></div></div>
 <div class="alert-overlay" id="welcomeOverlay" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
   <form class="welcome-box classy-frame" id="welcomeForm" autocomplete="off">
     <div class="classy-brand">NOËL TIER 1 HUB</div>
@@ -3524,7 +3520,6 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
     <input class="welcome-input" id="familyInput" maxlength="30" placeholder="e.g. Smith" aria-label="Family name">
     <button class="classy-btn" type="submit">MAKE IT MINE</button>
     <button class="classy-link" type="button" id="welcomeSkip">SKIP FOR NOW</button>
-    <button class="classy-link" type="button" id="welcomeTour">TAKE A QUICK TOUR</button>
     <p class="welcome-hint">You can change it any time by tapping the name at the top.</p>
   </form>
 </div>
@@ -9860,24 +9855,6 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   /* ============================================================
      TOUR + START HERE (first-run help, no manual needed)
      ============================================================ */
-  const TOUR = {
-    family: [["1","Plan","Planner holds your tasks, guests and the big picture for the season."],["2","Cook","Menu sizes recipes, writes your shopping list and keeps your plans."],["3","Give","Gifts and Budget track ideas and spending so nothing sneaks up on you."],["4","Run it","Timers keep dinner on schedule. Cards sends invites. Everything saves on this phone."]],
-    company: [["1","Plan","Planner is your Event Coordinator home. Build the plan, then review it."],["2","Approve","Send the plan for approval. When it is approved, tap Approved and the final plan is made."],["3","Run it","Timers and run of show keep the day on schedule. Guests, votes and surveys live under More."],["4","Keep it","Saved plans stay on this phone so next year starts with a head start."]]
-  };
-  let tourI = 0;
-  function tourShow() {
-    const L = TOUR[hubMode === "company" ? "company" : "family"], t = L[tourI];
-    $("#tourN").textContent = "STEP " + (tourI + 1) + " OF " + L.length; $("#tourSq").textContent = t[0];
-    $("#tourH").textContent = t[1]; $("#tourP").textContent = t[2];
-    $("#tourDots").innerHTML = L.map((_, i) => `<i class="${i === tourI ? "on" : ""}"></i>`).join("");
-    $("#tourNext").textContent = tourI === L.length - 1 ? "GOT IT" : "NEXT";
-  }
-  function openTour() { tourI = 0; tourShow(); $("#welcomeOverlay").classList.remove("show"); $("#tourOverlay").classList.add("show"); }
-  function closeTour() { $("#tourOverlay").classList.remove("show"); save("toured", true); }
-  $("#tourNext").addEventListener("click", () => { const L = TOUR[hubMode === "company" ? "company" : "family"]; if (tourI >= L.length - 1) closeTour(); else { tourI++; tourShow(); } });
-  $("#tourSkip").addEventListener("click", closeTour);
-  $("#welcomeTour").addEventListener("click", () => { save("welcomed", true); openTour(); });
-  if (/[?&]tour\b/.test(location.search)) setTimeout(openTour, 600);
   let shOpen = false;
   function renderStartHere() {
     const el = $("#startHere"); if (!el) return;
@@ -9892,16 +9869,14 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const nextI = items.find(i => !sn[i[1]]), shown = shOpen ? items : [nextI];
     el.innerHTML = `<div class="sh-card"><div class="sh-top"><svg class="sh-ring" viewBox="0 0 54 54"><circle cx="27" cy="27" r="22" fill="none" stroke="#E6E6E6" stroke-width="5"/><circle cx="27" cy="27" r="22" fill="none" stroke="#B8935A" stroke-width="5" stroke-dasharray="${(C * pct).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 27 27)"/><text x="27" y="32" text-anchor="middle" font-size="14" font-family="Cinzel,serif" fill="#000">${done}/${items.length}</text></svg><div><h3>Start here</h3><small>${shOpen ? "Tap each one to look around." : "Up next"}</small></div></div>`
       + shown.map(i => `<button class="sh-item ${sn[i[1]] ? "done" : ""}" data-shgo="${i[1]}"><span class="sh-box">${sn[i[1]] ? "✓" : ""}</span><span class="t">${i[0]}</span></button>`).join("")
-      + `<div class="sh-foot"><button data-shmore>${shOpen ? "Show less" : "Show all"}</button><button data-shtour>Replay tour</button><button data-shhide>Hide</button></div></div>`;
+      + `<div class="sh-foot"><button data-shmore>${shOpen ? "Show less" : "Show all"}</button><button data-shhide>Hide</button></div></div>`;
   }
   document.addEventListener("click", e => {
     const g = e.target.closest("[data-shgo]"); if (g) { showView(g.dataset.shgo); return; }
     if (e.target.closest("[data-shwrap]")) { $("#memorySave").click(); return; }
     if (e.target.closest("[data-shmore]")) { shOpen = !shOpen; renderStartHere(); return; }
-    if (e.target.closest("[data-shtour]")) { openTour(); return; }
     if (e.target.closest("[data-shhide]")) { save("shHide", true); renderStartHere(); }
   });
-  function afterWelcomeTour() { if (!load("toured", false)) setTimeout(openTour, 350); }
 
   /* ============================================================
      SPREADSHEET EXPORT · preview on screen, then save a real .xlsx
@@ -10031,7 +10006,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#welcomeForm").addEventListener("submit", e => {
     e.preventDefault();
     setHubMode(pickedMode);
-    family = $("#familyInput").value.trim(); save("family", family); applyFamily(); closeWelcome(); afterWelcomeTour();
+    family = $("#familyInput").value.trim(); save("family", family); applyFamily(); closeWelcome();
     if (family) toast(hubMode === "company" ? `🎄 Welcome, ${family} team!` : `🎄 Welcome, ${familyTitle(family)}!`);
   });
   $("#welcomeSkip").addEventListener("click", closeWelcome);
