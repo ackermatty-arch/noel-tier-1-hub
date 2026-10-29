@@ -3639,6 +3639,9 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
       <button class="chip co-only" data-cmd="Start the catering timer">“Start the catering timer”</button>
       <button class="chip co-only" data-cmd="How long on the gift exchange?">“How long on the gift exchange?”</button>
       <button class="chip co-only" data-cmd="Set a 10 minute timer for the raffle">“Set a 10 minute timer for the raffle”</button>
+      <button class="chip" data-cmd="I ordered a blender from Amazon arriving Friday">“I ordered a blender from Amazon, arriving Friday”</button>
+      <button class="chip" data-cmd="What packages are coming">“What packages are coming?”</button>
+      <button class="chip" data-cmd="The blender arrived">“The blender arrived”</button>
       <button class="chip" data-cmd="Pause all timers">“Pause all timers”</button>
       <button class="chip" data-cmd="Open the planner">“Open the planner”</button>
     </div>
@@ -8789,6 +8792,44 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       const x = bestMatch(t, org.thanks, z => z.from);
       if (x) { x.done = true; saveOrg(); renderOrg(); return `Marked the thank-you to ${x.from} as sent.`; }
       return "I couldn't find that person in your thank-yous.";
+    }
+    // ---- 📦 packages: add an order, mark it arrived, ask what is coming ----
+    if (has(/\b(packages?|parcels?|deliver(?:y|ies)|shipments?)\b|\bi (?:just )?ordered\b|\bmy order\b/) || (has(/\barriv(?:e|ed|es|ing)\b/) && (org.packages || []).length && bestMatch(t, org.packages.filter(p => !p.arrived), x => x.item + " " + (x.store || "")))) {
+      const pk = org.packages || (org.packages = []), todayS = ymd(new Date());
+      const dayS = p => p.eta ? shortDate(p.eta) : "no date yet";
+      const open = pk.filter(p => !p.arrived);
+      if (has(/\b(open|show|go to|take me to|see)\b/) && !has(/\b(add|ordered)\b/)) { closeSheets(); org.view = "packages"; saveOrg(); renderOrg(); showView("org"); return "Here are your packages."; }
+      if (has(/\b(arrived|came|delivered|here|got|received|showed up)\b/) && !has(/\b(arrive|arriving|arrives)\b/)) {
+        const p = bestMatch(t, open, x => x.item + " " + (x.store || "")) || (open.length === 1 ? open[0] : null);
+        if (p) { p.arrived = true; orgChanged(); return `Great. ${p.item} has arrived.`; }
+        return open.length ? "Which package arrived? Say its name, like the blender arrived." : "You have no packages waiting.";
+      }
+      if (has(/\b(what|which|any|how many|when|list|where|late|waiting|expect(?:ing)?|coming|on the way)\b/) && !has(/\b(add|ordered)\b/)) {
+        if (!open.length) return "No packages on the way right now.";
+        const one = pk.length > 1 && bestMatch(t, open, x => x.item + " " + (x.store || ""));
+        if (one && has(/\b(when|where)\b/)) return `${one.item}${one.store ? " from " + one.store : ""}: ${one.eta ? "expected " + dayS(one) : "no delivery date yet"}.`;
+        const late = open.filter(p => p.eta && p.eta < todayS);
+        if (has(/\blate\b/)) return late.length ? `Running late: ${late.map(p => p.item).join(", ")}. Check the tracking or contact the store.` : "Nothing is running late.";
+        const next = open.slice().sort((x, y) => (x.eta || "9999") < (y.eta || "9999") ? -1 : 1).slice(0, 3);
+        return `${open.length} ${open.length === 1 ? "package" : "packages"} on the way. ${next.map(p => `${p.item}, ${dayS(p)}`).join(". ")}.${late.length ? ` ${late.length} running late.` : ""}`;
+      }
+      if (has(/\b(add|track|new|ordered|order|expecting|coming|arriving|arrives|due)\b/)) {
+        const stores = ["amazon", "walmart", "target", "best buy", "costco", "etsy", "canadian tire", "ebay", "home depot", "ikea", "shein", "temu"], store = stores.find(x => t.includes(x)) || "";
+        let u = t, eta = "", m;
+        const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"], mons = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], now = new Date(); now.setHours(12, 0, 0, 0);
+        const iso = d => ymd(d);
+        if ((m = /\btomorrow\b/.exec(u))) { const d = new Date(now); d.setDate(d.getDate() + 1); eta = iso(d); }
+        else if ((m = /\btoday\b/.exec(u))) eta = iso(now);
+        else if ((m = /\bin (\d+) days?\b/.exec(u))) { const d = new Date(now); d.setDate(d.getDate() + +m[1]); eta = iso(d); }
+        else if ((m = new RegExp("\\b(?:next |this |on )?(" + days.join("|") + ")\\b").exec(u))) { const d = new Date(now); d.setDate(d.getDate() + ((days.indexOf(m[1]) - now.getDay() + 7) % 7 || 7)); eta = iso(d); }
+        else if ((m = new RegExp("\\b(" + mons.join("|") + ")[a-z]*\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b").exec(u))) { let d = new Date(now.getFullYear(), mons.indexOf(m[1]), +m[2], 12); if (d < now - 30 * 864e5) d.setFullYear(d.getFullYear() + 1); eta = iso(d); }
+        if (m) u = u.replace(new RegExp("\\b(?:arriving|arrives|arrive|due|expected|coming|delivered|on|by|for)?\\s*" + m[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), " ");
+        if (store) u = u.replace(new RegExp("\\b(?:from|at|on|via)?\\s*" + store + "\\b"), " ");
+        u = u.replace(/\b(add|track|a|an|the|new|packages?|parcels?|orders?|ordered|i|just|my|deliver(?:y|ies)|shipments?|for|from|to|of|please|is|are|expecting|coming|arriving|arrives|due|that|will|be|can|you)\b/g, " ").replace(/\s+/g, " ").trim();
+        const item = u ? u.charAt(0).toUpperCase() + u.slice(1) : "Package", st = store ? store.replace(/\b\w/g, c => c.toUpperCase()) : "";
+        pk.push({ id: uid(), item, store: st, eta, track: "", arrived: false }); orgChanged();
+        return `Added ${item}${st ? " from " + st : ""}${eta ? ", arriving " + shortDate(eta) : ""}. I'll remind you on delivery day.`;
+      }
     }
     if (has(/\bnew years?\b|\bnye\b/) && (has(/\bguests?\b|\bpeople\b/))) {
       const c = cfgFor("nyeparty");
