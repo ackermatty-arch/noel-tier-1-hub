@@ -9834,7 +9834,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${list.map(w => `<div class="wish-item" data-wid="${w.id}">
           <div><b>${esc(w.what)}</b>${w.note ? `<small>${esc(w.note)}</small>` : ""}<small>Noted ${new Date(w.date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</small></div>
           <div class="wish-actions">${w.price ? `<span class="w-price">${money(w.price)}</span>` : ""}
-            <button class="w-move ${w.moved ? "done" : ""}" data-wact="move" ${w.moved ? "disabled" : ""}>${w.moved ? "✓ In gifts" : "➕ To gifts"}</button>
+            <button class="w-move ${w.moved ? "done" : ""}" data-wact="move" ${w.moved ? "disabled" : ""}>${w.moved ? "✓ Planned" : "Plan to buy"}</button>
             <button class="w-buy" data-wact="buy">Purchased</button></div>
           <button class="icon-btn" data-wact="del" aria-label="Delete ${esc(w.what)}">✕</button>
         </div>`).join("")}
@@ -9869,7 +9869,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       wishes = wishes.filter(x => x !== w); save("wishes", wishes); save("gifts", gifts); renderGifts(); renderWishes();
       toast(`🛍️ ${w.what} is purchased for ${p.name}. It counts in your budget.`); return;
     }
-    if (b.dataset.wact === "move") { moveWish(w); toast(`🎁 Added to ${w.who}'s gifts. It now counts in your budget.`); }
+    if (b.dataset.wact === "move") { moveWish(w); toast(`🎁 Planned for ${w.who}. It counts in your planned budget.`); }
     if (b.dataset.wact === "del") { if (!confirm(`Delete "${w.what}"?`)) return; wishes = wishes.filter(x => x !== w); save("wishes", wishes); renderWishes(); }
   });
   $("#wishShare").addEventListener("click", async () => {
