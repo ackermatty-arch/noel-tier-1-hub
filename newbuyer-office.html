@@ -2199,6 +2199,22 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 </style>
 </head>
 <body>
+<script>
+/* Erase: opening this page with ?erase=1 erases everything saved on this phone for the app, then reloads clean.
+   ?erase=family or ?erase=office erases just that side. It runs before anything else loads. */
+(function () {
+  try {
+    var q = new URLSearchParams(location.search), f = q.get("erase"); if (!f) return;
+    Object.keys(localStorage).forEach(function (k) {
+      if (k.indexOf("xmasHub_") !== 0) return;
+      var off = k.indexOf("xmasHub_office_") === 0;
+      if (f === "1" || (f === "family" && !off) || (f === "office" && off)) localStorage.removeItem(k);
+    });
+    try { sessionStorage.clear(); } catch (e) {}
+    location.replace(location.pathname + "?clean=" + Date.now());
+  } catch (e) {}
+})();
+</script>
 
 <!-- Decorative snow (filled by JS) -->
 <div class="snow" id="snow" aria-hidden="true"></div>
@@ -2558,6 +2574,8 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
         <button type="button" class="btn btn-gold" id="xlOpen">Spreadsheet (Excel)</button>
         <button type="button" class="btn btn-ghost" id="backupRestore">📂 Restore from a backup</button>
       </div>
+      <p class="backup-last" style="margin-top:14px">Want a clean slate? This erases every plan, list, alarm and setting saved on this phone, on this side of the app only.</p>
+      <button type="button" class="btn btn-ghost btn-block" id="startFresh">Start fresh (erase everything)</button>
       <input type="file" id="backupFile" accept=".json,application/json" hidden>
     </div>
 
@@ -7981,6 +7999,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     toast("📝 Task added!");
   });
 
+  $("#startFresh").addEventListener("click", async () => {
+    if (!confirm("Erase everything saved in the " + (SPACE === "office" ? "Office" : "Family") + " side of Noël on this phone?\n\nEvery plan, list, alarm and setting will be gone. Save a backup first if you want to keep anything.")) return;
+    if (!confirm("Last check. Erase it all and start fresh? This can't be undone.")) return;
+    try { await NoelVault.flush(); } catch (e) {}
+    try { NoelNative.scheduleList(3000, 5000, []); NoelNative.scheduleList(9300, 9316, []); } catch (e) {}
+    location.href = location.pathname + "?erase=" + (SPACE === "office" ? "office" : "family");
+  });
   $("#resetChecklist").addEventListener("click", () => {
     if (!confirm("Untick every task? Your custom tasks will be kept.")) return;
     checks = {}; save(KEYS.checks, checks); renderPlanner();
