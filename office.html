@@ -2742,6 +2742,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
     <div id="mealMenu" hidden></div>
     <h2 class="view-title" id="mealsTitle">Meal Planner</h2>
     <p class="view-intro">Pick a dinner, choose how many guests and when you'll eat. Noël sizes every recipe, estimates your grocery prices, writes your shopping list and sets every alarm.</p>
+    <div id="voiceShopBox" hidden></div>
     <div class="meal-master" id="mealMaster" hidden></div>
     <a href="#mealOwn" class="meal-skip" id="mealSkip">Making your own dinner? Timers &amp; vegan dishes ↓</a>
     <div id="mealHome">
@@ -3576,6 +3577,12 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
       <button class="chip fam-only" data-cmd="I bought a scarf for Mom 30 dollars">“I bought a scarf for Mom, 30 dollars”</button>
       <button class="chip fam-only" data-cmd="Add a gift book for Dad">“Add a gift book for Dad”</button>
       <button class="chip fam-only" data-cmd="Find the scarf">“Find the scarf”</button>
+      <button class="chip fam-only" data-cmd="Open the menu">“Open the menu”</button>
+      <button class="chip fam-only" data-cmd="Add a task buy wrapping paper">“Add a task: buy wrapping paper”</button>
+      <button class="chip fam-only" data-cmd="Add cranberries to the shopping list">“Add cranberries to the shopping list”</button>
+      <button class="chip fam-only" data-cmd="How many days until Christmas">“How many days until Christmas?”</button>
+      <button class="chip fam-only" data-cmd="How much have I spent on Mom">“How much have I spent on Mom?”</button>
+      <button class="chip fam-only" data-cmd="Set New Year's guests to 12">“Set New Year's guests to 12”</button>
       <button class="chip co-only" data-cmd="Start the catering timer">“Start the catering timer”</button>
       <button class="chip co-only" data-cmd="How long on the gift exchange?">“How long on the gift exchange?”</button>
       <button class="chip co-only" data-cmd="Set a 10 minute timer for the raffle">“Set a 10 minute timer for the raffle”</button>
@@ -7612,6 +7619,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     $$(".view").forEach(v => { v.classList.toggle("active", v.id === "view-" + name); v.classList.remove("slide-left", "slide-right"); });
     if (slide) $("#view-" + name).classList.add("slide-" + slide);
     if (name === "nye") renderNye();
+    if (name === "meals") renderVoiceShop();
     if (name === "planner" && typeof renderHost === "function") renderHost();
     if (name === "org") renderOrg();
     if (name === "office") renderOffice();
@@ -8562,6 +8570,103 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       if (pick) { playMusic(tracks().indexOf(pick)); return `Playing ${pick.title}.`; }
     }
 
+    // ---- More voice: countdown, tasks, shopping list, budget, cards, thank-yous, New Year's ----
+    if (has(/\bhow many (days|sleeps)\b.*\b(christmas|xmas)\b|\bdays (until|till|to|before) (christmas|xmas)\b|\bhow long (until|till|to) (christmas|xmas)\b|\bcountdown\b/)) {
+      const n = new Date(), days = Math.round((new Date(n.getFullYear(), 11, 25) - new Date(n.getFullYear(), n.getMonth(), n.getDate())) / 86400000);
+      return days === 0 ? "It's Christmas Day. Merry Christmas!" : days < 0 ? `Christmas was ${-days} days ago. See you next year!` : `${days} ${days === 1 ? "day" : "days"} until Christmas.`;
+    }
+    if (has(/\bhow many (days|sleeps)\b.*\bnew years?\b|\bdays (until|till|to) new years?\b/)) {
+      const n = new Date(), days = Math.round((new Date(n.getFullYear(), 11, 31) - new Date(n.getFullYear(), n.getMonth(), n.getDate())) / 86400000);
+      return days <= 0 ? "It's New Year's Eve tonight!" : `${days} ${days === 1 ? "day" : "days"} until New Year's Eve.`;
+    }
+    if ((m = /\b(?:add|new|create|make)\s+(?:an? |another )?(?:task|to ?do|reminder to do)\b[:\s]*(?:to\s+)?(.+?)\s*$/.exec(t)) && !has(/\b(timer|alarm)\b/)) {
+      const text = m[1].charAt(0).toUpperCase() + m[1].slice(1), ph = PHASES.find(p => phaseTasks(p).some(x => !checks[x.id])) || PHASES[0];
+      customTasks.push({ id: "c-" + uid(), phase: ph.id, text }); save(KEYS.custom, customTasks);
+      if (collapsed[ph.id]) { collapsed[ph.id] = false; save(KEYS.collapsed, collapsed); }
+      renderPlanner(); closeSheets(); showView("tasks"); return `Added the task "${text}" to ${ph.title}.`;
+    }
+    if ((m = /\b(?:add|put)\s+(.+?)\s+(?:to|on)\s+(?:the |my )?(?:shopping|grocery|groceries|extra shopping)(?: list)?\s*$/.exec(t))) {
+      const item = m[1].replace(/^(?:an? |some |the )/, "").trim(), name = item.charAt(0).toUpperCase() + item.slice(1);
+      voiceShop.push({ id: uid(), name, on: false }); save("voiceShop", voiceShop); renderVoiceShop();
+      return `Added ${name} to your shopping list. You'll find it at the top of the Menu page.`;
+    }
+    if (has(/\b(read|tell|what.?s on|whats on)\b.*\bshopping list\b|\bshopping list\b.*\b(read|out loud)\b/)) {
+      const open = voiceShop.filter(x => !x.on);
+      closeSheets(); showView("meals");
+      return open.length ? `Your extra shopping list has ${open.length} ${open.length === 1 ? "item" : "items"}: ${open.map(x => x.name).join(", ")}. Your dinner shopping lists are on this page too.` : "Your extra shopping list is empty. Your dinner shopping lists are on this page.";
+    }
+    if ((m = /\b(?:set|change|make|put)\s+(?:my\s+|the\s+)?(gift\s+|holiday\s+|overall\s+|total\s+)?budget\s+(?:to|at|for)\s+\$?(\d+(?:\.\d+)?)/.exec(t))) {
+      const n = parseFloat(m[2]);
+      if (/gift/.test(m[1] || "")) { gifts.budget = n; save("gifts", gifts); renderGifts(); } else { budget.limit = n; saveBudget(); }
+      try { renderBudget(); } catch (e) {} closeSheets(); showView("budget");
+      return `${/gift/.test(m[1] || "") ? "Gift" : "Holiday"} budget set to ${money(n)}.`;
+    }
+    if (has(/\b(left|remaining)\b.*\b(holiday|overall|total) budget\b|\b(holiday|overall|total) budget\b.*\b(left|remaining)\b|\bhow much have i spent (overall|in total|so far|altogether)\b/)) {
+      const T = budTotals();
+      closeSheets(); showView("budget");
+      return T.limit ? (T.limit - T.spent >= 0 ? `You've spent ${money(T.spent)} of ${money(T.limit)}, with ${money(T.limit - T.spent)} left.` : `You've spent ${money(T.spent)}. That's ${money(T.spent - T.limit)} over your ${money(T.limit)} budget.`) : `You've spent ${money(T.spent)} so far. Set a holiday budget to track what's left.`;
+    }
+    if ((m = /\bhow much (?:have i |did i |do i )?(?:spent|spend)\b.*\b(?:on|for)\s+(?:my\s+)?([a-z]+)\s*$/.exec(t))) {
+      const p = findPerson(m[1]);
+      if (p) { const sp = p.gifts.filter(isSpent).reduce((a, g) => a + (+g.price || 0), 0); return sp ? `You've spent ${money(sp)} on ${p.name}.` : `Nothing bought yet for ${p.name}.`; }
+    }
+    if (has(/\bcards?\b/) && has(/\b(sent|mailed|posted|received|got)\b/) && org.contacts.length) {
+      const c = bestMatch(t, org.contacts, x => x.name);
+      if (c) {
+        const y = orgYear(), got = has(/\b(received|got|came|arrived)\b/) && !has(/\b(sent|mailed|posted)\b/);
+        c[got ? "recv" : "sent"] = Object.assign(c[got ? "recv" : "sent"] || {}, { [y]: true }); saveOrg(); renderOrg();
+        return got ? `Noted. ${c.name}'s card arrived.` : `Marked ${c.name}'s card as sent.`;
+      }
+    }
+    if (has(/\bthank ?you\b|\bthanks note\b/) && has(/\b(sent|done|written|wrote|finished|complete)\b/)) {
+      const x = bestMatch(t, org.thanks, z => z.from);
+      if (x) { x.done = true; saveOrg(); renderOrg(); return `Marked the thank-you to ${x.from} as sent.`; }
+      return "I couldn't find that person in your thank-yous.";
+    }
+    if (has(/\bnew years?\b|\bnye\b/) && (has(/\bguests?\b|\bpeople\b/))) {
+      const c = cfgFor("nyeparty");
+      if ((m = /\b(?:set|change|make|put|plan)\b.*?(\d+)\s*(?:guests?|people)\b|\b(?:guests?|people)\b.*?\bto\s+(\d+)/.exec(t))) {
+        const n = Math.max(1, Math.min(20, +(m[1] || m[2]))); c.guests = n; mealCfg.nyeparty = c; save("mealCfg", mealCfg);
+        try { if (planOf("nyeparty")) startMealPlan(mealById("nyeparty"), true); renderNyeParty(); } catch (e) {}
+        closeSheets(); nyeScreen = "build"; showView("nye"); try { renderNyeMenu(); } catch (e) {}
+        return `New Year's Eve is set for ${n} guests${+(m[1] || m[2]) > 20 ? " (20 is the most I can plan)" : ""}.`;
+      }
+      return `You have ${c.guests} guests planned for New Year's Eve, starting at ${c.time}.`;
+    }
+    if (has(/\b(open|go to|show|take me to|see)\b.*\b(new years?|nye)\b/)) { closeSheets(); nyeScreen = "build"; showView("nye"); try { renderNyeMenu(); } catch (e) {} return "Here's your New Year's Eve plan."; }
+    if (has(/\b(open|go to|show|take me to|see|where)\b/)) {
+      const go = [[/\b(menu|meals?|dinner|dinners|recipes?)\b/, "meals", "Here's your menu."], [/\bbudget|spending\b/, "budget", "Here's your budget."], [/\b(plan|planner)\b/, "planner", "Here's your plan."], [/\bgift tracker\b/, "budget", "Here's your gift tracker."], [/\b(cards|e ?cards?)\b/, "invites", "Here are your cards."], [/\b(review|holiday review)\b/, "review", "Here's your holiday review."], [/\b(calendar|calender)\b/, "org", "Here's your calendar."]].find(([re]) => re.test(t));
+      if (go && !has(/\b(tasks?|print|timers?)\b/)) { closeSheets(); showView(go[1]); if (go[1] === "invites") showPane("cards"); window.scrollTo(0, 0); return go[2]; }
+    }
+
+    // Gifts by voice: "I bought a scarf for Mom 30 dollars" (counts in the budget) / "add a gift scarf for Mom" / "add scarf to moms gifts"
+    {
+      const PRICE = '(?:\\s+(?:for|at|costing|cost|about|it was)?\\s*(\\d+(?:\\.\\d+)?)(?:\\s*(?:dollars?|bucks))?)?', cap = x => x.charAt(0).toUpperCase() + x.slice(1);
+      let gm = new RegExp("\\b(?:i )?(?:bought|purchased|picked up)\\s+(?:an? |some |the )?(.+?)\\s+for\\s+([a-z]+)" + PRICE + "\\s*$").exec(t), bought = true;
+      if (!gm) { bought = false; gm = new RegExp("\\badd\\s+(?:an? |some |the )?(?:gift|present)(?: idea)?\\s+(.+?)\\s+(?:for|to|under)\\s+([a-z]+)" + PRICE + "\\s*$").exec(t)
+        || new RegExp("\\badd\\s+(?:an? |some |the )?(.+?)\\s+(?:to|under)\\s+([a-z]+?)s?\\s+(?:gifts?|present list)" + PRICE + "\\s*$").exec(t); }
+      if (gm && !has(/\b(timer|minutes?)\b/)) {
+        const what = cap(gm[1].trim()), who = cap(gm[2].trim()), price = parseFloat(gm[3]) || 0;
+        let p = findPerson(who);
+        if (!p) { p = { id: uid(), name: who, gifts: [] }; gifts.people.push(p); }
+        p.gifts.push({ id: uid(), name: what, price, status: bought ? "bought" : "idea" });
+        save("gifts", gifts); renderGifts(); try { renderBudget && renderBudget(); } catch (e) {}
+        closeSheets(); budget.tab = "set"; saveBudget(); showView("budget");
+        return bought ? `Added ${what} to ${p.name}'s gifts as bought${price ? " for " + money(price) : ""}. It counts in your budget.` : `Added ${what} to ${p.name}'s gift ideas${price ? ", about " + money(price) : ""}.`;
+      }
+    }
+    m = /^ ?(?:(?:add|put) (?:it )?(?:to|on) (?:the |my )?wish ?list:? )?(?:(?:for )?)([a-z][a-z ]{0,20}?) (?:wants|would like|wishes for|asked for|is wishing for|would love)(?: an?| some| the)? (.+?) ?$/.exec(t)
+      || /\bwish ?list (?:for )?([a-z]+) (?:an?|some|the )?(.+?) ?$/.exec(t);
+    if (m && !has(/\b(timer|minutes?|turkey timer)\b/)) {
+      const w = addWish(m[1].trim(), m[2].trim());
+      if (w) { closeSheets(); showView("gifts"); showGiftPane("wish"); return `Added ${w.what} to ${w.who}'s wish list.`; }
+    }
+    m = /\b(?:remind me next (?:year|christmas)|note for next (?:year|christmas)) (?:to )?(.+?) ?$/.exec(t);
+    if (m) { yearNotes.unshift({ id: uid(), text: m[1].charAt(0).toUpperCase() + m[1].slice(1), date: Date.now() }); save("yearNotes", yearNotes); renderReview(); return `Got it. Saved for next Christmas: ${m[1]}.`; }
+    if (has(/\b(best moments?|holiday review|review tab|notes? for next (year|christmas)|leave a review)\b/)) { closeSheets(); showView("review"); return "Here's your holiday review. Add your best moments and notes for next year."; }
+    if (has(/\bwish ?lists?\b/)) { closeSheets(); showView("gifts"); showGiftPane("wish"); return "Here's your wish list."; }
+    if (has(/\b(gift tracker|gifts|presents|shopping list)\b/) && !has(/\b(check off|tick off|cross off|mark|uncheck|untick|done with|finished)\b/)) { closeSheets(); budget.tab = "set"; saveBudget(); showView("budget"); return "Here's your gift tracker, on the Budget page."; }
+
     // Printables: "print the gift list", "print the moose place cards"
     if (has(/\b(print|printables?|print out)\b/)) {
       const said = t.replace(/\b(print|printables?|out|pdf|download|christmas|holiday|please|the|my|some|a)\b/g, " ");
@@ -8579,6 +8684,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     }
     // Gift budget
     if (has(/\b(how much).*\b(spent|spend|left)\b|\bmy budget\b|\bleft to spend\b/)) {
+      if (+budget.limit && !has(/\bgifts?\b/)) { const T = budTotals(); return T.limit - T.spent >= 0 ? `You've spent ${money(T.spent)} of ${money(T.limit)}, with ${money(T.limit - T.spent)} left.` : `You've spent ${money(T.spent)}. That's ${money(T.spent - T.limit)} over your ${money(T.limit)} budget.`; }
       const g = giftTotals();
       if (!g.budget) return `You've spent ${money(g.spent)} on gifts so far.`;
       return g.left >= 0 ? `You've spent ${money(g.spent)}, with ${money(g.left)} left in your budget.` : `You've spent ${money(g.spent)}. That's ${money(-g.left)} over budget.`;
@@ -8611,37 +8717,10 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (has(/\b(back ?up|restore)\b/)) { closeSheets(); showView("tasks"); { const f = $("#safeFold"); if (f) f.open = true; } setTimeout(() => $("#backupCard").scrollIntoView({ behavior: "smooth", block: "center" }), 150); return "Tap Save a backup to keep a copy of your lists."; }
     if (has(/\b(invites?|invitations?|guest list|guests)\b/)) { closeSheets(); showView("invites"); showPane("invites"); return "Here are your party invites."; }
     if (has(/\b(send a card|e ?cards?|christmas cards?|greeting cards?|new years? cards?)\b/)) { closeSheets(); showView("invites"); showPane("cards"); return "Let's send a card. Pick a design and write your message."; }
-    // Gifts by voice: "I bought a scarf for Mom 30 dollars" (counts in the budget) / "add a gift scarf for Mom" / "add scarf to moms gifts"
-    {
-      const PRICE = '(?:\\s+(?:for|at|costing|cost|about|it was)?\\s*(\\d+(?:\\.\\d+)?)(?:\\s*(?:dollars?|bucks))?)?', cap = x => x.charAt(0).toUpperCase() + x.slice(1);
-      let gm = new RegExp("\\b(?:i )?(?:bought|purchased|picked up)\\s+(?:an? |some |the )?(.+?)\\s+for\\s+([a-z]+)" + PRICE + "\\s*$").exec(t), bought = true;
-      if (!gm) { bought = false; gm = new RegExp("\\badd\\s+(?:an? |some |the )?(?:gift|present)(?: idea)?\\s+(.+?)\\s+(?:for|to|under)\\s+([a-z]+)" + PRICE + "\\s*$").exec(t)
-        || new RegExp("\\badd\\s+(?:an? |some |the )?(.+?)\\s+(?:to|under)\\s+([a-z]+?)s?\\s+(?:gifts?|present list)" + PRICE + "\\s*$").exec(t); }
-      if (gm && !has(/\b(timer|minutes?)\b/)) {
-        const what = cap(gm[1].trim()), who = cap(gm[2].trim()), price = parseFloat(gm[3]) || 0;
-        let p = findPerson(who);
-        if (!p) { p = { id: uid(), name: who, gifts: [] }; gifts.people.push(p); }
-        p.gifts.push({ id: uid(), name: what, price, status: bought ? "bought" : "idea" });
-        save("gifts", gifts); renderGifts(); try { renderBudget && renderBudget(); } catch (e) {}
-        closeSheets(); budget.tab = "set"; saveBudget(); showView("budget");
-        return bought ? `Added ${what} to ${p.name}'s gifts as bought${price ? " for " + money(price) : ""}. It counts in your budget.` : `Added ${what} to ${p.name}'s gift ideas${price ? ", about " + money(price) : ""}.`;
-      }
-    }
-    m = /^ ?(?:(?:add|put) (?:it )?(?:to|on) (?:the |my )?wish ?list:? )?(?:(?:for )?)([a-z][a-z ]{0,20}?) (?:wants|would like|wishes for|asked for|is wishing for|would love)(?: an?| some| the)? (.+?) ?$/.exec(t)
-      || /\bwish ?list (?:for )?([a-z]+) (?:an?|some|the )?(.+?) ?$/.exec(t);
-    if (m && !has(/\b(timer|minutes?|turkey timer)\b/)) {
-      const w = addWish(m[1].trim(), m[2].trim());
-      if (w) { closeSheets(); showView("gifts"); showGiftPane("wish"); return `Added ${w.what} to ${w.who}'s wish list.`; }
-    }
-    m = /\b(?:remind me next (?:year|christmas)|note for next (?:year|christmas)) (?:to )?(.+?) ?$/.exec(t);
-    if (m) { yearNotes.unshift({ id: uid(), text: m[1].charAt(0).toUpperCase() + m[1].slice(1), date: Date.now() }); save("yearNotes", yearNotes); renderReview(); return `Got it. Saved for next Christmas: ${m[1]}.`; }
-    if (has(/\b(best moments?|holiday review|review tab|notes? for next (year|christmas)|leave a review)\b/)) { closeSheets(); showView("review"); return "Here's your holiday review. Add your best moments and notes for next year."; }
-    if (has(/\bwish ?lists?\b/)) { closeSheets(); showView("gifts"); showGiftPane("wish"); return "Here's your wish list."; }
-    if (has(/\b(gift tracker|gifts|presents|shopping list)\b/) && !has(/\b(check off|tick off|cross off|mark|uncheck|untick|done with|finished)\b/)) { closeSheets(); budget.tab = "set"; saveBudget(); showView("budget"); return "Here's your gift tracker, on the Budget page."; }
-
     // Voice search: "find the scarf", "where is Moms gift", "search for Dad"
     if ((m = /^\s*(?:find|search(?: for)?|look up|look for|where(?: is| are| s)?(?: the| my)?|show me)\s+(.+?)\s*$/.exec(t))) {
-      const q = m[1].replace(/\b(gifts?|presents?|for|the|my|a|an)\b/g, " ").replace(/s\b/g, w => w).trim().split(/\s+/).filter(Boolean);
+      const q = m[1].replace(/\b(gifts?|presents?|list|lists|tracker|for|the|my|a|an)\b/g, " ").replace(/s\b/g, w => w).trim().split(/\s+/).filter(Boolean);
+      if (!q.length) { closeSheets(); budget.tab = "set"; saveBudget(); showView("budget"); return "Here's your gift tracker, on the Budget page."; }
       const hit = [];
       gifts.people.forEach(p => p.gifts.forEach(g => { const hay = (p.name + " " + g.name).toLowerCase().replace(/[’']/g, ""); if (q.length && q.every(w => hay.includes(w.replace(/s$/, "")))) hit.push({ p, g }); }));
       if (!hit.length) gifts.people.forEach(p => { if (q.length && q.every(w => p.name.toLowerCase().includes(w.replace(/s$/, "")))) p.gifts.forEach(g => hit.push({ p, g })); });
@@ -8656,7 +8735,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
 
     // 2. Help
     if (has(/\b(help|what can (i|you) say|commands)\b/))
-      return "You can say: start the turkey timer, set a 10 minute timer for potatoes, check off wrap gifts, I bought a scarf for Mom 30 dollars, add a gift book for Dad, find the scarf, print the gift list, or open the planner.";
+      return "You can say: start the turkey timer, set a 10 minute timer for potatoes, check off wrap gifts, add a task, add cranberries to the shopping list, how many days until Christmas, open the menu, I bought a scarf for Mom 30 dollars, add a gift book for Dad, find the scarf, print the gift list, or open the planner.";
 
     // 3. All timers at once
     if (has(/\b(pause|stop|hold) (all|every|everything)\b/)) {
@@ -9461,6 +9540,21 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
      then move wishes into the Gift Tracker to budget for them.
      ============================================================ */
   let wishes = load("wishes", []);
+  let voiceShop = load("voiceShop", []);   // extra shopping items added by voice, shown at the top of the Menu page
+  function renderVoiceShop() {
+    const el = $("#voiceShopBox"); if (!el) return;
+    el.hidden = !voiceShop.length;
+    el.innerHTML = voiceShop.length ? `<div class="card"><h3>My extra shopping items</h3><ul class="host-list">${voiceShop.map(x => `<li data-vs="${x.id}"><label class="${x.on ? "on" : ""}"><input type="checkbox" data-vson ${x.on ? "checked" : ""}><span>${esc(x.name)}</span></label><button type="button" class="btn btn-ghost btn-sm" data-vsdel aria-label="Remove ${esc(x.name)}">Remove</button></li>`).join("")}</ul>${voiceShop.some(x => x.on) ? `<button type="button" class="btn btn-ghost btn-sm" data-vsclear>Clear ticked items</button>` : ""}</div>` : "";
+  }
+  document.addEventListener("click", e => {
+    const li = e.target.closest("[data-vs]"); const t = e.target;
+    if (t.closest("[data-vsclear]")) { voiceShop = voiceShop.filter(x => !x.on); save("voiceShop", voiceShop); renderVoiceShop(); return; }
+    if (!li) return;
+    const x = voiceShop.find(z => z.id === li.dataset.vs); if (!x) return;
+    if (t.closest("[data-vsdel]")) { voiceShop = voiceShop.filter(z => z !== x); save("voiceShop", voiceShop); renderVoiceShop(); }
+    else if (t.matches("[data-vson]")) { x.on = t.checked; save("voiceShop", voiceShop); renderVoiceShop(); }
+  });
+
   const wishKey = n => String(n || "").trim().toLowerCase();
   function findPerson(name) { return gifts.people.find(p => wishKey(p.name) === wishKey(name)); }
   function addWish(who, what, price, note) {
