@@ -12233,7 +12233,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const clean = i => esc(String(i).replace(/\s*\(24 pieces\)/, ""));
     const food = all.filter(([c]) => !/drink|pairing/i.test(c)).flatMap(([, it]) => it.map(clean)), drinks = all.filter(([c]) => /drink/i.test(c)).flatMap(([, it]) => it.map(clean));
     const dot = " <i>·</i> ", blk = (name, body) => `<div class="menu-dish"><h4>${name}</h4>${body}</div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
-    el.innerHTML = `<div class="menu-top">${go}</div>
+    const own = `<button type="button" class="menu-go menu-skip" data-nyeown>My own plans</button>`;
+    el.innerHTML = `<div class="menu-top">${own}${go}</div>
       <p class="menu-star">✦</p><h2 class="menu-title">New Year's Eve</h2><p class="menu-sub">Party bites, games and a midnight countdown, all planned for you</p><p class="menu-rule"><span></span>✦<span></span></p>
       <h3 class="menu-group">The Party</h3>` +
       blk("New Year's Eve Party", `<p class="menu-items">${food.join(dot)}</p><p class="menu-drinks"><b>Drinks</b> ${drinks.join(dot)}</p>`) +
@@ -12246,11 +12247,25 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       `<p class="menu-note">Choose your guests and start time, and Noël builds the rest.</p>
       <div class="menu-bottom"><p class="menu-ready">Ready to build your night?</p>${go}<button type="button" class="menu-own" data-nyecount>Just here for the countdown? Open it ›</button></div>`;
   }
+  document.addEventListener("click", e => {   // opening My Own Dinner from anywhere but New Year's resets its back buttons
+    if (e.target.closest && e.target.closest("[data-goview=own],[data-menuskip],[data-svown]")) {
+      const f = $("#view-own .meal-back.fam-only"), c = $("#view-own .meal-back.co-only");
+      if (f) { f.dataset.goview = "meals"; f.textContent = "‹ The Noël menu"; } if (c) { c.dataset.goview = "planner"; c.textContent = "‹ Planner"; }
+    }
+  }, true);
   document.addEventListener("click", e => {
     const nav = e.target.closest && e.target.closest("[data-goview=nye],[data-view=nye]");
     if (nav) { nyeScreen = "menu"; setTimeout(renderNyeMenu, 0); }
   }, true);
   $("#view-nye").addEventListener("click", e => {
+    if (e.target.closest("[data-nyeown]")) {   // 📝 my own plans: the typed notebook, set up for New Year's Eve
+      const co = hubMode === "company", nm = co ? "New Year's Eve party" : "My New Year's Eve";
+      let d = ownDinners.find(x => x.title === nm);
+      if (!d) { d = ownNew(); d.title = nm; const n = new Date(), y = n.getMonth() === 0 ? n.getFullYear() - 1 : n.getFullYear(); d.date = y + "-12-31"; d.time = "20:00"; ownDinners.push(d); }
+      ownId = d.id; saveOwn(); showView("own");
+      $$("#view-own .meal-back").forEach(b => { b.dataset.goview = "nye"; b.textContent = "‹ New Year's Eve"; });
+      window.scrollTo(0, 0); return;
+    }
     if (e.target.closest("[data-nyego]")) { nyeScreen = "build"; renderNyeMenu(); window.scrollTo(0, 0); }
     if (e.target.closest("[data-nyemenu]")) { nyeScreen = "menu"; renderNyeMenu(); window.scrollTo(0, 0); }
     if (e.target.closest("[data-nyecount]")) { nyeScreen = "build"; renderNyeMenu(); window.scrollTo(0, 0); }
