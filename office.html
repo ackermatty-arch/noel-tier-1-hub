@@ -947,7 +947,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .apps-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 12px; }
 .apps-filters .chip.on { background: var(--pine); color: #fff; border-color: var(--pine); }
 .apps-list { display: grid; gap: 10px; }
-.app-item { display: grid; grid-template-columns: 40px 1fr 36px; gap: 10px; align-items: start; padding: 14px; }
+.app-item { display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: start; padding: 14px; }
 .app-emo { font-size: 28px; line-height: 1.1; }
 .app-item h4 { margin: 0; font-size: 16.5px; color: var(--pine); }
 .app-item p { margin: 3px 0 0; font-size: 13.5px; color: var(--ink); line-height: 1.45; }
@@ -2192,6 +2192,9 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 .apps-build .ab-n { color: #E3C98A; font: 600 14px Cinzel, serif; letter-spacing: .1em; text-transform: uppercase; } .apps-build .ab-n b { color: #fff; font-size: 18px; }
 .apps-build .btn { margin: 0; background: #E3C98A !important; color: #151515 !important; border-color: #E3C98A !important; }
 .pr-menu { margin: 6px 0 0; font-size: 14px; line-height: 1.5; } .pr-menu b { display: block; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #8a6a24; }
+
+.app-fav[data-fav] { width: auto; min-width: 58px; height: 38px; padding: 0 12px; border-radius: 0 !important; background: #151515; color: #fff; border: 1px solid #151515; font: 600 13px Cinzel, serif; letter-spacing: .1em; text-transform: uppercase; align-self: start; }
+.app-fav[data-fav][aria-pressed="true"] { background: #fff; color: #151515; border: 2px solid #C9A45C; }
 </style>
 </head>
 <body>
@@ -3219,7 +3222,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
   </div>
   <div class="sheet-body">
     <div class="sheet-inner">
-      <p class="advent-intro">Party bites for New Year's Eve, Christmas Eve or any get-together. Tap ☆ on the appetizers you want, then tap Build my menu at the bottom.</p>
+      <p class="advent-intro">Party bites for New Year's Eve, Christmas Eve or any get-together. Tap Add on the appetizers you want, then tap Build my menu at the bottom.</p>
 
       <div class="card apps-calc">
         <h3>🧮 How many should I make?</h3>
@@ -3240,7 +3243,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
         <button class="chip" data-f="warm">Warm</button>
         <button class="chip" data-f="veg">Vegetarian</button>
         <button class="chip" data-f="sweet">Sweet</button>
-        <button class="chip" data-f="fav">★ My picks</button>
+        <button class="chip" data-f="fav">My picks</button>
       </div>
       <div class="apps-list" id="appsList"></div>
       <div class="apps-build" id="appsBuild"></div>
@@ -10395,8 +10398,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         <div class="app-emo">${a[0]}</div>
         <div><h4>${esc(a[1])}</h4><p>${esc(a[2])}</p><p class="app-tip">💡 ${esc(a[3])}</p>
           <div class="app-tags"><span>⏱ ${esc(a[5])}</span>${a[4].split(" ").map(t => `<span>${APP_TAG_NAMES[t]}</span>`).join("")}</div></div>
-        <button class="app-fav" data-fav="${esc(a[1])}" aria-pressed="${appFavs[a[1]] ? "true" : "false"}" aria-label="Add ${esc(a[1])} to my menu">${appFavs[a[1]] ? "★" : "☆"}</button>
-      </div>`).join("") : `<p class="apps-empty">${appFilter === "fav" ? "Tap ☆ on any idea to add it to your menu." : "No ideas match."}</p>`;
+        <button class="app-fav" data-fav="${esc(a[1])}" aria-pressed="${appFavs[a[1]] ? "true" : "false"}" aria-label="Add ${esc(a[1])} to my menu">${appFavs[a[1]] ? "Added" : "Add"}</button>
+      </div>`).join("") : `<p class="apps-empty">${appFilter === "fav" ? "Tap Add on any idea to put it on your menu." : "No ideas match."}</p>`;
     renderAppsCalc(); renderAppsBuild();
   }
   function renderAppsBuild() {
@@ -10424,7 +10427,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#appsBuild").addEventListener("click", e => {
     if (!e.target.closest("[data-appbuild]")) return;
     const picks = APPETIZERS.map(a => a[1]).filter(n => appFavs[n]);
-    if (!picks.length) { toast("Tap ☆ on the appetizers you want first"); return; }
+    if (!picks.length) { toast("Tap Add on the appetizers you want first"); return; }
     const c = cfgFor("nyeparty"); c.picks = picks; mealCfg.nyeparty = c; save("mealCfg", mealCfg);
     if (planOf("nyeparty")) startMealPlan(mealById("nyeparty"), true);
     closeSheet("appsSheet"); nyeScreen = "build"; showView("nye"); renderNyeMenu(); renderNyeParty(); window.scrollTo(0, 0);
@@ -10433,7 +10436,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#appsList").addEventListener("click", e => {
     const b = e.target.closest("[data-fav]"); if (!b) return;
     const k = b.dataset.fav;
-    if (appFavs[k]) delete appFavs[k]; else { appFavs[k] = true; toast("★ Added to your menu"); }
+    if (appFavs[k]) delete appFavs[k]; else { appFavs[k] = true; toast("Added to your menu"); }
     save("appFavs", appFavs); renderApps();
   });
 
