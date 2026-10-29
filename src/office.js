@@ -162,6 +162,7 @@
     return `<div class="card pt-card"><h3>💵 ${Y} office events budget</h3>
       <label class="off-f wide"><span class="meal-lab">Yearly budget for all events</span><input class="input" type="number" inputmode="decimal" min="0" data-oybud value="${lim || ""}" placeholder="$"></label>
       <div class="oy-sum"><div><b>${money(total)}</b><small>planned in ${Y}</small></div>${lim ? `<div><b>${money(Math.abs(lim - total))}</b><small>${total > lim ? "over budget" : "left"}</small></div>` : ""}</div>
+      ${lim ? `<button type="button" class="btn btn-ghost btn-block" data-oybudclear>Clear this budget and start fresh</button>` : ""}
       ${lim ? `<div class="oy-meter"><i style="width:${Math.min(100, Math.round(total / lim * 100))}%" class="${total > lim ? "over" : ""}"></i></div>` : ""}
       ${total > lim && lim ? `<p class="org-warn">⚠️ ${money(total - lim)} over the yearly budget.</p>` : ""}
       <div class="oy-bars" role="img" aria-label="Planned spending by month">${by.map((v, i) => `<div><em>${v ? money(v) : ""}</em><span><u style="height:${Math.round(v / mx * 100)}%"></u></span><small>${OY_MONTHS[i].slice(0, 3)}</small></div>`).join("")}</div></div>
@@ -361,6 +362,7 @@
     const missing = [!off.ev.date && "a date", !off.ev.venue && "a venue", !off.costs.length && "costs", !off.ev.organizer && "your name"].filter(Boolean);
     return `<div class="card pt-card ap-status ${a.status}"><div class="ap-big">${AP_TXT[a.status][0]}</div><div><b>${AP_TXT[a.status][1]}</b>
         <small>${a.status === "sent" && a.sentAt ? `Sent ${new Date(a.sentAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })} to ${esc(off.ev.approver || "your approver")}. Noël will remind you to follow up in ${a.followDays} days if you haven't heard back.` : a.status === "approved" ? `Go ahead and book everything! 🎉${last && last.note ? `<br>“${esc(last.note)}”` : ""}` : a.status === "changes" ? `${last && last.note ? `“${esc(last.note)}”<br>` : ""}Update the plan on the Event tab, then send the new version below.` : "Fill in the plan, check the letter below, then send it."}</small></div></div>
+      ${a.status !== "draft" || off.confirmed ? `<button type="button" class="btn btn-ghost btn-block" data-offundo style="margin-bottom:12px">↩ Undo, take this back to draft</button>` : ""}
       ${a.status === "approved" ? `<button type="button" class="btn btn-gold btn-block" data-oftab="plan" style="margin-bottom:12px">📄 Open my approved plan ›</button>` : ""}
       ${a.status !== "approved" ? `<div class="card pt-card"><h3>🙋 No one to ask?</h3><p class="host-rem">Own the business or make this call yourself? Skip the request and mark it approved. Your plan opens right away.</p><button type="button" class="btn btn-green btn-block" data-apset="approved" data-apnote="Approved by me, no request needed">✅ I approve it myself</button></div>` : ""}
       <div class="card pt-card"><h3>👤 Who approves it?</h3><div class="off-grid">${fld("approver", "Name", "text", "e.g. Mike")}${fld("approverEmail", "Email", "email", "boss@company.com")}</div></div>
@@ -581,6 +583,7 @@
     off.acts = { potluck: 1, gifts: 1, awards: 1, games: 1 }; off.costs = []; off.pot = []; off.polls = []; off.tbPick = []; off.santa = { time: "", who: "" }; off.food = null; off.confirmed = null;
     off.guests = o.guests ? (off.guests || []).map(g => Object.assign({}, g, { status: "pending" })) : []; if (!o.team) off.team = []; if (off.wep) off.wep.order = null;
     off.appr = { status: "draft", log: [], followDays: (off.appr && off.appr.followDays) || 3 }; off.tab = "event";
+    oy.budget = 0; oy.gift = 0; saveOy();
     off.chk = null; off.wrap = { worked: "", change: "" }; off.fired = {}; off.confirmed = null;
     { const cur = oy.events.find(x => x.id === oy.active); if (cur) { cur.name = "Holiday Party"; cur.date = ""; cur.month = 12; cur.snap = null; saveOy(); } }   // the year calendar starts fresh too
     try {   // 💰 the Budget tab: spending always starts at zero; the category budgets stay only if "Budget amount" is ticked
@@ -821,6 +824,8 @@
       location.href = INVITE.mailHref(off.ev.approverEmail || "", L.subject, L.body); setTimeout(apMarkSent, 800); return;
     }
     if (t.closest("#apCopy")) { const L = offLetter(off.appr.status === "changes"); try { await navigator.clipboard.writeText(L.subject + "\n\n" + L.body); toast("📋 Copied! Paste it into an email or message"); } catch (err) { toast("Couldn't copy on this device"); } if (off.appr.status === "draft" || off.appr.status === "changes") setTimeout(() => { if (confirm("Mark the request as sent?")) apMarkSent(); }, 400); return; }
+    if (t.closest("[data-oybudclear]")) { if (!confirm("Clear the yearly budget and start fresh?")) return; oy.budget = 0; oy.gift = 0; saveOy(); renderOffice(); toast("✦ Budget cleared"); return; }
+    if (t.closest("[data-offundo]")) { off.confirmed = null; off.appr.status = "draft"; off.appr.log.push({ at: Date.now(), s: "draft", note: "Taken back to draft" }); saveOff(); renderOffice(); window.scrollTo(0, 0); toast("✦ Back to draft. Nothing was deleted"); return; }
     const as = t.closest("[data-apset]"); if (as) { const note = as.dataset.apnote || ($("#apNote") || {}).value || ""; off.appr.status = as.dataset.apset; off.appr.log.push({ at: Date.now(), s: as.dataset.apset, note: note.trim() }); if (as.dataset.apset === "approved") offSavePlan(); off.tab = "plan"; saveOff(); offSync(); renderOffice(); toast(as.dataset.apset === "approved" ? "🎉 Approved! Your plan is ready" : "✏️ Noted. Update the plan, then send the new version"); return; }
     if (t.closest("#potShare")) { NoelMedia.share(new Blob([potText()], { type: "text/plain" }), "Potluck.txt", potText()).catch(() => {}); return; }
     if (t.closest("#offNewYear")) {
