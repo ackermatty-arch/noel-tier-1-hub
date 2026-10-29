@@ -2153,6 +2153,7 @@ body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!impor
 /* Holiday Review stays hidden until Dec 26 (or until opened) */
 .nav-btn[data-view="review"]{display:none}
 body.rev-open .nav-btn[data-view="review"]{display:flex}
+.gold-star{color:#C9A45C}
 .shop-timing{border:1px solid #C9A45C;padding:8px 12px;margin:0 0 10px;font-size:13.5px}.shop-timing p{margin:2px 0}
 .shop-when{float:right;font:700 10px "Cinzel",serif;letter-spacing:.1em;text-transform:uppercase;border:1px solid #9A7424;color:#9A7424;padding:2px 7px}.shop-when.now{background:#16130E;color:#E3C98A;border-color:#16130E}
 .cap-row{display:flex;gap:8px;align-items:center;margin:8px 0 2px;font-size:13px}.cap-row input{width:92px;min-height:38px}.cap-msg{font-size:13px;color:#6A6354}.cap-msg.over{color:#9E1B25;font-weight:700}
@@ -8207,7 +8208,7 @@ const TASK_TAGS = {"os-4":["h","Plan"],"f0-1":["h","Gifts"],"f0-2":["h","Gifts"]
             <label>
               <input type="checkbox" ${checks[t.id] ? "checked" : ""}>
               <span class="checkmark"></span>
-              <span class="task-text">${esc(t.text)}${taskTag(t.id)}</span>
+              <span class="task-text">${esc(t.text).replace(/✦/g, `<span class="gold-star">✦</span>`)}${taskTag(t.id)}</span>
             </label>
             ${t.custom ? `<button class="icon-btn" data-del="${t.id}" aria-label="Delete task">✕</button>` : ""}
           </li>`).join("")}
