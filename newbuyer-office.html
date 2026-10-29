@@ -3667,6 +3667,8 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
 <div class="mic-intro" id="micIntro" role="dialog" aria-labelledby="micIntroT" hidden>
   <b id="micIntroT">Meet your voice helper</b>
   <p>Tap the microphone, then just say what you need, like <i class="fam-only">"Start the turkey timer"</i><i class="co-only">"Start the catering timer"</i> or "Add a gift book for Dad". It shows examples you can tap, and it keeps listening if it misses a word.</p>
+  <p class="co-only"><b style="display:inline;font-size:inherit;letter-spacing:.04em">If plans change:</b> use <i>Start a new plan</i> on the More tab, or say <i>"Boss canceled plans"</i> into the mic. Your old plan is saved first, and nothing on your computer is touched.</p>
+  <p class="co-only"><b style="display:inline;font-size:inherit;letter-spacing:.04em">If plans change:</b> use <i>Start a new plan</i> on the More tab, or say <i>"Boss canceled plans"</i> into the mic. Your old plan is saved first, and nothing on your computer is touched.</p>
   <div class="mi-btns"><button type="button" id="micIntroTry">Try it</button><button type="button" id="micIntroOk">Got it</button></div>
 </div>
 <div class="voice-panel" id="voicePanel" role="dialog" aria-modal="true" aria-labelledby="voiceStatus" hidden>
@@ -8951,7 +8953,7 @@ const TASK_TAGS = {"os-4":["h","Plan"],"f0-1":["h","Gifts"],"f0-2":["h","Gifts"]
       }
       return `You have ${c.guests} guests planned for New Year's Eve, starting at ${c.time}.`;
     }
-    if (document.body.classList.contains("co") && has(/\b(cancel|scrap|start over|start fresh|new plan|reset|boss|plans? (changed|changing|are changing)|different plan|change of plans?)\b/)) { closeSheets(); off.tab = "more"; saveOff(); showView("office"); try { renderOffice(); } catch (e) {} window.scrollTo(0, 0); return "Here it is. Tap Start a new plan. Your old plan is saved first, so nothing is lost."; }
+    if (document.body.classList.contains("co") && has(/\b(cancel(l?ed)?|scrap(ped)?|start over|start fresh|new plan|reset|boss|plans? (changed|changing|are changing)|different plan|change of plans?)\b/)) { closeSheets(); off.tab = "more"; saveOff(); showView("office"); try { renderOffice(); } catch (e) {} window.scrollTo(0, 0); return "Here it is. Tap Start a new plan. Your old plan is saved first, so nothing is lost."; }
     if (has(/\b(open|go to|show|take me to|see|where)\b.*\b(saved|my) (menus?|dinners?)\b|\bsaved menus?\b/)) { closeSheets(); mealView = "saved"; showView("meals"); try { renderMeals(); } catch (e) {} window.scrollTo(0, 0); return "Here are your saved menus."; }
     if (has(/\b(open|go to|show|take me to|see)\b.*\b(new years?|nye)\b/)) { closeSheets(); nyeScreen = "build"; showView("nye"); try { renderNyeMenu(); } catch (e) {} return "Here's your New Year's Eve plan."; }
     if (has(/\b(open|go to|show|take me to|see|where)\b/)) {
