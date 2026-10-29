@@ -14566,19 +14566,26 @@ const PC_DESIGNS = [
     const d = e.date ? offDays(e.date) : null;
     const todo = off.costs.filter(c => c.orderBy && !c.ordered).sort((a, b) => a.orderBy < b.orderBy ? -1 : 1).slice(0, 3);
     const dashHtml = `<div class="card co-dash"><div class="cd-head"><span class="cd-k">Your event</span><b>${esc(e.name || "Holiday Party")}</b><small>${e.date ? esc(offDate(e.date)) + (e.start ? " · " + esc(offTime(e.start)) : "") : "Set the date to start the countdown"}</small></div>
-      <div class="cd-tiles"><button type="button" data-coto="event"><b>${d == null ? "–" : d < 0 ? "Done" : d}</b><small>${d == null ? "date" : d < 0 ? "event over" : d === 1 ? "day to go" : "days to go"}</small></button>
-      <button type="button" data-coto="${hasG ? "guests" : "event"}"><b>${hc || "–"}</b><small>${hasG ? "coming" : "guests"}</small></button>
+      <div class="cd-tiles"><button type="button" data-coto="event" data-cofocus="date"><b>${d == null ? "–" : d < 0 ? "Done" : d}</b><small>${d == null ? "date" : d < 0 ? "event over" : d === 1 ? "day to go" : "days to go"}</small></button>
+      <button type="button" data-coto="${hasG ? "guests" : "event"}" data-cofocus="headcount"><b>${hc || "–"}</b><small>${hasG ? "coming" : "guests"}</small></button>
       <button type="button" data-coto="approval"><b>${esc(OFF_STATUS[off.appr.status] || off.appr.status)}</b><small>approval</small></button></div>
       <button type="button" class="btn btn-ghost btn-block" data-coto="year" style="margin-bottom:10px">🗓️ My year of events (${Math.max(1, oy.events.length)}) ›</button>
       ${off.appr.status === "approved" ? `<button type="button" class="btn btn-gold btn-block" data-coto="plan" style="margin-bottom:10px">📄 Open my approved plan ›</button>` : ""}
-      <button type="button" class="cd-bud" data-coto="event"><span><b>${money(total)}</b> planned${lim ? ` of <b>${money(lim)}</b> approved` : ""}</span>${lim ? `<i><u style="width:${pct}%"></u></i>` : `<small>Add the approved budget on the Event tab</small>`}</button>
+      <button type="button" class="cd-bud" data-coto="event" data-cofocus="budget"><span><b>${money(total)}</b> planned${lim ? ` of <b>${money(lim)}</b> approved` : ""}</span>${lim ? `<i><u style="width:${pct}%"></u></i>` : `<small>Add the approved budget on the Event tab</small>`}</button>
       ${(off.saved || []).length ? `<button type="button" class="btn btn-ghost btn-block" data-coto="saved" style="margin-top:10px">📁 My saved plans (${off.saved.length})</button>` : ""}
       ${todo.length ? `<div class="cd-todo"><h4>To order</h4>${todo.map(c => `<div class="cd-ord"><div><b>${esc(c.name || c.type)}</b><small>Order by ${esc(offDate(c.orderBy, { month: "short", day: "numeric" }))}${offDays(c.orderBy) < 0 ? " · date has passed" : ""}</small></div><span class="of-acts">${offLinks(c)}<button type="button" class="of-lnk of-done" data-ocdone="${c.id}">Mark ordered</button></span></div>`).join("")}</div>` : ""}</div>`;
     els.forEach(el => { el.innerHTML = dashHtml; });
   }
   window.__offPicks = () => { const F = offFoodCfg(); return F.picks && F.picks.length ? F.picks.slice() : OFF_DEFAULT_PICKS.slice(); };
   document.addEventListener("click", e => {
-    const b = e.target.closest("[data-coto]"); if (b) { off.tab = b.dataset.coto; saveOff(); showView("office"); return; }
+    const b = e.target.closest("[data-coto]"); if (b) { off.tab = b.dataset.coto; saveOff(); showView("office");
+      const fk = b.dataset.cofocus;   // already on this page? jump down to the box and open it
+      setTimeout(() => {
+        const f = fk && off.tab === "event" && !(fk === "headcount" && offGuests().length) ? $(`#offBody [data-ev="${fk}"]`) : null, body = $("#offBody");
+        if (f) { f.scrollIntoView({ block: "center", behavior: "smooth" }); setTimeout(() => { try { f.focus(); if (fk === "date") f.click(); } catch (er) {} }, 350); }
+        else if (body) body.scrollIntoView({ block: "start", behavior: "smooth" });
+      }, 60);
+      return; }
     const od = e.target.closest("#coDash [data-ocdone]"); if (od) { const c = off.costs.find(x => x.id === od.dataset.ocdone); if (c) { c.ordered = !c.ordered; saveOff(); renderCoDash(); } }
   });
 
