@@ -295,6 +295,7 @@
     const H = 34, W = Math.min(34 * des.asp, 40), corner = des.kind === "corner";
     const half = (n, i, back) => {
       const len = n.length, fs = len <= 9 ? 27 : len <= 14 ? 22 : len <= 20 ? 17 : 13;
+      if (des.kind === "band") return `<div class="pch${back ? " bk" : ""}"><div class="pnm" style="padding:0 3mm 14mm;font-size:${fs}pt">${esc(n)}</div><img class="pband" src="${des.arts[0]}" alt=""></div>`;
       return `<div class="pch${back ? " bk" : ""}"><div class="pnm" style="padding-right:${(W + (corner ? 4 : 11)).toFixed(1)}mm;font-size:${fs}pt">${esc(n)}</div>${corner ? "" : `<i class="pln" style="right:${(W + 6).toFixed(1)}mm"></i>`}<img class="pa${corner ? " pcor" : ""}${des.border ? " pbd" : ""}" src="${des.arts[i % des.arts.length]}" style="height:${(corner ? 36 : H)}mm;width:${(corner ? 36 : H) * des.asp > 40 ? 40 : (corner ? 36 : H) * des.asp}mm" alt=""></div>`;
     };
     const cards = names.map((n, i) => `<div class="pcc">${half(n, i, true)}${half(n, i, false)}</div>`);
@@ -304,7 +305,7 @@
       .pch{position:relative;overflow:hidden;display:flex;align-items:center;box-sizing:border-box} .pch.bk{transform:rotate(180deg);border-bottom:.25mm dotted #999} .pch.bk + .pch{border-top:0}
       .pnm{flex:1;box-sizing:border-box;padding-left:3mm;text-align:center;font-family:"Great Vibes",cursive;color:#1E3A2F;line-height:1.15;overflow-wrap:break-word}
       .pa{position:absolute;right:3mm;top:50%;transform:translateY(-50%);object-fit:contain} .pa.pcor{top:1.5mm;right:1.5mm;transform:none} .pa.pbd{border:.25mm solid #C9A45C}
-      .pln{position:absolute;top:7mm;bottom:7mm;width:.3mm;background:#C9A45C} .pc-tip{font:9pt sans-serif;color:#777;margin:0 0 3mm;text-align:center}`;
+      .pband{position:absolute;left:50%;bottom:1.5mm;transform:translateX(-50%);height:15mm;width:auto;max-width:80mm} .pln{position:absolute;top:7mm;bottom:7mm;width:.3mm;background:#C9A45C} .pc-tip{font:9pt sans-serif;color:#777;margin:0 0 3mm;text-align:center}`;
     return { noBrand: 1, title: "Place cards", css, fonts: true, margin: 0.5, file: "Place-Cards",
       html: `<p class="pc-tip">Cut along the dashed lines and fold along the dotted line, so each card stands up like a little tent.</p>${pages.join("")}` };
   }
