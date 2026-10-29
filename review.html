@@ -3691,6 +3691,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       <button class="chip fam-only" data-cmd="How many days until Christmas">“How many days until Christmas?”</button>
       <button class="chip fam-only" data-cmd="How much have I spent on Mom">“How much have I spent on Mom?”</button>
       <button class="chip fam-only" data-cmd="Set New Year's guests to 12">“Set New Year's guests to 12”</button>
+      <button class="chip co-only" data-cmd="The boss changed the plan">“The boss changed the plan”</button>
       <button class="chip co-only" data-cmd="Start the catering timer">“Start the catering timer”</button>
       <button class="chip co-only" data-cmd="How long on the gift exchange?">“How long on the gift exchange?”</button>
       <button class="chip co-only" data-cmd="Set a 10 minute timer for the raffle">“Set a 10 minute timer for the raffle”</button>
@@ -8950,6 +8951,7 @@ const TASK_TAGS = {"os-4":["h","Plan"],"f0-1":["h","Gifts"],"f0-2":["h","Gifts"]
       }
       return `You have ${c.guests} guests planned for New Year's Eve, starting at ${c.time}.`;
     }
+    if (document.body.classList.contains("co") && has(/\b(cancel|scrap|start over|start fresh|new plan|reset|boss|plans? (changed|changing|are changing)|different plan|change of plans?)\b/)) { closeSheets(); off.tab = "more"; saveOff(); showView("office"); try { renderOffice(); } catch (e) {} window.scrollTo(0, 0); return "Here it is. Tap Start a new plan. Your old plan is saved first, so nothing is lost."; }
     if (has(/\b(open|go to|show|take me to|see|where)\b.*\b(saved|my) (menus?|dinners?)\b|\bsaved menus?\b/)) { closeSheets(); mealView = "saved"; showView("meals"); try { renderMeals(); } catch (e) {} window.scrollTo(0, 0); return "Here are your saved menus."; }
     if (has(/\b(open|go to|show|take me to|see)\b.*\b(new years?|nye)\b/)) { closeSheets(); nyeScreen = "build"; showView("nye"); try { renderNyeMenu(); } catch (e) {} return "Here's your New Year's Eve plan."; }
     if (has(/\b(open|go to|show|take me to|see|where)\b/)) {
