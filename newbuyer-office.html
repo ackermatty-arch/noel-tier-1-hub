@@ -2508,7 +2508,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
        VIEW 2 — HOLIDAY PLANNER & CHECKLIST
        ============================================================ -->
   <section class="view" id="view-planner" aria-labelledby="plannerTitle">
-    <button type="button" class="btn btn-green btn-sm gift-tasks-btn" data-goview="gifts">Gifts ›</button>
+    <button type="button" class="btn btn-green btn-sm gift-tasks-btn fam-only" data-goview="gifts">Gifts ›</button>
     <h2 class="view-title" id="plannerTitle" data-co-title="Event Coordinator">Plan</h2>
     <p class="view-intro" data-co-desc="Your party plan, approvals, vendors and budget in one place. Everything saves automatically.">Travel plans, guests, rooms, seating, cleaning and supplies, all in one place, so the house is ready before the doorbell rings.</p>
 
@@ -13636,7 +13636,7 @@ const PC_DESIGNS = [
      ============================================================ */
   const BUD_CATS = [
     ["gifts", "🎁", "Gifts", "#151515"], ["food", "🍽️", "Food & drinks", "#B8935A"], ["decor", "🎄", "Decorations", "#8C8C8C"],
-    ["hosting", "🏡", "Hosting & home", "#D9BF8C"], ["party", "🎉", "Parties & outings", "#4A4A4A"], ["cards", "✉️", "Cards & postage", "#C4C4C4"],
+    ["hosting", "🏡", "Hosting", "#D9BF8C"], ["party", "🎉", "Parties & outings", "#4A4A4A"], ["cards", "✉️", "Cards & postage", "#C4C4C4"],
     ["travel", "🚗", "Travel", "#6B5A3A"], ["giving", "⭐", "Giving", "#A8A8A8"], ["other", "📦", "Other", "#2B2B2B"]
   ];
   const budCat = k => BUD_CATS.find(c => c[0] === k) || BUD_CATS[BUD_CATS.length - 1];

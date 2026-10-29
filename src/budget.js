@@ -12,7 +12,7 @@
      ============================================================ */
   const BUD_CATS = [
     ["gifts", "🎁", "Gifts", "#151515"], ["food", "🍽️", "Food & drinks", "#B8935A"], ["decor", "🎄", "Decorations", "#8C8C8C"],
-    ["hosting", "🏡", "Hosting & home", "#D9BF8C"], ["party", "🎉", "Parties & outings", "#4A4A4A"], ["cards", "✉️", "Cards & postage", "#C4C4C4"],
+    ["hosting", "🏡", "Hosting", "#D9BF8C"], ["party", "🎉", "Parties & outings", "#4A4A4A"], ["cards", "✉️", "Cards & postage", "#C4C4C4"],
     ["travel", "🚗", "Travel", "#6B5A3A"], ["giving", "⭐", "Giving", "#A8A8A8"], ["other", "📦", "Other", "#2B2B2B"]
   ];
   const budCat = k => BUD_CATS.find(c => c[0] === k) || BUD_CATS[BUD_CATS.length - 1];
