@@ -809,6 +809,7 @@
     el.innerHTML = `<div class="pr-card"><p class="menu-star">✦</p><h3 class="pr-title">Saved</h3>
       <p class="pr-sub">${esc(snap.names.join(" and "))}<br>${esc(whenLong(snap.at))}</p>
       <div class="pr-meal"><p class="pr-when">Estimated cost to buy <b>${cad0(snap.toBuy)}</b><br>${ok ? "Your alarms are set." : "That time has passed, so no alarms were set."}</p></div>
+      <button type="button" class="btn btn-gold btn-block" data-print="savedmenu:${snap.id}" style="margin:0 0 10px">Print menu and shopping list</button>
       <div class="pr-btns"><button type="button" class="btn btn-ghost" data-svlist>My saved menus</button><button type="button" class="btn btn-gold" data-svdone>Done</button></div></div>`;
     document.body.appendChild(el);
     el.addEventListener("click", e => {
