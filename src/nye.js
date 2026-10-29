@@ -98,19 +98,29 @@
 
   // ---------- 🎉 party planner card ----------
   const nyeSaved = () => savedMenus.filter(x => x.names.some(n => /new year/i.test(n)));
+  const nyeTheme = () => { try { return ptTheme(); } catch (e) { return null; } };
   function renderNyeParty() {
     const m = mealById("nyeparty"); if (!m) return;
     const c = cfgFor("nyeparty"), p = mealSizes(m, c), active = !!planOf("nyeparty");
     const ps = pricedShop(m, p.f, p);
     if (!mealCfg.nyeparty || !mealCfg.nyeparty.guests) { mealCfg.nyeparty = Object.assign({}, mealCfg.nyeparty, { guests: 6 }); save("mealCfg", mealCfg); return renderNyeParty(); }
-    $("#nyePartySum").innerHTML = `<div class="wz-row"><div class="stepper"><button type="button" data-nyeg="-1" aria-label="Fewer guests">−</button><output>${c.guests}</output><button type="button" data-nyeg="1" aria-label="More guests">+</button></div><span class="wz-lab">guests</span>
+    const th = nyeTheme();
+    $("#nyePartySum").innerHTML = `<h4 class="nye-step"><span>1</span> Who is coming, and when</h4>
+      <div class="wz-row"><div class="stepper"><button type="button" data-nyeg="-1" aria-label="Fewer guests">−</button><output>${c.guests}</output><button type="button" data-nyeg="1" aria-label="More guests">+</button></div><span class="wz-lab">guests</span>
       <label class="wz-time"><span class="wz-lab">Party starts</span><input class="input" type="time" id="nyeTime" value="${esc(c.time)}"></label></div>
+      <h4 class="nye-step"><span>2</span> How much food</h4>
       <div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Will you serve dinner too?">
         <button type="button" data-nyemode="meal" aria-pressed="${c.mode !== "before"}"><b>Appetizers are the meal</b><small>About 12 bites per guest</small></button><button type="button" data-nyemode="before" aria-pressed="${c.mode === "before"}"><b>Light bites before dinner</b><small>About 5 bites per guest</small></button></div>
+      <h4 class="nye-step"><span>3</span> Your appetizers</h4>
+      <div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Which appetizers">
+        <button type="button" data-nyeoff="set" aria-pressed="${!c.picks}"><b>Our set menu</b><small>Ready to go</small></button><button type="button" data-nyeown aria-pressed="${!!c.picks}"><b>Choose my own ›</b><small>${c.picks ? c.picks.length + " picked" : "Browse 30 ideas"}</small></button></div>
+      <h4 class="nye-step"><span>4</span> A party theme <i>(optional)</i></h4>
+      <button type="button" class="btn btn-ghost btn-block nye-theme-btn" data-nyetheme>${th ? esc(th.name) + " · Change theme ›" : "Add a party theme ›"}</button>
+      <p class="cf-fine">${th ? "Your theme adds the decorations, games, music and a timeline for the night." : "Just want appetizers? Skip this step. A theme adds decorations, games, music and a timeline."}</p>
       <p class="party-total">About <b>${cad0(ps.total)}</b> · ${cad(ps.total / c.guests)} per guest<small>${currency} · ${c.picks ? "your own appetizer menu" : "our set New Year's Eve menu"}, includes the midnight toast.</small></p>` +
       (hubMode === "company" && window.__offPicks ? `<div class="seg sub-tabs meal-done pm-two nye-offmenu" role="group" aria-label="Which appetizer menu">
         <button type="button" data-nyeoff="set" aria-pressed="${!c.picks}"><b>Set New Year's menu</b><small>Our ready-made list</small></button><button type="button" data-nyeoff="office" aria-pressed="${!!c.picks}"><b>My office party menu</b><small>${window.__offPicks().length} appetizers from Food</small></button></div>` : "") +
-      (c.picks && hubMode !== "company" ? `<button type="button" class="btn btn-ghost btn-block" data-nyeoff="set">Back to the set New Year's menu</button>` : "") + (active ? `<p class="nye-on">✅ Party alarms are set</p>` : "") + (active || nyeSaved().length ? `<button type="button" class="btn btn-ghost btn-block" data-nyestop>Cancel my New Year's plan</button>` : "") + (nyeSaved().length ? `<button type="button" class="btn btn-gold btn-block" data-print="savedmenu:${nyeSaved()[0].id}">Print my menu and shopping list</button>` : "") + (savedMenus.length ? `<button type="button" class="btn btn-ghost btn-block" data-nyesaved>My saved menus (${savedMenus.length})</button>` : "");
+      (active ? `<p class="nye-on">✅ Party alarms are set</p>` : "") + (active || nyeSaved().length ? `<button type="button" class="btn btn-ghost btn-block" data-nyestop>Cancel my New Year's plan</button>` : "") + (nyeSaved().length ? `<button type="button" class="btn btn-gold btn-block" data-print="savedmenu:${nyeSaved()[0].id}">Print my menu and shopping list</button>` : "") + (savedMenus.length ? `<button type="button" class="btn btn-ghost btn-block" data-nyesaved>My saved menus (${savedMenus.length})</button>` : "");
   }
 
   // ---------- 💫 wishes jar ----------
@@ -158,6 +168,8 @@
     if (g) { const c = cfgFor("nyeparty"); c.guests = Math.min(20, Math.max(1, c.guests + +g.dataset.nyeg)); mealCfg.nyeparty = c; save("mealCfg", mealCfg); if (planOf("nyeparty")) startMealPlan(mealById("nyeparty"), true); renderNyeParty(); return; }
     const md = e.target.closest("[data-nyemode]");
     if (md) { const c = cfgFor("nyeparty"); c.mode = md.dataset.nyemode; mealCfg.nyeparty = c; save("mealCfg", mealCfg); if (planOf("nyeparty")) startMealPlan(mealById("nyeparty"), true); renderNyeParty(); return; }
+    if (e.target.closest("[data-nyeown]")) { const o = $("#view-nye [data-open=appsSheet]"); if (o) o.click(); return; }
+    if (e.target.closest("[data-nyetheme]")) { const c = cfgFor("nyeparty"); try { pt.guests = Math.max(2, c.guests); pt.start = c.time; savePt(); } catch (err) {} $("#ptOpen").click(); return; }
     if (e.target.closest("[data-nyestop]")) { if (confirm("Cancel your New Year's Eve plan? This turns off its alarms and deletes the saved New Year's menu.")) { mealPlans = mealPlans.filter(p => p.id !== "nyeparty"); saveMealPlans(); syncMealNative(); savedMenus = savedMenus.filter(x => !nyeSaved().includes(x)); saveSaved(); renderNyeParty(); toast("Your New Year's plan is cancelled."); } return; }
     if (e.target.closest("[data-nyesaved]")) { mealView = "saved"; showView("meals"); window.scrollTo(0, 0); }
   });

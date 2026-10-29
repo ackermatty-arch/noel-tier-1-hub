@@ -169,7 +169,7 @@
         <div class="card pt-card"><h3>🎨 Decorations</h3><ul class="pt-list">${t.decor.map(d => `<li>${esc(d)}</li>`).join("")}</ul></div>`,
       food: () => `<div class="card pt-card"><h3>🍢 Bites</h3><ul class="pt-list">${t.food.map(d => `<li>${esc(d)}</li>`).join("")}</ul>
           <p class="host-rem">Make-ahead tip: choose 2 or 3 bites you can make the day before, and ask guests to bring one each. Hosting is more fun when you're not stuck in the kitchen.</p>
-          <button type="button" class="btn btn-ghost btn-block" id="ptApps">🥂 Plan appetizer amounts & prices</button></div>
+          <button type="button" class="btn btn-ghost btn-block" id="ptApps">🥂 Choose my appetizers and see prices</button></div>
         <div class="card pt-card"><h3>🍸 Drinks</h3><ul class="pt-list">${t.drinks.map(d => `<li>${esc(d)}</li>`).join("")}</ul>
           <h4 class="shop-dept">Signature drinks</h4><ul class="pt-list">${t.signature.map(d => `<li>${esc(d)}</li>`).join("")}</ul>
           <p class="host-rem">Plan about 1 drink per guest per hour, half a bottle of bubbly per adult for the toast, and plenty of water. Always have a tasty no-alcohol option.</p></div>`,
@@ -259,20 +259,24 @@
   const openWwi = () => { wwi = { stage: "add", list: [], i: 0, shown: false }; renderWwi(); openSheet("wwiSheet"); };
 
   // ---------- taps ----------
+  function ptToPlan() {   // plan and theme share one guest count and start time
+    const c = cfgFor("nyeparty"); c.guests = Math.max(1, Math.min(20, pt.guests)); c.time = pt.start; mealCfg.nyeparty = c; save("mealCfg", mealCfg);
+    renderNyeParty();
+  }
   $("#ptOpen").addEventListener("click", () => { renderPt(); openSheet("themeSheet"); });
   $("#wwiOpen").addEventListener("click", openWwi);
   $("#themeSheet").addEventListener("click", e => {
     const t = e.target;
     const pick = t.closest("[data-pt]"); if (pick) { pt.id = pick.dataset.pt || null; if (pt.id) { const th = ptTheme(); if (th.early && ptTime(pt.start) > ptTime("19:00")) { pt.start = "17:00"; pt.end = "21:00"; } if (!th.early && ptTime(pt.start) < ptTime("18:00")) { pt.start = "20:00"; pt.end = "01:00"; } pt.tab = "night"; } savePt(); renderPt(); ptSync(); $("#themeSheet .sheet-body").scrollTop = 0; return; }
     const tb = t.closest("[data-pttab]"); if (tb) { pt.tab = tb.dataset.pttab; savePt(); renderPt(); return; }
-    const g = t.closest("[data-ptg]"); if (g) { pt.guests = Math.max(2, Math.min(60, pt.guests + +g.dataset.ptg)); savePt(); renderPt(); return; }
+    const g = t.closest("[data-ptg]"); if (g) { pt.guests = Math.max(2, Math.min(60, pt.guests + +g.dataset.ptg)); savePt(); ptToPlan(); renderPt(); return; }
     if (t.closest("#ptKids")) { openShow(Date.now() + 60500, "kids"); return; }
-    if (t.closest("#ptApps")) { closeSheet("themeSheet"); showView("meals"); openMeal("nyeparty"); return; }
+    if (t.closest("#ptApps")) { closeSheet("themeSheet"); nyeScreen = "build"; showView("nye"); renderNyeMenu(); window.scrollTo(0, 0); const o = $("#view-nye [data-open=appsSheet]"); if (o) o.click(); return; }
     if (t.closest("#ptWwi")) { openWwi(); return; }
   });
   $("#themeSheet").addEventListener("change", e => {
     const t = e.target;
-    if (t.id === "ptStart" || t.id === "ptEnd") { pt[t.id === "ptStart" ? "start" : "end"] = t.value; savePt(); renderPt(); ptSync(); return; }
+    if (t.id === "ptStart" || t.id === "ptEnd") { pt[t.id === "ptStart" ? "start" : "end"] = t.value; savePt(); if (t.id === "ptStart") ptToPlan(); renderPt(); ptSync(); return; }
     if (t.id === "ptRemind") { pt.remind = t.checked; savePt(); renderPt(); ptSync(); getAudio(); if (pt.remind) toast("🔔 Party alarms are on"); return; }
     if (t.dataset.ptgot) { pt.got[t.dataset.ptgot] = t.checked; savePt(); t.closest("label").classList.toggle("on", t.checked); }
   });

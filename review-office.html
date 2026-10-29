@@ -2200,6 +2200,11 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 #printAsk { z-index: 100000 !important; }
 .pv-overlay { z-index: 100001 !important; }
 #alertOverlay { z-index: 100002 !important; }
+
+.nye-step { display: flex; align-items: center; gap: 10px; margin: 18px 0 8px; font: 600 14px Cinzel, serif; letter-spacing: .08em; text-transform: uppercase; color: #151515; }
+.nye-step span { display: inline-grid; place-items: center; width: 26px; height: 26px; background: #151515; color: #E3C98A; font: 700 13px Cinzel, serif; letter-spacing: 0; }
+.nye-step i { font-style: normal; font-size: 11px; color: #8a6a24; letter-spacing: .1em; }
+.nye-plan-sum > .nye-step:first-child { margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -2802,17 +2807,17 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
     <div class="section-label">Party Planner</div>
     <div class="card nye-plan-card">
       <h3 class="party-star">New Year's Eve Party</h3>
-      <p class="review-sub">Choose your guests and start time. Noël works out how much to make, writes a priced shopping list and sets alarms right through to the midnight toast.</p>
+      <p class="review-sub">Four quick steps, top to bottom. Noël works out how much to make, writes a priced shopping list and sets alarms right through to the midnight toast.</p>
       <div class="nye-plan-sum" id="nyePartySum"></div>
       <button type="button" class="btn btn-gold btn-block" id="nyePlan">See my plan</button>
     </div>
 
-    <button class="advent-banner nye-banner" data-open="appsSheet">
+    <button class="advent-banner nye-banner" data-open="appsSheet" hidden>
       <span class="ab-ico">🥂</span>
       <span class="ab-text"><b>Appetizer Ideas</b><small>30 party bites, make-ahead tips and a how-many guide</small></span>
       <span class="ab-go">Open ›</span>
     </button>
-    <button type="button" class="advent-banner nye-banner pt-banner" id="ptOpen">
+    <button type="button" class="advent-banner nye-banner pt-banner" id="ptOpen" hidden>
       <span class="ab-ico">🎭</span>
       <span class="ab-text"><b>Party Themes</b><small>Pajamas &amp; Champagne, Masquerade, Gala, Kids' Countdown, Casino, Neon and more: the whole night planned</small></span>
       <span class="ab-go">Open ›</span>
@@ -10895,6 +10900,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       const c = cfgFor(id), D = dinnerAt(c), past = D < now; if (past) allOk = false;
       const adds = activeAddons(m), cost = msBuild([id]).total; grand += cost;
       return `<div class="pr-meal"><h4>${esc(m.name)}</h4>
+        ${m.party && typeof ptTheme === "function" && (() => { try { return ptTheme(); } catch (e) { return null; } })() ? `<p class="pr-menu"><b>Party theme</b> ${esc(ptTheme().name)}</p>` : ""}
         ${m.party ? allMenu(m).filter(([k]) => !/pairing/i.test(k)).map(([k, it]) => `<p class="pr-menu"><b>${esc(k)}</b> ${it.map(i => esc(String(i).replace(/\s*\(\d+ pieces\)/, ""))).join(" · ")}</p>`).join("") : ""}
         <p class="pr-when">${past ? "That time has passed. Go back and pick a later time." : `<b>${c.guests}</b> guest${c.guests > 1 ? "s" : ""}<br>${esc(whenLong(D))}`}</p>
         ${adds.length ? `<p class="pr-add"><b>Vegan add-on${adds.length > 1 ? "s" : ""}</b></p><ul class="pr-steps">${adds.map(x => `<li><span>${esc(x.a.name)} <small>(${x.c.guests} portion${x.c.guests > 1 ? "s" : ""})</small></span></li>`).join("")}</ul>` : ""}${cost ? `<p class="pr-cost">Estimated cost <b>${cad0(cost)} ${esc(currency)}</b></p>` : ""}</div>`;
@@ -11667,19 +11673,29 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
 
   // ---------- 🎉 party planner card ----------
   const nyeSaved = () => savedMenus.filter(x => x.names.some(n => /new year/i.test(n)));
+  const nyeTheme = () => { try { return ptTheme(); } catch (e) { return null; } };
   function renderNyeParty() {
     const m = mealById("nyeparty"); if (!m) return;
     const c = cfgFor("nyeparty"), p = mealSizes(m, c), active = !!planOf("nyeparty");
     const ps = pricedShop(m, p.f, p);
     if (!mealCfg.nyeparty || !mealCfg.nyeparty.guests) { mealCfg.nyeparty = Object.assign({}, mealCfg.nyeparty, { guests: 6 }); save("mealCfg", mealCfg); return renderNyeParty(); }
-    $("#nyePartySum").innerHTML = `<div class="wz-row"><div class="stepper"><button type="button" data-nyeg="-1" aria-label="Fewer guests">−</button><output>${c.guests}</output><button type="button" data-nyeg="1" aria-label="More guests">+</button></div><span class="wz-lab">guests</span>
+    const th = nyeTheme();
+    $("#nyePartySum").innerHTML = `<h4 class="nye-step"><span>1</span> Who is coming, and when</h4>
+      <div class="wz-row"><div class="stepper"><button type="button" data-nyeg="-1" aria-label="Fewer guests">−</button><output>${c.guests}</output><button type="button" data-nyeg="1" aria-label="More guests">+</button></div><span class="wz-lab">guests</span>
       <label class="wz-time"><span class="wz-lab">Party starts</span><input class="input" type="time" id="nyeTime" value="${esc(c.time)}"></label></div>
+      <h4 class="nye-step"><span>2</span> How much food</h4>
       <div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Will you serve dinner too?">
         <button type="button" data-nyemode="meal" aria-pressed="${c.mode !== "before"}"><b>Appetizers are the meal</b><small>About 12 bites per guest</small></button><button type="button" data-nyemode="before" aria-pressed="${c.mode === "before"}"><b>Light bites before dinner</b><small>About 5 bites per guest</small></button></div>
+      <h4 class="nye-step"><span>3</span> Your appetizers</h4>
+      <div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Which appetizers">
+        <button type="button" data-nyeoff="set" aria-pressed="${!c.picks}"><b>Our set menu</b><small>Ready to go</small></button><button type="button" data-nyeown aria-pressed="${!!c.picks}"><b>Choose my own ›</b><small>${c.picks ? c.picks.length + " picked" : "Browse 30 ideas"}</small></button></div>
+      <h4 class="nye-step"><span>4</span> A party theme <i>(optional)</i></h4>
+      <button type="button" class="btn btn-ghost btn-block nye-theme-btn" data-nyetheme>${th ? esc(th.name) + " · Change theme ›" : "Add a party theme ›"}</button>
+      <p class="cf-fine">${th ? "Your theme adds the decorations, games, music and a timeline for the night." : "Just want appetizers? Skip this step. A theme adds decorations, games, music and a timeline."}</p>
       <p class="party-total">About <b>${cad0(ps.total)}</b> · ${cad(ps.total / c.guests)} per guest<small>${currency} · ${c.picks ? "your own appetizer menu" : "our set New Year's Eve menu"}, includes the midnight toast.</small></p>` +
       (hubMode === "company" && window.__offPicks ? `<div class="seg sub-tabs meal-done pm-two nye-offmenu" role="group" aria-label="Which appetizer menu">
         <button type="button" data-nyeoff="set" aria-pressed="${!c.picks}"><b>Set New Year's menu</b><small>Our ready-made list</small></button><button type="button" data-nyeoff="office" aria-pressed="${!!c.picks}"><b>My office party menu</b><small>${window.__offPicks().length} appetizers from Food</small></button></div>` : "") +
-      (c.picks && hubMode !== "company" ? `<button type="button" class="btn btn-ghost btn-block" data-nyeoff="set">Back to the set New Year's menu</button>` : "") + (active ? `<p class="nye-on">✅ Party alarms are set</p>` : "") + (active || nyeSaved().length ? `<button type="button" class="btn btn-ghost btn-block" data-nyestop>Cancel my New Year's plan</button>` : "") + (nyeSaved().length ? `<button type="button" class="btn btn-gold btn-block" data-print="savedmenu:${nyeSaved()[0].id}">Print my menu and shopping list</button>` : "") + (savedMenus.length ? `<button type="button" class="btn btn-ghost btn-block" data-nyesaved>My saved menus (${savedMenus.length})</button>` : "");
+      (active ? `<p class="nye-on">✅ Party alarms are set</p>` : "") + (active || nyeSaved().length ? `<button type="button" class="btn btn-ghost btn-block" data-nyestop>Cancel my New Year's plan</button>` : "") + (nyeSaved().length ? `<button type="button" class="btn btn-gold btn-block" data-print="savedmenu:${nyeSaved()[0].id}">Print my menu and shopping list</button>` : "") + (savedMenus.length ? `<button type="button" class="btn btn-ghost btn-block" data-nyesaved>My saved menus (${savedMenus.length})</button>` : "");
   }
 
   // ---------- 💫 wishes jar ----------
@@ -11727,6 +11743,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (g) { const c = cfgFor("nyeparty"); c.guests = Math.min(20, Math.max(1, c.guests + +g.dataset.nyeg)); mealCfg.nyeparty = c; save("mealCfg", mealCfg); if (planOf("nyeparty")) startMealPlan(mealById("nyeparty"), true); renderNyeParty(); return; }
     const md = e.target.closest("[data-nyemode]");
     if (md) { const c = cfgFor("nyeparty"); c.mode = md.dataset.nyemode; mealCfg.nyeparty = c; save("mealCfg", mealCfg); if (planOf("nyeparty")) startMealPlan(mealById("nyeparty"), true); renderNyeParty(); return; }
+    if (e.target.closest("[data-nyeown]")) { const o = $("#view-nye [data-open=appsSheet]"); if (o) o.click(); return; }
+    if (e.target.closest("[data-nyetheme]")) { const c = cfgFor("nyeparty"); try { pt.guests = Math.max(2, c.guests); pt.start = c.time; savePt(); } catch (err) {} $("#ptOpen").click(); return; }
     if (e.target.closest("[data-nyestop]")) { if (confirm("Cancel your New Year's Eve plan? This turns off its alarms and deletes the saved New Year's menu.")) { mealPlans = mealPlans.filter(p => p.id !== "nyeparty"); saveMealPlans(); syncMealNative(); savedMenus = savedMenus.filter(x => !nyeSaved().includes(x)); saveSaved(); renderNyeParty(); toast("Your New Year's plan is cancelled."); } return; }
     if (e.target.closest("[data-nyesaved]")) { mealView = "saved"; showView("meals"); window.scrollTo(0, 0); }
   });
@@ -13213,7 +13231,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         <div class="card pt-card"><h3>🎨 Decorations</h3><ul class="pt-list">${t.decor.map(d => `<li>${esc(d)}</li>`).join("")}</ul></div>`,
       food: () => `<div class="card pt-card"><h3>🍢 Bites</h3><ul class="pt-list">${t.food.map(d => `<li>${esc(d)}</li>`).join("")}</ul>
           <p class="host-rem">Make-ahead tip: choose 2 or 3 bites you can make the day before, and ask guests to bring one each. Hosting is more fun when you're not stuck in the kitchen.</p>
-          <button type="button" class="btn btn-ghost btn-block" id="ptApps">🥂 Plan appetizer amounts & prices</button></div>
+          <button type="button" class="btn btn-ghost btn-block" id="ptApps">🥂 Choose my appetizers and see prices</button></div>
         <div class="card pt-card"><h3>🍸 Drinks</h3><ul class="pt-list">${t.drinks.map(d => `<li>${esc(d)}</li>`).join("")}</ul>
           <h4 class="shop-dept">Signature drinks</h4><ul class="pt-list">${t.signature.map(d => `<li>${esc(d)}</li>`).join("")}</ul>
           <p class="host-rem">Plan about 1 drink per guest per hour, half a bottle of bubbly per adult for the toast, and plenty of water. Always have a tasty no-alcohol option.</p></div>`,
@@ -13303,20 +13321,24 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   const openWwi = () => { wwi = { stage: "add", list: [], i: 0, shown: false }; renderWwi(); openSheet("wwiSheet"); };
 
   // ---------- taps ----------
+  function ptToPlan() {   // plan and theme share one guest count and start time
+    const c = cfgFor("nyeparty"); c.guests = Math.max(1, Math.min(20, pt.guests)); c.time = pt.start; mealCfg.nyeparty = c; save("mealCfg", mealCfg);
+    renderNyeParty();
+  }
   $("#ptOpen").addEventListener("click", () => { renderPt(); openSheet("themeSheet"); });
   $("#wwiOpen").addEventListener("click", openWwi);
   $("#themeSheet").addEventListener("click", e => {
     const t = e.target;
     const pick = t.closest("[data-pt]"); if (pick) { pt.id = pick.dataset.pt || null; if (pt.id) { const th = ptTheme(); if (th.early && ptTime(pt.start) > ptTime("19:00")) { pt.start = "17:00"; pt.end = "21:00"; } if (!th.early && ptTime(pt.start) < ptTime("18:00")) { pt.start = "20:00"; pt.end = "01:00"; } pt.tab = "night"; } savePt(); renderPt(); ptSync(); $("#themeSheet .sheet-body").scrollTop = 0; return; }
     const tb = t.closest("[data-pttab]"); if (tb) { pt.tab = tb.dataset.pttab; savePt(); renderPt(); return; }
-    const g = t.closest("[data-ptg]"); if (g) { pt.guests = Math.max(2, Math.min(60, pt.guests + +g.dataset.ptg)); savePt(); renderPt(); return; }
+    const g = t.closest("[data-ptg]"); if (g) { pt.guests = Math.max(2, Math.min(60, pt.guests + +g.dataset.ptg)); savePt(); ptToPlan(); renderPt(); return; }
     if (t.closest("#ptKids")) { openShow(Date.now() + 60500, "kids"); return; }
-    if (t.closest("#ptApps")) { closeSheet("themeSheet"); showView("meals"); openMeal("nyeparty"); return; }
+    if (t.closest("#ptApps")) { closeSheet("themeSheet"); nyeScreen = "build"; showView("nye"); renderNyeMenu(); window.scrollTo(0, 0); const o = $("#view-nye [data-open=appsSheet]"); if (o) o.click(); return; }
     if (t.closest("#ptWwi")) { openWwi(); return; }
   });
   $("#themeSheet").addEventListener("change", e => {
     const t = e.target;
-    if (t.id === "ptStart" || t.id === "ptEnd") { pt[t.id === "ptStart" ? "start" : "end"] = t.value; savePt(); renderPt(); ptSync(); return; }
+    if (t.id === "ptStart" || t.id === "ptEnd") { pt[t.id === "ptStart" ? "start" : "end"] = t.value; savePt(); if (t.id === "ptStart") ptToPlan(); renderPt(); ptSync(); return; }
     if (t.id === "ptRemind") { pt.remind = t.checked; savePt(); renderPt(); ptSync(); getAudio(); if (pt.remind) toast("🔔 Party alarms are on"); return; }
     if (t.dataset.ptgot) { pt.got[t.dataset.ptgot] = t.checked; savePt(); t.closest("label").classList.toggle("on", t.checked); }
   });

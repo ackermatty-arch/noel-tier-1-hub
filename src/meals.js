@@ -316,6 +316,7 @@
       const c = cfgFor(id), D = dinnerAt(c), past = D < now; if (past) allOk = false;
       const adds = activeAddons(m), cost = msBuild([id]).total; grand += cost;
       return `<div class="pr-meal"><h4>${esc(m.name)}</h4>
+        ${m.party && typeof ptTheme === "function" && (() => { try { return ptTheme(); } catch (e) { return null; } })() ? `<p class="pr-menu"><b>Party theme</b> ${esc(ptTheme().name)}</p>` : ""}
         ${m.party ? allMenu(m).filter(([k]) => !/pairing/i.test(k)).map(([k, it]) => `<p class="pr-menu"><b>${esc(k)}</b> ${it.map(i => esc(String(i).replace(/\s*\(\d+ pieces\)/, ""))).join(" · ")}</p>`).join("") : ""}
         <p class="pr-when">${past ? "That time has passed. Go back and pick a later time." : `<b>${c.guests}</b> guest${c.guests > 1 ? "s" : ""}<br>${esc(whenLong(D))}`}</p>
         ${adds.length ? `<p class="pr-add"><b>Vegan add-on${adds.length > 1 ? "s" : ""}</b></p><ul class="pr-steps">${adds.map(x => `<li><span>${esc(x.a.name)} <small>(${x.c.guests} portion${x.c.guests > 1 ? "s" : ""})</small></span></li>`).join("")}</ul>` : ""}${cost ? `<p class="pr-cost">Estimated cost <b>${cad0(cost)} ${esc(currency)}</b></p>` : ""}</div>`;
