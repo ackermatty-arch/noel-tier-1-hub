@@ -8949,6 +8949,7 @@ const TASK_TAGS = {"os-4":["h","Plan"],"f0-1":["h","Gifts"],"f0-2":["h","Gifts"]
       }
       return `You have ${c.guests} guests planned for New Year's Eve, starting at ${c.time}.`;
     }
+    if (has(/\b(open|go to|show|take me to|see|where)\b.*\b(saved|my) (menus?|dinners?)\b|\bsaved menus?\b/)) { closeSheets(); mealView = "saved"; showView("meals"); try { renderMeals(); } catch (e) {} window.scrollTo(0, 0); return "Here are your saved menus."; }
     if (has(/\b(open|go to|show|take me to|see)\b.*\b(new years?|nye)\b/)) { closeSheets(); nyeScreen = "build"; showView("nye"); try { renderNyeMenu(); } catch (e) {} return "Here's your New Year's Eve plan."; }
     if (has(/\b(open|go to|show|take me to|see|where)\b/)) {
       const go = [[/\b(menu|meals?|dinner|dinners|recipes?)\b/, "meals", "Here's your menu."], [/\bbudget|spending\b/, "budget", "Here's your budget."], [/\b(plan|planner)\b/, "planner", "Here's your plan."], [/\bgift tracker\b/, "budget", "Here's your gift tracker."], [/\b(cards|e ?cards?)\b/, "invites", "Here are your cards."], [/\b(review|holiday review)\b/, "review", "Here's your holiday review."], [/\b(calendar|calender)\b/, "org", "Here's your calendar."]].find(([re]) => re.test(t));
