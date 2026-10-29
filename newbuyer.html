@@ -7678,28 +7678,40 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     { id: "os", icon: "🍂", title: "September–October: Early Planning", tasks: [
       { id: "os-1", text: "Pick a date (December books up fast!)" }, { id: "o4-1", text: "Set the party budget" },
       { id: "os-2", text: "Send the plan for approval (Office Party Plan › Approval)" }, { id: "o4-2", text: "Book the venue or meeting room" },
-      { id: "os-3", text: "Book the caterer, DJ or entertainment" }, { id: "o4-3", text: "Send a save-the-date" } ] },
+      { id: "os-3", text: "Book the caterer, DJ or entertainment" }, { id: "o4-3", text: "Send a save-the-date" },
+      { id: "os-4", text: "Recruit a planning team and assign roles" }, { id: "os-5", text: "Split the budget into categories and set aside a contingency" },
+      { id: "os-6", text: "Decide the guest policy: plus-ones, kids, partners" }, { id: "os-7", text: "Ask the team when they'd prefer: work hours, after work or a weekend" },
+      { id: "os-8", text: "Check the venue: capacity, access, transit & rides home" } ] },
     { id: "on", icon: "🗓️", title: "November", tasks: [
       { id: "o4-4", text: "Plan the gift exchange and set the spending limit" }, { id: "o4-5", text: "Choose a theme or dress code" },
       { id: "on-1", text: "Start the potluck sign-up sheet" }, { id: "on-2", text: "Pick the Silly Office Awards" },
-      { id: "on-3", text: "Plan a charity drive or team giving (optional)" } ] },
+      { id: "on-3", text: "Plan a charity drive or team giving (optional)" },
+      { id: "on-4", text: "Plan the event schedule: arrivals, food, speech, awards, games" }, { id: "on-5", text: "Plan gift bags or favours with a personal card" },
+      { id: "on-6", text: "Plan a photographer or photo booth with props" }, { id: "on-7", text: "Draft and rehearse the thank-you speech, pick who to recognise" },
+      { id: "on-8", text: "Plan for remote staff: livestream or mail their gifts" }, { id: "on-9", text: "Plan the drinks: non-alcoholic options, bartender" } ] },
     { id: "o2", icon: "📨", title: "2 Weeks Before", tasks: [
       { id: "o2-1", text: "Send invites & collect RSVPs" }, { id: "o2-2", text: "Order catering & drinks" },
       { id: "o2-3", text: "Ask about dietary needs & allergies" }, { id: "o2-4", text: "Order decorations" },
       { id: "o2-5", text: "Plan games & prizes" },
-      { id: "o2-6", text: "Order paper plates, cups, cutlery & napkins" } ] },
+      { id: "o2-6", text: "Order paper plates, cups, cutlery & napkins" },
+      { id: "o2-7", text: "Confirm all vendor bookings" }, { id: "o2-8", text: "Follow up on unanswered RSVPs" } ] },
     { id: "o1", icon: "🛒", title: "1 Week Before", tasks: [
       { id: "o1-1", text: "Remind everyone about the gift exchange" }, { id: "o1-2", text: "Confirm headcount with the caterer" },
       { id: "o1-3", text: "Print the awards certificates & games" }, { id: "o1-4", text: "Make the party playlist" },
-      { id: "o1-5", text: "Buy prizes & awards" } ] },
+      { id: "o1-5", text: "Buy prizes & awards" },
+      { id: "o1-6", text: "Label dishes with allergens (nuts, gluten)" }, { id: "o1-7", text: "Set up a stage or mic area and test the equipment" } ] },
     { id: "od", icon: "🎉", title: "Party Day", tasks: [
       { id: "od-1", text: "Decorate the space" }, { id: "od-2", text: "Set out food & drinks" },
       { id: "od-3", text: "Welcome speech & toast" }, { id: "od-4", text: "Run the games & crown the winners" },
-      { id: "od-5", text: "Gift exchange" }, { id: "od-6", text: "Take a team photo" } ] },
+      { id: "od-5", text: "Gift exchange" }, { id: "od-6", text: "Take a team photo" },
+      { id: "od-7", text: "Arrive early and brief your helpers on their roles" }, { id: "od-8", text: "Set up a coat drop zone, have containers ready for leftovers" },
+      { id: "od-9", text: "Assign a cleanup team" } ] },
     { id: "oa", icon: "✉️", title: "After the Party", tasks: [
       { id: "oa-1", text: "Send a thank-you note to the team" }, { id: "oa-2", text: "Share the party photos" },
       { id: "oa-3", text: "Return rentals & tidy up" }, { id: "oa-5", text: "Hand in receipts (Budget › Reimbursement list)" },
-      { id: "oa-4", text: "Print the Year-End Report & save the handover file" } ] }
+      { id: "oa-4", text: "Print the Year-End Report & save the handover file" },
+      { id: "oa-6", text: "Send the team a quick feedback survey" }, { id: "oa-7", text: "Thank the vendors and volunteers" },
+      { id: "oa-8", text: "Write notes on what worked for next year" } ] }
   ];
   let hubMode = SPACE === "office" ? "company" : "family";   // the Office space is the company side
   let PHASES = hubMode === "company" ? OFFICE_PHASES : FAMILY_PHASES;
