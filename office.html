@@ -2153,6 +2153,13 @@ body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!impor
 /* Holiday Review stays hidden until Dec 26 (or until opened) */
 .nav-btn[data-view="review"]{display:none}
 body.rev-open .nav-btn[data-view="review"]{display:flex}
+/* name picker: our own list for every name box (the phone's built-in one only shows names that match what is typed) */
+input[data-dl]{padding-right:44px !important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10'%3E%3Cpath d='M1 1l7 7 7-7' fill='none' stroke='%2316130E' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.name-pop{position:absolute;z-index:100003;background:#fff;border:1px solid #C9A45C;box-shadow:0 8px 24px rgba(0,0,0,.25);max-height:220px;overflow-y:auto}
+.name-pop button{display:block;width:100%;text-align:left;padding:12px 14px;min-height:44px;background:#fff;color:#16130E;border:0;border-bottom:1px solid #EEE3C6;font:600 15px "Cinzel",serif;letter-spacing:.04em}
+.name-pop button:last-child{border-bottom:0}
+.name-pop button:active{background:#F6EFD9}
+.name-pop .np-none{padding:12px 14px;font-size:14px;color:#6A6354}
 .mic-intro{position:fixed;left:14px;right:14px;bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:9000;background:#16130E;color:#F6EFD9;border:1px solid #C9A45C;padding:14px 16px;box-shadow:0 8px 28px rgba(0,0,0,.35)}
 .mic-intro[hidden]{display:none}
 .mic-intro b{display:block;font-family:"Cinzel",serif;letter-spacing:.08em;text-transform:uppercase;color:#E3C98A;font-size:14px;margin-bottom:4px}
@@ -9867,6 +9874,43 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         </div>`).join("")}
       </div>`).join("");
   }
+  /* 📇 NAME PICKER: tap the arrow for everyone, or start typing and it narrows the list */
+  (function () {
+    let pop = null, cur = null;
+    const hide = () => { if (pop) { pop.remove(); pop = null; } cur = null; };
+    const names = inp => {
+      const id = inp.dataset.dl; if (id === "wishPeople") { try { renderWishes(); } catch (e) {} }
+      const dl = id && document.getElementById(id);
+      return dl ? [...dl.options].map(o => o.value).filter((v, i, a) => v && a.indexOf(v) === i) : [];
+    };
+    function show(inp, all) {
+      const q = inp.value.trim().toLowerCase(); let list = names(inp);
+      if (!all && q) { const st = list.filter(n => n.toLowerCase().startsWith(q)), inc = list.filter(n => !n.toLowerCase().startsWith(q) && n.toLowerCase().includes(q)); list = st.concat(inc); }
+      hide(); cur = inp;
+      pop = document.createElement("div"); pop.className = "name-pop";
+      pop.innerHTML = list.length ? list.map(n => `<button type="button" data-np="${esc(n)}">${esc(n)}</button>`).join("") : `<div class="np-none">${all || !q ? "No names yet. Type one to add it." : "New name. Keep typing, or tap the arrow for your list."}</div>`;
+      const r = inp.getBoundingClientRect();
+      pop.style.left = (r.left + scrollX) + "px"; pop.style.top = (r.bottom + scrollY + 2) + "px"; pop.style.width = r.width + "px";
+      document.body.appendChild(pop);
+    }
+    const conv = t => { const inp = t && t.closest && t.closest("input[list]"); if (inp) { inp.dataset.dl = inp.getAttribute("list"); inp.removeAttribute("list"); inp.autocomplete = "off"; } return inp || (t && t.closest && t.closest("input[data-dl]")); };
+    document.addEventListener("pointerdown", e => {
+      const inp = conv(e.target);
+      if (pop && !e.target.closest(".name-pop") && e.target !== cur) hide();
+      if (inp) { const r = inp.getBoundingClientRect(); inp.dataset.arrow = e.clientX > r.right - 48 ? "1" : ""; }
+    }, true);
+    document.addEventListener("click", e => {
+      const b = e.target.closest("[data-np]");
+      if (b && cur) { cur.value = b.dataset.np; cur.dispatchEvent(new Event("input", { bubbles: true })); const nx = cur; hide(); nx.focus(); return; }
+      const inp = e.target.closest("input[data-dl]"); if (!inp) return;
+      if (inp.dataset.arrow === "1") { if (pop && cur === inp) hide(); else show(inp, true); }
+      else show(inp, !inp.value.trim() || names(inp).some(n => n.toLowerCase() === inp.value.trim().toLowerCase()));
+    });
+    document.addEventListener("input", e => { const inp = e.target.closest && e.target.closest("input[data-dl]"); if (inp) show(inp, false); });
+    document.addEventListener("focusin", e => { conv(e.target); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+    document.addEventListener("scroll", () => { if (pop && cur) { const r = cur.getBoundingClientRect(); pop.style.top = (r.bottom + scrollY + 2) + "px"; } }, true);
+  })();
   $("#wishForm").addEventListener("submit", e => {
     e.preventDefault();
     const f = e.target, w = addWish(f.who.value, f.what.value, f.price.value, f.note.value);
