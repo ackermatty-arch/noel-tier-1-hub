@@ -2154,6 +2154,7 @@ body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!impor
 /* Holiday Review stays hidden until Dec 26 (or until opened) */
 .nav-btn[data-view="review"]{display:none}
 body.rev-open .nav-btn[data-view="review"]{display:flex}
+.reset-box{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}.reset-in{background:#fff;border:2px solid #C9A45C;padding:18px;max-width:420px;width:100%}.reset-in h3{font-family:"Cinzel",serif;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px}.reset-in label{display:block;padding:6px 0}.reset-note{font-size:13px;color:#555}
 .gold-star{color:#C9A45C}
 .shop-timing{border:1px solid #C9A45C;padding:8px 12px;margin:0 0 10px;font-size:13.5px}.shop-timing p{margin:2px 0}
 .shop-when{float:right;font:700 10px "Cinzel",serif;letter-spacing:.1em;text-transform:uppercase;border:1px solid #9A7424;color:#9A7424;padding:2px 7px}.shop-when.now{background:#16130E;color:#E3C98A;border-color:#16130E}
@@ -14780,7 +14781,7 @@ const PC_DESIGNS = [
     else if (G === "more" && tab !== "more") sub = `<div class="off-sub"><button type="button" class="chip" data-oftab="more">‹ More</button><span class="off-subt">${(OFF_MORE.find(m => m[0] === tab) || [0, "", ""])[1]} ${(OFF_MORE.find(m => m[0] === tab) || [0, 0, ""])[2]}</span></div>`;
     $("#offTabs").innerHTML = `<button type="button" class="oy-bar${tab === "year" ? " on" : ""}" data-oftab="year"><span>🗓️ <b>${esc(off.ev.name || "Holiday Party")}</b></span><small>My year · ${Math.max(1, oy.events.length)} event${oy.events.length > 1 ? "s" : ""} ›</small></button><div class="off-steps">${steps.map(([g, t, n, l, done]) => `<button type="button" class="off-step${g === G ? " on" : ""}${done ? " done" : ""}" data-oftab="${t}">${n ? `<i>${done ? "✓" : n}</i>` : ""}<span>${l}</span></button>`).join("")}</div>${sub}`;
     renderCoDash();
-    $("#offBody").innerHTML = ({ year: offYearHtml, checklist: offChkHtml, event: offEventHtml, guests: offGuestsHtml, polls: offPollsHtml, food: offFoodHtml, acts: offActsHtml, approval: offApprovalHtml, plan: offPlanHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml, more: offMoreHtml, saved: offSavedHtml, savedone: offSavedOne })[tab]() + (G === "plan" && tab !== "event" ? `<button type="button" class="btn btn-gold btn-block" data-offreview style="margin-top:12px">📄 See my plan ›</button>` : "");
+    $("#offBody").innerHTML = ({ year: offYearHtml, checklist: offChkHtml, event: offEventHtml, guests: offGuestsHtml, polls: offPollsHtml, food: offFoodHtml, acts: offActsHtml, approval: () => offApprovalHtml() + offStartOverCard(), plan: offPlanHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml, more: offMoreHtml, saved: offSavedHtml, savedone: offSavedOne })[tab]() + (G === "plan" && tab !== "event" ? `<button type="button" class="btn btn-gold btn-block" data-offreview style="margin-top:12px">📄 See my plan ›</button>` : "");
   }
   const fld = (k, label, type, ph, extra) => `<label class="off-f${extra === "wide" ? " wide" : ""}"><span class="meal-lab">${label}</span>${type === "area" ? `<textarea class="input" rows="2" data-ev="${k}" maxlength="300" placeholder="${ph || ""}">${esc(off.ev[k] || "")}</textarea>` : `<input class="input" type="${type || "text"}" data-ev="${k}" value="${esc(off.ev[k] ?? "")}" placeholder="${ph || ""}" ${type === "number" ? 'inputmode="decimal" min="0"' : 'maxlength="80"'}>`}</label>`;
   function offEventHtml() {
@@ -15040,13 +15041,27 @@ const PC_DESIGNS = [
   const OFF_PLAN_CSS = `.pl{font:10.5pt/1.45 Georgia,serif;color:#222} .pl h1{font-size:20pt;margin:0;color:#1E3A2F} .pl .pl-s{color:#8a6d3b;font:600 8.5pt sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:2px 0 12px} .pl h2{font-size:12.5pt;color:#1E3A2F;border-bottom:1.5px solid #B8935A;margin:14px 0 5px;padding-bottom:2px} .pl table{width:100%;border-collapse:collapse} .pl td,.pl th{padding:4px 6px;border-bottom:1px solid #e6dcc6;text-align:left;vertical-align:top;font-size:10pt} .pl .num{text-align:right}`;
   function offPlanDoc() { return { title: "Event plan", css: OFF_PLAN_CSS, html: `<div class="pl">${offPlanBody()}<p class="pl-s" style="margin-top:16px">Made with Noël Tier 1 Hub · Office Edition</p></div>`, margin: 0.5, file: "Event-Plan" }; }
   function offSavedDoc(id) { const s = (off.saved || []).find(x => x.id === id); return s ? { title: s.name, css: OFF_PLAN_CSS, html: `<div class="pl">${s.html}<p class="pl-s" style="margin-top:16px">Made with Noël Tier 1 Hub · Office Edition</p></div>`, margin: 0.5, file: "Event-Plan" } : null; }
+  function offStartOverCard() {
+    return `<div class="card pt-card"><h3>✦ Plans changed?</h3><p class="host-rem">The boss wants something different? Start over in one step. Your old plan is saved first.</p><button type="button" class="btn btn-ghost btn-block" data-offnew>Start a new plan</button></div>`;
+  }
   function offNewPlan() {
-    if (!confirm("Start a new plan? A copy of this plan is saved to My saved plans first. Then the event, costs, food, activities and approval are cleared so you can build a new one. Your name and approver stay.")) return;
+    const old = $("#offResetBox"); if (old) old.remove();
+    const d = document.createElement("div"); d.id = "offResetBox"; d.className = "reset-box";
+    d.innerHTML = `<div class="reset-in"><h3>Start a new plan?</h3><p>Your current plan is saved to My saved plans first. The event, costs, food, activities and approval are cleared.</p><p><b>Keep for the new plan:</b></p>
+      <label><input type="checkbox" id="rkGuests" checked> Guest list</label><label><input type="checkbox" id="rkBudget" checked> Budget amount</label><label><input type="checkbox" id="rkTeam" checked> Planning team</label>
+      <p class="reset-note">This only clears the plan in the app. Printed copies, Excel files, invites and bookings stay as they are, so tell your team and cancel anything booked.</p>
+      <div class="send-btns"><button type="button" class="btn btn-ghost" id="rkNo">Not now</button><button type="button" class="btn btn-gold" id="rkYes">Yes, start fresh</button></div></div>`;
+    document.body.appendChild(d);
+    $("#rkNo").onclick = () => d.remove();
+    $("#rkYes").onclick = () => { const o = { guests: $("#rkGuests").checked, budget: $("#rkBudget").checked, team: $("#rkTeam").checked }; d.remove(); offDoNewPlan(o); };
+  }
+  function offDoNewPlan(o) {
+    if (false && !confirm("Start a new plan? A copy of this plan is saved to My saved plans first. Then the event, costs, food, activities and approval are cleared so you can build a new one. Your name and approver stay.")) return;
     offSavePlan(); const last = off.saved[off.saved.length - 1]; if (last) last.name += " (replaced)";
-    const keep = { organizer: off.ev.organizer, approver: off.ev.approver, approverEmail: off.ev.approverEmail, headcount: off.ev.headcount, giftLimit: off.ev.giftLimit };
+    const keep = { organizer: off.ev.organizer, approver: off.ev.approver, approverEmail: off.ev.approverEmail, headcount: off.ev.headcount, giftLimit: off.ev.giftLimit }; if (o.budget) keep.budget = off.ev.budget;
     off.ev = Object.assign({ name: "Holiday Party", date: "", start: "17:00", end: "21:00", venue: "", address: "", headcount: 20, budget: 0, theme: "", dress: "", giftLimit: 25, organizer: "", approver: "", approverEmail: "", notes: "" }, keep);
     off.acts = { potluck: 1, gifts: 1, awards: 1, games: 1 }; off.costs = []; off.pot = []; off.polls = []; off.tbPick = []; off.santa = { time: "", who: "" }; off.food = null; off.confirmed = null;
-    off.guests = (off.guests || []).map(g => Object.assign({}, g, { status: "pending" })); if (off.wep) off.wep.order = null;
+    off.guests = o.guests ? (off.guests || []).map(g => Object.assign({}, g, { status: "pending" })) : []; if (!o.team) off.team = []; if (off.wep) off.wep.order = null;
     off.appr = { status: "draft", log: [], followDays: (off.appr && off.appr.followDays) || 3 }; off.tab = "event";
     saveOff(); offSync(); renderOffice(); renderCoDash(); window.scrollTo(0, 0); toast("🆕 Fresh plan. The old one is in My saved plans");
   }
