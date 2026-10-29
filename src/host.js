@@ -178,6 +178,8 @@
         <p class="host-rem">Tap a seat to type a name. Names from your guest list are suggested.</p>
         <label class="host-check"><input type="checkbox" id="hostKids" ${t.kids ? "checked" : ""}> Add a kids' table</label>
         ${t.kids ? `<div class="host-row"><span class="meal-lab">Kids' seats</span><div class="stepper sm"><button type="button" data-hkseats="-1">−</button><output>${t.kseats}</output><button type="button" data-hkseats="1">+</button></div></div>${seatsHtml(t.kseats, t.knames, "rect", "k")}` : ""}
+        <p class="host-rem" style="margin-bottom:4px">Choose a card design. Your guests' names are printed on it.</p>
+        <div class="pc-pick" role="group" aria-label="Place card design">${PC_DESIGNS.map(d => `<button type="button" class="pc-opt" data-hdesign="${d.id}" aria-pressed="${(t.design || "classic") === d.id}">${d.arts.length ? `<img src="${d.arts[0]}" alt="">` : `<b class="pc-cl">✦</b>`}<span>${esc(d.name)}</span></button>`).join("")}</div>
         <button type="button" class="btn btn-red btn-block" id="hostPlaceCards" data-print="place">🖨️ Print place cards</button>
         <datalist id="hostNameList">${all.map(n => `<option value="${esc(n)}">`).join("")}</datalist>
       </div>
@@ -280,12 +282,31 @@
   function placeDoc() {
     const names = host.table.names.slice(0, host.table.seats).concat(host.table.kids ? host.table.knames.slice(0, host.table.kseats) : []).filter(Boolean);
     if (!names.length) return { error: "🍽️ Add some names to the seats first" };
-    const card = n => `<div class="pc"><div class="pc-half"></div><div class="pc-half"><div class="pc-star">✦</div><div class="pc-name">${esc(n)}</div><div class="pc-sub">Merry Christmas</div></div></div>`;
-    const css = `.pcs{display:grid;grid-template-columns:1fr 1fr;gap:8mm;font-family:Georgia,serif} .pc{border:1px dashed #bbb;height:62mm;display:grid;grid-template-rows:1fr 1fr;break-inside:avoid}
+    const des = PC_DESIGNS.find(d => d.id === host.table.design) || PC_DESIGNS[0];
+    if (des.kind === "classic") {
+      const card = n => `<div class="pc"><div class="pc-half"></div><div class="pc-half"><div class="pc-star">✦</div><div class="pc-name">${esc(n)}</div><div class="pc-sub">Merry Christmas</div></div></div>`;
+      const css = `.pcs{display:grid;grid-template-columns:1fr 1fr;gap:8mm;font-family:Georgia,serif} .pc{border:1px dashed #bbb;height:62mm;display:grid;grid-template-rows:1fr 1fr;break-inside:avoid}
       .pc-half:first-child{border-bottom:1px dotted #ccc} .pc-half:last-child{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
       .pc-star{color:#B8935A;font-size:14pt} .pc-name{font:400 30pt "Great Vibes",cursive;color:#1E3A2F;line-height:1.2} .pc-sub{font:500 8pt sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#B8935A} .pc-tip{font:10pt sans-serif;color:#777;margin:0 0 6mm}`;
+      return { noBrand: 1, title: "Place cards", css, fonts: true, margin: 0.5, file: "Place-Cards",
+        html: `<p class="pc-tip">Cut along the dashed lines and fold along the dotted line, so each card stands up like a little tent.</p><div class="pcs">${names.map(card).join("")}</div>` };
+    }
+    // designs with art: six fold-over cards per page, the guest's name on both sides of the fold
+    const H = 34, W = Math.min(34 * des.asp, 40), corner = des.kind === "corner";
+    const half = (n, i, back) => {
+      const len = n.length, fs = len <= 9 ? 27 : len <= 14 ? 22 : len <= 20 ? 17 : 13;
+      return `<div class="pch${back ? " bk" : ""}"><div class="pnm" style="padding-right:${(W + (corner ? 4 : 11)).toFixed(1)}mm;font-size:${fs}pt">${esc(n)}</div>${corner ? "" : `<i class="pln" style="right:${(W + 6).toFixed(1)}mm"></i>`}<img class="pa${corner ? " pcor" : ""}${des.border ? " pbd" : ""}" src="${des.arts[i % des.arts.length]}" style="height:${(corner ? 36 : H)}mm;width:${(corner ? 36 : H) * des.asp > 40 ? 40 : (corner ? 36 : H) * des.asp}mm" alt=""></div>`;
+    };
+    const cards = names.map((n, i) => `<div class="pcc">${half(n, i, true)}${half(n, i, false)}</div>`);
+    const pages = []; for (let i = 0; i < cards.length; i += 6) pages.push(`<div class="pcd">${cards.slice(i, i + 6).join("")}</div>`);
+    const css = `.pcd{display:grid;grid-template-columns:repeat(2,minmax(0,91.4mm));justify-content:center;page-break-after:always} .pcd:last-child{page-break-after:auto}
+      .pcc{min-width:0;height:81mm;box-sizing:border-box;border:.25mm dashed #bbb;display:grid;grid-template-rows:1fr 1fr;break-inside:avoid;background:#fff}
+      .pch{position:relative;overflow:hidden;display:flex;align-items:center;box-sizing:border-box} .pch.bk{transform:rotate(180deg);border-bottom:.25mm dotted #999} .pch.bk + .pch{border-top:0}
+      .pnm{flex:1;box-sizing:border-box;padding-left:3mm;text-align:center;font-family:"Great Vibes",cursive;color:#1E3A2F;line-height:1.15;overflow-wrap:break-word}
+      .pa{position:absolute;right:3mm;top:50%;transform:translateY(-50%);object-fit:contain} .pa.pcor{top:1.5mm;right:1.5mm;transform:none} .pa.pbd{border:.25mm solid #C9A45C}
+      .pln{position:absolute;top:7mm;bottom:7mm;width:.3mm;background:#C9A45C} .pc-tip{font:9pt sans-serif;color:#777;margin:0 0 3mm;text-align:center}`;
     return { noBrand: 1, title: "Place cards", css, fonts: true, margin: 0.5, file: "Place-Cards",
-      html: `<p class="pc-tip">Cut along the dashed lines and fold along the dotted line, so each card stands up like a little tent.</p><div class="pcs">${names.map(card).join("")}</div>` };
+      html: `<p class="pc-tip">Cut along the dashed lines and fold along the dotted line, so each card stands up like a little tent.</p>${pages.join("")}` };
   }
   // ---------- 🧲 the fridge sheet: the whole hosting plan on one page ----------
   function travelDoc() {
@@ -352,6 +373,7 @@
     }
     const bd = t.closest("[data-hbeds]"); if (bd && room) { const r = host.rooms.find(x => x.id === room.dataset.hr); r.beds = Math.max(1, Math.min(12, r.beds + +bd.dataset.hbeds)); saveHost(); renderHost(); return; }
     const rd = t.closest("[data-hready]"); if (rd && room) { const r = host.rooms.find(x => x.id === room.dataset.hr); r.ready[rd.dataset.hready] = !r.ready[rd.dataset.hready]; saveHost(); renderHost(); return; }
+    const dz = t.closest("[data-hdesign]"); if (dz) { host.table.design = dz.dataset.hdesign; saveHost(); renderHost(); return; }
     const sh = t.closest("[data-hshape]"); if (sh) { host.table.shape = sh.dataset.hshape; saveHost(); renderHost(); return; }
     const st = t.closest("[data-hstyle]"); if (st) { host.table.style = st.dataset.hstyle; saveHost(); renderHost(); return; }
     const ss = t.closest("[data-hseats]"); if (ss) { host.table.seats = Math.max(2, Math.min(24, host.table.seats + +ss.dataset.hseats)); saveHost(); renderHost(); return; }
