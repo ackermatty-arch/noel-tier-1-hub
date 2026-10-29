@@ -187,7 +187,7 @@
   function renderNyeMenu() {
     const el = $("#nyeMenu"), v = $("#view-nye"); if (!el) return;
     const on = nyeScreen === "menu"; v.classList.toggle("on-menu", on); el.hidden = !on; if (!on || el.dataset.built) return; el.dataset.built = "1";
-    const go = `<button type="button" class="menu-go" data-nyego>Build my party <span>›</span></button>`;
+    const go = `<button type="button" class="menu-go" data-nyego>Noël's plans <span>›</span></button>`;
     const m = mealById("nyeparty"), all = m ? (m.menuFor ? m.menuFor(mealSizes(m, cfgFor("nyeparty"))) : m.menu) : [];
     const clean = i => esc(String(i).replace(/\s*\(24 pieces\)/, ""));
     const food = all.filter(([c]) => !/drink|pairing/i.test(c)).flatMap(([, it]) => it.map(clean)), drinks = all.filter(([c]) => /drink/i.test(c)).flatMap(([, it]) => it.map(clean));
@@ -207,7 +207,7 @@
       <div class="menu-bottom"><p class="menu-ready">Ready to build your night?</p>${go}<button type="button" class="menu-own" data-nyecount>Just here for the countdown? Open it ›</button></div>`;
   }
   document.addEventListener("click", e => {   // opening My Own Dinner from anywhere but New Year's resets its back buttons
-    if (e.target.closest && e.target.closest("[data-goview=own],[data-menuskip],[data-svown]")) {
+    if (e.target.closest && e.target.closest("[data-goview=own],[data-menuskip],[data-svown],[data-offown]")) {
       const f = $("#view-own .meal-back.fam-only"), c = $("#view-own .meal-back.co-only");
       if (f) { f.dataset.goview = "meals"; f.textContent = "‹ The Noël menu"; } if (c) { c.dataset.goview = "planner"; c.textContent = "‹ Planner"; }
     }

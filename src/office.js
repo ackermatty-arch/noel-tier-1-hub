@@ -1172,10 +1172,10 @@
   function renderOffMenu() {
     const el = $("#offMenu"), v = $("#view-office"); if (!el) return;
     const on = offScreen === "menu"; v.classList.toggle("on-menu", on); el.hidden = !on; if (!on || el.dataset.built) return; el.dataset.built = "1";
-    const go = `<button type="button" class="menu-go" data-offgo>Start planning <span>›</span></button>`, dot = " <i>·</i> ";
+    const go = `<button type="button" class="menu-go" data-offgo>Noël's plans <span>›</span></button>`, own = `<button type="button" class="menu-go menu-skip" data-offown>My own plans</button>`, dot = " <i>·</i> ";
     const blk = (n, b) => `<div class="menu-dish"><h4>${n}</h4>${b}</div><p class="menu-rule sm"><span></span>✦<span></span></p>`, line = x => `<p class="menu-items">${x}</p>`;
     const plain = l => l.replace(/^\S+\s/, "");
-    el.innerHTML = `<div class="menu-top">${go}</div>
+    el.innerHTML = `<div class="menu-top">${own}${go}</div>
       <p class="menu-star">✦</p><h2 class="menu-title">Office Events, All Year</h2><p class="menu-sub">Plan any event, get it approved and leave a tidy record for next year</p><p class="menu-rule"><span></span>✦<span></span></p>
       <h3 class="menu-group">All Year Long</h3>` +
       blk("A calendar of events", line(`Appreciation Day${dot}Summer BBQ${dot}Boss's Day${dot}Thanksgiving potluck${dot}Holiday party`) + `<p class="menu-sub2">Starter checklists, birthdays and anniversaries, and one yearly budget</p>`) +
@@ -1198,6 +1198,7 @@
     if (e.target.closest && e.target.closest("[data-goview=office]")) { offScreen = offHasWork() ? "build" : "menu"; setTimeout(renderOffMenu, 0); }
   }, true);
   $("#view-office").addEventListener("click", e => {
+    if (e.target.closest("[data-offown]")) { showView("own"); window.scrollTo(0, 0); return; }
     if (e.target.closest("[data-offgo]")) { offScreen = "build"; renderOffMenu(); window.scrollTo(0, 0); }
     if (e.target.closest("[data-offmenu]")) { offScreen = "menu"; renderOffMenu(); window.scrollTo(0, 0); }
   });

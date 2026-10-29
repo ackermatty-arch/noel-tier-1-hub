@@ -12228,7 +12228,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   function renderNyeMenu() {
     const el = $("#nyeMenu"), v = $("#view-nye"); if (!el) return;
     const on = nyeScreen === "menu"; v.classList.toggle("on-menu", on); el.hidden = !on; if (!on || el.dataset.built) return; el.dataset.built = "1";
-    const go = `<button type="button" class="menu-go" data-nyego>Build my party <span>›</span></button>`;
+    const go = `<button type="button" class="menu-go" data-nyego>Noël's plans <span>›</span></button>`;
     const m = mealById("nyeparty"), all = m ? (m.menuFor ? m.menuFor(mealSizes(m, cfgFor("nyeparty"))) : m.menu) : [];
     const clean = i => esc(String(i).replace(/\s*\(24 pieces\)/, ""));
     const food = all.filter(([c]) => !/drink|pairing/i.test(c)).flatMap(([, it]) => it.map(clean)), drinks = all.filter(([c]) => /drink/i.test(c)).flatMap(([, it]) => it.map(clean));
@@ -12248,7 +12248,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       <div class="menu-bottom"><p class="menu-ready">Ready to build your night?</p>${go}<button type="button" class="menu-own" data-nyecount>Just here for the countdown? Open it ›</button></div>`;
   }
   document.addEventListener("click", e => {   // opening My Own Dinner from anywhere but New Year's resets its back buttons
-    if (e.target.closest && e.target.closest("[data-goview=own],[data-menuskip],[data-svown]")) {
+    if (e.target.closest && e.target.closest("[data-goview=own],[data-menuskip],[data-svown],[data-offown]")) {
       const f = $("#view-own .meal-back.fam-only"), c = $("#view-own .meal-back.co-only");
       if (f) { f.dataset.goview = "meals"; f.textContent = "‹ The Noël menu"; } if (c) { c.dataset.goview = "planner"; c.textContent = "‹ Planner"; }
     }
@@ -15576,10 +15576,10 @@ const PC_DESIGNS = [
   function renderOffMenu() {
     const el = $("#offMenu"), v = $("#view-office"); if (!el) return;
     const on = offScreen === "menu"; v.classList.toggle("on-menu", on); el.hidden = !on; if (!on || el.dataset.built) return; el.dataset.built = "1";
-    const go = `<button type="button" class="menu-go" data-offgo>Start planning <span>›</span></button>`, dot = " <i>·</i> ";
+    const go = `<button type="button" class="menu-go" data-offgo>Noël's plans <span>›</span></button>`, own = `<button type="button" class="menu-go menu-skip" data-offown>My own plans</button>`, dot = " <i>·</i> ";
     const blk = (n, b) => `<div class="menu-dish"><h4>${n}</h4>${b}</div><p class="menu-rule sm"><span></span>✦<span></span></p>`, line = x => `<p class="menu-items">${x}</p>`;
     const plain = l => l.replace(/^\S+\s/, "");
-    el.innerHTML = `<div class="menu-top">${go}</div>
+    el.innerHTML = `<div class="menu-top">${own}${go}</div>
       <p class="menu-star">✦</p><h2 class="menu-title">Office Events, All Year</h2><p class="menu-sub">Plan any event, get it approved and leave a tidy record for next year</p><p class="menu-rule"><span></span>✦<span></span></p>
       <h3 class="menu-group">All Year Long</h3>` +
       blk("A calendar of events", line(`Appreciation Day${dot}Summer BBQ${dot}Boss's Day${dot}Thanksgiving potluck${dot}Holiday party`) + `<p class="menu-sub2">Starter checklists, birthdays and anniversaries, and one yearly budget</p>`) +
@@ -15602,6 +15602,7 @@ const PC_DESIGNS = [
     if (e.target.closest && e.target.closest("[data-goview=office]")) { offScreen = offHasWork() ? "build" : "menu"; setTimeout(renderOffMenu, 0); }
   }, true);
   $("#view-office").addEventListener("click", e => {
+    if (e.target.closest("[data-offown]")) { showView("own"); window.scrollTo(0, 0); return; }
     if (e.target.closest("[data-offgo]")) { offScreen = "build"; renderOffMenu(); window.scrollTo(0, 0); }
     if (e.target.closest("[data-offmenu]")) { offScreen = "menu"; renderOffMenu(); window.scrollTo(0, 0); }
   });
