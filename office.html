@@ -7601,21 +7601,47 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
 
   // --- Planner phases & default tasks. Keep each task "id" unique.
   const FAMILY_PHASES = [
+    { id: "f0", icon: "💰", title: "Late October: Budget & Master List", tasks: [
+      { id: "f0-1", text: "Build the gift list by group: family, friends, service workers, coworkers" },
+      { id: "f0-2", text: "Set a spending cap for each person" },
+      { id: "f0-3", text: "Mark the hard deadlines: school breaks, closures, shipping cut-offs" },
+      { id: "f0-4", text: "Add family gatherings, light festivals & school concerts to the calendar" },
+      { id: "f0-5", text: "Book event tickets before prices rise" } ] },
+    { id: "f1", icon: "🎨", title: "Early November: Decor, Theme & Supplies", tasks: [
+      { id: "f1-1", text: "Test the holiday lights & check the tree" },
+      { id: "f1-2", text: "List broken or missing decorations" },
+      { id: "f1-3", text: "Choose a colour palette or theme (wrapping, tree, table)" },
+      { id: "f1-4", text: "Check baking & hosting supplies: pantry staples, linens, dinnerware" } ] },
+    { id: "f2", icon: "✉️", title: "Mid-November: Cards & Gift Shopping", tasks: [
+      { id: "f2-1", text: "Update the card list & mailing addresses" },
+      { id: "f2-2", text: "Choose or order photo cards" },
+      { id: "f2-3", text: "Buy holiday postage stamps" },
+      { id: "f2-4", text: "Map the Black Friday & Cyber Monday deals" },
+      { id: "f2-5", text: "Log online orders: tracking, delivery date, hiding spot" } ] },
     { id: "w4", icon: "🗓️", title: "5-8 Weeks Before", tasks: [
       { id: "w4-1", text: "Set the holiday budget" },
       { id: "w4-6", text: "Travel plans booked" },
       { id: "w4-2", text: "Write the gift list" },
       { id: "w4-3", text: "Order online gifts early" },
       { id: "w4-4", text: "Confirm travel & guest plans" } ] },
+    { id: "f3", icon: "🍽️", title: "Late November: Menu & Prep", tasks: [
+      { id: "f3-1", text: "Lock the Christmas Day menu: breakfast, dinner, cocktails & dietary needs" },
+      { id: "f3-2", text: "Delegate dishes to guests (potluck)" },
+      { id: "f3-3", text: "Make the grocery timeline: non-perishables now, fresh items 48 hours before" } ] },
     { id: "w2", icon: "🎁", title: "2-4 Weeks Before", tasks: [
       { id: "w2-1", text: "Finish gift shopping" },
       { id: "w2-2", text: "Wrap gifts" },
+      { id: "w2-6", text: "Set aside batch-wrapping nights, tag gifts by household" },
+      { id: "w2-7", text: "Mail cards & out-of-town gifts before the post deadlines" },
       { id: "w2-3", text: "Decorate the house" },
       { id: "w2-4", text: "Plan the Christmas menu" },
       { id: "w2-5", text: "Plan holiday outfits" },
       { id: "w4-5", text: "Send cards & invitations" } ] },
     { id: "w1", icon: "🛒", title: "1 Week Before", tasks: [
       { id: "w1-1", text: "Big grocery shopping trip" },
+      { id: "w1-6", text: "Fresh grocery run: dairy, produce & fresh meat" },
+      { id: "w1-7", text: "Write the hour-by-hour cooking schedule for Christmas Eve & Day" },
+      { id: "w1-8", text: "Tidy guest spaces & reset the house" },
       { id: "w1-2", text: "Bake & freeze cookies" },
       { id: "w1-3", text: "Prep make-ahead meals" },
       { id: "w1-4", text: "Clean & ready the guest room" },
@@ -13342,6 +13368,8 @@ const PC_DESIGNS = [
     const mdp = mainDinnerPlan();
     add(ymd(dd), "🍽️", mdp ? mdp.name : "Christmas dinner", `${String(dd.getHours()).padStart(2, "0")}:${String(dd.getMinutes()).padStart(2, "0")}`);
     add(`${orgYear()}-12-25`, "🎄", "Christmas Day"); add(`${orgYear()}-12-31`, "🥂", "New Year's Eve");
+    { const y = orgYear(), n1 = new Date(y, 10, 1), th = 1 + ((4 - n1.getDay() + 7) % 7) + 21, bf = new Date(y, 10, th + 1), cm = new Date(y, 10, th + 4);   // 4th Thursday of November + 1 day
+      add(ymd(bf), "🛍️", "Black Friday sales"); add(ymd(cm), "💻", "Cyber Monday online sales"); }
     mealPlans.filter(pl => pl !== mdp).forEach(pl => { { const p = new Date(pl.at); add(ymd(p), pl.svc ? "⛪" : pl.eve ? "🕯️" : pl.party ? "🎉" : "🍽️", pl.svc ? pl.name : pl.party && !pl.eve ? "New Year's Eve party" : pl.name, `${String(p.getHours()).padStart(2, "0")}:${String(p.getMinutes()).padStart(2, "0")}`); } });
     host.trips.filter(x => x.k === "trip" && x.b).forEach(x => { const t = new Date(x.b); if (isNaN(t)) return; add(ymd(t), "✈️", x.a, x.b.slice(11, 16)); const pk = new Date(t.getTime() - 864e5); add(ymd(pk), "🧳", "Pack & check in: " + x.a); });
     host.trips.filter(x => x.k === "gtrip" && x.b).forEach(x => { const t = new Date(x.b); if (isNaN(t)) return; add(ymd(t), "🛬", "Pick up: " + x.a, x.b.slice(11, 16)); });

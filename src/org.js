@@ -79,6 +79,8 @@
     const mdp = mainDinnerPlan();
     add(ymd(dd), "🍽️", mdp ? mdp.name : "Christmas dinner", `${String(dd.getHours()).padStart(2, "0")}:${String(dd.getMinutes()).padStart(2, "0")}`);
     add(`${orgYear()}-12-25`, "🎄", "Christmas Day"); add(`${orgYear()}-12-31`, "🥂", "New Year's Eve");
+    { const y = orgYear(), n1 = new Date(y, 10, 1), th = 1 + ((4 - n1.getDay() + 7) % 7) + 21, bf = new Date(y, 10, th + 1), cm = new Date(y, 10, th + 4);   // 4th Thursday of November + 1 day
+      add(ymd(bf), "🛍️", "Black Friday sales"); add(ymd(cm), "💻", "Cyber Monday online sales"); }
     mealPlans.filter(pl => pl !== mdp).forEach(pl => { { const p = new Date(pl.at); add(ymd(p), pl.svc ? "⛪" : pl.eve ? "🕯️" : pl.party ? "🎉" : "🍽️", pl.svc ? pl.name : pl.party && !pl.eve ? "New Year's Eve party" : pl.name, `${String(p.getHours()).padStart(2, "0")}:${String(p.getMinutes()).padStart(2, "0")}`); } });
     host.trips.filter(x => x.k === "trip" && x.b).forEach(x => { const t = new Date(x.b); if (isNaN(t)) return; add(ymd(t), "✈️", x.a, x.b.slice(11, 16)); const pk = new Date(t.getTime() - 864e5); add(ymd(pk), "🧳", "Pack & check in: " + x.a); });
     host.trips.filter(x => x.k === "gtrip" && x.b).forEach(x => { const t = new Date(x.b); if (isNaN(t)) return; add(ymd(t), "🛬", "Pick up: " + x.a, x.b.slice(11, 16)); });
