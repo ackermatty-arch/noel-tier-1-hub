@@ -15964,7 +15964,13 @@ const PC_DESIGNS = [
   orgSync();   // 📒 organizer reminders
   hostSync();   // 🏡 keep phone reminders in step with the plan
   showView(hubMode === "company" && typeof offHasWork === "function" && offHasWork() ? "planner" : load(KEYS.view, "planner"));
-  setInterval(tick, 250);
+  // ⚡ battery: check 4 times a second only while a timer or a dinner alarm is about to go; otherwise once a second
+  (function loop() {
+    const soon = Date.now() + 60000;
+    const busy = duties.some(d => d.status === "running") || mealPlans.some(pl => pl.steps.some(st => st.alarm && !st.fired && st.t <= soon));
+    setTimeout(() => { if (!document.hidden) tick(); loop(); }, busy ? 250 : 1000);
+  })();
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
   tick(); // catches timers that finished while the app was closed
   afterUnlock();
   window.NOEL_STARTED = true;
