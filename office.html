@@ -918,13 +918,16 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .wish-person { padding: 14px 16px; margin-bottom: 10px; }
 .wish-person h4 { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; font-size: 17px; color: var(--pine); }
 .wish-person h4 small { margin-left: auto; font-size: 12px; color: var(--muted); font-weight: 600; }
-.wish-item { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); }
+.wish-item { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); }
 .wish-item b { display: block; font-size: 15px; color: var(--ink); }
 .wish-item small { display: block; font-size: 12.5px; color: var(--muted); }
 .wish-item .w-price { font-weight: 800; color: var(--pine); font-size: 14px; }
 .w-move { font-size: 12px; font-weight: 800; padding: 7px 10px; border-radius: 99px; background: var(--pine); color: #fff; white-space: nowrap; }
 .w-move.done { background: var(--cream); color: var(--pine); }
-.wish-item .icon-btn { grid-column: 3; }
+.wish-item .icon-btn { grid-column: 2; grid-row: 1; }
+.wish-item .wish-actions { grid-column: 1 / -1; grid-row: 2; flex-wrap: wrap; }
+.w-buy { font-size: 12px; font-weight: 800; padding: 9px 14px; background: #16130E; color: #E3C98A; white-space: nowrap; border-radius: 0; min-height: 40px; }
+.w-move { min-height: 40px; }
 .wish-actions { display: flex; gap: 6px; align-items: center; }
 
 /* ---------- 🎆 Party games ---------- */
@@ -1707,7 +1710,7 @@ body, .view { background:#fff; }
 /* ===== Sleek square black boxes, white instead of grey, no red (except the alarm badge) ===== */
 :root { --red:#151515; --red-dark:#151515; --pine:#151515; --pine-dark:#151515; --pine-deep:#151515; --c-pine:#151515; --success:#151515; }
 .btn, .btn-red, .btn-green, .btn-gold, .btn-ghost, .chip, .pill, .meal-back, .seg, .seg button, .cur-switch, .cur-switch button, .mode-pick button,
-.classy-btn, .night-tag, .bud-status, .meal-diet-note, .tray-done, .ch-opt, .ch-opt.on, .bundle-tag, .host-pill, .checkmark, .app-fav, .w-move, .gi-cat, .score-btn, .act-btn, .print-thumb::after { border-radius: 0 !important; }
+.classy-btn, .night-tag, .bud-status, .meal-diet-note, .tray-done, .ch-opt, .ch-opt.on, .bundle-tag, .host-pill, .checkmark, .app-fav, .w-move, .w-buy, .gi-cat, .score-btn, .act-btn, .print-thumb::after { border-radius: 0 !important; }
 .btn { padding: 11px 22px; min-height: 44px; font-size: 14px; font-weight: 700; letter-spacing: .05em; box-shadow: none !important; }
 .btn-sm { padding: 8px 16px; min-height: 38px; font-size: 13px; }
 .btn-red, .btn-green, .btn-gold, #nyeBig, .game-card .btn-gold { background:#151515 !important; color:#fff !important; border:1px solid #151515 !important; }
@@ -9830,7 +9833,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         ${list.map(w => `<div class="wish-item" data-wid="${w.id}">
           <div><b>${esc(w.what)}</b>${w.note ? `<small>${esc(w.note)}</small>` : ""}<small>Noted ${new Date(w.date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</small></div>
           <div class="wish-actions">${w.price ? `<span class="w-price">${money(w.price)}</span>` : ""}
-            <button class="w-move ${w.moved ? "done" : ""}" data-wact="move" ${w.moved ? "disabled" : ""}>${w.moved ? "✓ In gifts" : "➕ To gifts"}</button></div>
+            <button class="w-move ${w.moved ? "done" : ""}" data-wact="move" ${w.moved ? "disabled" : ""}>${w.moved ? "✓ In gifts" : "➕ To gifts"}</button>
+            <button class="w-buy" data-wact="buy">Purchased</button></div>
           <button class="icon-btn" data-wact="del" aria-label="Delete ${esc(w.what)}">✕</button>
         </div>`).join("")}
       </div>`).join("");
@@ -9856,6 +9860,14 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   $("#wishList").addEventListener("click", e => {
     const b = e.target.closest("[data-wact]"); if (!b) return;
     const w = wishes.find(x => x.id === b.closest(".wish-item").dataset.wid); if (!w) return;
+    if (b.dataset.wact === "buy") {   // 🛍️ bought it: counts in the budget as purchased, and the wish comes off the list
+      let p = findPerson(w.who);
+      if (!p) { p = { id: uid(), name: w.who, gifts: [] }; gifts.people.push(p); }
+      const nm = w.what + (w.note ? ` (${w.note})` : ""), g = w.moved ? p.gifts.find(x => x.name === nm && x.status !== "bought") : null;
+      if (g) { g.status = "bought"; if (!g.price && w.price) g.price = w.price; } else p.gifts.push({ id: uid(), name: nm, price: w.price || 0, status: "bought" });
+      wishes = wishes.filter(x => x !== w); save("wishes", wishes); save("gifts", gifts); renderGifts(); renderWishes();
+      toast(`🛍️ ${w.what} is purchased for ${p.name}. It counts in your budget.`); return;
+    }
     if (b.dataset.wact === "move") { moveWish(w); toast(`🎁 Added to ${w.who}'s gifts. It now counts in your budget.`); }
     if (b.dataset.wact === "del") { if (!confirm(`Delete "${w.what}"?`)) return; wishes = wishes.filter(x => x !== w); save("wishes", wishes); renderWishes(); }
   });
