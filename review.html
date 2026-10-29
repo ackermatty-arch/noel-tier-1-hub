@@ -3574,6 +3574,9 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
       <button class="chip fam-only" data-cmd="How long on the cookies?">“How long on the cookies?”</button>
       <button class="chip fam-only" data-cmd="Set a 10 minute timer for potatoes">“Set a 10 minute timer for potatoes”</button>
       <button class="chip fam-only" data-cmd="Check off wrap gifts">“Check off wrap gifts”</button>
+      <button class="chip fam-only" data-cmd="I bought a scarf for Mom 30 dollars">“I bought a scarf for Mom, 30 dollars”</button>
+      <button class="chip fam-only" data-cmd="Add a gift book for Dad">“Add a gift book for Dad”</button>
+      <button class="chip fam-only" data-cmd="Find the scarf">“Find the scarf”</button>
       <button class="chip co-only" data-cmd="Start the catering timer">“Start the catering timer”</button>
       <button class="chip co-only" data-cmd="How long on the gift exchange?">“How long on the gift exchange?”</button>
       <button class="chip co-only" data-cmd="Set a 10 minute timer for the raffle">“Set a 10 minute timer for the raffle”</button>
@@ -8609,6 +8612,22 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (has(/\b(back ?up|restore)\b/)) { closeSheets(); showView("tasks"); { const f = $("#safeFold"); if (f) f.open = true; } setTimeout(() => $("#backupCard").scrollIntoView({ behavior: "smooth", block: "center" }), 150); return "Tap Save a backup to keep a copy of your lists."; }
     if (has(/\b(invites?|invitations?|guest list|guests)\b/)) { closeSheets(); showView("invites"); showPane("invites"); return "Here are your party invites."; }
     if (has(/\b(send a card|e ?cards?|christmas cards?|greeting cards?|new years? cards?)\b/)) { closeSheets(); showView("invites"); showPane("cards"); return "Let's send a card. Pick a design and write your message."; }
+    // Gifts by voice: "I bought a scarf for Mom 30 dollars" (counts in the budget) / "add a gift scarf for Mom" / "add scarf to moms gifts"
+    {
+      const PRICE = '(?:\\s+(?:for|at|costing|cost|about|it was)?\\s*(\\d+(?:\\.\\d+)?)(?:\\s*(?:dollars?|bucks))?)?', cap = x => x.charAt(0).toUpperCase() + x.slice(1);
+      let gm = new RegExp("\\b(?:i )?(?:bought|purchased|picked up)\\s+(?:an? |some |the )?(.+?)\\s+for\\s+([a-z]+)" + PRICE + "\\s*$").exec(t), bought = true;
+      if (!gm) { bought = false; gm = new RegExp("\\badd\\s+(?:an? |some |the )?(?:gift|present)(?: idea)?\\s+(.+?)\\s+(?:for|to|under)\\s+([a-z]+)" + PRICE + "\\s*$").exec(t)
+        || new RegExp("\\badd\\s+(?:an? |some |the )?(.+?)\\s+(?:to|under)\\s+([a-z]+?)s?\\s+(?:gifts?|present list)" + PRICE + "\\s*$").exec(t); }
+      if (gm && !has(/\b(timer|minutes?)\b/)) {
+        const what = cap(gm[1].trim()), who = cap(gm[2].trim()), price = parseFloat(gm[3]) || 0;
+        let p = findPerson(who);
+        if (!p) { p = { id: uid(), name: who, gifts: [] }; gifts.people.push(p); }
+        p.gifts.push({ id: uid(), name: what, price, status: bought ? "bought" : "idea" });
+        save("gifts", gifts); renderGifts(); try { renderBudget && renderBudget(); } catch (e) {}
+        closeSheets(); budget.tab = "set"; saveBudget(); showView("budget");
+        return bought ? `Added ${what} to ${p.name}'s gifts as bought${price ? " for " + money(price) : ""}. It counts in your budget.` : `Added ${what} to ${p.name}'s gift ideas${price ? ", about " + money(price) : ""}.`;
+      }
+    }
     m = /^ ?(?:(?:add|put) (?:it )?(?:to|on) (?:the |my )?wish ?list:? )?(?:(?:for )?)([a-z][a-z ]{0,20}?) (?:wants|would like|wishes for|asked for|is wishing for|would love)(?: an?| some| the)? (.+?) ?$/.exec(t)
       || /\bwish ?list (?:for )?([a-z]+) (?:an?|some|the )?(.+?) ?$/.exec(t);
     if (m && !has(/\b(timer|minutes?|turkey timer)\b/)) {
@@ -8621,9 +8640,24 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (has(/\bwish ?lists?\b/)) { closeSheets(); showView("gifts"); showGiftPane("wish"); return "Here's your wish list."; }
     if (has(/\b(gift tracker|gifts|presents|shopping list)\b/) && !has(/\b(check off|tick off|cross off|mark|uncheck|untick|done with|finished)\b/)) { closeSheets(); budget.tab = "set"; saveBudget(); showView("budget"); return "Here's your gift tracker, on the Budget page."; }
 
+    // Voice search: "find the scarf", "where is Moms gift", "search for Dad"
+    if ((m = /^\s*(?:find|search(?: for)?|look up|look for|where(?: is| are| s)?(?: the| my)?|show me)\s+(.+?)\s*$/.exec(t))) {
+      const q = m[1].replace(/\b(gifts?|presents?|for|the|my|a|an)\b/g, " ").replace(/s\b/g, w => w).trim().split(/\s+/).filter(Boolean);
+      const hit = [];
+      gifts.people.forEach(p => p.gifts.forEach(g => { const hay = (p.name + " " + g.name).toLowerCase().replace(/[’']/g, ""); if (q.length && q.every(w => hay.includes(w.replace(/s$/, "")))) hit.push({ p, g }); }));
+      if (!hit.length) gifts.people.forEach(p => { if (q.length && q.every(w => p.name.toLowerCase().includes(w.replace(/s$/, "")))) p.gifts.forEach(g => hit.push({ p, g })); });
+      if (hit.length) {
+        closeSheets(); budget.tab = "set"; saveBudget(); showView("budget");
+        return "Found " + hit.slice(0, 3).map(x => `${x.g.name} for ${x.p.name}${+x.g.price ? ", " + money(+x.g.price) : ""}${x.g.status === "bought" ? ", bought" : ""}`).join("; ") + (hit.length > 3 ? `, and ${hit.length - 3} more` : "") + ".";
+      }
+      const w = wishes.filter(x => q.length && q.every(k => (x.who + " " + x.what).toLowerCase().includes(k.replace(/s$/, ""))));
+      if (w.length) { closeSheets(); showView("gifts"); showGiftPane("wish"); return "Found " + w.slice(0, 3).map(x => `${x.what} on ${x.who}'s wish list`).join("; ") + "."; }
+      return `I couldn't find ${m[1]} in your gifts or wish lists. Try "open the planner" or "print the gift list".`;
+    }
+
     // 2. Help
     if (has(/\b(help|what can (i|you) say|commands)\b/))
-      return "You can say: start the turkey timer, how long on the cookies, set a 10 minute timer for potatoes, check off wrap gifts, add a point to Team Elves, print the gift list, or open the planner.";
+      return "You can say: start the turkey timer, set a 10 minute timer for potatoes, check off wrap gifts, I bought a scarf for Mom 30 dollars, add a gift book for Dad, find the scarf, print the gift list, or open the planner.";
 
     // 3. All timers at once
     if (has(/\b(pause|stop|hold) (all|every|everything)\b/)) {
