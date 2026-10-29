@@ -565,25 +565,27 @@
   function offNewPlan() {
     const old = $("#offResetBox"); if (old) old.remove();
     const d = document.createElement("div"); d.id = "offResetBox"; d.className = "reset-box";
-    d.innerHTML = `<div class="reset-in"><h3>Start a new plan?</h3><p>Your current plan is saved to My saved plans first. The event, costs, food, activities and approval are cleared.</p><p><b>Keep for the new plan:</b></p>
-      <label><input type="checkbox" id="rkGuests" checked> Guest list</label><label><input type="checkbox" id="rkBudget" checked> Budget amounts (Budget tab)</label><label><input type="checkbox" id="rkTeam" checked> Planning team</label>
+    d.innerHTML = `<div class="reset-in"><h3>Start a new plan?</h3><p>Your current plan is saved to My saved plans first. The event, costs, food, activities and approval are cleared.</p><p>The budget and all spending are cleared too, so you start at day one.</p><p><b>Keep for the new plan:</b></p>
+      <label><input type="checkbox" id="rkGuests" checked> Guest list</label><label><input type="checkbox" id="rkTeam" checked> Planning team</label>
       <p class="reset-note">This only clears the plan in the app. Printed copies, Excel files, invites and bookings stay as they are, so tell your team and cancel anything booked.</p>
       <div class="send-btns"><button type="button" class="btn btn-ghost" id="rkNo">Not now</button><button type="button" class="btn btn-gold" id="rkYes">Yes, start fresh</button></div></div>`;
     document.body.appendChild(d);
     $("#rkNo").onclick = () => d.remove();
-    $("#rkYes").onclick = () => { const o = { guests: $("#rkGuests").checked, budget: $("#rkBudget").checked, team: $("#rkTeam").checked }; d.remove(); offDoNewPlan(o); };
+    $("#rkYes").onclick = () => { const o = { guests: $("#rkGuests").checked, team: $("#rkTeam").checked }; d.remove(); offDoNewPlan(o); };
   }
   function offDoNewPlan(o) {
     if (false && !confirm("Start a new plan? A copy of this plan is saved to My saved plans first. Then the event, costs, food, activities and approval are cleared so you can build a new one. Your name and approver stay.")) return;
     offSavePlan(); const last = off.saved[off.saved.length - 1]; if (last) last.name += " (replaced)";
-    const keep = { organizer: off.ev.organizer, approver: off.ev.approver, approverEmail: off.ev.approverEmail, headcount: off.ev.headcount, giftLimit: off.ev.giftLimit }; if (o.budget) keep.budget = off.ev.budget;
+    const keep = { organizer: off.ev.organizer, approver: off.ev.approver, approverEmail: off.ev.approverEmail, headcount: off.ev.headcount, giftLimit: off.ev.giftLimit };
     off.ev = Object.assign({ name: "Holiday Party", date: "", start: "17:00", end: "21:00", venue: "", address: "", headcount: 20, budget: 0, theme: "", dress: "", giftLimit: 25, organizer: "", approver: "", approverEmail: "", notes: "" }, keep);
     off.acts = { potluck: 1, gifts: 1, awards: 1, games: 1 }; off.costs = []; off.pot = []; off.polls = []; off.tbPick = []; off.santa = { time: "", who: "" }; off.food = null; off.confirmed = null;
     off.guests = o.guests ? (off.guests || []).map(g => Object.assign({}, g, { status: "pending" })) : []; if (!o.team) off.team = []; if (off.wep) off.wep.order = null;
     off.appr = { status: "draft", log: [], followDays: (off.appr && off.appr.followDays) || 3 }; off.tab = "event";
+    off.chk = null; off.wrap = { worked: "", change: "" }; off.fired = {}; off.confirmed = null;
+    { const cur = oy.events.find(x => x.id === oy.active); if (cur) { cur.name = "Holiday Party"; cur.date = ""; cur.month = 12; cur.snap = null; saveOy(); } }   // the year calendar starts fresh too
     try {   // 💰 the Budget tab: spending always starts at zero; the category budgets stay only if "Budget amount" is ticked
       budget.expenses = []; budget.daily = {}; foodBudget.items = [];
-      if (!o.budget) { budget.cats = {}; budget.limit = 0; foodBudget.limit = 0; gifts.budget = 0; }
+      budget.cats = {}; budget.limit = 0; foodBudget.limit = 0; gifts.budget = 0;
       saveBudget(); save("foodBudget", foodBudget); save("gifts", gifts); if (typeof renderBudget === "function") renderBudget(); if (typeof renderGifts === "function") renderGifts(); if (typeof renderFoodBudget === "function") renderFoodBudget();
     } catch (e) {}
     saveOff(); offSync(); renderOffice(); renderCoDash(); window.scrollTo(0, 0); toast("🆕 Fresh plan. The old one is in My saved plans");
