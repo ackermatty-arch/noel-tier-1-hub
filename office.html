@@ -2665,6 +2665,19 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
     </div>
 
     </details>
+
+    <details class="fold" id="helpFold"><summary>Help &amp; troubleshooting</summary>
+    <div class="card backup-card" id="helpCard">
+      <p><b>New phone, or deleted the app by accident?</b><br>Open the App Store, tap your picture, then Purchased, find Noël Tier 1 Hub and tap the cloud to download it again. Use the same Apple ID you bought it with. It's free to re-download and works on your iPhone and iPad.</p>
+      <p><b>Bring your lists back</b><br>Your lists are saved on the device only. In the app, go to Tasks, open Backup, spreadsheet &amp; privacy, and tap Save a backup. Keep the file in Files, iCloud Drive or email it to yourself. On the new device tap Restore from a backup and choose that file. Without a backup, a deleted app means the lists are gone.</p>
+      <p><b>Forgot your PIN?</b><br>The only way back in is to erase the Noël data on this device, then restore a backup. This is why a backup matters.</p>
+      <p><b>No alarms or reminders?</b><br>Open your phone Settings, then Notifications, then Noël Tier 1 Hub, and turn notifications on. Also turn off Do Not Disturb and check the silent switch.</p>
+      <p><b>Voice does not hear you?</b><br>In Settings, then Noël Tier 1 Hub, turn on Microphone and Speech Recognition. Tap the microphone button and speak after it opens.</p>
+      <p><b>Printing or sharing a file?</b><br>Tap Print and choose Save as PDF, or use the Share arrow to send it by email, AirDrop or Files.</p>
+      <p><b>Still stuck?</b> Email us and tell us what you see on screen.</p>
+      <div class="send-btns"><button type="button" class="btn btn-green" id="helpMail">Email for help</button></div>
+    </div>
+    </details>
   </section>
 
   <!-- ============================================================
@@ -10895,6 +10908,17 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const t = load("lastBackup", 0);
     $("#backupLast").textContent = t ? "Last backup: " + new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "No backup saved yet.";
   }
+  $("#helpMail").addEventListener("click", () => { location.href = INVITE.mailHref(FEEDBACK_EMAIL, "Noël Tier 1 Hub help", "Hi! I need help with:\n\n(Please tell us what you see on screen.)\n\nApp: " + (document.body.classList.contains("co") ? "Office" : "Family") + " edition"); });
+  // November 1: gentle reminder to save a backup
+  setTimeout(() => {
+    const now = new Date(), y = now.getFullYear();
+    if (now.getMonth() !== 10 || now.getDate() > 14 || load("backupNudge", 0) === y) return;
+    const last = load("lastBackup", 0);
+    if (last && Date.now() - last < 45 * 864e5) return;
+    if ($$(".alert-overlay.show, .sheet.open").length) return;
+    save("backupNudge", y);
+    if (confirm("Save a backup of your Noël lists?\n\nA backup lets you bring everything back on a new phone, or after deleting the app.")) { showView("tasks"); const f = $("#safeFold"); if (f) f.open = true; setTimeout(() => $("#backupCard").scrollIntoView({ behavior: "smooth", block: "center" }), 200); }
+  }, 6000);
   $("#backupSave").addEventListener("click", async () => {
     const name = `Noel-Tier-1-Hub-Backup-${new Date().toISOString().slice(0, 10)}.json`;
     const blob = new Blob([backupText()], { type: "application/json" });
