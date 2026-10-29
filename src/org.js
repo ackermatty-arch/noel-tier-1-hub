@@ -238,7 +238,7 @@
           <button type="button" class="chip${p.arrived ? " on" : ""}" data-oarrived>${p.arrived ? "✓ Arrived" : "Mark as arrived"}</button></div>`; }).join("")}
       <form class="card add-task org-ev-form" id="orgPackageForm" autocomplete="off"><h3>➕ Add an order</h3>
         <input class="input" name="item" maxlength="60" placeholder="What did you order?" aria-label="Item">
-        ${fillChips((currency === "USD" ? ["Amazon", "Walmart", "Target", "Best Buy", "Costco", "Etsy"] : ["Amazon", "Walmart", "Canadian Tire", "Best Buy", "Costco", "Etsy"]).map(x => [x]), "#orgPackageForm [name=store]")}
+        ${fillChips((currency === "USD" ? ["Amazon", "Walmart", "Target", "Best Buy", "Costco"] : ["Amazon", "Walmart", "Canadian Tire", "Best Buy", "Costco"]).map(x => [x]), "#orgPackageForm [name=store]")}
         <div class="org-addr-row"><input class="input" name="store" maxlength="30" placeholder="Store" aria-label="Store"><input class="input" name="eta" type="date" aria-label="Expected delivery"></div>
         <input class="input" name="track" maxlength="40" placeholder="Tracking number (optional)" aria-label="Tracking number">
         <button class="btn btn-green btn-block" type="submit">Add</button></form>`;

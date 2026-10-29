@@ -866,7 +866,6 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .review-list { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 8px; }
 .review-list li { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: start; padding: 10px 12px; border-radius: 12px; background: var(--cream); font-size: 14.5px; line-height: 1.45; }
 .review-list li small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
-.etsy-card { text-align: center; border: 2px solid var(--gold); }
 .review-stars { font-size: 26px; letter-spacing: 6px; color: var(--gold); margin: 4px 0 12px; }
 #ideaChips .chip.on { background: var(--pine); color: #fff; border-color: var(--pine); }
 /* swipe: the new tab slides in from the side */
@@ -3063,8 +3062,6 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
           <button type="button" class="classy-link" id="cardOutOpen" hidden></button>
         </div>
       </div>
-      <!-- ✏️ Link to your Etsy shop: set SHOP_URL in the script -->
-      <a class="shop-link" id="shopLink" href="#" target="_blank" rel="noopener">🎁 See more animated e-cards in my Etsy shop ›</a>
     </div>
 
     <!-- 🎉 PARTY INVITES -->
@@ -3149,15 +3146,6 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
         <button class="btn btn-green btn-block" type="submit">➕ Add a note</button>
       </form>
       <ul class="review-list" id="noteList"></ul>
-    </div>
-
-    <!-- ⭐ Review on Etsy -->
-    <div class="card review-card etsy-card" hidden>
-      <h3>⭐ Loved Noël Tier 1 Hub?</h3>
-      <p class="review-sub">A quick review helps my small shop more than you know. Thank you for making Noël part of your Christmas!</p>
-      <div class="review-stars" aria-hidden="true">★ ★ ★ ★ ★</div>
-      <a class="btn btn-gold btn-block" id="etsyReview" target="_blank" rel="noopener">⭐ Leave a review on Etsy</a>
-      <a class="btn btn-ghost btn-block" id="etsyShop" target="_blank" rel="noopener" style="margin-top:8px">🛍️ Visit the shop</a>
     </div>
 
     <!-- 💡 Ideas for next year's Hub -->
@@ -8816,7 +8804,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         return `${open.length} ${open.length === 1 ? "package" : "packages"} on the way. ${next.map(p => `${p.item}, ${dayS(p)}`).join(". ")}.${late.length ? ` ${late.length} running late.` : ""}`;
       }
       if (has(/\b(add|track|new|ordered|order|expecting|coming|arriving|arrives|due)\b/)) {
-        const stores = ["amazon", "walmart", "target", "best buy", "costco", "etsy", "canadian tire", "ebay", "home depot", "ikea", "shein", "temu"], store = stores.find(x => t.includes(x)) || "";
+        const stores = ["amazon", "walmart", "target", "best buy", "costco", "canadian tire", "ebay", "home depot", "ikea", "shein", "temu"], store = stores.find(x => t.includes(x)) || "";
         let u = t, eta = "", m;
         const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"], mons = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], now = new Date(); now.setHours(12, 0, 0, 0);
         const iso = d => ymd(d);
@@ -10302,19 +10290,15 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   });
 
   // ---------- 🎄 e-cards ----------
-  const SHOP_URL = "#";   // ✏️ your Etsy shop link, e.g. "https://www.etsy.com/shop/EarthAndWonder"
-  const REVIEW_URL = "https://www.etsy.com/your/purchases";   // ✏️ where buyers leave a review (Etsy: Purchases and reviews)
   const FEEDBACK_EMAIL = "ackermatty@gmail.com";   // ✏️ where app ideas and support emails go
 
-  /* ---------- ✨ Holiday review: best moments, notes for next year, Etsy review, ideas ---------- */
+  /* ---------- ✨ Holiday review: best moments, notes for next year, ideas ---------- */
   let moments = load("moments", []);     // this season's best moments (saved into Past Christmases)
   let yearNotes = load("yearNotes", []); // notes for next Christmas (these stay until you delete them)
   function renderReview() {
     const item = (x, kind) => `<li data-id="${x.id}" data-kind="${kind}"><span>${esc(x.text)}<small>${new Date(x.date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</small></span><button class="icon-btn" data-rdel aria-label="Delete">✕</button></li>`;
     $("#momentList").innerHTML = moments.map(x => item(x, "m")).join("");
     $("#noteList").innerHTML = yearNotes.map(x => item(x, "n")).join("");
-    $("#etsyReview").href = REVIEW_URL;
-    $("#etsyShop").hidden = SHOP_URL === "#"; if (SHOP_URL !== "#") $("#etsyShop").href = SHOP_URL;
   }
   function addReviewItem(form, list, key, msg) {
     const text = form.text.value.trim(); if (!text) return;
@@ -10338,7 +10322,6 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     if (FEEDBACK_EMAIL) { location.href = INVITE.mailHref(FEEDBACK_EMAIL, "Noël Tier 1 Hub ideas 💡", body); }
     else {
       try { await navigator.clipboard.writeText(body); toast("📋 Ideas copied! Thank you for helping make Noël better."); } catch (err) { toast("Thank you! Your ideas are ready to send."); }
-      if (SHOP_URL !== "#") setTimeout(() => window.open(SHOP_URL, "_blank"), 600);
     }
     $$("#ideaChips .chip.on").forEach(c => c.classList.remove("on")); $("#ideaText").value = "";
   });
@@ -10369,7 +10352,6 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       ["🎁 Gift thanks", "Thank you so much for the thoughtful gift. It was just perfect, and it made our Christmas extra special."], ["❄️ Cozy", "Wishing you snowy evenings, hot cocoa and a very cozy Christmas with the people you love."]];
     window.__cardSets = { office, fam }; renderCardIdeas();
     $("#cardFrom").placeholder = defaultFrom() || "e.g. Love, the Smith Family";
-    if (SHOP_URL === "#") $("#shopLink").hidden = true; else $("#shopLink").href = SHOP_URL;
     syncCards();
     showPane(load("pane", "cards"));
   }
@@ -13362,7 +13344,7 @@ const PC_DESIGNS = [
           <button type="button" class="chip${p.arrived ? " on" : ""}" data-oarrived>${p.arrived ? "✓ Arrived" : "Mark as arrived"}</button></div>`; }).join("")}
       <form class="card add-task org-ev-form" id="orgPackageForm" autocomplete="off"><h3>➕ Add an order</h3>
         <input class="input" name="item" maxlength="60" placeholder="What did you order?" aria-label="Item">
-        ${fillChips((currency === "USD" ? ["Amazon", "Walmart", "Target", "Best Buy", "Costco", "Etsy"] : ["Amazon", "Walmart", "Canadian Tire", "Best Buy", "Costco", "Etsy"]).map(x => [x]), "#orgPackageForm [name=store]")}
+        ${fillChips((currency === "USD" ? ["Amazon", "Walmart", "Target", "Best Buy", "Costco"] : ["Amazon", "Walmart", "Canadian Tire", "Best Buy", "Costco"]).map(x => [x]), "#orgPackageForm [name=store]")}
         <div class="org-addr-row"><input class="input" name="store" maxlength="30" placeholder="Store" aria-label="Store"><input class="input" name="eta" type="date" aria-label="Expected delivery"></div>
         <input class="input" name="track" maxlength="40" placeholder="Tracking number (optional)" aria-label="Tracking number">
         <button class="btn btn-green btn-block" type="submit">Add</button></form>`;

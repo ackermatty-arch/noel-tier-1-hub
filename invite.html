@@ -203,8 +203,7 @@ footer a { color: #f2d68a; }
 </head>
 <body>
 <main id="app"></main>
-<!-- ✏️ BRANDING: put your Etsy shop link in SHOP_URL below -->
-<footer>Made with the <a id="shopLink" href="#" target="_blank" rel="noopener">Noël Tier 1 Hub</a></footer>
+<footer>Made with the Noël Tier 1 Hub</footer>
 
 <script>
 /* ============================================================
@@ -552,9 +551,6 @@ const INVITE = (() => {
 </script>
 <script>
 (() => {
-  const SHOP_URL = "#";   // ✏️ e.g. "https://www.etsy.com/shop/EarthAndWonder"
-  const link = document.getElementById("shopLink");
-  if (SHOP_URL === "#") link.removeAttribute("href"); else link.href = SHOP_URL;
 
   const app = document.getElementById("app");
   const hit = location.hash.match(/[#&](i|c)=([^&]+)/) || [];
