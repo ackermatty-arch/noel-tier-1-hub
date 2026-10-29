@@ -20,6 +20,7 @@
     else if (key === "survival") d = survivalDoc();
     else if (key === "selfcare") d = selfCareDoc();
     else if (key === "place") d = placeDoc();
+    else if (key === "oysign" || key === "oysheet" || key.startsWith("oycard:")) d = oyDoc(key);
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "travel") d = travelDoc();
     else if (key === "chores") d = choresDoc();

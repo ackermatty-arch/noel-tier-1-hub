@@ -2215,6 +2215,26 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 .pc-opt img { height: 48px; width: auto; max-width: 70px; object-fit: contain; }
 .pc-opt .pc-cl { display: grid; place-items: center; height: 48px; font-size: 24px; color: #C9A45C; }
 .pc-opt[aria-pressed="true"] { border: 2px solid #151515; }
+
+/* Office Year */
+.oy-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; margin-bottom: 8px; padding: 10px 12px; background: #151515; color: #E3C98A; border: 1px solid #C9A45C; font: 600 13px Cinzel, serif; text-align: left; }
+.oy-bar small { font: 600 11px Nunito, sans-serif; letter-spacing: .04em; } .oy-bar.on { background: #C9A45C; color: #151515; }
+.oy-yr { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 10px 0 4px; font: 700 20px Cinzel, serif; } .oy-yr button { width: 40px; height: 40px; border: 1px solid #C9A45C; background: #fff; font-size: 20px; }
+.oy-year { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; } @media (max-width: 380px) { .oy-year { grid-template-columns: 1fr; } }
+.oy-m { background: #fff; border: 1px solid #E3D2A8; padding: 10px; min-width: 0; } .oy-m.now { border: 2px solid #151515; }
+.oy-m h4 { margin: 0 0 6px; font: 700 12px Cinzel, serif; letter-spacing: .12em; text-transform: uppercase; color: #9A7424; }
+.oy-e { display: flex; gap: 4px; align-items: stretch; margin-bottom: 4px; } .oy-e > button:first-child { flex: 1; min-width: 0; text-align: left; background: #F3EAD2; border: 1px solid #C9A45C; padding: 6px 8px; font: 13px Nunito, sans-serif; color: #151515; }
+.oy-e.on > button:first-child { background: #151515; color: #E3C98A; } .oy-e b, .oy-soon b { display: block; font-weight: 700; overflow-wrap: anywhere; } .oy-e small, .oy-soon small { display: block; font-size: 11px; opacity: .8; }
+.oy-s { display: block; width: 100%; margin-bottom: 4px; padding: 6px 8px; text-align: left; background: transparent; border: 1px dashed #B8A27A; color: #5b4a24; font: 12.5px Nunito, sans-serif; }
+.oy-rep { font-size: 11px !important; margin: 0 0 6px; }
+.oy-soon { display: block; width: 100%; text-align: left; background: #F3EAD2; border: 1px solid #C9A45C; padding: 8px 10px; margin-bottom: 6px; color: #151515; font: 14px Nunito, sans-serif; }
+.oy-chk, .oy-ms, .oy-ppl { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #EFE6CF; } .oy-chk > div, .oy-ms > div, .oy-ppl > div { flex: 1; min-width: 0; } .oy-chk small, .oy-ms small, .oy-ppl small { display: block; font-size: 12px; color: #6A6354; }
+.oy-box { flex: none; width: 28px; height: 28px; border: 2px solid #151515; background: #fff; font-weight: 700; font-size: 16px; color: #151515; } .oy-box[aria-pressed="true"] { background: #151515; color: #E3C98A; }
+.oy-chk.done b { text-decoration: line-through; opacity: .55; } .oy-chk.late small { color: #9E1B25; font-weight: 700; } .oy-chk.soon small { color: #9A7424; font-weight: 700; }
+.oy-meter { height: 8px; background: #EFE6CF; margin: 6px 0 10px; } .oy-meter i { display: block; height: 100%; background: #1F6B3A; } .oy-meter i.over { background: #9E1B25; }
+.oy-sum { display: flex; gap: 22px; margin: 8px 0; } .oy-sum b { display: block; font: 700 24px Cinzel, serif; } .oy-sum small { color: #6A6354; }
+.oy-bars { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; align-items: end; margin-top: 10px; } .oy-bars div { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.oy-bars span { display: flex; align-items: flex-end; width: 100%; height: 110px; background: #F7F1E1; } .oy-bars u { display: block; width: 100%; background: #C9A45C; } .oy-bars small { font-size: 9px; color: #6A6354; } .oy-bars em { font: normal 8px Nunito, sans-serif; height: 12px; color: #151515; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -14149,6 +14169,211 @@ const PC_DESIGNS = [
     return by + (links || c.orderBy ? `<span class="of-acts">${links}${c.orderBy || c.url ? `<button type="button" class="of-lnk of-done" data-ocdone="${c.id}">${c.ordered ? "Undo" : "Mark ordered"}</button>` : ""}</span>` : "");
   }
   const OFF_STATUS = { draft: "Not sent yet", sent: "Waiting", changes: "Changes asked", approved: "Approved", declined: "Declined" };
+  // ============================================================
+  // 🗓️ OFFICE YEAR: many events, starter checklists, a 12-month calendar,
+  // birthdays & anniversaries, and one yearly budget
+  // `off` is always the event you have open; the others wait in `oy.events`.
+  // ============================================================
+  const OY_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const OY_CATS = { rec: "Recognition", well: "Wellness", team: "Team fun", comm: "Community", learn: "Learning", cele: "Celebration" };
+  const OY_GEN = [[21, "Pick the date and book the space"], [14, "Decide the food and order it"], [7, "Send the invitation"], [2, "Confirm the headcount"], [0, "Set up and enjoy it"]];
+  const OY_TYPES = [
+    { id: "kickoff", name: "New Year kick-off lunch", m: 1, cat: "cele", start: "12:00", end: "13:30", acts: ["catered", "games"], theme: "Fresh start", sign: "Happy New Year! Add your goal to the board.", chk: [[21, "Pick a date and book the room"], [14, "Choose catered or potluck"], [7, "Send the invitation"], [3, "Set up a goals board or flip chart"], [0, "Welcome everyone and share the year's plan"]] },
+    { id: "kindness", name: "Random acts of kindness week", m: 2, cat: "comm", start: "09:00", end: "17:00", acts: ["games"], sign: "Kindness week. Do one kind thing today and tell us about it.", chk: [[14, "Choose the week and tell the team"], [7, "Make a kindness board or jar"], [3, "Buy small treats to hand out"], [0, "Start the week and share a kind act each day"]] },
+    { id: "appreciation", name: "Employee Appreciation Day", m: 3, cat: "rec", start: "12:00", end: "13:30", acts: ["catered"], theme: "Thank you", hint: "Often the first Friday in March. Check the date for your country.", sign: "Thank you for everything you do.", chk: [[21, "Get the budget approved"], [14, "Choose a lunch or treat"], [10, "Ask each manager for a thank-you note"], [7, "Order the food"], [2, "Print the thank-you cards"], [0, "Hand out cards and treats"]] },
+    { id: "adminpros", name: "Administrative Professionals Week", m: 4, cat: "rec", start: "12:00", end: "13:30", acts: ["catered", "gifts"], theme: "Thank you", hint: "Usually the last full week of April. Check the date.", sign: "Thank you to the people who keep us running.", chk: [[21, "Get the budget approved"], [14, "Pick a lunch spot or gift"], [10, "Collect thank-you notes from the team"], [7, "Book or order"], [2, "Print the cards"], [0, "Celebrate"]] },
+    { id: "earth", name: "Earth Day clean-up", m: 4, cat: "comm", start: "12:00", end: "14:00", acts: ["charity"], theme: "Earth Day, April 22", sign: "Earth Day clean-up starts here.", chk: [[14, "Choose the area to clean up"], [10, "Get permission from the owner"], [7, "Send the sign-up sheet"], [3, "Buy gloves, bags and water"], [0, "Clean up, then share lunch"]] },
+    { id: "wellness", name: "Wellness walk challenge", m: 5, cat: "well", start: "12:00", end: "13:00", acts: ["games"], theme: "Mental health month", sign: "Walk with us at noon.", chk: [[14, "Pick the route and the challenge dates"], [7, "Share the sign-up sheet"], [2, "Prepare small prizes"], [0, "Walk together"]] },
+    { id: "pizza", name: "Pizza party", m: 5, cat: "team", start: "12:00", end: "13:30", acts: ["catered"], sign: "Pizza is here!", chk: [[10, "Count heads and ask about allergies"], [7, "Pick the pizza place and get a quote"], [2, "Order, with vegetarian and vegan options"], [0, "Set out plates, napkins and drinks"]] },
+    { id: "bbq", name: "Summer BBQ or picnic", m: 6, cat: "cele", start: "11:30", end: "14:00", acts: ["potluck", "games", "music"], theme: "Summer", sign: "Summer BBQ. Grab a plate.", chk: [[28, "Choose the date and a rain plan"], [21, "Book the park or patio"], [14, "Send the invitation and the potluck sheet"], [7, "Order the meat, buns and drinks"], [2, "Confirm the headcount"], [0, "Set up tables, shade and games"]] },
+    { id: "icecream", name: "Ice cream social", m: 7, cat: "team", start: "14:00", end: "15:00", acts: ["catered"], sign: "Ice cream social. Build your own sundae.", chk: [[10, "Pick the date and the budget"], [5, "Order ice cream and toppings"], [2, "Get a cooler or freezer space"], [0, "Set up the topping bar"]] },
+    { id: "learning", name: "Learning lunch", m: 9, cat: "learn", start: "12:00", end: "13:30", acts: ["catered", "teamb"], theme: "Lunch and learn", sign: "Lunch and learn today.", chk: [[21, "Choose a topic and a speaker"], [14, "Book the room and any screen"], [7, "Send the invitation"], [2, "Order lunch"], [0, "Set up and welcome everyone"]] },
+    { id: "boss", name: "Boss's Day", m: 10, cat: "rec", start: "15:00", end: "15:30", acts: ["catered"], hint: "October 16 in many countries. Check yours.", sign: "Thank you for leading us.", chk: [[14, "Decide on a card or small gift"], [10, "Pass the card around"], [3, "Order a treat or flowers"], [0, "Present it"]] },
+    { id: "costume", name: "Costume or pumpkin contest", m: 10, cat: "team", start: "15:00", end: "16:30", acts: ["games", "sweater"], theme: "Fall fun", sign: "Costume contest. Vote at 3:30.", chk: [[14, "Pick the date and the rules"], [7, "Send the invitation"], [3, "Buy small prizes"], [0, "Set up voting slips and snacks"]] },
+    { id: "thanksgiving", name: "Thanksgiving potluck", m: 11, cat: "cele", start: "12:00", end: "13:30", acts: ["potluck"], theme: "Gratitude", hint: "The date differs by country. Check yours.", sign: "Thankful for this team.", chk: [[21, "Pick the date and the room"], [14, "Send the potluck sign-up sheet"], [7, "Remind people what is still needed"], [2, "Gather plates, cutlery and serving spoons"], [0, "Set up the table and share what you are thankful for"]] },
+    { id: "drive", name: "Food or toy drive", m: 11, cat: "comm", start: "09:00", end: "17:00", acts: ["charity"], sign: "Drop your donation here.", chk: [[28, "Choose the charity and ask what they need"], [21, "Set a goal"], [14, "Announce it and put out a collection box"], [3, "Remind the team"], [0, "Count and deliver the donations"]] },
+    { id: "holiday", name: "Holiday Party", m: 12, cat: "cele", start: "17:00", end: "21:00", acts: ["potluck", "gifts", "awards", "games"], theme: "", sign: "Happy holidays!", chk: [[56, "Get the budget and date approved"], [42, "Book the venue or caterer"], [28, "Send the save-the-date"], [21, "Plan activities and the gift exchange"], [14, "Order food and drinks"], [7, "Confirm the headcount and allergies"], [2, "Print signs and certificates"], [0, "Set up and celebrate"]] },
+    { id: "custom", name: "My own event", m: 0, cat: "cele", start: "12:00", end: "13:30", acts: [], sign: "", chk: OY_GEN }
+  ];
+  let oy = load("officeyear", null) || { events: [], active: "", people: [], budget: 0, gift: 0, sub: "cal", year: new Date().getFullYear(), fired: {} };
+  oy.fired = oy.fired || {}; oy.people = oy.people || []; oy.year = oy.year || new Date().getFullYear();
+  const saveOy = () => save("officeyear", oy);
+  const oyType = id => OY_TYPES.find(t => t.id === id) || OY_TYPES[OY_TYPES.length - 1];
+  const oyCopy = o => JSON.parse(JSON.stringify(o));
+  const oyPad = n => String(n).padStart(2, "0");
+  const oyYmd = d => `${d.getFullYear()}-${oyPad(d.getMonth() + 1)}-${oyPad(d.getDate())}`;
+  const oyAdd = (ymd, n) => { const d = new Date(ymd + "T12:00"); d.setDate(d.getDate() + n); return oyYmd(d); };
+  const oyIn = ymd => { const a = new Date(); a.setHours(0, 0, 0, 0); return Math.round((new Date(ymd + "T00:00") - a) / 864e5); };
+  const oyDay = ymd => offDate(ymd, { weekday: "short", month: "short", day: "numeric" });
+  const oyMergePast = (a, b) => { const m = {}; a.concat(b).forEach(p => { m[p.year + "|" + p.name] = p; }); return Object.values(m).sort((x, y) => x.year - y.year); };
+  function oyEnsure() {
+    if (oy.events.length) return;
+    const id = uid(); oy.events.push({ id, type: off.oyType || "holiday", name: off.ev.name || "Holiday Party", date: off.ev.date || "", month: off.ev.date ? +off.ev.date.slice(5, 7) : 12, year: offYear(), snap: null }); oy.active = id; saveOy();
+  }
+  function oySyncCur() {
+    oyEnsure(); const s = oy.events.find(x => x.id === oy.active); if (!s) return;
+    s.name = off.ev.name || s.name; s.date = off.ev.date || ""; if (s.date) { s.month = +s.date.slice(5, 7); s.year = +s.date.slice(0, 4); }
+  }
+  const oyCost = e => e.id === oy.active ? offTotal() : ((e.snap && e.snap.costs) || []).reduce((a, c) => a + (+c.cost || 0), 0);
+  const oyBudgetOf = e => e.id === oy.active ? (+off.ev.budget || 0) : ((e.snap && e.snap.ev && +e.snap.ev.budget) || 0);
+  const offChk = () => { if (!off.chk) off.chk = oyType(off.oyType || "holiday").chk.map(([d, t]) => ({ id: uid(), d, t, done: 0 })); return off.chk; };
+  const oyDue = c => off.ev.date ? oyAdd(off.ev.date, -c.d) : "";
+  function oyMake(typeId, o) {
+    o = o || {}; oySyncCur(); const T = oyType(typeId), cur = oy.events.find(x => x.id === oy.active); if (cur) cur.snap = oyCopy(off);
+    const id = uid(), base = o.base, acts = {}; T.acts.forEach(k => { acts[k] = 1; });
+    const n = { tab: "event", oyType: T.id, ev: Object.assign({ name: o.name || T.name, date: o.date || "", start: T.start, end: T.end, venue: "", address: "", headcount: 20, budget: 0, theme: T.theme || "", dress: "", giftLimit: 25, organizer: "", approver: "", approverEmail: "", notes: "" },
+        { organizer: off.ev.organizer, approver: off.ev.approver, approverEmail: off.ev.approverEmail, headcount: off.ev.headcount, giftLimit: off.ev.giftLimit }, { who: "staff" }),
+      acts, costs: [], appr: { status: "draft", log: [], followDays: 3 }, pot: [], awards: OFF_AWARDS.slice(0, 8).map(t => ({ id: uid(), t, w: "" })), wrap: { worked: "", change: "" }, past: off.past || [], fired: {},
+      chk: T.chk.map(([d, t]) => ({ id: uid(), d, t, done: 0 })), guests: (off.guests || []).map(g => Object.assign({}, g, { status: "pending" })) };
+    if (base) { Object.assign(n.ev, { venue: base.ev.venue, address: base.ev.address, headcount: base.ev.headcount, theme: base.ev.theme, dress: base.ev.dress, giftLimit: base.ev.giftLimit, who: base.ev.who || "staff" }); n.acts = oyCopy(base.acts || {}); n.costs = (base.costs || []).map(c => Object.assign({}, c, { id: uid(), ordered: 0, orderBy: "" })); }
+    oy.events.push({ id, type: T.id, name: n.ev.name, date: n.ev.date, month: o.month || T.m || (new Date().getMonth() + 1), year: o.year || oy.year, snap: null });
+    oy.active = id; off = n; saveOy(); saveOff(); offSync(); offScreen = "build"; document.body.classList.toggle("co-kids", n.ev.who === "family");
+  }
+  function oySwitch(id) {
+    if (id !== oy.active) {
+      oySyncCur(); const cur = oy.events.find(x => x.id === oy.active), t = oy.events.find(x => x.id === id); if (!t || !t.snap) return;
+      if (cur) cur.snap = oyCopy(off);
+      const past = oyMergePast(off.past || [], t.snap.past || []); off = t.snap; off.past = past; t.snap = null; oy.active = id;
+    }
+    off.tab = "event"; saveOy(); saveOff(); offSync(); offScreen = "build"; document.body.classList.toggle("co-kids", off.ev.who === "family"); renderOffice(); renderCoDash(); window.scrollTo(0, 0);
+  }
+  function oyRepeat(id) {
+    const e = oy.events.find(x => x.id === id); if (!e) return; const src = id === oy.active ? off : e.snap; if (!src) return;
+    const date = e.date ? oyAdd(e.date, 365) : "", y = e.date ? +date.slice(0, 4) : (e.year || oy.year) + 1;
+    oyMake(e.type, { base: src, date, month: e.month, year: y, name: src.ev.name }); oy.year = y; saveOy(); renderOffice(); window.scrollTo(0, 0); toast("🔁 Planned again for " + y + ". Vendors and the room are copied over");
+  }
+  function oyRemove(id) {
+    const e = oy.events.find(x => x.id === id); if (!e || id === oy.active) return;
+    if (!confirm(`Remove "${e.name}" from your year? Its plan and costs are deleted.`)) return;
+    oy.events = oy.events.filter(x => x.id !== id); saveOy(); renderOffice();
+  }
+  // ---------- 🎂 people ----------
+  function oyMilestones(days) {
+    const out = [], today = new Date(); today.setHours(12, 0, 0, 0);
+    const nxt = (m, d) => { let dt = new Date(today.getFullYear(), m - 1, d, 12); if (dt < today) dt = new Date(today.getFullYear() + 1, m - 1, d, 12); return dt; };
+    oy.people.forEach(p => {
+      if (p.bd) { const [m, d] = p.bd.split("-").map(Number); out.push({ p, kind: "bday", dt: nxt(m, d), n: 0 }); }
+      if (p.start) { const [y, m, d] = p.start.split("-").map(Number), dt = nxt(m, d), n = dt.getFullYear() - y; if (n >= 1) out.push({ p, kind: "anniv", dt, n }); }
+    });
+    return out.map(x => Object.assign(x, { in: Math.round((x.dt - today) / 864e5) })).filter(x => x.in <= days).sort((a, b) => a.in - b.in);
+  }
+  const oyMsLabel = m => esc(m.p.name) + " · " + (m.kind === "bday" ? "birthday" : m.n + (m.n === 1 ? "-year" : "-year") + " anniversary");
+  const oyMsWhen = m => m.in === 0 ? "today" : m.in === 1 ? "tomorrow" : `${oyDay(oyYmd(m.dt))} · in ${m.in} days`;
+  function oyPeopleHtml() {
+    const up = oyMilestones(30), P = oy.people.slice().sort((a, b) => a.name.localeCompare(b.name));
+    return `<div class="card pt-card"><h3>🎂 Coming up in the next 30 days</h3>
+      ${up.length ? up.map(m => `<div class="oy-ms"><div><b>${oyMsLabel(m)}</b><small>${oyMsWhen(m)}${+oy.gift ? ` · about ${money(+oy.gift)} for a card or small gift` : ""}</small></div><button type="button" class="btn btn-ghost btn-sm" data-print="oycard:${m.p.id}:${m.kind}">🖨️ Card</button></div>`).join("") : `<p class="host-rem">${P.length ? "Nothing in the next 30 days." : "Add your team below and the app will remind you a week ahead."}</p>`}
+      <label class="off-f wide" style="margin-top:8px"><span class="meal-lab">Budget for each card or small gift</span><input class="input" type="number" inputmode="decimal" min="0" data-oygift value="${+oy.gift || ""}" placeholder="$"></label></div>
+    <div class="card pt-card"><h3>👥 My team</h3>
+      ${P.map(p => `<div class="oy-ppl" data-oyp="${p.id}"><div><b>${esc(p.name)}</b><small>${p.bd ? "Birthday " + OY_MONTHS[+p.bd.slice(0, 2) - 1].slice(0, 3) + " " + +p.bd.slice(3) : ""}${p.bd && p.start ? " · " : ""}${p.start ? "Started " + esc(p.start.slice(0, 4)) : ""}</small></div><button type="button" class="icon-btn" data-oypdel aria-label="Remove ${esc(p.name)}">✕</button></div>`).join("")}
+      <form class="org-ev-form" id="oyPersonForm" autocomplete="off"><input class="input" name="name" maxlength="40" placeholder="First name" required>
+        <div class="org-addr-row"><select class="input" name="bm" aria-label="Birthday month"><option value="">Birthday month</option>${OY_MONTHS.map((m, i) => `<option value="${oyPad(i + 1)}">${m}</option>`).join("")}</select><select class="input" name="bd" aria-label="Birthday day" style="max-width:88px"><option value="">Day</option>${Array.from({ length: 31 }, (_, i) => `<option>${i + 1}</option>`).join("")}</select></div>
+        <label class="off-ob"><span>Started on (optional)</span><input class="input" name="start" type="date"></label>
+        <button class="btn btn-green btn-block" type="submit">➕ Add to my team</button></form>
+      <p class="host-rem">Everything stays on this phone, locked. Keep only what your team is happy to share: a first name, a birthday month and day, and a start date. Nothing else is needed.</p></div>`;
+  }
+  // ---------- 💵 yearly budget ----------
+  function oyMsCount(Y) { return oy.people.reduce((a, p) => a + (p.bd ? 1 : 0) + (p.start && +p.start.slice(0, 4) < Y ? 1 : 0), 0); }
+  function oyBudgetHtml() {
+    const Y = oy.year, evs = oy.events.filter(e => e.year === Y).sort((a, b) => (a.month || 0) - (b.month || 0)), by = Array(12).fill(0);
+    evs.forEach(e => { by[Math.max(0, (e.month || 1) - 1)] += oyCost(e); });
+    const evTot = by.reduce((a, b) => a + b, 0), ms = oyMsCount(Y) * (+oy.gift || 0), total = evTot + ms, lim = +oy.budget || 0, mx = Math.max(1, ...by);
+    return `<div class="card pt-card"><h3>💵 ${Y} office events budget</h3>
+      <label class="off-f wide"><span class="meal-lab">Yearly budget for all events</span><input class="input" type="number" inputmode="decimal" min="0" data-oybud value="${lim || ""}" placeholder="$"></label>
+      <div class="oy-sum"><div><b>${money(total)}</b><small>planned in ${Y}</small></div>${lim ? `<div><b>${money(Math.abs(lim - total))}</b><small>${total > lim ? "over budget" : "left"}</small></div>` : ""}</div>
+      ${lim ? `<div class="oy-meter"><i style="width:${Math.min(100, Math.round(total / lim * 100))}%" class="${total > lim ? "over" : ""}"></i></div>` : ""}
+      ${total > lim && lim ? `<p class="org-warn">⚠️ ${money(total - lim)} over the yearly budget.</p>` : ""}
+      <div class="oy-bars" role="img" aria-label="Planned spending by month">${by.map((v, i) => `<div><em>${v ? money(v) : ""}</em><span><u style="height:${Math.round(v / mx * 100)}%"></u></span><small>${OY_MONTHS[i].slice(0, 3)}</small></div>`).join("")}</div></div>
+    <div class="card pt-card"><h3>📋 By event</h3>
+      ${evs.map(e => { const c = oyCost(e), b = oyBudgetOf(e); return `<div class="off-cost"><div><b>${esc(e.name)}</b><small>${OY_MONTHS[Math.max(0, (e.month || 1) - 1)]}${b ? ` · approved ${money(b)}` : ""}${b && c > b ? " · over" : ""}</small></div><span>${money(c)}</span><i></i></div>`; }).join("") || `<p class="host-rem">No events in ${Y} yet. Add some on the Calendar.</p>`}
+      ${ms ? `<div class="off-cost"><div><b>Birthdays and anniversaries</b><small>${oyMsCount(Y)} × ${money(+oy.gift)}</small></div><span>${money(ms)}</span><i></i></div>` : ""}</div>`;
+  }
+  // ---------- 🗓️ calendar ----------
+  function oyCalHtml() {
+    const Y = oy.year, now = new Date(), curM = now.getFullYear() === Y ? now.getMonth() + 1 : 0, evs = oy.events.filter(e => e.year === Y), used = new Set(evs.map(e => e.type));
+    const soon = oy.events.filter(e => e.date && oyIn(e.date) >= 0 && oyIn(e.date) <= 30).sort((a, b) => a.date < b.date ? -1 : 1);
+    return `${soon.length ? `<div class="card pt-card oy-soonbox"><h3>⏰ Coming up</h3>${soon.map(e => `<button type="button" class="oy-soon" data-oyopen="${e.id}"><b>${esc(e.name)}</b><small>${oyDay(e.date)} · ${oyIn(e.date) === 0 ? "today" : "in " + oyIn(e.date) + " days"}</small></button>`).join("")}</div>` : ""}
+      <div class="oy-yr"><button type="button" data-oyyr="-1" aria-label="Previous year">‹</button><b>${Y}</b><button type="button" data-oyyr="1" aria-label="Next year">›</button></div>
+      <p class="host-rem">Tap an event to open it. Tap a suggestion to add it to your year, with a ready checklist.</p>
+      <div class="oy-year">${OY_MONTHS.map((mn, i) => { const m = i + 1, here = evs.filter(e => e.month === m), sug = OY_TYPES.filter(t => t.m === m && !used.has(t.id));
+        return `<div class="oy-m${m === curM ? " now" : ""}"><h4>${mn}</h4>${here.map(e => `<div class="oy-e${e.id === oy.active ? " on" : ""}"><button type="button" data-oyopen="${e.id}"><b>${esc(e.name)}</b><small>${e.date ? oyDay(e.date) : "date not set"} · ${money(oyCost(e))}</small></button>${e.id === oy.active ? "" : `<button type="button" class="icon-btn" data-oyrm="${e.id}" aria-label="Remove ${esc(e.name)}">✕</button>`}</div>${Y <= now.getFullYear() ? `<button type="button" class="classy-link oy-rep" data-oyrep="${e.id}">Plan again in ${Y + 1}</button>` : ""}`).join("")}
+          ${sug.map(t => `<button type="button" class="oy-s" data-oyadd="${t.id}" data-oym="${m}"${t.hint ? ` title="${esc(t.hint)}"` : ""}>+ ${esc(t.name)}</button>`).join("")}</div>`; }).join("")}</div>
+      <form class="card pt-card org-ev-form" id="oyAddForm" autocomplete="off"><h3>➕ Add my own</h3>
+        <input class="input" name="name" maxlength="50" placeholder="Event name, e.g. Team trivia afternoon">
+        <div class="org-addr-row"><select class="input" name="type" aria-label="Starter checklist">${OY_TYPES.map(t => `<option value="${t.id}"${t.id === "custom" ? " selected" : ""}>${t.id === "custom" ? "Basic checklist" : esc(t.name) + " checklist"}</option>`).join("")}</select><select class="input" name="month" aria-label="Month">${OY_MONTHS.map((m, i) => `<option value="${i + 1}"${i === now.getMonth() ? " selected" : ""}>${m}</option>`).join("")}</select></div>
+        <button class="btn btn-green btn-block" type="submit">➕ Add to ${Y}</button></form>`;
+  }
+  function offYearHtml() {
+    oySyncCur(); const sub = oy.sub || "cal";
+    return `<div class="off-sub">${[["cal", "🗓️ Calendar"], ["people", "🎂 People"], ["bud", "💵 Budget"]].map(([k, l]) => `<button type="button" class="chip${k === sub ? " on" : ""}" data-oysub="${k}">${l}</button>`).join("")}</div>` + (sub === "people" ? oyPeopleHtml() : sub === "bud" ? oyBudgetHtml() : oyCalHtml());
+  }
+  // ---------- ✅ checklist ----------
+  function offChkHtml() {
+    const C = offChk(), T = oyType(off.oyType || "holiday"), n = C.filter(c => c.done).length, has = !!off.ev.date;
+    const rows = C.slice().sort((a, b) => b.d - a.d).map(c => {
+      const due = oyDue(c), dd = due ? oyIn(due) : null, st = c.done ? "done" : dd == null ? "" : dd < 0 ? "late" : dd <= 3 ? "soon" : "";
+      const when = due ? (c.done ? "Done · " : dd < 0 ? "Was due " : dd === 0 ? "Due today · " : "") + oyDay(due) + (!c.done && dd > 0 ? ` · in ${dd} days` : "") : (c.d ? c.d + (c.d === 1 ? " day" : " days") + " before" : "On the day");
+      return `<div class="oy-chk ${st}" data-oyc="${c.id}"><button type="button" class="oy-box" data-oychk="${c.id}" aria-pressed="${!!c.done}" aria-label="Mark done">${c.done ? "✓" : ""}</button><div><b>${esc(c.t)}</b><small>${when}</small></div><button type="button" class="icon-btn" data-oycdel aria-label="Remove step">✕</button></div>`;
+    }).join("");
+    return `<div class="card pt-card"><h3>✅ ${esc(off.ev.name || T.name)} checklist</h3>
+      <p class="host-rem">${n} of ${C.length} done.${has ? "" : " Set the date on the Event tab to see when each step is due."}${T.hint ? " " + esc(T.hint) : ""}</p>
+      <div class="oy-meter"><i style="width:${C.length ? Math.round(n / C.length * 100) : 0}%"></i></div>${rows}
+      <form class="org-ev-form" id="oyChkForm" autocomplete="off"><input class="input" name="t" maxlength="80" placeholder="Add a step" required>
+        <div class="org-addr-row"><select class="input" name="d" aria-label="When">${[[0, "On the day"], [1, "1 day before"], [2, "2 days before"], [3, "3 days before"], [7, "1 week before"], [14, "2 weeks before"], [21, "3 weeks before"], [30, "A month before"]].map(([v, l]) => `<option value="${v}">${l}</option>`).join("")}</select></div>
+        <button class="btn btn-green btn-block" type="submit">➕ Add step</button></form></div>
+      <div class="card pt-card"><h3>🖨️ Print for this event</h3><p class="host-rem">A sign for the door or the table, and a sheet for people to sign up on.</p>
+        <button type="button" class="btn btn-red btn-block" data-print="oysign">🪧 Event sign</button><button type="button" class="btn btn-ghost btn-block" data-print="oysheet" style="margin-top:8px">📝 Sign-up sheet</button></div>`;
+  }
+  function oyDoc(key) {
+    const e = off.ev, T = oyType(off.oyType || "holiday");
+    const base = `.oy{font-family:Georgia,serif;color:#222} .oy h1{color:#1E3A2F;margin:0} .oy small{font:9pt sans-serif;color:#8a6d3b;letter-spacing:.08em;text-transform:uppercase}`;
+    if (key === "oysign") {
+      const when = [e.date ? offDate(e.date) : "", e.start ? offTime(e.start) + (e.end ? " to " + offTime(e.end) : "") : "", e.venue].filter(Boolean).map(esc).join("<br>");
+      return { noBrand: 1, title: "Event sign", margin: 0.6, file: "Event-Sign", css: base + ` .sg{text-align:center;padding-top:34mm} .sg h1{font-size:44pt;line-height:1.1;margin-bottom:10mm} .sg p{font-size:20pt;margin:3mm 0;line-height:1.4} .sg .big{font-size:26pt;color:#8a6d3b;margin-top:16mm} .sg .rule{width:40mm;border-top:2px solid #B8935A;margin:0 auto 10mm}`,
+        html: `<div class="oy sg"><h1>${esc(e.name || T.name)}</h1><div class="rule"></div><p>${when}</p>${T.sign ? `<p class="big">${esc(T.sign)}</p>` : ""}</div>` };
+    }
+    if (key === "oysheet") {
+      const rows = Array.from({ length: 18 }, () => `<tr><td></td><td></td></tr>`).join("");
+      return { noBrand: 1, title: "Sign-up sheet", margin: 0.6, file: "Sign-Up-Sheet", css: base + ` .oy h1{font-size:24pt} .oy table{width:100%;border-collapse:collapse;margin-top:6mm} .oy th{text-align:left;font:600 9pt sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#8a6d3b;border-bottom:2px solid #B8935A;padding:4px} .oy td{height:11mm;border-bottom:1px solid #ccc} .oy td:first-child{width:50%}`,
+        html: `<div class="oy"><h1>${esc(e.name || T.name)}</h1><p>${[e.date ? offDate(e.date) : "", e.start ? offTime(e.start) : "", e.venue].filter(Boolean).map(esc).join(" · ")}</p><table><tr><th>Name</th><th>Bringing or notes</th></tr>${rows}</table></div>` };
+    }
+    const [, pid, kind] = key.split(":"), p = oy.people.find(x => x.id === pid); if (!p) return { error: "That person is no longer on your team list" };
+    const m = oyMilestones(366).find(x => x.p.id === pid && x.kind === kind), line = kind === "bday" ? "Happy Birthday" : m && m.n ? `Congratulations on ${m.n} ${m.n === 1 ? "year" : "years"}` : "Thank you";
+    return { noBrand: 1, title: "Card", margin: 0.6, file: "Card-" + p.name.replace(/[^A-Za-z0-9]+/g, "-"), css: base + ` .cd{border:1px dashed #bbb;height:120mm;width:90mm;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8mm} .cd h1{font-size:26pt;line-height:1.2} .cd .nm{font-size:30pt;color:#8a6d3b;margin:6mm 0} .cd p{font-size:12pt;color:#555} .cd .ln{width:60mm;border-top:1px solid #999;margin-top:12mm}`,
+      html: `<div class="oy"><div class="cd"><h1>${esc(line)}</h1><div class="nm">${esc(p.name)}</div><p>${kind === "bday" ? "Wishing you a wonderful day." : "Thank you for everything you bring to the team."}</p><div class="ln"></div><p style="font-size:9pt">Signed by the team</p></div><p style="text-align:center;font:9pt sans-serif;color:#888;margin-top:6mm">Print, fold in half and pass it around for signatures.</p></div>` };
+  }
+  function oyYearEndHtml() {
+    oySyncCur(); const Y = offYear(), evs = oy.events.filter(e => e.year === Y).sort((a, b) => (a.month || 0) - (b.month || 0)); if (evs.length < 2) return "";
+    const tot = evs.reduce((a, e) => a + oyCost(e), 0);
+    return `<h2>All ${Y} events</h2><table><tr><th>Event</th><th>When</th><th class="num">Planned</th></tr>${evs.map(e => `<tr><td>${esc(e.name)}</td><td>${e.date ? offDate(e.date, { month: "short", day: "numeric" }) : OY_MONTHS[Math.max(0, (e.month || 1) - 1)]}</td><td class="num">${money(oyCost(e))}</td></tr>`).join("")}<tr><td colspan="2"><b>Total planned</b>${+oy.budget ? ` (yearly budget ${money(+oy.budget)})` : ""}</td><td class="num"><b>${money(tot)}</b></td></tr></table>`;
+  }
+  // ---------- taps & typing for the Office Year ----------
+  $("#view-office").addEventListener("click", e => {
+    const t = e.target, q = s => t.closest(s); let b;
+    if ((b = q("[data-oysub]"))) { oy.sub = b.dataset.oysub; saveOy(); renderOffice(); return; }
+    if ((b = q("[data-oyyr]"))) { oy.year += +b.dataset.oyyr; saveOy(); renderOffice(); return; }
+    if ((b = q("[data-oyopen]"))) { oySwitch(b.dataset.oyopen); return; }
+    if ((b = q("[data-oyadd]"))) { oyMake(b.dataset.oyadd, { month: +b.dataset.oym, year: oy.year }); renderOffice(); renderCoDash(); window.scrollTo(0, 0); toast("✅ Added. Your checklist is ready"); return; }
+    if ((b = q("[data-oyrm]"))) { oyRemove(b.dataset.oyrm); return; }
+    if ((b = q("[data-oyrep]"))) { oyRepeat(b.dataset.oyrep); return; }
+    if ((b = q("[data-oychk]"))) { const c = offChk().find(x => x.id === b.dataset.oychk); if (c) { c.done = c.done ? 0 : 1; saveOff(); offSync(); renderOffice(); } return; }
+    if ((b = q("[data-oycdel]"))) { const id = b.closest("[data-oyc]").dataset.oyc; off.chk = offChk().filter(x => x.id !== id); saveOff(); offSync(); renderOffice(); return; }
+    if ((b = q("[data-oypdel]"))) { const id = b.closest("[data-oyp]").dataset.oyp; oy.people = oy.people.filter(x => x.id !== id); saveOy(); offSync(); renderOffice(); return; }
+  });
+  $("#view-office").addEventListener("submit", e => {
+    const f = e.target, v = k => (f.elements[k] ? f.elements[k].value : "").trim();
+    if (f.id === "oyAddForm") { e.preventDefault(); const T = oyType(v("type")); oyMake(T.id, { month: +v("month"), year: oy.year, name: v("name") || (T.id === "custom" ? "My own event" : T.name) }); renderOffice(); renderCoDash(); window.scrollTo(0, 0); toast("✅ Added to your year"); return; }
+    if (f.id === "oyChkForm") { e.preventDefault(); if (!v("t")) return; offChk().push({ id: uid(), d: +v("d") || 0, t: v("t"), done: 0 }); saveOff(); offSync(); renderOffice(); return; }
+    if (f.id === "oyPersonForm") {
+      e.preventDefault(); if (!v("name")) return; const bm = v("bm"), bd = v("bd");
+      oy.people.push({ id: uid(), name: v("name"), bd: bm && bd ? bm + "-" + oyPad(+bd) : "", start: v("start") }); saveOy(); offSync(); renderOffice(); toast("🎂 Added"); return;
+    }
+  });
+  $("#view-office").addEventListener("change", e => {
+    const t = e.target;
+    if (t.dataset.oybud != null) { oy.budget = Math.max(0, +t.value || 0); saveOy(); renderOffice(); return; }
+    if (t.dataset.oygift != null) { oy.gift = Math.max(0, +t.value || 0); saveOy(); renderOffice(); return; }
+  });
   function renderCoDash() {
     const els = [$("#coDash"), $("#offDash")].filter(Boolean); if (!els.length || hubMode !== "company") return;
     const e = off.ev, hasG = offGuests().length > 0, hc = hasG ? offAttend() : Math.max(0, +e.headcount || 0), total = offTotal(), lim = +e.budget || 0, pct = lim ? Math.min(100, Math.round(total / lim * 100)) : 0;
@@ -14158,6 +14383,7 @@ const PC_DESIGNS = [
       <div class="cd-tiles"><button type="button" data-coto="event"><b>${d == null ? "–" : d < 0 ? "Done" : d}</b><small>${d == null ? "date" : d < 0 ? "event over" : d === 1 ? "day to go" : "days to go"}</small></button>
       <button type="button" data-coto="${hasG ? "guests" : "event"}"><b>${hc || "–"}</b><small>${hasG ? "coming" : "guests"}</small></button>
       <button type="button" data-coto="approval"><b>${esc(OFF_STATUS[off.appr.status] || off.appr.status)}</b><small>approval</small></button></div>
+      <button type="button" class="btn btn-ghost btn-block" data-coto="year" style="margin-bottom:10px">🗓️ My year of events (${Math.max(1, oy.events.length)}) ›</button>
       ${off.appr.status === "approved" ? `<button type="button" class="btn btn-gold btn-block" data-coto="plan" style="margin-bottom:10px">📄 Open my approved plan ›</button>` : ""}
       <button type="button" class="cd-bud" data-coto="event"><span><b>${money(total)}</b> planned${lim ? ` of <b>${money(lim)}</b> approved` : ""}</span>${lim ? `<i><u style="width:${pct}%"></u></i>` : `<small>Add the approved budget on the Event tab</small>`}</button>
       ${(off.saved || []).length ? `<button type="button" class="btn btn-ghost btn-block" data-coto="saved" style="margin-top:10px">📁 My saved plans (${off.saved.length})</button>` : ""}
@@ -14170,8 +14396,8 @@ const PC_DESIGNS = [
     const od = e.target.closest("#coDash [data-ocdone]"); if (od) { const c = off.costs.find(x => x.id === od.dataset.ocdone); if (c) { c.ordered = !c.ordered; saveOff(); renderCoDash(); } }
   });
 
-  const OFF_GROUP = { event: "plan", guests: "plan", food: "plan", acts: "plan", approval: "approve", plan: "run", more: "more", saved: "more", savedone: "more", polls: "more", potluck: "more", santa: "more", awards: "more", auction: "more", charity: "more", handover: "more" };
-  const OFF_SUB = [["event", "📋 Event"], ["guests", "👥 Guests"], ["food", "🍽️ Food"], ["acts", "🎭 Activities"]];
+  const OFF_GROUP = { year: "year", checklist: "plan", event: "plan", guests: "plan", food: "plan", acts: "plan", approval: "approve", plan: "run", more: "more", saved: "more", savedone: "more", polls: "more", potluck: "more", santa: "more", awards: "more", auction: "more", charity: "more", handover: "more" };
+  const OFF_SUB = [["event", "📋 Event"], ["checklist", "✅ Checklist"], ["guests", "👥 Guests"], ["food", "🍽️ Food"], ["acts", "🎭 Activities"]];
   const OFF_MORE = [["saved", "📁", "My saved plans", "Approved plans, print any time"], ["polls", "🗳️", "Votes", "Pick a date or a caterer"], ["potluck", "🥘", "Potluck", "Who brings what"], ["santa", "🎅", "Secret Santa", "Draw names"], ["awards", "🏆", "Awards", "Silly office awards"], ["auction", "🔨", "Auction", "Silent auction"], ["charity", "⭐", "Charity", "Give back"], ["handover", "📦", "Handover", "Survey, report, next year"]];
   function offMoreHtml() {
     return `<div class="card pt-card"><h3>🆕 Plans changed?</h3><p class="host-rem">Venue cancelled, or the plan is now something different? Start a new plan. The old one is saved first.</p><button type="button" class="btn btn-ghost btn-block" data-offnew>Start a new plan</button></div>` + `<div class="org-tiles">${OFF_MORE.map(([k, i, l, d]) => `<button type="button" class="org-tile" data-oftab="${k}"><span class="ot-ico">${i}</span><b>${l}</b><small>${d}</small></button>`).join("")}</div>`;
@@ -14183,16 +14409,16 @@ const PC_DESIGNS = [
     let sub = "";
     if (G === "plan") sub = `<div class="off-sub">${OFF_SUB.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-oftab="${k}">${l}</button>`).join("")}</div>`;
     else if (G === "more" && tab !== "more") sub = `<div class="off-sub"><button type="button" class="chip" data-oftab="more">‹ More</button><span class="off-subt">${(OFF_MORE.find(m => m[0] === tab) || [0, "", ""])[1]} ${(OFF_MORE.find(m => m[0] === tab) || [0, 0, ""])[2]}</span></div>`;
-    $("#offTabs").innerHTML = `<div class="off-steps">${steps.map(([g, t, n, l, done]) => `<button type="button" class="off-step${g === G ? " on" : ""}${done ? " done" : ""}" data-oftab="${t}">${n ? `<i>${done ? "✓" : n}</i>` : ""}<span>${l}</span></button>`).join("")}</div>${sub}`;
+    $("#offTabs").innerHTML = `<button type="button" class="oy-bar${tab === "year" ? " on" : ""}" data-oftab="year"><span>🗓️ <b>${esc(off.ev.name || "Holiday Party")}</b></span><small>My year · ${Math.max(1, oy.events.length)} event${oy.events.length > 1 ? "s" : ""} ›</small></button><div class="off-steps">${steps.map(([g, t, n, l, done]) => `<button type="button" class="off-step${g === G ? " on" : ""}${done ? " done" : ""}" data-oftab="${t}">${n ? `<i>${done ? "✓" : n}</i>` : ""}<span>${l}</span></button>`).join("")}</div>${sub}`;
     renderCoDash();
-    $("#offBody").innerHTML = ({ event: offEventHtml, guests: offGuestsHtml, polls: offPollsHtml, food: offFoodHtml, acts: offActsHtml, approval: offApprovalHtml, plan: offPlanHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml, more: offMoreHtml, saved: offSavedHtml, savedone: offSavedOne })[tab]() + (G === "plan" && tab !== "event" ? `<button type="button" class="btn btn-gold btn-block" data-offreview style="margin-top:12px">📄 See my plan ›</button>` : "");
+    $("#offBody").innerHTML = ({ year: offYearHtml, checklist: offChkHtml, event: offEventHtml, guests: offGuestsHtml, polls: offPollsHtml, food: offFoodHtml, acts: offActsHtml, approval: offApprovalHtml, plan: offPlanHtml, potluck: offPotHtml, santa: offSantaHtml, awards: offAwardsHtml, auction: offAucHtml, charity: offCharityHtml, handover: offHandoverHtml, more: offMoreHtml, saved: offSavedHtml, savedone: offSavedOne })[tab]() + (G === "plan" && tab !== "event" ? `<button type="button" class="btn btn-gold btn-block" data-offreview style="margin-top:12px">📄 See my plan ›</button>` : "");
   }
   const fld = (k, label, type, ph, extra) => `<label class="off-f${extra === "wide" ? " wide" : ""}"><span class="meal-lab">${label}</span>${type === "area" ? `<textarea class="input" rows="2" data-ev="${k}" maxlength="300" placeholder="${ph || ""}">${esc(off.ev[k] || "")}</textarea>` : `<input class="input" type="${type || "text"}" data-ev="${k}" value="${esc(off.ev[k] ?? "")}" placeholder="${ph || ""}" ${type === "number" ? 'inputmode="decimal" min="0"' : 'maxlength="80"'}>`}</label>`;
   function offEventHtml() {
     if (!off.ev.who) return `<div class="card pt-card"><h3>👥 First, who's invited?</h3><p class="host-rem">This shapes the whole plan: the time of day, the activities, the food and the approval request.</p>
       <div class="who-pick">${OFF_WHO.map(([k, i, l, d]) => `<button type="button" class="who-tile" data-ofwho="${k}"><span class="wt-ico">${i}</span><span><b>${l}</b><small>${d}</small></span></button>`).join("")}</div></div>`;
     const W = offWho();
-    const last = off.past[off.past.length - 1], total = offTotal(), hc = Math.max(1, +off.ev.headcount || 1);
+    const last = off.past.filter(p => p.name === off.ev.name).pop() || off.past[off.past.length - 1], total = offTotal(), hc = Math.max(1, +off.ev.headcount || 1);
     return `${last ? `<div class="card pt-card off-last"><h3>🗂️ Last year (${last.year})</h3><p><b>${esc(last.name || "Holiday party")}</b>${last.organizer ? `, organized by <b>${esc(last.organizer)}</b>` : ""}${last.date ? ` · ${offDate(last.date, { month: "short", day: "numeric" })}` : ""} · ${last.headcount || "?"} people · ${money(last.spent || 0)} spent</p>
         ${last.worked ? `<p>👍 <b>What worked:</b> ${esc(last.worked)}</p>` : ""}${last.change ? `<p>✏️ <b>Change next time:</b> ${esc(last.change)}</p>` : ""}
         ${last.vendors && last.vendors.length ? `<p class="host-rem">Vendors used: ${last.vendors.map(v => esc(v.name) + (v.type ? ` (${esc(v.type)})` : "")).join(", ")}</p>` : ""}</div>` : ""}
@@ -14606,6 +14832,7 @@ const PC_DESIGNS = [
       ${chRaised() ? `<h2>Charity</h2><p>Raised <b>${money(chRaised())}</b>${chChosen() ? ` for <b>${esc(chChosen().name)}</b>` : ""}${+offCh().goal ? ` (goal ${money(+offCh().goal)})` : ""}${offCh().drive.count ? ` · ${offCh().drive.count} ${esc(offCh().drive.unit || "items")} collected` : ""}.</p>` : ""}
       ${off.awards.some(x => x.w) ? `<h2>Silly Office Awards</h2><p>${off.awards.filter(x => x.w).map(x => `🏆 ${esc(x.t)}: <b>${esc(x.w)}</b>`).join("<br>")}</p>` : ""}
       ${offSurveyYE()}
+      ${oyYearEndHtml()}
       <h2>Notes for next year</h2><p><b>What worked:</b> ${esc(off.wrap.worked || "—")}</p><p><b>Change next time:</b> ${esc(off.wrap.change || "—")}</p>
       <p class="ye-foot">Made with Noël Tier 1 Hub · Office Edition</p></div>`;
     return { title: "Year-End Report", css, html, margin: 0.5, file: "Office-Year-End-Report" };
@@ -14637,7 +14864,7 @@ const PC_DESIGNS = [
   function offSnapshotPast() {
     const e = off.ev; if (!e.date && !off.costs.length) return;
     const y = offYear(), T = budTotals();
-    off.past = off.past.filter(p => p.year !== y).concat({ year: y, name: e.name, organizer: e.organizer, date: e.date, headcount: e.headcount, spent: T.spent || offTotal(), worked: off.wrap.worked, change: off.wrap.change, vendors: off.costs.filter(c => c.name).map(c => ({ type: c.type, name: c.name, contact: c.contact })) });
+    off.past = off.past.filter(p => !(p.year === y && p.name === e.name)).concat({ year: y, name: e.name, organizer: e.organizer, date: e.date, headcount: e.headcount, spent: T.spent || offTotal(), worked: off.wrap.worked, change: off.wrap.change, vendors: off.costs.filter(c => c.name).map(c => ({ type: c.type, name: c.name, contact: c.contact })) });
     saveOff();
   }
 
@@ -14645,13 +14872,15 @@ const PC_DESIGNS = [
   const offReminders = () => {
     const a = off.appr, out = a.status === "sent" && a.sentAt ? [{ k: "follow" + a.sentAt, t: a.sentAt + a.followDays * 86400000, text: `No answer yet? Follow up with ${off.ev.approver || "your approver"} about the ${off.ev.name || "party"} plan.` }] : [];
     const day = ssDay(); if (ssOn() && day) { const t = new Date(day + "T10:00"); t.setDate(t.getDate() - 3); out.push({ k: "ss" + day, t: t.getTime(), text: `Secret Santa exchange is ${offDate(day, { weekday: "long", month: "short", day: "numeric" })}${+off.ev.giftLimit ? `. Limit ${money(+off.ev.giftLimit)}` : ""}. Remind the team!` }); }
+    (off.chk || []).forEach(c => { if (c.done || !off.ev.date) return; const t = new Date(oyDue(c) + "T09:00").getTime(); if (t > Date.now() - 6 * 36e5) out.push({ k: "chk" + c.id, t, text: `${off.ev.name || "Event"}: ${c.t}` }); });
+    oyMilestones(14).forEach(m => { const t = m.in <= 7 ? new Date(oyYmd(new Date()) + "T09:00").getTime() : new Date(oyAdd(oyYmd(m.dt), -7) + "T09:00").getTime(); out.push({ g: 1, k: "ms" + m.p.id + m.kind + m.dt.getFullYear(), t, text: m.kind === "bday" ? `${m.p.name}'s birthday is ${oyMsWhen(m).split(" · ")[0]}` : `${m.p.name}'s ${m.n}-year anniversary is ${oyMsWhen(m).split(" · ")[0]}` }); });
     return out;
   };
-  function offSync() { if (SPACE === "office") NoelNative.scheduleList(9100, 9110, offReminders().map(r => ({ t: r.t, title: "📨 " + r.text, body: "Noël Tier 1 Hub · Office" }))); }
+  function offSync() { if (SPACE === "office") NoelNative.scheduleList(9100, 9110, offReminders().filter(r => r.t > Date.now()).sort((a, b) => a.t - b.t).slice(0, 10).map(r => ({ t: r.t, title: "📨 " + r.text, body: "Noël Tier 1 Hub · Office" }))); }
   function offAlertItem(id) { if (!String(id).startsWith("off:")) return null; const r = offReminders().find(x => "off:" + x.k === id); return r ? { icon: "📨", name: r.text } : null; }
   if (SPACE === "office") setInterval(() => {
-    const now = Date.now(), due = offReminders().filter(r => !off.fired[r.k] && r.t <= now); if (!due.length) return;
-    due.forEach(r => { off.fired[r.k] = 1; }); saveOff(); triggerAlert(due.map(r => ({ id: "off:" + r.k })));
+    const now = Date.now(), due = offReminders().filter(r => !off.fired[r.k] && !oy.fired[r.k] && r.t <= now); if (!due.length) return;
+    due.forEach(r => { (r.g ? oy.fired : off.fired)[r.k] = 1; }); saveOff(); saveOy(); triggerAlert(due.map(r => ({ id: "off:" + r.k })));
   }, 15000);
 
   // ---------- taps & typing ----------
@@ -15058,8 +15287,10 @@ const PC_DESIGNS = [
     const blk = (n, b) => `<div class="menu-dish"><h4>${n}</h4>${b}</div><p class="menu-rule sm"><span></span>✦<span></span></p>`, line = x => `<p class="menu-items">${x}</p>`;
     const plain = l => l.replace(/^\S+\s/, "");
     el.innerHTML = `<div class="menu-top">${go}</div>
-      <p class="menu-star">✦</p><h2 class="menu-title">Office Christmas Party</h2><p class="menu-sub">Plan it, get it approved and leave a tidy record for next year</p><p class="menu-rule"><span></span>✦<span></span></p>
-      <h3 class="menu-group">The Party</h3>` +
+      <p class="menu-star">✦</p><h2 class="menu-title">Office Events, All Year</h2><p class="menu-sub">Plan any event, get it approved and leave a tidy record for next year</p><p class="menu-rule"><span></span>✦<span></span></p>
+      <h3 class="menu-group">All Year Long</h3>` +
+      blk("A calendar of events", line(`Appreciation Day${dot}Summer BBQ${dot}Boss's Day${dot}Thanksgiving potluck${dot}Holiday party`) + `<p class="menu-sub2">Starter checklists, birthdays and anniversaries, and one yearly budget</p>`) +
+      `<h3 class="menu-group">The Party</h3>` +
       blk("Who's invited", line(OFF_WHO.map(w => esc(w[2])).join(dot))) +
       blk("Where", line(`In the office${dot}Rent a venue${dot}Team outing${dot}Someone's home`)) +
       `<h3 class="menu-group">Food</h3>` +
@@ -15105,6 +15336,7 @@ const PC_DESIGNS = [
     else if (key === "survival") d = survivalDoc();
     else if (key === "selfcare") d = selfCareDoc();
     else if (key === "place") d = placeDoc();
+    else if (key === "oysign" || key === "oysheet" || key.startsWith("oycard:")) d = oyDoc(key);
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "travel") d = travelDoc();
     else if (key === "chores") d = choresDoc();
