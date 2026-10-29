@@ -2154,6 +2154,9 @@ body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!impor
 /* Holiday Review stays hidden until Dec 26 (or until opened) */
 .nav-btn[data-view="review"]{display:none}
 body.rev-open .nav-btn[data-view="review"]{display:flex}
+.shop-timing{border:1px solid #C9A45C;padding:8px 12px;margin:0 0 10px;font-size:13.5px}.shop-timing p{margin:2px 0}
+.shop-when{float:right;font:700 10px "Cinzel",serif;letter-spacing:.1em;text-transform:uppercase;border:1px solid #9A7424;color:#9A7424;padding:2px 7px}.shop-when.now{background:#16130E;color:#E3C98A;border-color:#16130E}
+.cap-row{display:flex;gap:8px;align-items:center;margin:8px 0 2px;font-size:13px}.cap-row input{width:92px;min-height:38px}.cap-msg{font-size:13px;color:#6A6354}.cap-msg.over{color:#9E1B25;font-weight:700}
 .task-text{display:block}
 .nt{display:block;margin-top:4px;font:600 11px "Cinzel",serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;padding:4px 0}
 .nt::before{content:"* "}
@@ -7717,7 +7720,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       { id: "oa-6", text: "Send the team a quick feedback survey" }, { id: "oa-7", text: "Thank the vendors and volunteers" },
       { id: "oa-8", text: "Write notes on what worked for next year" } ] }
   ];
-const TASK_TAGS = {"f0-1":["h","Gifts"],"f0-2":["h","Gifts"],"f0-3":["h","Calendar"],"f0-4":["h","Calendar"],"f1-4":["h","Menu"],"f2-1":["h","Calendar"],"f2-2":["h","Cards"],"f2-4":["g","Calendar"],"f2-5":["h","Calendar"],"w4-1":["h","Budget"],"w4-6":["h","Plan"],"w4-2":["h","Gifts"],"w4-3":["h","Calendar"],"w4-4":["h","Plan"],"f3-1":["g","Menu"],"f3-2":["h","Menu"],"f3-3":["h","Menu"],"w2-1":["h","Gifts"],"w2-7":["h","Calendar"],"w2-4":["g","Menu"],"w4-5":["g","Cards"],"w1-1":["g","Menu"],"w1-6":["h","Menu"],"w1-7":["g","Menu"],"w1-8":["h","Plan"],"w1-3":["h","Menu"],"w1-4":["h","Plan"],"eve-1":["g","Menu"],"eve-2":["g","Menu"],"eve-3":["h","Plan"],"day-1":["g","Menu"],"day-4":["g","Menu"],"nyw-1":["g","NYE"],"nyw-2":["g","Cards"],"nyw-3":["h","NYE"],"nyw-5":["h","Games"],"nye-1":["g","NYE"],"nye-2":["g","NYE"],"nye-4":["h","NYE"],"nye-5":["g","NYE"],"nye-6":["g","NYE"],"os-1":["h","Plan"],"o4-1":["h","Plan"],"os-2":["g","Plan"],"o4-2":["h","Plan"],"os-3":["h","Plan"],"o4-3":["h","Cards"],"os-5":["h","Budget"],"os-6":["h","Plan"],"os-7":["h","Plan"],"o4-4":["h","Plan"],"o4-5":["h","Plan"],"on-1":["g","Plan"],"on-2":["h","Plan"],"on-3":["h","Plan"],"on-4":["h","Plan"],"on-8":["h","Plan"],"on-9":["h","Plan"],"o2-1":["h","Cards"],"o2-2":["h","Plan"],"o2-3":["h","Plan"],"o2-4":["h","Plan"],"o2-5":["h","Plan"],"o2-6":["h","Plan"],"o2-8":["h","Plan"],"o1-1":["h","Plan"],"o1-2":["g","Plan"],"o1-3":["g","Plan"],"o1-4":["h","Plan"],"o1-5":["h","Plan"],"od-2":["h","Tasks"],"od-4":["h","Games"],"od-5":["h","Plan"],"oa-1":["h","Cards"],"oa-5":["g","Budget"],"oa-4":["g","Plan"],"oa-6":["g","Plan"],"oa-7":["h","Cards"],"oa-8":["h","Plan"]};   // ✦ which tasks Noël generates (g) or can help with (h), and which tab
+const TASK_TAGS = {"os-4":["h","Plan"],"f0-1":["h","Gifts"],"f0-2":["h","Gifts"],"f0-3":["h","Calendar"],"f0-4":["h","Calendar"],"f1-4":["h","Menu"],"f2-1":["h","Calendar"],"f2-2":["h","Cards"],"f2-4":["g","Calendar"],"f2-5":["h","Calendar"],"w4-1":["h","Budget"],"w4-6":["h","Plan"],"w4-2":["h","Gifts"],"w4-3":["h","Calendar"],"w4-4":["h","Plan"],"f3-1":["g","Menu"],"f3-2":["h","Menu"],"f3-3":["h","Menu"],"w2-1":["h","Gifts"],"w2-7":["h","Calendar"],"w2-4":["g","Menu"],"w4-5":["g","Cards"],"w1-1":["g","Menu"],"w1-6":["h","Menu"],"w1-7":["g","Menu"],"w1-8":["h","Plan"],"w1-3":["h","Menu"],"w1-4":["h","Plan"],"eve-1":["g","Menu"],"eve-2":["g","Menu"],"eve-3":["h","Plan"],"day-1":["g","Menu"],"day-4":["g","Menu"],"nyw-1":["g","NYE"],"nyw-2":["g","Cards"],"nyw-3":["h","NYE"],"nyw-5":["h","Games"],"nye-1":["g","NYE"],"nye-2":["g","NYE"],"nye-4":["h","NYE"],"nye-5":["g","NYE"],"nye-6":["g","NYE"],"os-1":["h","Plan"],"o4-1":["h","Plan"],"os-2":["g","Plan"],"o4-2":["h","Plan"],"os-3":["h","Plan"],"o4-3":["h","Cards"],"os-5":["h","Budget"],"os-6":["h","Plan"],"os-7":["h","Plan"],"o4-4":["h","Plan"],"o4-5":["h","Plan"],"on-1":["g","Plan"],"on-2":["h","Plan"],"on-3":["h","Plan"],"on-4":["h","Plan"],"on-8":["h","Plan"],"on-9":["h","Plan"],"o2-1":["h","Cards"],"o2-2":["h","Plan"],"o2-3":["h","Plan"],"o2-4":["h","Plan"],"o2-5":["h","Plan"],"o2-6":["h","Plan"],"o2-8":["h","Plan"],"o1-1":["h","Plan"],"o1-2":["g","Plan"],"o1-3":["g","Plan"],"o1-4":["h","Plan"],"o1-5":["h","Plan"],"od-2":["h","Tasks"],"od-4":["h","Games"],"od-5":["h","Plan"],"oa-1":["h","Cards"],"oa-5":["g","Budget"],"oa-4":["g","Plan"],"oa-6":["g","Plan"],"oa-7":["h","Cards"],"oa-8":["h","Plan"]};   // ✦ which tasks Noël generates (g) or can help with (h), and which tab
   const TAG_VIEW = { Gifts: "gifts", Calendar: "org", Menu: "meals", Cards: "invites", NYE: "nye", Games: "games", Budget: "budget", Tasks: "tasks" };
   let hubMode = SPACE === "office" ? "company" : "family";   // the Office space is the company side
   let PHASES = hubMode === "company" ? OFFICE_PHASES : FAMILY_PHASES;
@@ -9457,6 +9460,8 @@ const TASK_TAGS = {"f0-1":["h","Gifts"],"f0-2":["h","Gifts"],"f0-3":["h","Calend
     const budget = +gifts.budget || 0, spent = sum(withSanta, isSpent), planned = sum(withSanta, () => true);
     return { all, budget, spent, planned, left: budget - spent };
   }
+  const capOver = p => +p.cap > 0 && sum(p.gifts, () => true) > +p.cap;
+  const capMsg = p => { if (!(+p.cap > 0)) return "Optional"; const pl = sum(p.gifts, () => true); return pl > +p.cap ? `${money(pl - p.cap)} over the cap` : `${money(p.cap - pl)} left of the cap`; };
   function renderGifts() {
     const { all, budget, spent, planned, left } = giftTotals();
     $("#giftCur").textContent = CUR;
@@ -9484,6 +9489,7 @@ const TASK_TAGS = {"f0-1":["h","Gifts"],"f0-2":["h","Gifts"],"f0-3":["h","Calend
           <div class="p-name">${esc(p.name)}<small>${money(sum(p.gifts, isSpent))} spent · ${money(sum(p.gifts, () => true))} planned</small></div>
           <button class="icon-btn" data-act="del-person" aria-label="Remove ${esc(p.name)}">✕</button>
         </div>
+        <div class="cap-row"><label for="cap-${p.id}">Spending cap</label><input class="input" id="cap-${p.id}" data-cap type="number" inputmode="decimal" min="0" step="1" placeholder="${CUR}" value="${p.cap || ""}"><span class="cap-msg${capOver(p) ? " over" : ""}">${capMsg(p)}</span></div>
         ${lastYearFor(p.name) ? `<p class="last-year">🗂️ ${esc(lastYearFor(p.name))}</p>` : ""}
         <ul class="gift-items">${p.gifts.map(g => {
           const s = STATUSES.find(x => x.key === g.status) || STATUSES[0];
@@ -9525,12 +9531,19 @@ const TASK_TAGS = {"f0-1":["h","Gifts"],"f0-2":["h","Gifts"],"f0-3":["h","Calend
     }
     save("gifts", gifts); renderGifts();
   });
+  $("#peopleList").addEventListener("change", e => {   // 💰 spending cap for one person
+    if (!e.target.matches("[data-cap]")) return;
+    const p = gifts.people.find(x => x.id === e.target.closest(".person").dataset.pid); if (!p) return;
+    p.cap = Math.max(0, parseFloat(e.target.value) || 0); save("gifts", gifts); renderGifts();
+    toast(p.cap ? `Cap set for ${p.name}` : `Cap cleared for ${p.name}`);
+  });
   $("#peopleList").addEventListener("submit", e => {
     e.preventDefault();
     const f = e.target, p = gifts.people.find(x => x.id === f.closest(".person").dataset.pid);
     const name = f.gift.value.trim(); if (!p || !name) return;
     p.gifts.push({ id: uid(), name, price: parseFloat(f.price.value) || 0, status: "idea" });
     save("gifts", gifts); renderGifts();
+    if (capOver(p)) toast(`${p.name} is ${money(sum(p.gifts, () => true) - p.cap)} over the cap`);
     const again = $(`.person[data-pid="${p.id}"] input[name="gift"]`); if (again) again.focus();
   });
 
@@ -11313,7 +11326,8 @@ const TASK_TAGS = {"f0-1":["h","Gifts"],"f0-2":["h","Gifts"],"f0-3":["h","Calend
       body = `<div class="shop-total" id="shopTotal">${shopTotalHtml(ps, c.guests)}</div>
         <button type="button" class="btn btn-gold btn-block" id="shopToBudget">💵 Add to my food budget</button>
         <div class="shop-note">${currencySwitchHtml()}Rough ${curName()} prices (${currency}). Tap any price to match your store. Pantry staples you likely have aren't counted.</div>` +
-        ps.groups.map(([dept, items]) => `<h4 class="shop-dept">${esc(dept)}</h4><ul class="shop-list">` + items.map(it =>
+        `<div class="shop-timing"><p><b>Buy now:</b> pantry, frozen, drinks and anything that keeps.</p><p><b>Buy 48 hours before:</b> produce, dairy, bread, fresh meat and fish.</p></div>` +
+        ps.groups.map(g => [g, /produce|veg|fruit|herb|dairy|egg|bakery|bread|meat|poultry|fish|seafood|deli|fresh|cheese|butcher/i.test(g[0].replace(/\(.*\)/, ""))]).sort((a, b) => a[1] - b[1]).map(([[dept, items], later]) => `<h4 class="shop-dept">${esc(dept)}<span class="shop-when${later ? "" : " now"}">${later ? "48 hrs before" : "Buy now"}</span></h4><ul class="shop-list">` + items.map(it =>
           `<li><label class="${it.on ? "on" : ""}"><input type="checkbox" data-shop="${esc(it.key)}" ${it.on ? "checked" : ""}><span>${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}</span></label>` +
           (it.price != null ? `<span class="shop-cad">$</span><input class="shop-price${it.edited ? " edited" : ""}" data-price="${esc(it.key)}" data-est="${it.est}" inputmode="decimal" value="${it.price.toFixed(2)}" aria-label="Price for ${esc(it.name)}">` : "") + `</li>`
         ).join("") + `</ul>`).join("") +
@@ -14482,7 +14496,7 @@ const PC_DESIGNS = [
   const OFF_AWARDS = ["Most Likely to Reply-All", "The Coffee Champion", "Best Desk Snacks", "Queen/King of Spreadsheets", "The Unmute Award (\"You're on mute!\")", "Office DJ", "Best Out-of-Office Message", "The Plant Whisperer", "Most Creative Excuse for Being Late", "Calendar Tetris Champion", "The Fridge Detective", "Best Holiday Sweater", "Most Emojis per Email", "The Office Comedian", "Most Likely to Bring Treats", "Unsung Hero of the Year"];
   let off = load("office", null) || {
     tab: "event", ev: { name: "Holiday Party", date: "", start: "17:00", end: "21:00", venue: "", address: "", headcount: 20, budget: 0, theme: "", dress: "", giftLimit: 25, organizer: "", approver: "", approverEmail: "", notes: "" },
-    acts: { potluck: 1, gifts: 1, awards: 1, games: 1 }, costs: [], appr: { status: "draft", log: [], followDays: 3 },
+    acts: { potluck: 1, gifts: 1, awards: 1, games: 1 }, costs: [], team: [], appr: { status: "draft", log: [], followDays: 3 },
     pot: [], awards: OFF_AWARDS.slice(0, 8).map(t => ({ id: uid(), t, w: "" })), wrap: { worked: "", change: "" }, past: [], fired: {}
   };
   const saveOff = () => save("office", off);
@@ -14776,6 +14790,9 @@ const PC_DESIGNS = [
         ${fld("name", "Event name", "text", "e.g. Holiday Party", "wide")}${fld("date", "Date", "date")}${fld("headcount", off.ev.who === "family" ? "Adults (about)" : "Guests (about)", "number")}${off.ev.who === "family" ? fld("kids", "Kids (about)", "number") : ""}${fld("start", "Starts", "time")}${fld("end", "Ends", "time")}
         ${fld("venue", "Venue", "text", "e.g. Boardroom, The Keg", "wide")}${fld("address", "Address", "text", "", "wide")}${fld("theme", "Theme", "text", "e.g. Ugly sweater")}${fld("dress", "Dress code", "text", "e.g. Festive casual")}
         ${fld("organizer", "Organized by", "text", "Your name")}${fld("budget", "Approved budget", "number", "$")}</div></div>
+      <div class="card pt-card"><h3>✦ Planning team</h3><p class="host-rem">Who is helping, and what they own.</p>
+        ${(off.team || []).map(m => `<div class="off-cost" data-tm="${m.id}"><div><b>${esc(m.name)}</b><small>${esc(m.role)}</small></div><span></span><button type="button" class="icon-btn" data-tmdel aria-label="Remove">✕</button></div>`).join("")}
+        <form class="org-ev-form" id="offTeamForm" autocomplete="off"><div class="org-addr-row"><input class="input" name="name" placeholder="Name" maxlength="40"><select class="input" name="role">${["Venue", "Food", "Invites", "Decor", "Entertainment", "Photos", "Cleanup", "Budget"].map(r => `<option>${r}</option>`).join("")}</select><button class="btn btn-gold" type="submit">Add</button></div></form></div>
       ${offAlcCardHtml()}
       <div class="card pt-card"><h3>✨ What's planned</h3><div class="apps-filters">${offActList().map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div>
         ${off.acts.gifts ? `<div class="off-grid" style="margin-top:8px">${fld("giftLimit", "Gift exchange limit", "number", "$")}</div>` : ""}</div>
@@ -15246,6 +15263,7 @@ const PC_DESIGNS = [
     }
     const ac = t.closest("[data-ofact]"); if (ac) { off.acts[ac.dataset.ofact] = off.acts[ac.dataset.ofact] ? 0 : 1; saveOff(); renderOffice(); return; }
     const od = t.closest("[data-ocdone]"); if (od) { const c = off.costs.find(x => x.id === od.dataset.ocdone); if (c) { c.ordered = !c.ordered; saveOff(); renderOffice(); renderCoDash(); } return; }
+    const td = t.closest("[data-tmdel]"); if (td) { off.team = (off.team || []).filter(m => m.id !== td.closest("[data-tm]").dataset.tm); saveOff(); renderOffice(); return; }
     const cd = t.closest("[data-ocdel]"); if (cd) { off.costs = off.costs.filter(c => c.id !== cd.closest("[data-oc]").dataset.oc); saveOff(); renderOffice(); return; }
     const pd = t.closest("[data-opdel]"); if (pd) { off.pot = off.pot.filter(p => p.id !== pd.closest("[data-op]").dataset.op); saveOff(); renderOffice(); return; }
     const ad = t.closest("[data-awdel]"); if (ad) { off.awards = off.awards.filter(a => a.id !== ad.closest("[data-oa]").dataset.oa); saveOff(); renderOffice(); return; }
@@ -15289,6 +15307,7 @@ const PC_DESIGNS = [
   });
   $("#view-office").addEventListener("submit", async e => {
     e.preventDefault(); const f = e.target;
+    if (f.id === "offTeamForm") { const n = f.name.value.trim(); if (!n) { toast("✦ Add a name"); return; } (off.team = off.team || []).push({ id: uid(), name: n, role: f.role.value }); saveOff(); renderOffice(); return; }
     if (f.id === "offCostForm") { const c = parseFloat(f.cost.value) || 0; if (!c && !f.name.value.trim()) { toast("💵 Add an amount or a vendor"); return; } off.costs.push({ id: uid(), type: f.type.value, name: f.name.value.trim(), contact: f.contact.value.trim(), url: f.url.value.trim(), orderBy: f.orderBy.value, cost: c }); }
     if (f.id === "offPotForm") { const who = f.who.value.trim(), dish = f.dish.value.trim(); if (!who || !dish) { toast("🥘 Add a name and a dish"); return; } off.pot.push({ id: uid(), who, dish, cat: f.cat.value, diet: [...f.querySelectorAll("[name=diet]:checked")].map(x => x.value) }); }
     if (f.id === "offAwardForm") { const tt = f.t.value.trim(); if (!tt) return; off.awards.push({ id: uid(), t: tt, w: "" }); }

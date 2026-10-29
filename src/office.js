@@ -22,7 +22,7 @@
   const OFF_AWARDS = ["Most Likely to Reply-All", "The Coffee Champion", "Best Desk Snacks", "Queen/King of Spreadsheets", "The Unmute Award (\"You're on mute!\")", "Office DJ", "Best Out-of-Office Message", "The Plant Whisperer", "Most Creative Excuse for Being Late", "Calendar Tetris Champion", "The Fridge Detective", "Best Holiday Sweater", "Most Emojis per Email", "The Office Comedian", "Most Likely to Bring Treats", "Unsung Hero of the Year"];
   let off = load("office", null) || {
     tab: "event", ev: { name: "Holiday Party", date: "", start: "17:00", end: "21:00", venue: "", address: "", headcount: 20, budget: 0, theme: "", dress: "", giftLimit: 25, organizer: "", approver: "", approverEmail: "", notes: "" },
-    acts: { potluck: 1, gifts: 1, awards: 1, games: 1 }, costs: [], appr: { status: "draft", log: [], followDays: 3 },
+    acts: { potluck: 1, gifts: 1, awards: 1, games: 1 }, costs: [], team: [], appr: { status: "draft", log: [], followDays: 3 },
     pot: [], awards: OFF_AWARDS.slice(0, 8).map(t => ({ id: uid(), t, w: "" })), wrap: { worked: "", change: "" }, past: [], fired: {}
   };
   const saveOff = () => save("office", off);
@@ -316,6 +316,9 @@
         ${fld("name", "Event name", "text", "e.g. Holiday Party", "wide")}${fld("date", "Date", "date")}${fld("headcount", off.ev.who === "family" ? "Adults (about)" : "Guests (about)", "number")}${off.ev.who === "family" ? fld("kids", "Kids (about)", "number") : ""}${fld("start", "Starts", "time")}${fld("end", "Ends", "time")}
         ${fld("venue", "Venue", "text", "e.g. Boardroom, The Keg", "wide")}${fld("address", "Address", "text", "", "wide")}${fld("theme", "Theme", "text", "e.g. Ugly sweater")}${fld("dress", "Dress code", "text", "e.g. Festive casual")}
         ${fld("organizer", "Organized by", "text", "Your name")}${fld("budget", "Approved budget", "number", "$")}</div></div>
+      <div class="card pt-card"><h3>✦ Planning team</h3><p class="host-rem">Who is helping, and what they own.</p>
+        ${(off.team || []).map(m => `<div class="off-cost" data-tm="${m.id}"><div><b>${esc(m.name)}</b><small>${esc(m.role)}</small></div><span></span><button type="button" class="icon-btn" data-tmdel aria-label="Remove">✕</button></div>`).join("")}
+        <form class="org-ev-form" id="offTeamForm" autocomplete="off"><div class="org-addr-row"><input class="input" name="name" placeholder="Name" maxlength="40"><select class="input" name="role">${["Venue", "Food", "Invites", "Decor", "Entertainment", "Photos", "Cleanup", "Budget"].map(r => `<option>${r}</option>`).join("")}</select><button class="btn btn-gold" type="submit">Add</button></div></form></div>
       ${offAlcCardHtml()}
       <div class="card pt-card"><h3>✨ What's planned</h3><div class="apps-filters">${offActList().map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div>
         ${off.acts.gifts ? `<div class="off-grid" style="margin-top:8px">${fld("giftLimit", "Gift exchange limit", "number", "$")}</div>` : ""}</div>
@@ -786,6 +789,7 @@
     }
     const ac = t.closest("[data-ofact]"); if (ac) { off.acts[ac.dataset.ofact] = off.acts[ac.dataset.ofact] ? 0 : 1; saveOff(); renderOffice(); return; }
     const od = t.closest("[data-ocdone]"); if (od) { const c = off.costs.find(x => x.id === od.dataset.ocdone); if (c) { c.ordered = !c.ordered; saveOff(); renderOffice(); renderCoDash(); } return; }
+    const td = t.closest("[data-tmdel]"); if (td) { off.team = (off.team || []).filter(m => m.id !== td.closest("[data-tm]").dataset.tm); saveOff(); renderOffice(); return; }
     const cd = t.closest("[data-ocdel]"); if (cd) { off.costs = off.costs.filter(c => c.id !== cd.closest("[data-oc]").dataset.oc); saveOff(); renderOffice(); return; }
     const pd = t.closest("[data-opdel]"); if (pd) { off.pot = off.pot.filter(p => p.id !== pd.closest("[data-op]").dataset.op); saveOff(); renderOffice(); return; }
     const ad = t.closest("[data-awdel]"); if (ad) { off.awards = off.awards.filter(a => a.id !== ad.closest("[data-oa]").dataset.oa); saveOff(); renderOffice(); return; }
@@ -829,6 +833,7 @@
   });
   $("#view-office").addEventListener("submit", async e => {
     e.preventDefault(); const f = e.target;
+    if (f.id === "offTeamForm") { const n = f.name.value.trim(); if (!n) { toast("✦ Add a name"); return; } (off.team = off.team || []).push({ id: uid(), name: n, role: f.role.value }); saveOff(); renderOffice(); return; }
     if (f.id === "offCostForm") { const c = parseFloat(f.cost.value) || 0; if (!c && !f.name.value.trim()) { toast("💵 Add an amount or a vendor"); return; } off.costs.push({ id: uid(), type: f.type.value, name: f.name.value.trim(), contact: f.contact.value.trim(), url: f.url.value.trim(), orderBy: f.orderBy.value, cost: c }); }
     if (f.id === "offPotForm") { const who = f.who.value.trim(), dish = f.dish.value.trim(); if (!who || !dish) { toast("🥘 Add a name and a dish"); return; } off.pot.push({ id: uid(), who, dish, cat: f.cat.value, diet: [...f.querySelectorAll("[name=diet]:checked")].map(x => x.value) }); }
     if (f.id === "offAwardForm") { const tt = f.t.value.trim(); if (!tt) return; off.awards.push({ id: uid(), t: tt, w: "" }); }

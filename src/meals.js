@@ -209,7 +209,8 @@
       body = `<div class="shop-total" id="shopTotal">${shopTotalHtml(ps, c.guests)}</div>
         <button type="button" class="btn btn-gold btn-block" id="shopToBudget">💵 Add to my food budget</button>
         <div class="shop-note">${currencySwitchHtml()}Rough ${curName()} prices (${currency}). Tap any price to match your store. Pantry staples you likely have aren't counted.</div>` +
-        ps.groups.map(([dept, items]) => `<h4 class="shop-dept">${esc(dept)}</h4><ul class="shop-list">` + items.map(it =>
+        `<div class="shop-timing"><p><b>Buy now:</b> pantry, frozen, drinks and anything that keeps.</p><p><b>Buy 48 hours before:</b> produce, dairy, bread, fresh meat and fish.</p></div>` +
+        ps.groups.map(g => [g, /produce|veg|fruit|herb|dairy|egg|bakery|bread|meat|poultry|fish|seafood|deli|fresh|cheese|butcher/i.test(g[0].replace(/\(.*\)/, ""))]).sort((a, b) => a[1] - b[1]).map(([[dept, items], later]) => `<h4 class="shop-dept">${esc(dept)}<span class="shop-when${later ? "" : " now"}">${later ? "48 hrs before" : "Buy now"}</span></h4><ul class="shop-list">` + items.map(it =>
           `<li><label class="${it.on ? "on" : ""}"><input type="checkbox" data-shop="${esc(it.key)}" ${it.on ? "checked" : ""}><span>${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}</span></label>` +
           (it.price != null ? `<span class="shop-cad">$</span><input class="shop-price${it.edited ? " edited" : ""}" data-price="${esc(it.key)}" data-est="${it.est}" inputmode="decimal" value="${it.price.toFixed(2)}" aria-label="Price for ${esc(it.name)}">` : "") + `</li>`
         ).join("") + `</ul>`).join("") +
