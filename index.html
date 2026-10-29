@@ -2187,6 +2187,11 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
 .adv-xmas.locked { opacity: 1; }
 .adv-xmas.today { animation: glow 1s ease-in-out infinite alternate; outline: 3px solid #C9A45C; outline-offset: 2px; }
 .adv-xmas.open { background: #fff; color: #151515; border: 2px solid #C9A45C; } .adv-xmas.open small { color: #6b5a30; }
+
+.apps-build { position: sticky; bottom: -8px; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding: 12px 14px; background: #151515; border: 1px solid #C9A45C; }
+.apps-build .ab-n { color: #E3C98A; font: 600 14px Cinzel, serif; letter-spacing: .1em; text-transform: uppercase; } .apps-build .ab-n b { color: #fff; font-size: 18px; }
+.apps-build .btn { margin: 0; background: #E3C98A !important; color: #151515 !important; border-color: #E3C98A !important; }
+.pr-menu { margin: 6px 0 0; font-size: 14px; line-height: 1.5; } .pr-menu b { display: block; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #8a6a24; }
 </style>
 </head>
 <body>
@@ -3214,7 +3219,7 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
   </div>
   <div class="sheet-body">
     <div class="sheet-inner">
-      <p class="advent-intro">Party bites for New Year's Eve, Christmas Eve or any get-together. Tap ☆ to save your favourites.</p>
+      <p class="advent-intro">Party bites for New Year's Eve, Christmas Eve or any get-together. Tap ☆ on the appetizers you want, then tap Build my menu at the bottom.</p>
 
       <div class="card apps-calc">
         <h3>🧮 How many should I make?</h3>
@@ -3235,9 +3240,10 @@ body.rev-open .nav-btn[data-view="review"]{display:flex}
         <button class="chip" data-f="warm">Warm</button>
         <button class="chip" data-f="veg">Vegetarian</button>
         <button class="chip" data-f="sweet">Sweet</button>
-        <button class="chip" data-f="fav">★ Saved</button>
+        <button class="chip" data-f="fav">★ My picks</button>
       </div>
       <div class="apps-list" id="appsList"></div>
+      <div class="apps-build" id="appsBuild"></div>
     </div>
   </div>
 </div>
@@ -10389,9 +10395,13 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
         <div class="app-emo">${a[0]}</div>
         <div><h4>${esc(a[1])}</h4><p>${esc(a[2])}</p><p class="app-tip">💡 ${esc(a[3])}</p>
           <div class="app-tags"><span>⏱ ${esc(a[5])}</span>${a[4].split(" ").map(t => `<span>${APP_TAG_NAMES[t]}</span>`).join("")}</div></div>
-        <button class="app-fav" data-fav="${esc(a[1])}" aria-pressed="${appFavs[a[1]] ? "true" : "false"}" aria-label="Save ${esc(a[1])}">${appFavs[a[1]] ? "★" : "☆"}</button>
-      </div>`).join("") : `<p class="apps-empty">${appFilter === "fav" ? "Tap ☆ on any idea to save it here." : "No ideas match."}</p>`;
-    renderAppsCalc();
+        <button class="app-fav" data-fav="${esc(a[1])}" aria-pressed="${appFavs[a[1]] ? "true" : "false"}" aria-label="Add ${esc(a[1])} to my menu">${appFavs[a[1]] ? "★" : "☆"}</button>
+      </div>`).join("") : `<p class="apps-empty">${appFilter === "fav" ? "Tap ☆ on any idea to add it to your menu." : "No ideas match."}</p>`;
+    renderAppsCalc(); renderAppsBuild();
+  }
+  function renderAppsBuild() {
+    const n = APPETIZERS.filter(a => appFavs[a[1]]).length;
+    $("#appsBuild").innerHTML = `<span class="ab-n"><b>${n}</b> picked</span><button type="button" class="btn btn-gold" data-appbuild>Build my menu ›</button>`;
   }
   function appsCount(guests, mode) {
     const per = mode === "meal" ? 12 : 5, kinds = mode === "meal" ? (guests > 20 ? 8 : 6) : (guests > 20 ? 5 : 3);
@@ -10411,10 +10421,19 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
     const b = e.target.closest("[data-f]"); if (!b) return;
     appFilter = b.dataset.f; $$("#appsFilters .chip").forEach(c => c.classList.toggle("on", c === b)); renderApps();
   });
+  $("#appsBuild").addEventListener("click", e => {
+    if (!e.target.closest("[data-appbuild]")) return;
+    const picks = APPETIZERS.map(a => a[1]).filter(n => appFavs[n]);
+    if (!picks.length) { toast("Tap ☆ on the appetizers you want first"); return; }
+    const c = cfgFor("nyeparty"); c.picks = picks; mealCfg.nyeparty = c; save("mealCfg", mealCfg);
+    if (planOf("nyeparty")) startMealPlan(mealById("nyeparty"), true);
+    closeSheet("appsSheet"); nyeScreen = "build"; showView("nye"); renderNyeMenu(); renderNyeParty(); window.scrollTo(0, 0);
+    planReview(["nyeparty"], "nye");
+  });
   $("#appsList").addEventListener("click", e => {
     const b = e.target.closest("[data-fav]"); if (!b) return;
     const k = b.dataset.fav;
-    if (appFavs[k]) delete appFavs[k]; else { appFavs[k] = true; toast("★ Saved to your favourites"); }
+    if (appFavs[k]) delete appFavs[k]; else { appFavs[k] = true; toast("★ Added to your menu"); }
     save("appFavs", appFavs); renderApps();
   });
 
@@ -10843,6 +10862,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       const c = cfgFor(id), D = dinnerAt(c), past = D < now; if (past) allOk = false;
       const adds = activeAddons(m), cost = msBuild([id]).total; grand += cost;
       return `<div class="pr-meal"><h4>${esc(m.name)}</h4>
+        ${m.party ? allMenu(m).filter(([k]) => !/pairing/i.test(k)).map(([k, it]) => `<p class="pr-menu"><b>${esc(k)}</b> ${it.map(i => esc(String(i).replace(/\s*\(\d+ pieces\)/, ""))).join(" · ")}</p>`).join("") : ""}
         <p class="pr-when">${past ? "That time has passed. Go back and pick a later time." : `<b>${c.guests}</b> guest${c.guests > 1 ? "s" : ""}<br>${esc(whenLong(D))}`}</p>
         ${adds.length ? `<p class="pr-add"><b>Vegan add-on${adds.length > 1 ? "s" : ""}</b></p><ul class="pr-steps">${adds.map(x => `<li><span>${esc(x.a.name)} <small>(${x.c.guests} portion${x.c.guests > 1 ? "s" : ""})</small></span></li>`).join("")}</ul>` : ""}${cost ? `<p class="pr-cost">Estimated cost <b>${cad0(cost)} ${esc(currency)}</b></p>` : ""}</div>`;
     }).join("");
@@ -11625,7 +11645,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       <p class="party-total">About <b>${cad0(ps.total)}</b> · ${cad(ps.total / c.guests)} per guest<small>${currency} · ${c.picks ? "your own appetizer menu" : "our set New Year's Eve menu"}, includes the midnight toast.</small></p>` +
       (hubMode === "company" && window.__offPicks ? `<div class="seg sub-tabs meal-done pm-two nye-offmenu" role="group" aria-label="Which appetizer menu">
         <button type="button" data-nyeoff="set" aria-pressed="${!c.picks}"><b>Set New Year's menu</b><small>Our ready-made list</small></button><button type="button" data-nyeoff="office" aria-pressed="${!!c.picks}"><b>My office party menu</b><small>${window.__offPicks().length} appetizers from Food</small></button></div>` : "") +
-      (active ? `<p class="nye-on">✅ Party alarms are set</p>` : "") + (active || nyeSaved().length ? `<button type="button" class="btn btn-ghost btn-block" data-nyestop>Cancel my New Year's plan</button>` : "") + (savedMenus.length ? `<button type="button" class="btn btn-ghost btn-block" data-nyesaved>My saved menus (${savedMenus.length})</button>` : "");
+      (c.picks && hubMode !== "company" ? `<button type="button" class="btn btn-ghost btn-block" data-nyeoff="set">Back to the set New Year's menu</button>` : "") + (active ? `<p class="nye-on">✅ Party alarms are set</p>` : "") + (active || nyeSaved().length ? `<button type="button" class="btn btn-ghost btn-block" data-nyestop>Cancel my New Year's plan</button>` : "") + (savedMenus.length ? `<button type="button" class="btn btn-ghost btn-block" data-nyesaved>My saved menus (${savedMenus.length})</button>` : "");
   }
 
   // ---------- 💫 wishes jar ----------
