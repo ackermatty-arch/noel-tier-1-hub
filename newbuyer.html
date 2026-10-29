@@ -7571,7 +7571,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
      its own saved data, switched from the bar under the header.
      ============================================================ */
   const EDITION = window.NOEL_EDITION === "office" ? "office" : "family";
-  const SPACE = EDITION === "office" && NoelVault.getItem("xmasHub_space") === '"office"' ? "office" : "family";
+  const SPACE = EDITION === "office" && NoelVault.getItem("xmasHub_space") !== '"family"' ? "office" : "family";   // the Office edition opens in Office until the buyer switches
   // Change the prefix if you sell several hub apps, so their saved data never mixes.
   const PREFIX = SPACE === "office" ? "xmasHub_office_" : "xmasHub_";
   NoelNative.offset = SPACE === "office" ? 20000 : 0;   // 📱 office reminders use their own phone-alarm ids
