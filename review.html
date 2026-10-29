@@ -14763,7 +14763,7 @@ const PC_DESIGNS = [
       const fk = b.dataset.cofocus;   // already on this page? jump down to the box and open it
       setTimeout(() => {
         const f = fk && off.tab === "event" && !(fk === "headcount" && offGuests().length) ? $(`#offBody [data-ev="${fk}"]`) : null, body = $("#offBody");
-        if (f) { f.scrollIntoView({ block: "center", behavior: "smooth" }); setTimeout(() => { try { f.focus(); if (fk === "date") f.click(); } catch (er) {} }, 350); }
+        if (f) { f.scrollIntoView({ block: "center", behavior: "smooth" }); setTimeout(() => { try { f.focus(); } catch (er) {} }, 350); }
         else if (body) body.scrollIntoView({ block: "start", behavior: "smooth" });
       }, 60);
       return; }
