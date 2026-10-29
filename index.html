@@ -2153,6 +2153,10 @@ body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!impor
 /* Holiday Review stays hidden until Dec 26 (or until opened) */
 .nav-btn[data-view="review"]{display:none}
 body.rev-open .nav-btn[data-view="review"]{display:flex}
+.task-text{display:block}
+.nt{display:block;margin-top:4px;font:600 11px "Cinzel",serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;padding:4px 0}
+.nt::before{content:"* "}
+.nt.h{color:#9A7424}.nt.g{color:#16130E}
 /* name picker: our own list for every name box (the phone's built-in one only shows names that match what is typed) */
 input[data-dl]{padding-right:44px !important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10'%3E%3Cpath d='M1 1l7 7 7-7' fill='none' stroke='%2316130E' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
 .name-pop{position:absolute;z-index:100003;background:#fff;border:1px solid #C9A45C;box-shadow:0 8px 24px rgba(0,0,0,.25);max-height:220px;overflow-y:auto}
@@ -7657,7 +7661,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       { id: "day-2", text: "Open gifts & take photos" },
       { id: "day-3", text: "Video-call far-away family" },
       { id: "day-4", text: "Serve Christmas dinner" },
-      { id: "day-5", text: "Relax and enjoy! 🎉" } ] },
+      { id: "day-5", text: "Relax and enjoy! ✦" } ] },
     { id: "nyw", icon: "🥂", title: "New Year's · 1 Week Before", tasks: [
       { id: "nyw-1", text: "Plan the New Year's menu & appetizers" },
       { id: "nyw-2", text: "Send New Year's invites" },
@@ -7670,7 +7674,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       { id: "nye-3", text: "Set out glasses & serving platters" },
       { id: "nye-4", text: "Chill the bubbly" },
       { id: "nye-5", text: "Warm the hot appetizers before guests arrive" },
-      { id: "nye-6", text: "Count down to midnight! 🎉" } ] }
+      { id: "nye-6", text: "Count down to midnight! ✦" } ] }
   ];
   // ✏️ Office party checklist (used when the Hub is set to Company)
   const OFFICE_PHASES = [   // ✏️ the office timeline, from September to the party and after
@@ -7712,6 +7716,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       { id: "oa-6", text: "Send the team a quick feedback survey" }, { id: "oa-7", text: "Thank the vendors and volunteers" },
       { id: "oa-8", text: "Write notes on what worked for next year" } ] }
   ];
+const TASK_TAGS = {"f0-1":["h","Gifts"],"f0-2":["h","Gifts"],"f0-3":["h","Calendar"],"f0-4":["h","Calendar"],"f1-4":["h","Menu"],"f2-1":["h","Calendar"],"f2-2":["h","Cards"],"f2-4":["g","Calendar"],"f2-5":["h","Calendar"],"w4-1":["h","Budget"],"w4-6":["h","Plan"],"w4-2":["h","Gifts"],"w4-3":["h","Calendar"],"w4-4":["h","Plan"],"f3-1":["g","Menu"],"f3-2":["h","Menu"],"f3-3":["h","Menu"],"w2-1":["h","Gifts"],"w2-7":["h","Calendar"],"w2-4":["g","Menu"],"w4-5":["g","Cards"],"w1-1":["g","Menu"],"w1-6":["h","Menu"],"w1-7":["g","Menu"],"w1-8":["h","Plan"],"w1-3":["h","Menu"],"w1-4":["h","Plan"],"eve-1":["g","Menu"],"eve-2":["g","Menu"],"eve-3":["h","Plan"],"day-1":["g","Menu"],"day-4":["g","Menu"],"nyw-1":["g","NYE"],"nyw-2":["g","Cards"],"nyw-3":["h","NYE"],"nyw-5":["h","Games"],"nye-1":["g","NYE"],"nye-2":["g","NYE"],"nye-4":["h","NYE"],"nye-5":["g","NYE"],"nye-6":["g","NYE"],"os-1":["h","Plan"],"o4-1":["h","Plan"],"os-2":["g","Plan"],"o4-2":["h","Plan"],"os-3":["h","Plan"],"o4-3":["h","Cards"],"os-5":["h","Budget"],"os-6":["h","Plan"],"os-7":["h","Plan"],"o4-4":["h","Plan"],"o4-5":["h","Plan"],"on-1":["g","Plan"],"on-2":["h","Plan"],"on-3":["h","Plan"],"on-4":["h","Plan"],"on-8":["h","Plan"],"on-9":["h","Plan"],"o2-1":["h","Cards"],"o2-2":["h","Plan"],"o2-3":["h","Plan"],"o2-4":["h","Plan"],"o2-5":["h","Plan"],"o2-6":["h","Plan"],"o2-8":["h","Plan"],"o1-1":["h","Plan"],"o1-2":["g","Plan"],"o1-3":["g","Plan"],"o1-4":["h","Plan"],"o1-5":["h","Plan"],"od-2":["h","Tasks"],"od-4":["h","Games"],"od-5":["h","Plan"],"oa-1":["h","Cards"],"oa-5":["g","Budget"],"oa-4":["g","Plan"],"oa-6":["g","Plan"],"oa-7":["h","Cards"],"oa-8":["h","Plan"]};   // ✦ which tasks Noël generates (g) or can help with (h), and which tab
+  const TAG_VIEW = { Gifts: "gifts", Calendar: "org", Menu: "meals", Cards: "invites", NYE: "nye", Games: "games", Budget: "budget", Tasks: "tasks" };
   let hubMode = SPACE === "office" ? "company" : "family";   // the Office space is the company side
   let PHASES = hubMode === "company" ? OFFICE_PHASES : FAMILY_PHASES;
 
@@ -8174,6 +8180,15 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
 
   const NY_IDS = ["nyw", "nye"];   // the two New Year's task groups live on the NYE tab
   const planPhases = () => PHASES.filter(p => !NY_IDS.includes(p.id)), nyPhases = () => PHASES.filter(p => NY_IDS.includes(p.id));
+  function taskTag(id) {
+    const g = TASK_TAGS[id]; if (!g) return "";
+    return `<span class="nt ${g[0]}" role="button" tabindex="0" data-nt="${g[1]}">${g[0] === "g" ? "Noël generates" : "Noël can help"} › ${g[1]}</span>`;
+  }
+  document.addEventListener("click", e => {
+    const n = e.target.closest && e.target.closest("[data-nt]"); if (!n) return;
+    e.preventDefault(); e.stopPropagation();
+    const w = n.dataset.nt; showView(w === "Plan" ? (hubMode === "company" ? "office" : "planner") : TAG_VIEW[w] || "planner"); window.scrollTo(0, 0);
+  }, true);
   function phaseHtml(p) {
     const tasks = phaseTasks(p);
     const done = tasks.filter(t => checks[t.id]).length;
@@ -8189,7 +8204,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
             <label>
               <input type="checkbox" ${checks[t.id] ? "checked" : ""}>
               <span class="checkmark"></span>
-              <span class="task-text">${esc(t.text)}</span>
+              <span class="task-text">${esc(t.text)}${taskTag(t.id)}</span>
             </label>
             ${t.custom ? `<button class="icon-btn" data-del="${t.id}" aria-label="Delete task">✕</button>` : ""}
           </li>`).join("")}
