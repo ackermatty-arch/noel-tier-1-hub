@@ -2158,6 +2158,7 @@ body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!impor
 .nav-btn[data-view="review"]{display:none}
 body.rev-open .nav-btn[data-view="review"]{display:flex}
 .reset-box{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}.reset-in{background:#fff;border:2px solid #C9A45C;padding:18px;max-width:420px;width:100%}.reset-in h3{font-family:"Cinzel",serif;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px}.reset-in label{display:block;padding:6px 0}.reset-note{font-size:13px;color:#555}
+.menu-est{text-align:center;margin:6px 0;font-size:14px;color:#9A7424;letter-spacing:.04em}.menu-est b{color:#16130E}
 .gold-star{color:#C9A45C}
 .shop-timing{border:1px solid #C9A45C;padding:8px 12px;margin:0 0 10px;font-size:13.5px}.shop-timing p{margin:2px 0}
 .shop-when{float:right;font:700 10px "Cinzel",serif;letter-spacing:.1em;text-transform:uppercase;border:1px solid #9A7424;color:#9A7424;padding:2px 7px}.shop-when.now{background:#16130E;color:#E3C98A;border-color:#16130E}
@@ -11757,7 +11758,7 @@ const TASK_TAGS = {"os-4":["h","Plan"],"f0-1":["h","Gifts"],"f0-2":["h","Gifts"]
     const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
     const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);
     v.classList.toggle("on-menu", on); el.hidden = !on; if (!on) return;
-    const hasPlan = mealPlans.some(p => !p.svc), sig = (hasPlan ? "plan" : "none") + savedMenus.length + "/" + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length;
+    const hasPlan = mealPlans.some(p => !p.svc), sig = currency + (hasPlan ? "plan" : "none") + savedMenus.length + "/" + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length;
     if (el.dataset.built === sig) return; el.dataset.built = sig;
     const go = `<button type="button" class="menu-go" data-menugo>Noël's dinner plans <span>›</span></button>`;
     const svN = savedMenus.length + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length, sv = svN ? `<button type="button" class="menu-go menu-saved" data-menusaved>My saved menus (${svN}) <span>›</span></button>` : "";
@@ -11769,7 +11770,8 @@ const TASK_TAGS = {"os-4":["h","Plan"],"f0-1":["h","Gifts"],"f0-2":["h","Gifts"]
         const dr = all.filter(([c]) => /drink/i.test(c)), food = all.filter(([c]) => !/drink/i.test(c));
         let drinks = dr.flatMap(([, items]) => items.map(clean));
         if (!drinks.length) { const names = [...(m.drinks || []).map(d => d[1]).join(" ").matchAll(/((?:[A-Z][\w'’-]*\s)*[A-Z][\w'’-]*)\s*\(recipe included\)/g)].map(x => x[1]); drinks = [...names.map(esc), "wine pairings"]; }
-        return `<div class="menu-dish"><h4>${esc(m.name)}</h4><p class="menu-items">${food.flatMap(([, items]) => items.map(clean)).join(" <i>·</i> ")}</p>` +
+        const est = (() => { try { const c8 = Object.assign({}, cfgFor(id), { guests: 8 }), p8 = mealSizes(m, c8); return m.shop(p8.f, p8).reduce((a, [, items]) => a + items.reduce((b, [, , e]) => b + (e != null ? e * fx() : 0), 0), 0); } catch (e) { return 0; } })();
+        return `<div class="menu-dish"><h4>${esc(m.name)}</h4><p class="menu-items">${food.flatMap(([, items]) => items.map(clean)).join(" <i>·</i> ")}</p>` + (est ? `<p class="menu-est">Estimated about <b>${cad0(est)}</b> for 8 guests</p>` : "") +
           `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p>${m.party ? "" : '<p class="menu-sub2">Vegan dish available to add</p>'}<a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
       }).join("")).join("") +
       `<p class="menu-note">Have vegan guests? Choose a vegan dish to add when you plan your dinner.</p>

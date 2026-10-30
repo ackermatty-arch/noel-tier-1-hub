@@ -630,7 +630,7 @@
     const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
     const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);
     v.classList.toggle("on-menu", on); el.hidden = !on; if (!on) return;
-    const hasPlan = mealPlans.some(p => !p.svc), sig = (hasPlan ? "plan" : "none") + savedMenus.length + "/" + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length;
+    const hasPlan = mealPlans.some(p => !p.svc), sig = currency + (hasPlan ? "plan" : "none") + savedMenus.length + "/" + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length;
     if (el.dataset.built === sig) return; el.dataset.built = sig;
     const go = `<button type="button" class="menu-go" data-menugo>Noël's dinner plans <span>›</span></button>`;
     const svN = savedMenus.length + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length, sv = svN ? `<button type="button" class="menu-go menu-saved" data-menusaved>My saved menus (${svN}) <span>›</span></button>` : "";
@@ -642,7 +642,8 @@
         const dr = all.filter(([c]) => /drink/i.test(c)), food = all.filter(([c]) => !/drink/i.test(c));
         let drinks = dr.flatMap(([, items]) => items.map(clean));
         if (!drinks.length) { const names = [...(m.drinks || []).map(d => d[1]).join(" ").matchAll(/((?:[A-Z][\w'’-]*\s)*[A-Z][\w'’-]*)\s*\(recipe included\)/g)].map(x => x[1]); drinks = [...names.map(esc), "wine pairings"]; }
-        return `<div class="menu-dish"><h4>${esc(m.name)}</h4><p class="menu-items">${food.flatMap(([, items]) => items.map(clean)).join(" <i>·</i> ")}</p>` +
+        const est = (() => { try { const c8 = Object.assign({}, cfgFor(id), { guests: 8 }), p8 = mealSizes(m, c8); return m.shop(p8.f, p8).reduce((a, [, items]) => a + items.reduce((b, [, , e]) => b + (e != null ? e * fx() : 0), 0), 0); } catch (e) { return 0; } })();
+        return `<div class="menu-dish"><h4>${esc(m.name)}</h4><p class="menu-items">${food.flatMap(([, items]) => items.map(clean)).join(" <i>·</i> ")}</p>` + (est ? `<p class="menu-est">Estimated about <b>${cad0(est)}</b> for 8 guests</p>` : "") +
           `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p>${m.party ? "" : '<p class="menu-sub2">Vegan dish available to add</p>'}<a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
       }).join("")).join("") +
       `<p class="menu-note">Have vegan guests? Choose a vegan dish to add when you plan your dinner.</p>
