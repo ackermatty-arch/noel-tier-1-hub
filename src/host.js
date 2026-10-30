@@ -56,6 +56,7 @@
 
   // every reminder this page can ring: { k, t, icon, text }
   function hostReminders() {
+    return [];   // no hosting alarms or nudges at all (cleaning countdown and helpers were scrapped)
     const D = hostDinner(), out = [], add = (k, t, icon, text) => out.push({ k, t, icon, text });
     // 🎁 the little surprise helpers
     add("s-phone1", atDay(D, 1, 21), "🔋", "Plug your phone in tonight so it's fully charged for the big day.");
@@ -119,15 +120,15 @@
 
   // ---------- screens ----------
   const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["table", "🍽️ Table arrangement"], ["house", "📶 House info"], ["cards", "💌 Cards"]];
-  const TASK_TABS = [["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["out", "💡 Outdoor & lights"]];   // these now live on the Tasks page
+  const TASK_TABS = [["supplies", "📦 Supplies"], ["out", "💡 Outdoor & lights"]];   // these now live on the Tasks page
   function renderHost() {
     const fr = $("#hostFridge");
     if (fr) fr.innerHTML = (host.tab || "away") === "away"
       ? `<span class="hf-ico">✈️</span><span class="hf-txt"><b>Travel sheet</b><small>Flights and trains, guests' travel, pet care, passports and your leaving-home checklist, all on one printed page.</small></span><button type="button" class="btn btn-red" data-print="travel">🖨️ Print</button>`
-      : `<span class="hf-ico">🧲</span><span class="hf-txt"><b>Fridge sheet</b><small>Guests, rooms, seating, cleaning days, supplies and house info, all on one printed page.</small></span><button type="button" class="btn btn-red" data-print="fridge">🖨️ Print</button>`;
+      : `<span class="hf-ico">🧲</span><span class="hf-txt"><b>Fridge sheet</b><small>Travel plans, guests, seating, supplies and house info, all on one printed page.</small></span><button type="button" class="btn btn-red" data-print="fridge">🖨️ Print</button>`;
     const tab = HOST_TABS.some(x => x[0] === host.tab) ? host.tab : "away";
     $("#hostTabs").innerHTML = HOST_TABS.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-htab="${k}">${l}</button>`).join("");
-    const tt = TASK_TABS.some(x => x[0] === host.ttab) ? host.ttab : "clean";
+    const tt = TASK_TABS.some(x => x[0] === host.ttab) ? host.ttab : "supplies";
     if ($("#hostTaskTabs")) { $("#hostTaskTabs").innerHTML = TASK_TABS.map(([k, l]) => `<button type="button" class="chip${k === tt ? " on" : ""}" data-ttab="${k}">${l}</button>`).join(""); $("#hostTaskBody").innerHTML = ({ clean: hostCleanHtml, supplies: hostSuppliesHtml, out: hostOutHtml })[tt](); }
     $("#hostBody").innerHTML = ({ guests: hostGuestsHtml, rooms: hostRoomsHtml, table: hostTableHtml, clean: hostCleanHtml, supplies: hostSuppliesHtml, house: hostHouseHtml, away: hostAwayHtml, out: hostOutHtml })[tab]();
   }
@@ -341,14 +342,14 @@
       .fr ul{list-style:none;margin:0;padding:0} .fr li{margin:1px 0;font-size:9.5pt} .fr .fr-day{font-weight:bold;margin-top:4px;font-size:9.5pt} .fr .fr-need{columns:3;column-gap:12px} .fr .fr-need li{font-size:8.5pt} .fr p{margin:0 0 3px} .fr .fr-clean td{font-size:8.5pt;padding:2px 4px} .fr .fr-clean td:first-child{white-space:nowrap;font-weight:bold;width:62px} .fr .fr-foot{margin-top:12px;text-align:center;color:#999;font:8pt sans-serif}`;
     const html = `<div class="fr"><h1>🎄 Our Christmas Hosting Plan</h1><p class="fr-sub">Dinner · ${esc(hostFmt(D))}</p>
       <h2>Guests &amp; arrivals</h2>${guests.length ? `<table><tr><th>Who</th><th>Arriving</th><th>Getting here</th><th>Sleeping</th><th>Notes</th></tr>${guests.map(g => `<tr><td><b>${esc(g.name)}</b> (${g.people || 1})</td><td>${g.arrive ? esc(hostFmt(new Date(g.arrive))) : "—"}</td><td>${g.travel === "fly" ? `✈️ ${esc(g.flight || "Flying")}` : "🚗 Driving"}${g.pickup ? "<br><b>Needs a pickup</b>" : ""}</td><td>${esc(room(g.room)) || "—"}</td><td>${esc(g.notes || "")}</td></tr>`).join("")}</table>` : `<p>No guests added yet.</p>`}
-      <div class="fr-cols"><div><h2>Seating</h2>${main.some(Boolean) ? `<div class="fr-seats">${seatList(main)}</div>` : "<p>Not set yet.</p>"}${kids.some(Boolean) ? `<p class="fr-day">Kids' table</p><div class="fr-seats">${seatList(kids)}</div>` : ""}</div>
-        <div><h2>Deep-clean countdown</h2><table class="fr-clean">${Object.entries(cleanByDay).map(([k, l]) => `<tr><td>${esc(k)}</td><td>${l.join("<br>")}</td></tr>`).join("")}</table></div></div>
+      <div><div><h2>Seating</h2>${main.some(Boolean) ? `<div class="fr-seats">${seatList(main)}</div>` : "<p>Not set yet.</p>"}${kids.some(Boolean) ? `<p class="fr-day">Kids' table</p><div class="fr-seats">${seatList(kids)}</div>` : ""}</div>
+        </div>
       <h2>Still to get</h2>${need.length ? `<ul class="fr-need">${need.map(i => `<li>☐ ${esc(i)}</li>`).join("")}</ul>` : "<p>Everything's ready! ✨</p>"}
       ${house.length ? `<h2>House info</h2><table>${house.map(([k, v]) => `<tr><td style="width:90px"><b>${k}</b></td><td>${esc(v)}</td></tr>`).join("")}</table>` : ""}
       <p class="fr-foot">Made with Noël Tier 1 Hub</p></div>`;
     return { title: "Hosting fridge sheet", css, html, margin: 0.45, file: "Hosting-Fridge-Sheet" };
   }
-  function planAllDoc() {   // 🖨️ everything on the Plan page (travel, guests, rooms, seating, cleaning, supplies, house info) as one printout
+  function planAllDoc() {   // 🖨️ everything on the Plan page (travel, guests, seating, supplies, house info) as one printout
     const a = travelDoc(), b = fridgeDoc();
     return { title: "Everything for your home", css: a.css + " " + b.css + " .pa-break{page-break-before:always;break-before:page}", html: a.html + `<div class="pa-break"></div>` + b.html, margin: 0.45, file: "Home-Plans" };
   }
