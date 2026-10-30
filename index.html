@@ -3047,7 +3047,6 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
        VIEW — 🎁 GIFT TRACKER (live budget, saved on the phone)
        ============================================================ -->
   <section class="view" id="view-gifts" aria-labelledby="giftsTitle">
-    <button type="button" class="btn btn-green btn-sm gift-tasks-btn" data-goview="tasks">Tasks ›</button>
     <h2 class="view-title" id="giftsTitle">Gifts</h2>
     <p class="view-intro">Jot down wishes as you hear them, then track what you buy against your budget.</p>
 
@@ -3804,6 +3803,8 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       <button class="chip fam-only" data-cmd="Check off wrap gifts">“Check off wrap gifts”</button>
       <button class="chip fam-only" data-cmd="I bought a scarf for Mom 30 dollars">“I bought a scarf for Mom, 30 dollars”</button>
       <button class="chip fam-only" data-cmd="Add a gift book for Dad">“Add a gift book for Dad”</button>
+      <button class="chip fam-only" data-cmd="Open Santa's secret list">“Open Santa's secret list”</button>
+      <button class="chip" data-cmd="Open the gifts page">“Open the gifts page”</button>
       <button class="chip fam-only" data-cmd="Find the scarf">“Find the scarf”</button>
       <button class="chip fam-only" data-cmd="Open my saved menus">“Open my saved menus”</button>
       <button class="chip fam-only" data-cmd="Open the menu">“Open the menu”</button>
@@ -9144,6 +9145,8 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (document.body.classList.contains("co") && has(/\b(cancel(l?ed)?|scrap(ped)?|start over|start fresh|new plan|reset|boss|plans? (changed|changing|are changing)|different plan|change of plans?)\b/)) { closeSheets(); off.tab = "more"; saveOff(); showView("office"); try { renderOffice(); } catch (e) {} window.scrollTo(0, 0); return "Here it is. Tap Start a new plan. Your old plan is saved first, so nothing is lost."; }
     if (has(/\b(open|go to|show|take me to|see|where)\b.*\b(saved|my) (menus?|dinners?)\b|\bsaved menus?\b/)) { closeSheets(); mealView = "saved"; showView("meals"); try { renderMeals(); } catch (e) {} window.scrollTo(0, 0); return "Here are your saved menus."; }
     if (has(/\b(open|go to|show|take me to|see)\b.*\b(new years?|nye)\b/)) { closeSheets(); nyeScreen = "build"; showView("nye"); try { renderNyeMenu(); } catch (e) {} return "Here's your New Year's Eve plan."; }
+    if (!document.body.classList.contains("co") && has(/\bsanta'?s? (secret )?list\b/) && !has(/\b(add|bought|buy)\b/)) { closeSheets(); showView("gifts"); showGiftPane("santa"); window.scrollTo(0, 0); return "Here's Santa's secret list."; }
+    if (has(/\b(open|go to|show|take me to|see)\b.*\bgifts?( page| tab)\b|\bgifts? page\b/) && !has(/\b(add|bought|buy)\b/)) { closeSheets(); showView("gifts"); showGiftPane("wish"); window.scrollTo(0, 0); return "Here's your gifts page."; }
     if (has(/\b(open|go to|show|take me to|see|where)\b/)) {
       const go = [[/\b(menu|meals?|dinner|dinners|recipes?)\b/, "meals", "Here's your menu."], [/\bbudget|spending\b/, "budget", "Here's your budget."], [/\b(plan|planner)\b/, "planner", "Here's your plan."], [/\bgift tracker\b/, "budget", "Here's your gift tracker."], [/\b(cards|e ?cards?)\b/, "invites", "Here are your cards."], [/\b(review|holiday review)\b/, "review", "Here's your holiday review."], [/\b(calendar|calender)\b/, "org", "Here's your calendar."]].find(([re]) => re.test(t));
       if (go && !has(/\b(tasks?|print|timers?)\b/)) { closeSheets(); showView(go[1]); if (go[1] === "invites") showPane("cards"); window.scrollTo(0, 0); return go[2]; }
