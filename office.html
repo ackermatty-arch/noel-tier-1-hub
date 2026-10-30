@@ -2658,7 +2658,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
   <section class="view" id="view-tasks" aria-labelledby="tasksTitle">
     <button type="button" class="btn btn-green btn-sm gift-tasks-btn fam-only" data-goview="meals">Menu ›</button>
     <h2 class="view-title" id="tasksTitle">Task list</h2>
-    <p class="view-intro">Tick off each task as you go. Your progress saves automatically.</p>
+    <p class="view-intro">November: Foundation &amp; Prep. Tick off each task as you go. Your progress saves automatically.</p>
 
 
 
@@ -2674,10 +2674,6 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     </div>
 
     <div id="phaseList"></div>
-
-    <div class="fam-only" id="hostTaskWrap">
-      <div id="hostTaskBody"></div>
-    </div>
 
     <form class="card add-task" id="addTaskForm" autocomplete="off">
       <h3>➕ Add your own task</h3>
@@ -3800,7 +3796,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       <button class="chip fam-only" data-cmd="Start the turkey timer">“Start the turkey timer”</button>
       <button class="chip fam-only" data-cmd="How long on the cookies?">“How long on the cookies?”</button>
       <button class="chip fam-only" data-cmd="Set a 10 minute timer for potatoes">“Set a 10 minute timer for potatoes”</button>
-      <button class="chip fam-only" data-cmd="Check off wrap gifts">“Check off wrap gifts”</button>
+      <button class="chip fam-only" data-cmd="Check off set your budget">“Check off set your budget”</button>
       <button class="chip fam-only" data-cmd="I bought a scarf for Mom 30 dollars">“I bought a scarf for Mom, 30 dollars”</button>
       <button class="chip fam-only" data-cmd="Add a gift book for Dad">“Add a gift book for Dad”</button>
       <button class="chip fam-only" data-cmd="Open Santa's secret list">“Open Santa's secret list”</button>
@@ -7738,59 +7734,24 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
 
   // --- Planner phases & default tasks. Keep each task "id" unique.
   const FAMILY_PHASES = [
-    { id: "f0", icon: "💰", title: "Late October: Budget & Master List", tasks: [
-      { id: "f0-2", text: "Set a spending cap for each person" },
-      { id: "f0-5", text: "Book event tickets before prices rise" },
-      { id: "w4-1", text: "Set the holiday budget" },
-      { id: "w4-6", text: "Travel plans booked" },
-      { id: "w4-2", text: "Write the gift list" },
-      { id: "w4-3", text: "Order online gifts early" },
-      { id: "w4-4", text: "Confirm travel & guest plans" } ] },
-    { id: "f1", icon: "🎨", title: "November", tasks: [
-      { id: "f1-1", text: "Test the holiday lights & check the tree" },
-      { id: "f1-2", text: "List broken or missing decorations" },
-      { id: "f1-3", text: "Choose a colour palette or theme (wrapping, tree, table)" },
-       ] },
-    { id: "f2", icon: "✉️", title: "Mid-November: Cards & Gift Shopping", tasks: [
-      { id: "f2-1", text: "Update the card list & mailing addresses" },
-      { id: "f2-3", text: "Buy holiday postage stamps" },
-      { id: "f2-4", text: "Map the Black Friday & Cyber Monday deals" },
-      { id: "f2-5", text: "Log online orders: tracking, delivery date, hiding spot" } ] },
-    { id: "f3", icon: "🍽️", title: "Late November: Menu & Prep", tasks: [
-      { id: "f3-1", text: "Lock the Christmas Day menu: breakfast, dinner, cocktails & dietary needs" },
-      { id: "f3-2", text: "Delegate dishes to guests (potluck)" },
-      { id: "f3-3", text: "Make the grocery timeline: non-perishables now, fresh items 48 hours before" } ] },
-    { id: "w2", icon: "🎁", title: "2-4 Weeks Before", tasks: [
-      { id: "w2-1", text: "Finish gift shopping" },
-      { id: "w2-2", text: "Wrap gifts" },
-      { id: "w2-6", text: "Set aside batch-wrapping nights, tag gifts by household" },
-      { id: "w2-7", text: "Mail cards & out-of-town gifts before the post deadlines" },
-      { id: "w2-3", text: "Decorate the house" },
-      { id: "w2-4", text: "Plan the Christmas menu" },
-      { id: "w2-4b", text: "Order specialty meats, e.g. crown roasts" },
-      { id: "w2-5", text: "Plan holiday outfits" },
-      { id: "w4-5", text: "Send cards & invitations" } ] },
-    { id: "w1", icon: "🛒", title: "1 Week Before", tasks: [
-      { id: "w1-1", text: "Big grocery shopping trip" },
-      { id: "w1-6", text: "Fresh grocery run: dairy, produce & fresh meat" },
-      { id: "w1-7", text: "Write the hour-by-hour cooking schedule for Christmas Eve & Day" },
-      { id: "w1-8", text: "Tidy guest spaces & reset the house" },
-      { id: "w1-2", text: "Bake & freeze cookies" },
-      { id: "w1-3", text: "Prep make-ahead meals" },
-      { id: "w1-4", text: "Clean & ready the guest room" },
-      { id: "w1-5", text: "Stock up on batteries & tape" } ] },
-    { id: "eve", icon: "🌟", title: "Christmas Eve", tasks: [
-      { id: "eve-1", text: "Check the roast is thawed" },
-      { id: "eve-2", text: "Prep side dishes" },
-      { id: "eve-3", text: "Set the dinner table" },
-      { id: "eve-4", text: "Hang stockings & place gifts" },
-      { id: "eve-5", text: "Leave cookies for Santa" } ] },
-    { id: "day", icon: "🎄", title: "Christmas Day", tasks: [
-      { id: "day-1", text: "Put the turkey in the oven" },
-      { id: "day-2", text: "Open gifts & take photos" },
-      { id: "day-3", text: "Video-call far-away family" },
-      { id: "day-4", text: "Serve Christmas dinner" },
-      { id: "day-5", text: "Relax and enjoy! ✦" } ] },
+    { id: "n1", icon: "💰", title: "Week 1 (Early November): Budget & Lists", tasks: [
+      { id: "n1-1", text: "Set your budget: Determine your total spending limit for gifts, food, travel, and decor." },
+      { id: "n1-2", text: "Make the gift list: Write down every recipient, set a spending cap per person, and brainstorm gift ideas." },
+      { id: "n1-3", text: "Address book update: Check and update your holiday card mailing list." },
+      { id: "n1-4", text: "Book travel: Finalize and book flights, trains, or hotels if you are traveling." } ] },
+    { id: "n2", icon: "✉️", title: "Week 2: Cards, Custom Orders & Shipping Deadlines", tasks: [
+      { id: "n2-1", text: "Order custom items: Place orders for personalized gifts, photo cards, or handmade items early before maker queues fill up." },
+      { id: "n2-2", text: "Far-away mail: Check shipping deadlines for military (APO/FPO) or international mail." },
+      { id: "n2-3", text: "Declutter & donate: Go through closets or living spaces to donate unused items before decorating." } ] },
+    { id: "n3", icon: "🎨", title: "Week 3: Decor Check & Menus", tasks: [
+      { id: "n3-1", text: "Inventory decor: Bring down holiday boxes, check string lights, and note what needs replacing." },
+      { id: "n3-2", text: "Plan the menus: Draft your Christmas Eve and Christmas Day dinner menus." },
+      { id: "n3-3", text: "Order centerpieces or specialty meats: Reserve your turkey, ham, or main roast from the butcher." },
+      { id: "n3-4", text: "Shop early sales: Take advantage of Black Friday and Cyber Monday deals using your master gift list." } ] },
+    { id: "n4", icon: "🎁", title: "Week 4: Baking & Wrapping Prep", tasks: [
+      { id: "n4-1", text: "Stock wrapping supplies: Gather wrapping paper, tape, scissors, gift tags, and ribbons." },
+      { id: "n4-2", text: "Baking prep: Make your holiday baking list and freeze durable doughs or make-ahead treats." },
+      { id: "n4-3", text: "Send party invites: Finalize guest lists and send out invitations for any holiday gatherings." } ] },
     { id: "nyw", icon: "🥂", title: "New Year's · 1 Week Before", tasks: [
       { id: "nyw-1", text: "Plan the New Year's menu & appetizers" },
       { id: "nyw-2", text: "Send New Year's invites" },
