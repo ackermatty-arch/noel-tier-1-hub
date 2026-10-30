@@ -8859,7 +8859,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     me.onerror = e => {
       if (rec !== me || e.error === "aborted") return;
       const msg = {
-        "not-allowed": "Microphone access is off. Allow it in your browser settings to use voice.",
+        "not-allowed": (/iPhone|iPad/.test(navigator.userAgent) ? "Microphone is blocked. In Safari tap the aA icon (left of the address), choose Website Settings, set Microphone to Allow, then reload. Also check Settings > Apps > Safari > Microphone." : "Microphone access is off. Allow it in your browser settings to use voice."),
         "service-not-allowed": "Voice isn't available here. Try opening the app in Safari or Chrome.",
         "no-speech": "I didn't hear anything. Tap the mic and try again.",
         "network": "Voice needs an internet connection.",
