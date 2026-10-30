@@ -934,7 +934,7 @@
         ${d.steps.map(r => `<div class="own-row own-r5"><input class="input" type="time" data-own="steps" data-id="${r.id}" data-k="time" value="${esc(r.time)}"><input class="input" data-own="steps" data-id="${r.id}" data-k="text" placeholder="e.g. Turkey into the oven" value="${esc(r.text)}"><button type="button" class="btn btn-ghost btn-sm own-tm" data-owntimer="${r.id}">Timer</button><button type="button" class="icon-btn" data-owndel="steps:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
         <button type="button" class="btn btn-ghost btn-block" data-ownadd="steps">+ Add a step</button></div>
       <div class="card own-card"><h4 class="ms-h">Guest notes</h4><textarea class="input" rows="3" data-ownf="notes" placeholder="Allergies, who is coming, seating ideas">${esc(d.notes)}</textarea></div>
-      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button><p class="own-more">Need more timers? Tap <b>Timers/Cal</b> in the top right banner.</p></div>`);
+      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button><p class="own-more">Need more timers? Find them in the <b>calendar</b> (top right), or ask the microphone to <b>“show timers”</b>.</p></div>`);
   }
   function ownDinnerDoc(id) {
     const d = ownDinners.find(x => x.id === id); if (!d) return { error: "That dinner isn't here any more" };

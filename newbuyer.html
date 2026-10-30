@@ -3815,7 +3815,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       <button class="chip" data-cmd="What packages are coming">“What packages are coming?”</button>
       <button class="chip" data-cmd="The blender arrived">“The blender arrived”</button>
       <button class="chip" data-cmd="Show timers">“Show timers”</button>
-      <button class="chip" data-cmd="Show packages">“Show packages”</button>
+      <button class="chip" data-cmd="Find packages">“Find packages”</button>
       <button class="chip" data-cmd="Pause all timers">“Pause all timers”</button>
       <button class="chip" data-cmd="Open the planner">“Open the planner”</button>
     </div>
@@ -9016,7 +9016,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (has(/\b(stop|silence|turn off) (the )?(alarm|ringing|chime|bell)\b/)) return "No alarm is ringing right now.";
 
     // Show the timers / calendar page
-    if (has(/\b(show|open|see|go to|take me to|bring up)\b/) && has(/\b(timers?|alarms?|calendar)\b/) && !has(/\b(start|set|add|pause|stop|cancel|delete)\b/)) { closeSheets(); org.view = "cal"; saveOrg(); renderOrg(); showView("org"); window.scrollTo(0, 0); return "Here are your timers and calendar."; }
+    if (has(/\b(show|open|find|see|go to|take me to|bring up)\b/) && has(/\b(timers?|alarms?|calendar)\b/) && !has(/\b(start|set|add|pause|stop|cancel|delete)\b/)) { closeSheets(); org.view = "cal"; saveOrg(); renderOrg(); showView("org"); window.scrollTo(0, 0); return "Here are your timers and calendar."; }
 
     // Music
     if (has(/\b(pause|stop|turn off|mute)\b.*\b(music|songs?|tunes)\b/)) { pauseMusic(); return "Music paused."; }
@@ -9089,7 +9089,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       const pk = org.packages || (org.packages = []), todayS = ymd(new Date());
       const dayS = p => p.eta ? shortDate(p.eta) : "no date yet";
       const open = pk.filter(p => !p.arrived);
-      if (has(/\b(open|show|go to|take me to|see)\b/) && !has(/\b(add|ordered)\b/)) { closeSheets(); org.view = "packages"; saveOrg(); renderOrg(); showView("org"); return "Here are your packages."; }
+      if (has(/\b(open|show|find|go to|take me to|see)\b/) && !has(/\b(add|ordered)\b/)) { closeSheets(); org.view = "packages"; saveOrg(); renderOrg(); showView("org"); return "Here are your packages."; }
       if (has(/\b(arrived|came|delivered|here|got|received|showed up)\b/) && !has(/\b(arrive|arriving|arrives)\b/)) {
         const p = bestMatch(t, open, x => x.item + " " + (x.store || "")) || (open.length === 1 ? open[0] : null);
         if (p) { p.arrived = true; orgChanged(); return `Great. ${p.item} has arrived.`; }
@@ -12238,7 +12238,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
         ${d.steps.map(r => `<div class="own-row own-r5"><input class="input" type="time" data-own="steps" data-id="${r.id}" data-k="time" value="${esc(r.time)}"><input class="input" data-own="steps" data-id="${r.id}" data-k="text" placeholder="e.g. Turkey into the oven" value="${esc(r.text)}"><button type="button" class="btn btn-ghost btn-sm own-tm" data-owntimer="${r.id}">Timer</button><button type="button" class="icon-btn" data-owndel="steps:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
         <button type="button" class="btn btn-ghost btn-block" data-ownadd="steps">+ Add a step</button></div>
       <div class="card own-card"><h4 class="ms-h">Guest notes</h4><textarea class="input" rows="3" data-ownf="notes" placeholder="Allergies, who is coming, seating ideas">${esc(d.notes)}</textarea></div>
-      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button><p class="own-more">Need more timers? Tap <b>Timers/Cal</b> in the top right banner.</p></div>`);
+      <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="owndinner:${d.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-owndrop="${d.id}">Delete this dinner</button><p class="own-more">Need more timers? Find them in the <b>calendar</b> (top right), or ask the microphone to <b>“show timers”</b>.</p></div>`);
   }
   function ownDinnerDoc(id) {
     const d = ownDinners.find(x => x.id === id); if (!d) return { error: "That dinner isn't here any more" };
