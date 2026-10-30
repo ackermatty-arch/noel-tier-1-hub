@@ -2518,6 +2518,37 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <div class="kids-only">
     <div class="section-label">Kids' Corner</div>
 
+    <div class="game-grid">
+      <article class="game-card red">
+        <div class="game-emoji">✦</div>
+        <h3>Christmas Fun Quiz</h3>
+        <p>Easy questions about Santa, snowmen and Christmas.</p>
+        <div class="game-meta"><span class="pill">10 questions</span><span class="pill">Ages 6 &amp; under</span></div>
+        <button class="btn btn-gold" data-open="quizSheet" data-quiz="k5x">▶ Play Now</button>
+      </article>
+      <article class="game-card red">
+        <div class="game-emoji">✦</div>
+        <h3>Everyday Fun Quiz</h3>
+        <p>Animals, colours and shapes. No Christmas needed.</p>
+        <div class="game-meta"><span class="pill">10 questions</span><span class="pill">Ages 6 &amp; under</span></div>
+        <button class="btn btn-gold" data-open="quizSheet" data-quiz="k5f">▶ Play Now</button>
+      </article>
+      <article class="game-card red">
+        <div class="game-emoji">✦</div>
+        <h3>Christmas Challenge Quiz</h3>
+        <p>Reindeer, elves, stories and traditions.</p>
+        <div class="game-meta"><span class="pill">10 questions</span><span class="pill">Ages 6 to 10</span></div>
+        <button class="btn btn-gold" data-open="quizSheet" data-quiz="k10x">▶ Play Now</button>
+      </article>
+      <article class="game-card red">
+        <div class="game-emoji">✦</div>
+        <h3>Brain Busters Quiz</h3>
+        <p>Animals, space, nature and geography. No Christmas needed.</p>
+        <div class="game-meta"><span class="pill">10 questions</span><span class="pill">Ages 6 to 10</span></div>
+        <button class="btn btn-gold" data-open="quizSheet" data-quiz="k10f">▶ Play Now</button>
+      </article>
+    </div>
+
     <!-- ✏️ KIDS' PRINTABLES: replace href="#" with your PDF links -->
     <div class="print-grid">
       <article class="card print-card">
@@ -7992,11 +8023,20 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     {"q": "What is the largest organ of the human body?", "options": ["The skin", "The liver", "The heart", "The brain"], "answer": "The skin", "fact": "An adult's skin weighs around 4 kilograms and covers about 2 square metres."},
     {"q": "Which force keeps our feet on the ground?", "options": ["Gravity", "Magnetism", "Friction", "Static electricity"], "answer": "Gravity", "fact": "Gravity is also what keeps the Moon in orbit around the Earth."}
   ];
+  // ---------- Kids' trivia (ages 6 & under, ages 6 to 10) ----------
+  const KIDS5_XMAS = [{"q": "Who brings presents on Christmas Eve?", "options": ["Santa Claus", "A dragon", "A pirate"], "answer": "Santa Claus", "fact": "Santa has a big sleigh full of gifts!"}, {"q": "What colour is Santa's suit?", "options": ["Red", "Purple", "Green"], "answer": "Red", "fact": "Santa wears a red suit with white fur."}, {"q": "What do reindeer pull?", "options": ["A sleigh", "A bus", "A boat"], "answer": "A sleigh", "fact": "Reindeer fly Santa's sleigh across the sky."}, {"q": "What do we hang on a Christmas tree?", "options": ["Ornaments", "Shoes", "Spoons"], "answer": "Ornaments", "fact": "Ornaments are shiny and pretty."}, {"q": "What is the star's job on top of the tree?", "options": ["It shines at the top", "It sleeps", "It cooks dinner"], "answer": "It shines at the top", "fact": "Many trees have a star at the very top."}, {"q": "What is a snowman made of?", "options": ["Snow", "Sand", "Jelly"], "answer": "Snow", "fact": "Roll three snowballs and stack them up!"}, {"q": "What does Santa say?", "options": ["Ho ho ho!", "Moo moo moo!", "Beep beep!"], "answer": "Ho ho ho!", "fact": "Ho ho ho is Santa's jolly laugh."}, {"q": "What do we sing at Christmas?", "options": ["Carols", "Lullabies only", "Nothing at all"], "answer": "Carols", "fact": "Jingle Bells is a favourite carol."}, {"q": "What is red and green and grows on a wreath?", "options": ["Holly", "Bananas", "Carrots"], "answer": "Holly", "fact": "Holly has spiky green leaves and red berries."}, {"q": "What do we leave out for Santa?", "options": ["Cookies and milk", "A shoe full of mud", "A bowl of soup"], "answer": "Cookies and milk", "fact": "Santa loves a snack on his big night!"}];
+  const KIDS5_FUN = [{"q": "What sound does a cow make?", "options": ["Moo", "Quack", "Roar"], "answer": "Moo", "fact": "Cows say moo!"}, {"q": "What colour is a banana?", "options": ["Yellow", "Blue", "Pink"], "answer": "Yellow", "fact": "Bananas are yellow when ripe."}, {"q": "How many legs does a dog have?", "options": ["4", "2", "6"], "answer": "4", "fact": "Dogs walk on four legs."}, {"q": "What do bees make?", "options": ["Honey", "Bread", "Ice cream"], "answer": "Honey", "fact": "Bees make sweet honey."}, {"q": "Which one can fly?", "options": ["A bird", "A fish", "A turtle"], "answer": "A bird", "fact": "Birds have wings to fly."}, {"q": "What shape is a ball?", "options": ["Round", "Square", "Triangle"], "answer": "Round", "fact": "A ball is round like the sun."}, {"q": "What colour is the sky on a sunny day?", "options": ["Blue", "Orange", "Black"], "answer": "Blue", "fact": "Sunny skies are blue."}, {"q": "What do fish live in?", "options": ["Water", "Trees", "Sand castles"], "answer": "Water", "fact": "Fish swim in water."}, {"q": "What do you wear on your feet?", "options": ["Shoes", "Hats", "Gloves"], "answer": "Shoes", "fact": "Shoes keep our feet safe."}, {"q": "Which animal says meow?", "options": ["A cat", "A frog", "A horse"], "answer": "A cat", "fact": "Kittens and cats say meow."}];
+  const KIDS10_XMAS = [{"q": "Which animals pull Santa's sleigh?", "options": ["Reindeer", "Horses", "Polar bears", "Elephants"], "answer": "Reindeer", "fact": "Santa's lead reindeer is Rudolph, with his glowing red nose."}, {"q": "What is the name of the red-nosed reindeer?", "options": ["Rudolph", "Dasher", "Comet", "Frosty"], "answer": "Rudolph", "fact": "Rudolph's nose lights the way through foggy nights."}, {"q": "In which direction does Santa live?", "options": ["The North Pole", "The South Pole", "The Sahara Desert", "Hawaii"], "answer": "The North Pole", "fact": "Santa's workshop is said to be at the North Pole."}, {"q": "What are Santa's helpers called?", "options": ["Elves", "Fairies", "Gnomes only", "Goblins"], "answer": "Elves", "fact": "Elves make toys all year long."}, {"q": "Which plant do people kiss under at Christmas?", "options": ["Mistletoe", "Ivy", "Cactus", "Fern"], "answer": "Mistletoe", "fact": "Hanging mistletoe is an old Christmas tradition."}, {"q": "What do you put in a stocking?", "options": ["Small gifts", "Wet socks", "Spaghetti", "Pillows"], "answer": "Small gifts", "fact": "Stockings are hung up for little treats."}, {"q": "What month is Christmas in?", "options": ["December", "November", "January", "July"], "answer": "December", "fact": "Christmas Day is December 25."}, {"q": "What is a candy cane shaped like?", "options": ["The letter J, or a shepherd's hook", "A circle", "A square", "A star"], "answer": "The letter J, or a shepherd's hook", "fact": "Candy canes are red and white striped."}, {"q": "What did the three wise men follow?", "options": ["A bright star", "A river", "A map of treasure", "A balloon"], "answer": "A bright star", "fact": "The star led them to baby Jesus in the story."}, {"q": "What is the name of the mean green character who stole Christmas?", "options": ["The Grinch", "Shrek", "Oscar", "Hulk"], "answer": "The Grinch", "fact": "The Grinch's heart grew three sizes in the story."}];
+  const KIDS10_FUN = [{"q": "What is the largest animal on Earth?", "options": ["The blue whale", "The elephant", "The giraffe", "The shark"], "answer": "The blue whale", "fact": "A blue whale is longer than three buses."}, {"q": "How many days are in a week?", "options": ["7", "5", "6", "10"], "answer": "7", "fact": "Monday to Sunday makes seven days."}, {"q": "Which planet do we live on?", "options": ["Earth", "Mars", "Venus", "Jupiter"], "answer": "Earth", "fact": "Earth is the third planet from the sun."}, {"q": "What do plants need to grow?", "options": ["Sunlight and water", "Candy", "Only darkness", "Soap"], "answer": "Sunlight and water", "fact": "Plants use sunlight to make their food."}, {"q": "What is the fastest land animal?", "options": ["The cheetah", "The lion", "The horse", "The rabbit"], "answer": "The cheetah", "fact": "A cheetah can run faster than a car in a town."}, {"q": "What is frozen water called?", "options": ["Ice", "Steam", "Fog", "Mud"], "answer": "Ice", "fact": "Water freezes at 0 degrees Celsius."}, {"q": "How many continents are there?", "options": ["7", "5", "9", "12"], "answer": "7", "fact": "Asia, Africa, North America, South America, Antarctica, Europe and Australia."}, {"q": "Which animal is known as the king of the jungle?", "options": ["The lion", "The tiger", "The monkey", "The parrot"], "answer": "The lion", "fact": "Lions actually live in grasslands, not jungles."}, {"q": "What is the capital of Canada?", "options": ["Ottawa", "Toronto", "Vancouver", "Calgary"], "answer": "Ottawa", "fact": "Ottawa is in the province of Ontario."}, {"q": "What do caterpillars turn into?", "options": ["Butterflies", "Bees", "Beetles only", "Birds"], "answer": "Butterflies", "fact": "A caterpillar rests in a chrysalis, then comes out with wings."}];
   const QUIZ_SETS = {
     xmas: { list: () => QUIZ, title: "Christmas Trivia", best: KEYS.best },
     yir:  { list: () => YIR_QUIZ, title: "2026 Year in Review", best: "quizBestYir" },
     world: { list: () => WORLD_QUIZ, title: "Around the World", best: "quizBestWorld" },
-    science: { list: () => SCIENCE_QUIZ, title: "Science & Nature", best: "quizBestScience" }
+    science: { list: () => SCIENCE_QUIZ, title: "Science & Nature", best: "quizBestScience" },
+    k5x: { list: () => KIDS5_XMAS, title: "Christmas Fun · Ages 6 & Under", best: "quizBestK5x", kid: 1 },
+    k5f: { list: () => KIDS5_FUN, title: "Everyday Fun · Ages 6 & Under", best: "quizBestK5f", kid: 1 },
+    k10x: { list: () => KIDS10_XMAS, title: "Christmas Challenge · Ages 6 to 10", best: "quizBestK10x", kid: 1 },
+    k10f: { list: () => KIDS10_FUN, title: "Brain Busters · Ages 6 to 10", best: "quizBestK10f", kid: 1 }
   };
   function startQuiz(set) {
     quiz.set = QUIZ_SETS[set] ? set : (quiz.set || "xmas");
@@ -8059,7 +8099,11 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     $("#finalScore").textContent = `${quiz.score}/${total}`;
     const pct = quiz.score / total;
     // ✏️ Edit the end-of-quiz messages here
-    $("#finalMsg").textContent = quiz.set === "world" || quiz.set === "science" ? (
+    $("#finalMsg").textContent = QUIZ_SETS[quiz.set].kid ? (
+      pct === 1 ? "Perfect! You got every single one! ✦" :
+      pct >= .7 ? "Great job! You are so clever! ✦" :
+      pct >= .4 ? "Good try! Let's play again! ✦" :
+                  "Nice playing! Try again, it's fun! ✦") : quiz.set === "world" || quiz.set === "science" ? (
       pct === 1 ? "Perfect score! You're a trivia champion! 🏆" :
       pct >= .7 ? "Brilliant! You really know your stuff. ✨" :
       pct >= .4 ? "Nice try! Play again and beat your best. 🌍" :
