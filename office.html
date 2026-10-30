@@ -1134,6 +1134,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .voice-heard { min-height: 22px; color: var(--muted); font-style: italic; margin: 6px 0 4px; }
 .voice-reply { min-height: 22px; font-weight: 800; color: var(--pine); margin: 0 0 14px; }
 .voice-try { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--red); margin-bottom: 8px; }
+.voice-chips[hidden] { display: none; }
 .voice-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 14px; }
 .chip {
   padding: 8px 12px; border-radius: 99px; font-size: 13px; font-weight: 700; color: var(--pine);
@@ -3774,6 +3775,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <p class="voice-heard" id="voiceHeard"></p>
     <p class="voice-reply" id="voiceReply" aria-live="polite"></p>
     <div class="voice-try">Try saying</div>
+    <button type="button" class="btn btn-ghost btn-sm" id="voiceMore" hidden style="margin-bottom:10px">Show examples ›</button>
     <div class="voice-chips" id="voiceChips">
       <button class="chip fam-only" data-cmd="Start the turkey timer">“Start the turkey timer”</button>
       <button class="chip fam-only" data-cmd="How long on the cookies?">“How long on the cookies?”</button>
@@ -8838,6 +8840,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
 
   function openVoice() {
     clearTimeout(closeTimer); voiceMiss = 0;
+    { const sm = window.innerHeight < 820, ch = $("#voiceChips"), mb = $("#voiceMore"); ch.hidden = sm; mb.hidden = !sm; mb.textContent = "Show examples ›"; }
     vPanel.hidden = false;
     document.body.classList.add("lock");
     duckMusic(true);
@@ -8845,6 +8848,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   }
 
   vPanel.addEventListener("click", e => { if (e.target === vPanel) closeVoice(); });
+  $("#voiceMore").addEventListener("click", () => { const ch = $("#voiceChips"); ch.hidden = !ch.hidden; $("#voiceMore").textContent = ch.hidden ? "Show examples ›" : "Hide examples ‹"; });
   function closeVoice() {
     clearTimeout(closeTimer);
     stopListening();
