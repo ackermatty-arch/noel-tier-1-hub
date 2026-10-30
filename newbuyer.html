@@ -15472,7 +15472,9 @@ const PC_DESIGNS = [
   function offAlertItem(id) { if (!String(id).startsWith("off:")) return null; const r = offReminders().find(x => "off:" + x.k === id); return r ? { icon: "📨", name: r.text } : null; }
   if (SPACE === "office") setInterval(() => {
     const now = Date.now(), due = offReminders().filter(r => !off.fired[r.k] && !oy.fired[r.k] && r.t <= now); if (!due.length) return;
-    due.forEach(r => { (r.g ? oy.fired : off.fired)[r.k] = 1; }); saveOff(); saveOy(); triggerAlert(due.map(r => ({ id: "off:" + r.k })));
+    due.forEach(r => { (r.g ? oy.fired : off.fired)[r.k] = 1; }); saveOff(); saveOy();
+    const fresh = due.filter(r => r.t > now - 6 * 36e5);   // a reminder that was due more than 6 hours ago is stale: mark it done quietly, never ring for it
+    if (fresh.length) triggerAlert(fresh.map(r => ({ id: "off:" + r.k })));
   }, 15000);
 
   // ---------- taps & typing ----------
