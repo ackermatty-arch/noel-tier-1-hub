@@ -2645,7 +2645,6 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     </button>
 
 <div class="fam-only" id="hostWrap">
-    <div class="card host-remind" id="hostRemind"></div>
     <div class="apps-filters host-tabs" id="hostTabs"></div>
     <div id="hostBody"></div>
     <div class="card host-fridge" id="hostFridge">
@@ -2685,6 +2684,11 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
         <button class="btn btn-green" type="submit">Add</button>
       </div>
     </form>
+
+    <div class="fam-only" id="hostTaskWrap">
+      <div class="apps-filters host-tabs" id="hostTaskTabs"></div>
+      <div id="hostTaskBody"></div>
+    </div>
 
     <div class="board-actions">
       <button class="btn btn-ghost" id="resetChecklist">↺ Untick all tasks</button>
@@ -9672,7 +9676,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     $("#giftCounts").innerHTML = STATUSES.map(s => `<span>${s.icon} ${all.filter(g => g.status === s.key).length} ${s.label.toLowerCase()}</span>`).join("");
     const list = $("#peopleList");
     if (!gifts.people.length) {
-      list.innerHTML = `<div class="card empty">🎁 Add the first person on your list below.<br>Then add a name and an amount for each thing you plan to spend.</div>`;
+      list.innerHTML = `<div class="card empty">🎁 Add the first person on your list below.<br>Then set a spending cap for each person.</div>`;
       return;
     }
     list.innerHTML = gifts.people.map(p => `
@@ -9692,11 +9696,6 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
             <span class="g-price">${g.price ? money(+g.price) : ""}</span>
             <button class="icon-btn" data-act="del-gift" aria-label="Delete ${esc(g.name)}">✕</button>
           </li>`; }).join("")}</ul>
-        <form class="add-gift" autocomplete="off">
-          <input class="input" name="gift" maxlength="40" placeholder="Name" aria-label="Name for ${esc(p.name)}" required>
-          <input class="input price" name="price" type="number" inputmode="decimal" min="0" step="0.01" placeholder="${CUR} amount" aria-label="Amount">
-          <button class="btn btn-green btn-sm" type="submit">Add</button>
-        </form>
       </div>`).join("");
   }
   $("#giftBudget").addEventListener("input", e => { gifts.budget = parseFloat(e.target.value) || 0; save("gifts", gifts); renderGifts(); });
@@ -13217,15 +13216,17 @@ const PC_DESIGNS = [
   }
 
   // ---------- screens ----------
-  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["house", "📶 House info"], ["out", "💡 Outdoor & lights"]];
+  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["table", "🍽️ Table"], ["house", "📶 House info"]];
+  const TASK_TABS = [["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["out", "💡 Outdoor & lights"]];   // these now live on the Tasks page
   function renderHost() {
     const fr = $("#hostFridge");
     if (fr) fr.innerHTML = (host.tab || "away") === "away"
       ? `<span class="hf-ico">✈️</span><span class="hf-txt"><b>Travel sheet</b><small>Flights and trains, guests' travel, pet care, passports and your leaving-home checklist, all on one printed page.</small></span><button type="button" class="btn btn-red" data-print="travel">🖨️ Print</button>`
       : `<span class="hf-ico">🧲</span><span class="hf-txt"><b>Fridge sheet</b><small>Guests, rooms, seating, cleaning days, supplies and house info, all on one printed page.</small></span><button type="button" class="btn btn-red" data-print="fridge">🖨️ Print</button>`;
-    const tab = host.tab || "away";
-    $("#hostRemind").innerHTML = `<label class="host-switch"><input type="checkbox" id="hostRemindBox" ${host.remind ? "checked" : ""}><span><b>🔔 Helpful little reminders</b><small>${host.remind ? `On. Noël will nudge you at just the right moments, timed to your dinner on ${hostFmt(hostDinner())}.` : "Turn on for well-timed nudges for cleaning, guests and the little things that are easy to forget."}</small></span></label>`;
+    const tab = HOST_TABS.some(x => x[0] === host.tab) ? host.tab : "away";
     $("#hostTabs").innerHTML = HOST_TABS.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-htab="${k}">${l}</button>`).join("");
+    const tt = TASK_TABS.some(x => x[0] === host.ttab) ? host.ttab : "clean";
+    if ($("#hostTaskTabs")) { $("#hostTaskTabs").innerHTML = TASK_TABS.map(([k, l]) => `<button type="button" class="chip${k === tt ? " on" : ""}" data-ttab="${k}">${l}</button>`).join(""); $("#hostTaskBody").innerHTML = ({ clean: hostCleanHtml, supplies: hostSuppliesHtml, out: hostOutHtml })[tt](); }
     $("#hostBody").innerHTML = ({ guests: hostGuestsHtml, rooms: hostRoomsHtml, table: hostTableHtml, clean: hostCleanHtml, supplies: hostSuppliesHtml, house: hostHouseHtml, away: hostAwayHtml, out: hostOutHtml })[tab]();
   }
   const roomOpts = sel => `<option value="">Not staying over</option>` + host.rooms.map(r => `<option value="${r.id}" ${r.id === sel ? "selected" : ""}>${r.icon} ${esc(r.name)}</option>`).join("");
@@ -13462,8 +13463,10 @@ const PC_DESIGNS = [
   }
 
   // ---------- taps & typing ----------
-  $("#hostWrap").addEventListener("click", e => {
+  document.addEventListener("click", e => {
+    if (!e.target.closest("#hostWrap, #hostTaskWrap")) return;
     const t = e.target;
+    const ttb = t.closest("[data-ttab]"); if (ttb) { host.ttab = ttb.dataset.ttab; saveHost(); renderHost(); return; }
     const tb = t.closest("[data-htab]"); if (tb) { host.tab = tb.dataset.htab; saveHost(); renderHost(); return; }
     const card = t.closest("[data-hg]"), room = t.closest("[data-hr]");
     if (t.closest("[data-hdel]")) {
@@ -13495,7 +13498,8 @@ const PC_DESIGNS = [
     const dt = t.closest("[data-hdeltrip]"); if (dt) { const id = dt.closest("[data-htrip]").dataset.htrip; host.trips = host.trips.filter(x => x.id !== id); saveHost(); renderHost(); hostSync(); return; }
     const dj = t.closest("[data-hdeljob]"); if (dj) { const id = dj.closest("[data-hjob]").dataset.hjob; host.jobs = host.jobs.filter(j => j.id !== id); delete host.who["j:" + id]; delete host.jobDone[id]; saveHost(); renderHost(); return; }
   });
-  $("#hostWrap").addEventListener("change", async e => {
+  document.addEventListener("change", async e => {
+    if (!e.target.closest("#hostWrap, #hostTaskWrap")) return;
     const t = e.target;
     if (t.id === "hostRemindBox") {
       host.remind = t.checked; saveHost(); renderHost(); getAudio();
@@ -13518,7 +13522,8 @@ const PC_DESIGNS = [
     if (t.dataset.hsup) { host.supplies[t.dataset.hsup] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hhouse) { host.house[t.dataset.hhouse] = t.value.trim(); saveHost(); return; }
   });
-  $("#hostWrap").addEventListener("submit", e => {
+  document.addEventListener("submit", e => {
+    if (!e.target.closest("#hostWrap, #hostTaskWrap")) return;
     e.preventDefault(); const f = e.target;
     if (f.dataset.htripform) { const n = f.a.value.trim(); if (!n) return; host.trips.push({ id: uid(), k: f.dataset.htripform, a: n, b: f.b.value.trim() }); saveHost(); renderHost(); hostSync(); return; }
     if (f.id === "hostLeaveForm") { const n = f.t.value.trim(); if (!n) return; host.leave.custom.push({ id: uid(), text: n }); saveHost(); renderHost(); return; }
@@ -14226,10 +14231,12 @@ const PC_DESIGNS = [
   }
 
   // ---------- 📊 pictures (plain SVG, so they also print sharply) ----------
+  const BUD_GOLD = ["#D4A93C", "#9C7A1E", "#EBCB6E", "#B8902A", "#F0D27A", "#7A5F14", "#C9A24A", "#E0B94F"];   // the ring is gold; each kind of spending is its own shade
+  const budGold = k => BUD_GOLD[Math.max(0, BUD_CATS.findIndex(c => c[0] === k)) % BUD_GOLD.length];
   function budPie(by, total, limit, size) {
     const r = 70, C = 2 * Math.PI * r; let off = 0;
     const parts = BUD_CATS.filter(([k]) => by[k] > 0);
-    const arcs = parts.map(([k, , , col]) => { const len = by[k] / total * C, s = `<circle r="${r}" cx="100" cy="100" fill="none" stroke="${col}" stroke-width="34" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`; off += len; return s; }).join("");
+    const arcs = parts.map(([k, , , col]) => { const len = by[k] / Math.max(limit || 0, total) * C, s = `<circle r="${r}" cx="100" cy="100" fill="none" stroke="${budGold(k)}" stroke-width="34" stroke-dasharray="${Math.max(0, len - 1)} ${C - Math.max(0, len - 1)}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`; off += len; return s; }).join("");
     const pct = limit ? Math.round(total / limit * 100) : 0;
     return `<svg viewBox="0 0 200 200" width="${size}" height="${size}" role="img" aria-label="Spending by category">
       <circle r="${r}" cx="100" cy="100" fill="none" stroke="#EBEBEB" stroke-width="34"/>${total ? arcs : ""}
@@ -14285,7 +14292,7 @@ const PC_DESIGNS = [
     const perPerson = gifts.people.map(p => [p.name, sum(p.gifts, () => true)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 6), ppMax = Math.max(1, ...perPerson.map(x => x[1]));
     const last = budget.past[budget.past.length - 1];
     return `<div class="card bud-hero">${budPie(T.by, T.spent, T.limit, 210)}
-        <ul class="bud-legend">${BUD_CATS.filter(([k]) => T.by[k] > 0).map(([k, i, l, col]) => `<li><i style="background:${col}"></i><span>${i} ${l}</span><b>${money(T.by[k])}</b><small>${Math.round(T.by[k] / T.spent * 100)}%</small></li>`).join("") || `<li class="host-rem">Nothing spent yet. Mark gifts as bought, or add spending on the 🧾 Spreadsheet tab.</li>`}</ul>
+        <ul class="bud-legend">${BUD_CATS.filter(([k]) => T.by[k] > 0).map(([k, i, l, col]) => `<li><i style="background:${budGold(k)}"></i><span>${i} ${l}</span><b>${money(T.by[k])}</b><small>${Math.round(T.by[k] / T.spent * 100)}%</small></li>`).join("") || `<li class="host-rem">Nothing spent yet. Mark gifts as bought, or add spending on the 🧾 Spreadsheet tab.</li>`}</ul>
         <p class="bud-status ${pct > 1 ? "over" : pct >= 0.9 ? "warn" : ""}">${status}</p></div>
       <div class="card pt-card"><h3>📈 Spending as the season goes</h3>${budLine(T.limit, 340, 170) || ""}<p class="host-rem">${T.rows.length ? "Your running total, stepping up on each day you spent. The gold dashed line is your budget." : "Your line appears as soon as you spend something."}</p></div>
       <div class="card pt-card"><h3>🎯 Budget vs spent</h3>${budBars(T.by)}</div>
@@ -14354,7 +14361,7 @@ const PC_DESIGNS = [
       .bd .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px} .bd .bd-foot{margin-top:14px;text-align:center;color:#999;font:8pt sans-serif}`;
     const html = `<div class="bd"><h1>💰 Holiday Budget</h1><p class="bd-sub">${new Date().toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })} · spent ${money(T.spent)}${T.limit ? ` of ${money(T.limit)}` : ""}</p>
       <div class="bd-top">${budPie(T.by, T.spent, T.limit, 200)}<table><tr><th>Category</th><th class="num">Spent</th><th class="num">Budget</th><th class="num">Left</th></tr>
-        ${BUD_CATS.filter(([k]) => T.by[k] || catLimit(k)).map(([k, i, l, col]) => `<tr><td><span class="dot" style="background:${col}"></span>${l}</td><td class="num">${money(T.by[k])}</td><td class="num">${catLimit(k) ? money(catLimit(k)) : "—"}</td><td class="num">${catLimit(k) ? money(catLimit(k) - T.by[k]) : "—"}</td></tr>`).join("")}
+        ${BUD_CATS.filter(([k]) => T.by[k] || catLimit(k)).map(([k, i, l, col]) => `<tr><td><span class="dot" style="background:${budGold(k)}"></span>${l}</td><td class="num">${money(T.by[k])}</td><td class="num">${catLimit(k) ? money(catLimit(k)) : "—"}</td><td class="num">${catLimit(k) ? money(catLimit(k) - T.by[k]) : "—"}</td></tr>`).join("")}
         <tr><td><b>Total</b></td><td class="num"><b>${money(T.spent)}</b></td><td class="num"><b>${T.limit ? money(T.limit) : "—"}</b></td><td class="num"><b>${T.limit ? money(T.limit - T.spent) : "—"}</b></td></tr></table></div>
       ${T.rows.length ? `<h2>Spending over time</h2>${budLine(T.limit, 680, 200)}` : ""}
       <h2>Every purchase</h2><table><tr><th>Date</th><th>Category</th><th>Item</th><th class="num">Amount</th></tr>${T.rows.slice().sort((a, b) => (a.date || "0").localeCompare(b.date || "0")).map(r => `<tr><td>${r.date || "—"}</td><td>${budCat(r.cat)[2]}</td><td>${esc(r.name)}</td><td class="num">${money(r.amt)}</td></tr>`).join("")}</table>

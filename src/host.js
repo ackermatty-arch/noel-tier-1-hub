@@ -118,15 +118,17 @@
   }
 
   // ---------- screens ----------
-  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["rooms", "🛏️ Rooms"], ["table", "🍽️ Table"], ["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["house", "📶 House info"], ["out", "💡 Outdoor & lights"]];
+  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["table", "🍽️ Table"], ["house", "📶 House info"]];
+  const TASK_TABS = [["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["out", "💡 Outdoor & lights"]];   // these now live on the Tasks page
   function renderHost() {
     const fr = $("#hostFridge");
     if (fr) fr.innerHTML = (host.tab || "away") === "away"
       ? `<span class="hf-ico">✈️</span><span class="hf-txt"><b>Travel sheet</b><small>Flights and trains, guests' travel, pet care, passports and your leaving-home checklist, all on one printed page.</small></span><button type="button" class="btn btn-red" data-print="travel">🖨️ Print</button>`
       : `<span class="hf-ico">🧲</span><span class="hf-txt"><b>Fridge sheet</b><small>Guests, rooms, seating, cleaning days, supplies and house info, all on one printed page.</small></span><button type="button" class="btn btn-red" data-print="fridge">🖨️ Print</button>`;
-    const tab = host.tab || "away";
-    $("#hostRemind").innerHTML = `<label class="host-switch"><input type="checkbox" id="hostRemindBox" ${host.remind ? "checked" : ""}><span><b>🔔 Helpful little reminders</b><small>${host.remind ? `On. Noël will nudge you at just the right moments, timed to your dinner on ${hostFmt(hostDinner())}.` : "Turn on for well-timed nudges for cleaning, guests and the little things that are easy to forget."}</small></span></label>`;
+    const tab = HOST_TABS.some(x => x[0] === host.tab) ? host.tab : "away";
     $("#hostTabs").innerHTML = HOST_TABS.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-htab="${k}">${l}</button>`).join("");
+    const tt = TASK_TABS.some(x => x[0] === host.ttab) ? host.ttab : "clean";
+    if ($("#hostTaskTabs")) { $("#hostTaskTabs").innerHTML = TASK_TABS.map(([k, l]) => `<button type="button" class="chip${k === tt ? " on" : ""}" data-ttab="${k}">${l}</button>`).join(""); $("#hostTaskBody").innerHTML = ({ clean: hostCleanHtml, supplies: hostSuppliesHtml, out: hostOutHtml })[tt](); }
     $("#hostBody").innerHTML = ({ guests: hostGuestsHtml, rooms: hostRoomsHtml, table: hostTableHtml, clean: hostCleanHtml, supplies: hostSuppliesHtml, house: hostHouseHtml, away: hostAwayHtml, out: hostOutHtml })[tab]();
   }
   const roomOpts = sel => `<option value="">Not staying over</option>` + host.rooms.map(r => `<option value="${r.id}" ${r.id === sel ? "selected" : ""}>${r.icon} ${esc(r.name)}</option>`).join("");
@@ -363,8 +365,10 @@
   }
 
   // ---------- taps & typing ----------
-  $("#hostWrap").addEventListener("click", e => {
+  document.addEventListener("click", e => {
+    if (!e.target.closest("#hostWrap, #hostTaskWrap")) return;
     const t = e.target;
+    const ttb = t.closest("[data-ttab]"); if (ttb) { host.ttab = ttb.dataset.ttab; saveHost(); renderHost(); return; }
     const tb = t.closest("[data-htab]"); if (tb) { host.tab = tb.dataset.htab; saveHost(); renderHost(); return; }
     const card = t.closest("[data-hg]"), room = t.closest("[data-hr]");
     if (t.closest("[data-hdel]")) {
@@ -396,7 +400,8 @@
     const dt = t.closest("[data-hdeltrip]"); if (dt) { const id = dt.closest("[data-htrip]").dataset.htrip; host.trips = host.trips.filter(x => x.id !== id); saveHost(); renderHost(); hostSync(); return; }
     const dj = t.closest("[data-hdeljob]"); if (dj) { const id = dj.closest("[data-hjob]").dataset.hjob; host.jobs = host.jobs.filter(j => j.id !== id); delete host.who["j:" + id]; delete host.jobDone[id]; saveHost(); renderHost(); return; }
   });
-  $("#hostWrap").addEventListener("change", async e => {
+  document.addEventListener("change", async e => {
+    if (!e.target.closest("#hostWrap, #hostTaskWrap")) return;
     const t = e.target;
     if (t.id === "hostRemindBox") {
       host.remind = t.checked; saveHost(); renderHost(); getAudio();
@@ -419,7 +424,8 @@
     if (t.dataset.hsup) { host.supplies[t.dataset.hsup] = t.checked; saveHost(); t.closest("label").classList.toggle("on", t.checked); return; }
     if (t.dataset.hhouse) { host.house[t.dataset.hhouse] = t.value.trim(); saveHost(); return; }
   });
-  $("#hostWrap").addEventListener("submit", e => {
+  document.addEventListener("submit", e => {
+    if (!e.target.closest("#hostWrap, #hostTaskWrap")) return;
     e.preventDefault(); const f = e.target;
     if (f.dataset.htripform) { const n = f.a.value.trim(); if (!n) return; host.trips.push({ id: uid(), k: f.dataset.htripform, a: n, b: f.b.value.trim() }); saveHost(); renderHost(); hostSync(); return; }
     if (f.id === "hostLeaveForm") { const n = f.t.value.trim(); if (!n) return; host.leave.custom.push({ id: uid(), text: n }); saveHost(); renderHost(); return; }

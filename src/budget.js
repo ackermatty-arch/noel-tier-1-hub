@@ -45,10 +45,12 @@
   }
 
   // ---------- 📊 pictures (plain SVG, so they also print sharply) ----------
+  const BUD_GOLD = ["#D4A93C", "#9C7A1E", "#EBCB6E", "#B8902A", "#F0D27A", "#7A5F14", "#C9A24A", "#E0B94F"];   // the ring is gold; each kind of spending is its own shade
+  const budGold = k => BUD_GOLD[Math.max(0, BUD_CATS.findIndex(c => c[0] === k)) % BUD_GOLD.length];
   function budPie(by, total, limit, size) {
     const r = 70, C = 2 * Math.PI * r; let off = 0;
     const parts = BUD_CATS.filter(([k]) => by[k] > 0);
-    const arcs = parts.map(([k, , , col]) => { const len = by[k] / total * C, s = `<circle r="${r}" cx="100" cy="100" fill="none" stroke="${col}" stroke-width="34" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`; off += len; return s; }).join("");
+    const arcs = parts.map(([k, , , col]) => { const len = by[k] / Math.max(limit || 0, total) * C, s = `<circle r="${r}" cx="100" cy="100" fill="none" stroke="${budGold(k)}" stroke-width="34" stroke-dasharray="${Math.max(0, len - 1)} ${C - Math.max(0, len - 1)}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`; off += len; return s; }).join("");
     const pct = limit ? Math.round(total / limit * 100) : 0;
     return `<svg viewBox="0 0 200 200" width="${size}" height="${size}" role="img" aria-label="Spending by category">
       <circle r="${r}" cx="100" cy="100" fill="none" stroke="#EBEBEB" stroke-width="34"/>${total ? arcs : ""}
@@ -104,7 +106,7 @@
     const perPerson = gifts.people.map(p => [p.name, sum(p.gifts, () => true)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 6), ppMax = Math.max(1, ...perPerson.map(x => x[1]));
     const last = budget.past[budget.past.length - 1];
     return `<div class="card bud-hero">${budPie(T.by, T.spent, T.limit, 210)}
-        <ul class="bud-legend">${BUD_CATS.filter(([k]) => T.by[k] > 0).map(([k, i, l, col]) => `<li><i style="background:${col}"></i><span>${i} ${l}</span><b>${money(T.by[k])}</b><small>${Math.round(T.by[k] / T.spent * 100)}%</small></li>`).join("") || `<li class="host-rem">Nothing spent yet. Mark gifts as bought, or add spending on the 🧾 Spreadsheet tab.</li>`}</ul>
+        <ul class="bud-legend">${BUD_CATS.filter(([k]) => T.by[k] > 0).map(([k, i, l, col]) => `<li><i style="background:${budGold(k)}"></i><span>${i} ${l}</span><b>${money(T.by[k])}</b><small>${Math.round(T.by[k] / T.spent * 100)}%</small></li>`).join("") || `<li class="host-rem">Nothing spent yet. Mark gifts as bought, or add spending on the 🧾 Spreadsheet tab.</li>`}</ul>
         <p class="bud-status ${pct > 1 ? "over" : pct >= 0.9 ? "warn" : ""}">${status}</p></div>
       <div class="card pt-card"><h3>📈 Spending as the season goes</h3>${budLine(T.limit, 340, 170) || ""}<p class="host-rem">${T.rows.length ? "Your running total, stepping up on each day you spent. The gold dashed line is your budget." : "Your line appears as soon as you spend something."}</p></div>
       <div class="card pt-card"><h3>🎯 Budget vs spent</h3>${budBars(T.by)}</div>
@@ -173,7 +175,7 @@
       .bd .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px} .bd .bd-foot{margin-top:14px;text-align:center;color:#999;font:8pt sans-serif}`;
     const html = `<div class="bd"><h1>💰 Holiday Budget</h1><p class="bd-sub">${new Date().toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })} · spent ${money(T.spent)}${T.limit ? ` of ${money(T.limit)}` : ""}</p>
       <div class="bd-top">${budPie(T.by, T.spent, T.limit, 200)}<table><tr><th>Category</th><th class="num">Spent</th><th class="num">Budget</th><th class="num">Left</th></tr>
-        ${BUD_CATS.filter(([k]) => T.by[k] || catLimit(k)).map(([k, i, l, col]) => `<tr><td><span class="dot" style="background:${col}"></span>${l}</td><td class="num">${money(T.by[k])}</td><td class="num">${catLimit(k) ? money(catLimit(k)) : "—"}</td><td class="num">${catLimit(k) ? money(catLimit(k) - T.by[k]) : "—"}</td></tr>`).join("")}
+        ${BUD_CATS.filter(([k]) => T.by[k] || catLimit(k)).map(([k, i, l, col]) => `<tr><td><span class="dot" style="background:${budGold(k)}"></span>${l}</td><td class="num">${money(T.by[k])}</td><td class="num">${catLimit(k) ? money(catLimit(k)) : "—"}</td><td class="num">${catLimit(k) ? money(catLimit(k) - T.by[k]) : "—"}</td></tr>`).join("")}
         <tr><td><b>Total</b></td><td class="num"><b>${money(T.spent)}</b></td><td class="num"><b>${T.limit ? money(T.limit) : "—"}</b></td><td class="num"><b>${T.limit ? money(T.limit - T.spent) : "—"}</b></td></tr></table></div>
       ${T.rows.length ? `<h2>Spending over time</h2>${budLine(T.limit, 680, 200)}` : ""}
       <h2>Every purchase</h2><table><tr><th>Date</th><th>Category</th><th>Item</th><th class="num">Amount</th></tr>${T.rows.slice().sort((a, b) => (a.date || "0").localeCompare(b.date || "0")).map(r => `<tr><td>${r.date || "—"}</td><td>${budCat(r.cat)[2]}</td><td>${esc(r.name)}</td><td class="num">${money(r.amt)}</td></tr>`).join("")}</table>
