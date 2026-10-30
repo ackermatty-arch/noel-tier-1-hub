@@ -553,7 +553,7 @@
 
 
   // ---- 🎄 guided planner: night → dinners → guests and time → next steps ----
-  const WN = { day: "Christmas Day", eve: "Christmas Eve", eved: "Christmas Eve Dinner" };
+  const WN = { day: "Christmas Day", eve: "Christmas Eve Elegant", eved: "Christmas Eve Traditional" };
   let wiz = load("wiz", null);
   if (!wiz || !wiz.sel) {
     const at = n => mealPlans.filter(p => !p.svc && ymdOf(p.at) === (n === "day" ? dayYmd() : eveYmd()) && (n === "day" || (n === "eve") === ((mealById(p.id) || {}).tab === "eve"))).map(p => p.id);
