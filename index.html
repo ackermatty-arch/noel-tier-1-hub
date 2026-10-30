@@ -7918,7 +7918,23 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
 
   // Placeholder PDF links → friendly message instead of a dead link
   $$(".pdf-link").forEach(a => a.addEventListener("click", e => {
-    if (a.getAttribute("href") === "#") { e.preventDefault(); toast("📄 Download link coming soon!"); }
+    const h = a.getAttribute("href");
+    if (h === "#") { e.preventDefault(); toast("📄 Download link coming soon!"); return; }
+    if (!/^pdf\//.test(h)) return;
+    e.preventDefault();
+    const card = a.closest(".card"), t = (card && card.querySelector("h3") ? card.querySelector("h3").textContent.trim() : "PDF") + (/A4/i.test(h) ? " (A4)" : "");
+    const old = document.getElementById("pdfAsk"); if (old) old.remove();
+    const el = document.createElement("div"); el.id = "pdfAsk"; el.className = "alert-overlay show"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+    el.innerHTML = `<div class="alert-box"><p class="door-type">${esc(t)}</p><p class="door-text">PDF · look at it first, or save it to your device.</p><div class="print-btns"><button type="button" class="btn btn-ghost btn-block" data-pdfa="view">Look at it first</button><button type="button" class="btn btn-red btn-block" data-pdfa="dl">⬇ Download</button></div><button type="button" class="btn btn-ghost btn-block" data-pdfa="x">Close</button></div>`;
+    document.body.appendChild(el);
+    el.addEventListener("click", ev => {
+      const b = ev.target.closest("[data-pdfa]");
+      if (ev.target !== el && !b) return;
+      const act = b ? b.dataset.pdfa : "x";
+      if (act === "view") window.open(h, "_blank");
+      else if (act === "dl") { const d = document.createElement("a"); d.href = h; d.download = h.split("/").pop(); document.body.appendChild(d); d.click(); d.remove(); }
+      if (act !== "view") el.remove();
+    });
   }));
 
   /* ============================================================
