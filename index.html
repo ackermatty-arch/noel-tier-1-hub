@@ -13617,8 +13617,8 @@ const PC_DESIGNS = [
     host.trips.filter(x => x.k === "trip" && x.b).forEach(x => { const t = new Date(x.b); if (isNaN(t)) return; add(ymd(t), "✈️", x.a, x.b.slice(11, 16)); const pk = new Date(t.getTime() - 864e5); add(ymd(pk), "🧳", "Pack & check in: " + x.a); });
     host.trips.filter(x => x.k === "gtrip" && x.b).forEach(x => { const t = new Date(x.b); if (isNaN(t)) return; add(ymd(t), "🛬", "Pick up: " + x.a, x.b.slice(11, 16)); });
     host.guests.forEach(g => { if (g.arrive) { const t = new Date(g.arrive); add(ymd(t), g.pickup ? "🚗" : "🚪", (g.pickup ? "Pick up " : "") + g.name + (g.pickup ? "" : " arrive"), g.arrive.slice(11, 16)); } });
-    const cleanDays = {}; HOST_CLEAN.forEach(([id, days]) => { if (!host.clean[id] && days) { const k = ymd(new Date(atDay(D, days, 10))); cleanDays[k] = (cleanDays[k] || 0) + 1; } });
-    Object.entries(cleanDays).forEach(([k, n]) => add(k, "🧽", `Cleaning day: ${n} ${n === 1 ? "task" : "tasks"} on your Hosting list`));
+    const cleanDays = {}; HOST_CLEAN.forEach(([id, days]) => { if (host.remind && !host.clean[id] && days) {   const k = ymd(new Date(atDay(D, days, 10))); cleanDays[k] = (cleanDays[k] || 0) + 1; } });
+    Object.entries(cleanDays).forEach(([k, n]) => add(k, "🧽", `Cleaning day: ${n} ${n === 1 ? "chore" : "chores"} from Plan › Chores`));
     org.packages.forEach(p => { if (p.eta && !p.arrived) add(p.eta, "📦", p.item + " arrives"); });
     add(`${orgYear()}-12-10`, "✉️", "Mail your Christmas cards");
     return out.sort((a, b) => (a.date + (a.time || "99")).localeCompare(b.date + (b.time || "99")));
