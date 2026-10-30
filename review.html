@@ -16162,7 +16162,14 @@ const PC_DESIGNS = [
     const el = document.createElement("div"); el.id = "printView"; el.className = "pv-overlay"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
     el.innerHTML = `<div class="pv-bar"><b>${esc(d.title)}</b><button type="button" class="btn btn-ghost btn-sm" data-pvclose>Back</button></div><iframe class="pv-frame" title="Preview"></iframe>`;
     document.body.appendChild(el);
-    el.querySelector("iframe").srcdoc = fullHtml(d);
+    // 📄 pages with a margin are shown as real paper: a white letter-size sheet on a soft backdrop, shrunk to fit the phone
+    let pd = d;
+    if (d.margin) {
+      const sheets = String(d.html).split('<div class="pa-break"></div>').map(h => `<div class="pv-sheet">${h}</div>`).join("");
+      pd = Object.assign({}, d, { html: sheets,
+        css: d.css + ` html,body{background:#E4DFD3 !important} body{padding:10px 10px 24px !important} .pv-sheet{box-sizing:border-box;max-width:8.5in;margin:0 auto 14px;padding:22px 18px;background:#fff !important;box-shadow:0 2px 10px rgba(0,0,0,.25);border-top:3px solid #C9A45C;overflow:hidden;font-size:15px} .pv-sheet h1{font-size:22px} .pv-sheet h2{font-size:16px} .pv-sheet table{font-size:14px}` });
+    }
+    el.querySelector("iframe").srcdoc = fullHtml(pd);
     el.addEventListener("click", e => { if (e.target.closest("[data-pvclose]")) el.remove(); });
   }
   document.addEventListener("click", e => {
