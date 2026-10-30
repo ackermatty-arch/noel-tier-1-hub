@@ -919,6 +919,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .wish-lab { display: block; font-size: 12.5px; font-weight: 800; color: var(--pine); margin-bottom: 10px; }
 .wish-lab .input { width: 100%; margin-top: 4px; font-weight: 400; }
 .wish-row { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; }
+.wish-narrow { max-width: 170px; }
 .wish-tip { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); text-align: center; }
 .wish-summary { margin: 14px 2px 8px; font-size: 13.5px; color: var(--muted); }
 .wish-summary b { color: var(--pine); }
@@ -3066,14 +3067,14 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
           <input class="input" name="who" list="wishPeople" maxlength="30" placeholder="e.g. Mom" required></label>
         <datalist id="wishPeople"></datalist>
         <label class="wish-lab">What do they wish for?
-          <input class="input" name="what" maxlength="60" placeholder="e.g. Cozy slippers" required></label>
-        <div class="wish-row">
-          <label class="wish-lab">Spending cap
-            <input class="input" name="cap" type="number" inputmode="decimal" min="0" step="1" placeholder="$"></label>
-          <label class="wish-lab">Spent
-            <input class="input" name="spent" type="number" inputmode="decimal" min="0" step="0.01" placeholder="$"></label>
-        </div>
-        <div class="wish-btns"><button class="btn btn-red btn-block" type="submit" style="flex:1">Add</button></div>
+          <input class="input" name="what" maxlength="60" placeholder="e.g. Cozy slippers"></label>
+        <label class="wish-lab wish-narrow">Spending cap
+          <input class="input" name="cap" type="number" inputmode="decimal" min="0" step="1" placeholder="$"></label>
+        <label class="wish-lab">What was purchased
+          <input class="input" name="bought" maxlength="60" placeholder="e.g. Cozy slippers"></label>
+        <label class="wish-lab wish-narrow">Spent
+          <input class="input" name="spent" type="number" inputmode="decimal" min="0" step="0.01" placeholder="$"></label>
+        <div class="wish-btns" style="display:block;text-align:center"><button class="btn btn-red" type="submit" style="min-width:160px">Add</button></div>
         <p class="wish-tip">🎤 Or tap the mic and say: <i>"Mom wants cozy slippers"</i></p>
       </form>
       <div class="wish-summary" id="wishSummary"></div>
@@ -10177,22 +10178,24 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   $("#wishForm [name=who]").addEventListener("change", wishCapSync);
   $("#wishForm").addEventListener("submit", e => {
     e.preventDefault();
-    const f = e.target; let who = f.who.value.trim(), what = f.what.value.trim(); if (!who || !what) return;
-    who = who.charAt(0).toUpperCase() + who.slice(1); what = what.charAt(0).toUpperCase() + what.slice(1);
+    const f = e.target; let who = f.who.value.trim(), what = f.what.value.trim(), bought = f.bought.value.trim();
     const cap = parseFloat(f.cap.value) || 0, spent = parseFloat(f.spent.value) || 0;
+    if (!who) { toast("Who is the gift for?"); return; }
+    if (spent && !bought) bought = what;
+    if (!what && !bought && !cap) { toast("Add what they wish for or what was purchased"); return; }
+    if (spent && !bought) { toast("Add what was purchased"); return; }
+    who = who.charAt(0).toUpperCase() + who.slice(1); what = what.charAt(0).toUpperCase() + what.slice(1); bought = bought.charAt(0).toUpperCase() + bought.slice(1);
     let p = findPerson(who);
     if (!p && (cap || spent)) { p = { id: uid(), name: who, gifts: [] }; gifts.people.push(p); }
     if (p && cap) p.cap = cap;
+    if (what) addWish(who, what, 0, "");
     if (spent) {   // bought it: straight into the Gift Tracker as Bought, so it counts in the budget
-      p.gifts.push({ id: uid(), name: what, price: spent, status: "bought" });
-      save("gifts", gifts); renderGifts(); renderWishes();
+      p.gifts.push({ id: uid(), name: bought, price: spent, status: "bought" });
       toast(`🛍️ Added to ${p.name}'s gifts. ${money(spent)} counts in your budget.`);
-    } else {
-      const w = addWish(who, what, 0, ""); if (!w) return;
-      if (p) { save("gifts", gifts); renderGifts(); }
-      toast(`💭 Added to ${w.who}'s gift list`);
-    }
-    f.what.value = ""; f.spent.value = ""; f.what.focus();   // keep the name and cap for the next gift
+    } else toast(what ? `💭 Added to ${who}'s gift list` : `Spending cap saved for ${who}`);
+    if (p) save("gifts", gifts);
+    renderGifts(); renderWishes();
+    f.what.value = ""; f.bought.value = ""; f.spent.value = ""; f.what.focus();   // keep the name and cap for the next gift
   });
   $("#wishList").addEventListener("click", e => {
     const b = e.target.closest("[data-wact]"); if (!b) return;
