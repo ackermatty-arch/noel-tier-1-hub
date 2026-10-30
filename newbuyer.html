@@ -8806,11 +8806,27 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     try {
       if (!("speechSynthesis" in window)) return;
       speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = navigator.language || "en-US"; u.rate = 1; u.pitch = 1.05;
-      speechSynthesis.speak(u);
+      // iPhone: the mic holds the audio, so wait a moment after listening ends, then pick a real voice and speak
+      setTimeout(() => {
+        try {
+          const u = new SpeechSynthesisUtterance(text);
+          const lang = navigator.language || "en-US", vs = speechSynthesis.getVoices();
+          const v = vs.find(x => x.lang === lang && x.localService) || vs.find(x => x.lang === lang) || vs.find(x => x.lang && x.lang.slice(0, 2) === lang.slice(0, 2));
+          if (v) u.voice = v;
+          u.lang = lang; u.rate = 1; u.pitch = 1.05; u.volume = 1;
+          speechSynthesis.resume(); speechSynthesis.speak(u);
+        } catch (e) {}
+      }, 350);
     } catch (e) { /* speaking is optional */ }
   }
+  // iPhone only speaks after a tap: quietly "warm up" the voice the first time the mic is tapped
+  let voiceUnlocked = false;
+  function unlockVoice() {
+    if (voiceUnlocked || !("speechSynthesis" in window)) return;
+    voiceUnlocked = true;
+    try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); speechSynthesis.getVoices(); } catch (e) {}
+  }
+  document.addEventListener("pointerdown", unlockVoice, { once: true, capture: true });
 
   function stopListening() {
     const r = rec; rec = null;
