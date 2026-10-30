@@ -2653,6 +2653,10 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       <button type="button" class="btn btn-red" data-print="fridge">🖨️ Print</button>
     </div>
     </div>
+
+    <button type="button" class="advent-banner acts-banner" data-goview="invites" id="planCardsBanner">
+      <span class="ab-text"><b>Cards &amp; Invites</b><small>Send a card, keep your card list, party invites and thank-yous</small></span>
+    </button>
   </section>
 
   <!-- ✅ TASKS: the checklist, printables and extras that used to sit under Hosting -->
@@ -3140,6 +3144,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
        VIEW — ✉️ PARTY INVITES & GUEST LIST
        ============================================================ -->
   <section class="view" id="view-invites" aria-labelledby="invitesTitle">
+    <button type="button" class="btn btn-green btn-sm gift-tasks-btn" data-goview="planner">‹ Plan</button>
     <h2 class="view-title" id="invitesTitle">Cards &amp; Invites</h2>
     <p class="view-intro">Get your cards ready to mail out: keep your card list, tick people off as you send, and track your thank-yous. Prefer e-cards, or running late? Send a flip-open card as a video that opens with music, made right on your phone, even at the last minute. You can invite guests to your party here too.</p>
 
@@ -3327,7 +3332,6 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
   <button class="nav-btn" data-view="tasks"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16.5" rx="1"/><path d="M9 3h6v3H9z"/><path d="M8.5 11l1.4 1.4 2.3-2.6M8.5 16.2l1.4 1.4 2.3-2.6M14 11.3h2.5M14 16.5h2.5"/></svg></span>Tasks</button>
   <button class="nav-btn" data-view="meals" id="navMeals"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 17.5a8.5 8.5 0 0 1 17 0z"/><path d="M2.5 20h19M12 9V7.2"/><circle cx="12" cy="6.4" r="1.1"/></svg></span>Menu</button>
   <button class="nav-btn" data-view="nye" id="navNye"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5v4.5M12 15v4.500M3.500 11h4.500M16 11h4.500M6 5l3.200 3.200M14.800 13.800L18 17M18 5l-3.200 3.200M9.200 13.800L6 17"/><path d="M12 22h.01M3 20h.01M21 20h.01"/></svg></span>NYE</button>
-  <button class="nav-btn" data-view="invites"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="1"/><path d="M3 6.5l9 6.8 9-6.8"/><path d="M12 14.2l.5 1.1 1.2.2-.9.8.2 1.2-1-.6-1 .6.2-1.2-.9-.8 1.2-.2z"/></svg></span>Cards</button>
   <button class="nav-btn" data-view="games"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.500 21.500h13M7 21.500c.2-4 1.200-6 3.200-8.200-1.600.4-3 1.200-4.400 2l-1.300-2c.8-2 2.600-3.700 4.200-5.800L8.800 4l2.200 1.600c.8-.8 1.800-1.500 3-1.600 3.400.4 5.800 3.600 5.800 8 0 3-.8 6-1.400 9.500"/><circle cx="11.200" cy="8.600" r=".6" fill="currentColor"/></svg></span>Games</button>
   <button class="nav-btn" data-view="review"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.600 5.600 6.100.7-4.500 4.200 1.200 6L12 16.500 6.600 19.500l1.200-6L3.300 9.300l6.100-.7z"/></svg></span>Review</button>
 </nav>
@@ -8002,7 +8006,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   /* 👆 SWIPE between tabs (left = next tab, right = previous tab)
      Ignores up/down scrolling, edge swipes (Android "back"), text boxes,
      sliders and anything inside a pop-up or full-screen page. */
-  const VIEW_ORDER = ["budget", "planner", "gifts", "tasks", "meals", "nye", "invites", "games", "review"];   // same order as the bottom bar
+  const VIEW_ORDER = ["budget", "planner", "gifts", "tasks", "meals", "nye", "games", "review"];   // same order as the bottom bar
   let swipe = null;
   document.querySelector("main").addEventListener("touchstart", e => {
     const t = e.touches[0];
@@ -13223,7 +13227,7 @@ const PC_DESIGNS = [
   }
 
   // ---------- screens ----------
-  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["table", "🍽️ Table"], ["house", "📶 House info"]];
+  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["table", "🍽️ Table arrangement"], ["house", "📶 House info"]];
   const TASK_TABS = [["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["out", "💡 Outdoor & lights"]];   // these now live on the Tasks page
   function renderHost() {
     const fr = $("#hostFridge");
