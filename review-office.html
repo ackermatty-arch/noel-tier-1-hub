@@ -3775,6 +3775,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <p class="voice-status" id="voiceStatus" aria-live="polite">Listening…</p>
     <p class="voice-heard" id="voiceHeard"></p>
     <p class="voice-reply" id="voiceReply" aria-live="polite"></p>
+    <button type="button" class="btn btn-ghost btn-sm" id="voiceHear" hidden style="margin-bottom:10px">Tap to hear it ›</button>
     <div class="voice-try">Try saying</div>
     <button type="button" class="btn btn-ghost btn-sm" id="voiceMore" hidden style="margin-bottom:10px">Show examples ›</button>
     <div class="voice-chips" id="voiceChips">
@@ -8807,7 +8808,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
         vStatus = $("#voiceStatus"), vHeard = $("#voiceHeard"), vReply = $("#voiceReply");
   let rec = null, closeTimer = null;
 
-  function speak(text) {
+  function speak(text, now) {
     try {
       if (!("speechSynthesis" in window)) return;
       speechSynthesis.cancel();
@@ -8821,7 +8822,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
           u.lang = lang; u.rate = 1; u.pitch = 1.05; u.volume = 1;
           speechSynthesis.resume(); speechSynthesis.speak(u);
         } catch (e) {}
-      }, 350);
+      }, now ? 0 : 350);
     } catch (e) { /* speaking is optional */ }
   }
   // iPhone only speaks after a tap: quietly "warm up" the voice the first time the mic is tapped
@@ -8865,7 +8866,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     try { speechSynthesis.cancel(); } catch (e) {}
     stopListening();
     if (keep !== true) { vHeard.textContent = ""; vReply.textContent = ""; voiceMiss = 0; }
-    vStatus.textContent = "Listening…";
+    vStatus.textContent = "Listening…"; $("#voiceHear").hidden = true;
     const me = rec = new SR();
     me.lang = navigator.language || "en-US";
     me.interimResults = true; me.maxAlternatives = 3; me.continuous = false;
@@ -8906,12 +8907,16 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     else showReply(`Sorry, I didn't catch that. Try again, or tap an example below.`, false, true);
   }
 
+  let lastReply = ""; const IS_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  $("#voiceHear").addEventListener("click", () => { clearTimeout(closeTimer); speak(lastReply, true); });
   function showReply(text, ok, retry) {
     vOrb.classList.remove("listening");
     vStatus.textContent = ok ? "Done!" : "Hmm…";
     vReply.textContent = text;
     clearTimeout(closeTimer);
-    if (ok) { speak(text); closeTimer = setTimeout(closeVoice, 4500); return; }
+    lastReply = text; $("#voiceHear").hidden = !text;
+    stopListening();   // let go of the mic so the phone can play sound
+    if (ok) { speak(text); closeTimer = setTimeout(closeVoice, IS_IOS ? 12000 : 4500); return; }
     if (retry && ++voiceMiss <= 3 && !vPanel.hidden) {   // didn't catch it: stay open and listen again, no need to close and tap the mic
       closeTimer = setTimeout(() => { if (!vPanel.hidden) listen(true); }, 900);
     } else { speak(text); if (retry) vStatus.textContent = "Tap the mic to try again"; }
