@@ -119,7 +119,7 @@
   }
 
   // ---------- screens ----------
-  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["table", "🍽️ Table arrangement"], ["house", "📶 House info"], ["cards", "💌 Cards"]];
+  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["table", "🍽️ Table arrangement"], ["house", "📶 House info"], ["cards", "💌 Ecards & invites"]];
   const TASK_TABS = [["supplies", "📦 Supplies"], ["out", "💡 Outdoor & lights"]];   // these now live on the Tasks page
   function renderHost() {
     const fr = $("#hostFridge");
