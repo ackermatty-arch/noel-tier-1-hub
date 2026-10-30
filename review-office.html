@@ -2652,6 +2652,11 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       <span class="hf-txt"><b>Fridge sheet</b><small>Travel plans, guests, rooms, seating, cleaning days, supplies and house info, all on one printed page.</small></span>
       <button type="button" class="btn btn-red" data-print="fridge">🖨️ Print</button>
     </div>
+    <div class="card host-fridge" id="hostAllPrint">
+      <span class="hf-ico">🖨️</span>
+      <span class="hf-txt"><b>Print everything</b><small>Everything you chose on this page (travel, guests, table, cleaning, supplies and house info) as one printout. Look at it first, then print or save.</small></span>
+      <button type="button" class="btn btn-red" data-print="planall">Print all</button>
+    </div>
     </div>
   </section>
 
@@ -13453,6 +13458,10 @@ const PC_DESIGNS = [
       <p class="fr-foot">Made with Noël Tier 1 Hub</p></div>`;
     return { title: "Hosting fridge sheet", css, html, margin: 0.45, file: "Hosting-Fridge-Sheet" };
   }
+  function planAllDoc() {   // 🖨️ everything on the Plan page (travel, guests, rooms, seating, cleaning, supplies, house info) as one printout
+    const a = travelDoc(), b = fridgeDoc();
+    return { title: "Everything for your home", css: a.css + " " + b.css + " .pa-break{page-break-before:always;break-before:page}", html: a.html + `<div class="pa-break"></div>` + b.html, margin: 0.45, file: "Home-Plans" };
+  }
   // ---------- house info card as a picture ----------
   async function shareHouseCard() {
     const h = host.house, rows = [["📶 Wi-Fi", h.wifi], ["🔑 Password", h.pass], ["🚗 Parking", h.parking], ["🏡 House notes", h.rules], ["🧸 Little ones", h.kids]].filter(r => r[1]);
@@ -15960,6 +15969,7 @@ const PC_DESIGNS = [
     else if (key === "oysign" || key === "oysheet" || key.startsWith("oycard:")) d = oyDoc(key);
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "travel") d = travelDoc();
+    else if (key === "planall") d = planAllDoc();
     else if (key === "chores") d = choresDoc();
     else if (key === "budget") d = budgetDoc();
     else if (key === "shared") d = shrDoc();

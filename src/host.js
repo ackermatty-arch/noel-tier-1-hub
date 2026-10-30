@@ -348,6 +348,10 @@
       <p class="fr-foot">Made with Noël Tier 1 Hub</p></div>`;
     return { title: "Hosting fridge sheet", css, html, margin: 0.45, file: "Hosting-Fridge-Sheet" };
   }
+  function planAllDoc() {   // 🖨️ everything on the Plan page (travel, guests, rooms, seating, cleaning, supplies, house info) as one printout
+    const a = travelDoc(), b = fridgeDoc();
+    return { title: "Everything for your home", css: a.css + " " + b.css + " .pa-break{page-break-before:always;break-before:page}", html: a.html + `<div class="pa-break"></div>` + b.html, margin: 0.45, file: "Home-Plans" };
+  }
   // ---------- house info card as a picture ----------
   async function shareHouseCard() {
     const h = host.house, rows = [["📶 Wi-Fi", h.wifi], ["🔑 Password", h.pass], ["🚗 Parking", h.parking], ["🏡 House notes", h.rules], ["🧸 Little ones", h.kids]].filter(r => r[1]);

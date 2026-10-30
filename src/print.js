@@ -23,6 +23,7 @@
     else if (key === "oysign" || key === "oysheet" || key.startsWith("oycard:")) d = oyDoc(key);
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "travel") d = travelDoc();
+    else if (key === "planall") d = planAllDoc();
     else if (key === "chores") d = choresDoc();
     else if (key === "budget") d = budgetDoc();
     else if (key === "shared") d = shrDoc();
