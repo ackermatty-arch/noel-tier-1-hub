@@ -8809,19 +8809,21 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
 
   function speak(text, now) {
     try {
-      if (!("speechSynthesis" in window)) return;
-      speechSynthesis.cancel();
-      // iPhone: the mic holds the audio, so wait a moment after listening ends, then pick a real voice and speak
-      setTimeout(() => {
+      if (!("speechSynthesis" in window)) { vStatus.textContent = "No voice on this browser"; return; }
+      const go = () => {
         try {
+          if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
           const u = new SpeechSynthesisUtterance(text);
           const lang = navigator.language || "en-US", vs = speechSynthesis.getVoices();
           const v = vs.find(x => x.lang === lang && x.localService) || vs.find(x => x.lang === lang) || vs.find(x => x.lang && x.lang.slice(0, 2) === lang.slice(0, 2));
-          if (v) u.voice = v;
-          u.lang = lang; u.rate = 1; u.pitch = 1.05; u.volume = 1;
+          if (v) { u.voice = v; u.lang = v.lang; } else u.lang = lang;
+          u.rate = 1; u.volume = 1;
+          u.onerror = ev => { vStatus.textContent = "Voice problem: " + (ev.error || "unknown"); };
+          window.__noelUtt = u;   // Safari drops speech if nothing holds on to the utterance
           speechSynthesis.resume(); speechSynthesis.speak(u);
-        } catch (e) {}
-      }, now ? 0 : 350);
+        } catch (e) { vStatus.textContent = "Voice problem: " + e.message; }
+      };
+      if (now) go(); else setTimeout(go, 350);
     } catch (e) { /* speaking is optional */ }
   }
   // iPhone only speaks after a tap: quietly "warm up" the voice the first time the mic is tapped
