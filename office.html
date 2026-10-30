@@ -12510,7 +12510,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     const food = all.filter(([c]) => !/drink|pairing/i.test(c)).flatMap(([, it]) => it.map(clean)), drinks = all.filter(([c]) => /drink/i.test(c)).flatMap(([, it]) => it.map(clean));
     const dot = " <i>·</i> ", blk = (name, body) => `<div class="menu-dish"><h4>${name}</h4>${body}</div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
     const own = `<button type="button" class="menu-go menu-skip" data-nyeown>My own plans</button>`;
-    el.innerHTML = `<div class="menu-top">${own}${go}</div>
+    el.innerHTML = `<div class="menu-top">${go}</div>
       <p class="menu-star">✦</p><h2 class="menu-title">New Year's Eve</h2><p class="menu-sub">Party bites, games and a midnight countdown, all planned for you</p><p class="menu-rule"><span></span>✦<span></span></p>
       <h3 class="menu-group">The Party</h3>` +
       blk("New Year's Eve Party", `<p class="menu-items">${food.join(dot)}</p><p class="menu-drinks"><b>Drinks</b> ${drinks.join(dot)}</p>`) +
@@ -12531,7 +12531,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   }, true);
   document.addEventListener("click", e => {
     const nav = e.target.closest && e.target.closest("[data-goview=nye],[data-view=nye]");
-    if (nav) { nyeScreen = "menu"; setTimeout(renderNyeMenu, 0); }
+    if (nav) { nyeScreen = e.target.closest("#nyBanner") ? "build" : "menu"; setTimeout(renderNyeMenu, 0); }   // the Games countdown banner goes straight to the countdown
   }, true);
   $("#view-nye").addEventListener("click", e => {
     if (e.target.closest("[data-nyeown]")) {   // 📝 my own plans: the typed notebook, set up for New Year's Eve
