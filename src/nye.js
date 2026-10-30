@@ -156,6 +156,13 @@
 
   function renderNye() { renderNyeCount(); renderNyeParty(); renderJar(); renderNyeMenu(); }
   setInterval(() => { if ($("#view-nye").classList.contains("active")) renderNyeCount(); }, 1000);
+  function renderNyBanner() {
+    const el = $("#nyBannerSub"); if (!el) return;
+    const now = new Date(), isJan1 = now.getMonth() === 0 && now.getDate() === 1, y = isJan1 ? now.getFullYear() : now.getFullYear() + 1;
+    const dl = Math.ceil((new Date(y, 0, 1) - now) / 86400000);
+    el.textContent = (now.getMonth() === 11 && now.getDate() === 31) ? "It's New Year's Eve! Midnight is tonight" : isJan1 ? "Happy New Year!" : `${dl} day${dl === 1 ? "" : "s"} until ${y}`;
+  }
+  renderNyBanner(); setInterval(renderNyBanner, 60000);
   setInterval(applySeasonNav, 60000);
 
   // ---------- taps ----------
