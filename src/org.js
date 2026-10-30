@@ -146,7 +146,7 @@
   let miniM = "", miniD = "";
   function calBtnIcon() {
     const b = $("#calBtn"); if (!b) return;
-    b.innerHTML = `<span class="cal-txt">Timers<br>/Cal</span>`;
+    b.innerHTML = `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="1"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 12.4l.9 1.9 2.1.3-1.5 1.5.4 2.1-1.9-1-1.9 1 .4-2.1-1.5-1.5 2.1-.3z"/></svg>`;
   }
   // 👆 swipe the calendar grid left or right to change month (mini popup and full calendar)
   (() => { let x0 = 0, y0 = 0, on = false;

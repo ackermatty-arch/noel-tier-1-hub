@@ -3814,6 +3814,8 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       <button class="chip" data-cmd="I ordered a blender from Amazon arriving Friday">“I ordered a blender from Amazon, arriving Friday”</button>
       <button class="chip" data-cmd="What packages are coming">“What packages are coming?”</button>
       <button class="chip" data-cmd="The blender arrived">“The blender arrived”</button>
+      <button class="chip" data-cmd="Show timers">“Show timers”</button>
+      <button class="chip" data-cmd="Show packages">“Show packages”</button>
       <button class="chip" data-cmd="Pause all timers">“Pause all timers”</button>
       <button class="chip" data-cmd="Open the planner">“Open the planner”</button>
     </div>
@@ -9013,6 +9015,9 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     }
     if (has(/\b(stop|silence|turn off) (the )?(alarm|ringing|chime|bell)\b/)) return "No alarm is ringing right now.";
 
+    // Show the timers / calendar page
+    if (has(/\b(show|open|see|go to|take me to|bring up)\b/) && has(/\b(timers?|alarms?|calendar)\b/) && !has(/\b(start|set|add|pause|stop|cancel|delete)\b/)) { closeSheets(); org.view = "cal"; saveOrg(); renderOrg(); showView("org"); window.scrollTo(0, 0); return "Here are your timers and calendar."; }
+
     // Music
     if (has(/\b(pause|stop|turn off|mute)\b.*\b(music|songs?|tunes)\b/)) { pauseMusic(); return "Music paused."; }
     if (has(/\b(next|skip)\b.*\b(song|track|tune)\b|^ skip $/)) { playMusic(trackIdx + 1); return `Now playing ${tracks()[trackIdx] ? tracks()[trackIdx].title : "the next song"}.`; }
@@ -13667,7 +13672,7 @@ const PC_DESIGNS = [
   let miniM = "", miniD = "";
   function calBtnIcon() {
     const b = $("#calBtn"); if (!b) return;
-    b.innerHTML = `<span class="cal-txt">Timers<br>/Cal</span>`;
+    b.innerHTML = `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="1"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 12.4l.9 1.9 2.1.3-1.5 1.5.4 2.1-1.9-1-1.9 1 .4-2.1-1.5-1.5 2.1-.3z"/></svg>`;
   }
   // 👆 swipe the calendar grid left or right to change month (mini popup and full calendar)
   (() => { let x0 = 0, y0 = 0, on = false;
