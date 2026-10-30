@@ -368,7 +368,7 @@ window.NOEL_MEALS = (function () {
           [`${pars}`, pl(pars, "bunch fresh flat-leaf parsley", "bunches fresh flat-leaf parsley"), pars * 2],
           [`${chive}`, pl(chive, "bunch fresh chives", "bunches fresh chives"), chive * 3]
         ]],
-        ["Meat", [[`${p.w} lb`, "whole turkey (fresh, or frozen and thawed in time)", p.w * 3.3]]],
+        ["Meat", [[`${p.w} lb`, "whole turkey (fresh, or frozen and thawed in time)", p.w * 4.49]]],
         ["Dairy & Refrigerated", [
           [`${sticks} sticks`, `unsalted butter (${fmtNum(up(sticks / 4, 0.25))} lb)`, sticks * 1.75],
           [cupsT(up(creamCups, 0.5)), `heavy cream (${cream} × 500 ml)`, cream * 4.5],
@@ -665,7 +665,7 @@ window.NOEL_MEALS = (function () {
           ["1", "bunch fresh flat-leaf parsley", 2],
           ["1", "bunch fresh thyme", 3]
         ]],
-        ["Meat", [[`${p.w} lb`, "fully cooked bone-in ham (not spiral-cut)", p.w * 4]]],
+        ["Meat", [[`${p.w} lb`, "fully cooked bone-in ham (not spiral-cut)", p.w * 5.49]]],
         ["Dairy & Refrigerated", [
           [`${sticks} sticks`, `unsalted butter (${fmtNum(up(sticks / 4, 0.25))} lb)`, sticks * 1.75],
           [cupsT(up(milkCups, 0.5)), `whole milk (${milk} × 1 L)`, milk * 2.8],
@@ -995,8 +995,8 @@ window.NOEL_MEALS = (function () {
           [`${pom}`, pl(pom, "pomegranate, for garnish (optional)", "pomegranates, for garnish (optional)"), pom * 3]
         ]],
         ["Meat & Seafood", [
-          [`${fmtNum(p.w)} lb`, p.roasts > 1 ? `bone-in prime rib, ${p.ribs} ribs in total (ask for 2 roasts)` : `bone-in prime rib (standing rib roast), ${p.ribs} ribs`, p.w * 14],
-          [`${fmtNum(shrimp)} lb`, "cooked jumbo shrimp, peeled, tails on", shrimp * 22]
+          [`${fmtNum(p.w)} lb`, p.roasts > 1 ? `bone-in prime rib, ${p.ribs} ribs in total (ask for 2 roasts)` : `bone-in prime rib (standing rib roast), ${p.ribs} ribs`, p.w * 22.99],
+          [`${fmtNum(shrimp)} lb`, "cooked jumbo shrimp, peeled, tails on", shrimp * 23]
         ]],
         ["Frozen", [[`${spin} × 10 oz`, pl(spin, "package frozen chopped spinach", "packages frozen chopped spinach"), spin * 3]]],
         ["Dairy & Refrigerated", [
@@ -1010,7 +1010,7 @@ window.NOEL_MEALS = (function () {
         ]],
         ["Pantry & Baking", [
           [`${stock} × 1 L`, "low-sodium beef stock", stock * 3.5],
-          [`${wine}`, pl(wine, "bottle dry red wine (for the jus)", "bottles dry red wine (for the jus)"), wine * 14],
+          [`${wine}`, pl(wine, "bottle dry red wine (for the jus)", "bottles dry red wine (for the jus)"), wine * 16],
           [`${horse}`, pl(horse, "jar prepared horseradish (250 ml)", "jars prepared horseradish (250 ml)"), horse * 4],
           [cupsT(flourC), p.gf ? "gluten-free 1:1 flour blend (with xanthan gum)" : "all-purpose flour", flourC * (p.gf ? 1 : 0.25)],
           [`${choc} × 100 g`, pl(choc, "bar bittersweet chocolate (60–70%)", "bars bittersweet chocolate (60–70%)"), choc * 4],
@@ -1360,7 +1360,7 @@ window.NOEL_MEALS = (function () {
       const cider = n((7 * f + 1) / 8), bourbon = n(1.6 * f / 3.2), cj = n(3 * f / 8), gb = n(4 * f / 6);
       return [
         ["Meat & Seafood", [
-          [`${fmtNum(p.w)} lb`, `crown roast of pork, ${p.ribs} ribs, frenched and tied (order ahead from your butcher)`, p.w * 9],
+          [`${fmtNum(p.w)} lb`, `crown roast of pork, ${p.ribs} ribs, frenched and tied (order ahead from your butcher)`, p.w * 14.99],
           [`${prosc} × 100 g`, pl(prosc, "package thinly sliced prosciutto", "packages thinly sliced prosciutto"), prosc * 6]
         ]],
         ["Produce", [
@@ -1410,7 +1410,7 @@ window.NOEL_MEALS = (function () {
         ]],
         ["Wine, Spirits & Mixers", [
           [`${cider} × 1.89 L`, pl(cider, "jug apple cider", "jugs apple cider"), cider * 5],
-          [`${bourbon} × 750 ml`, pl(bourbon, "bottle bourbon", "bottles bourbon"), bourbon * 35],
+          [`${bourbon} × 750 ml`, pl(bourbon, "bottle bourbon", "bottles bourbon"), bourbon * 45],
           [`${cj} × 1.89 L`, pl(cj, "jug cranberry juice", "jugs cranberry juice"), cj * 5],
           [`${gb} × 4-pack`, "non-alcoholic ginger beer", gb * 6],
           ["", "optional: Champagne or Crémant, Pinot Noir or Chenin Blanc, port", null]
@@ -1726,7 +1726,7 @@ window.NOEL_MEALS = (function () {
       const prosecco = n(f), pj = n(f / 4), fizz = n(f);
       return [
         ["Meat & Seafood", [
-          [`${p.racks} racks`, `frenched racks of lamb, 8 ribs each (about ${fmtNum(p.w)} lb total)`, p.racks * 25],
+          [`${p.racks} racks`, `frenched racks of lamb, 8 ribs each (about ${fmtNum(p.w)} lb total)`, p.racks * 55],
           [`${salmon} × 8 oz`, "smoked salmon", salmon * 12]
         ]],
         ["Produce", [
@@ -1769,8 +1769,8 @@ window.NOEL_MEALS = (function () {
           ["", "kosher salt, flaky salt, black pepper", null]
         ]],
         ["Wine, Spirits & Mixers", [
-          [`${prosecco} × 750 ml`, pl(prosecco, "bottle Prosecco", "bottles Prosecco"), prosecco * 16],
-          [`${wine}`, pl(wine, "bottle dry red wine (for the demi-glace)", "bottles dry red wine (for the demi-glace)"), wine * 14],
+          [`${prosecco} × 750 ml`, pl(prosecco, "bottle Prosecco", "bottles Prosecco"), prosecco * 20],
+          [`${wine}`, pl(wine, "bottle dry red wine (for the demi-glace)", "bottles dry red wine (for the demi-glace)"), wine * 16],
           [`${pj} × 946 ml`, "pomegranate juice", pj * 6],
           [`${fizz} × 1 L`, "sparkling water", fizz * 1.75],
           ["", "optional: Bordeaux, Rioja Reserva or Syrah; Sauvignon Blanc; ice wine", null]
@@ -2791,10 +2791,10 @@ window.NOEL_MEALS = (function () {
       const wine = n(1.5 * f / 3), crushed = n(f), diced = n(2 * f), stock = n(4 * f / 4), gel = n(1.5 * f / 4), van = n(1.5 * f), rasp = n(15 * f / 21), bubbly = n(6 * f / 4);
       return [
         ["Seafood", [
-          [`${fmtNum(fish)} lb`, "firm white fish (cod or halibut)", fish * 14],
-          [`${fmtNum(shrimp)} lb`, "large shrimp, peeled and deveined", shrimp * 18],
-          [`${fmtNum(mussels)} lb`, "fresh mussels", mussels * 5],
-          [`${fmtNum(scallops)} lb`, "sea scallops", scallops * 30]
+          [`${fmtNum(fish)} lb`, "firm white fish (cod or halibut)", fish * 22],
+          [`${fmtNum(shrimp)} lb`, "large shrimp, peeled and deveined", shrimp * 23],
+          [`${fmtNum(mussels)} lb`, "fresh mussels", mussels * 8],
+          [`${fmtNum(scallops)} lb`, "sea scallops", scallops * 42]
         ]],
         ["Produce", [
           [`${fennel}`, pl(fennel, "large fennel bulb", "large fennel bulbs"), fennel * 3],
@@ -2811,7 +2811,7 @@ window.NOEL_MEALS = (function () {
           ["1 L", "whole milk", milk * 2.8]
         ]],
         ["Pantry & Bakery", [
-          [`${wine}`, pl(wine, "bottle dry white wine (Pinot Grigio or Sauvignon Blanc)", "bottles dry white wine"), wine * 15],
+          [`${wine}`, pl(wine, "bottle dry white wine (Pinot Grigio or Sauvignon Blanc)", "bottles dry white wine"), wine * 17],
           [`${crushed} × 28 oz`, pl(crushed, "can crushed tomatoes", "cans crushed tomatoes"), crushed * 2.5],
           [`${diced} × 14 oz`, pl(diced, "can diced tomatoes", "cans diced tomatoes"), diced * 1.5],
           [`${stock} × 1 L`, "seafood stock (or bottles of clam juice)", stock * 4],
