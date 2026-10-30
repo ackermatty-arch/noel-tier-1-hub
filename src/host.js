@@ -128,8 +128,7 @@
       : `<span class="hf-ico">🧲</span><span class="hf-txt"><b>Fridge sheet</b><small>Travel plans, guests, seating, supplies and house info, all on one printed page.</small></span><button type="button" class="btn btn-red" data-print="fridge">🖨️ Print</button>`;
     const tab = HOST_TABS.some(x => x[0] === host.tab) ? host.tab : "away";
     $("#hostTabs").innerHTML = HOST_TABS.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-htab="${k}">${l}</button>`).join("");
-    const tt = TASK_TABS.some(x => x[0] === host.ttab) ? host.ttab : "supplies";
-    if ($("#hostTaskTabs")) { $("#hostTaskTabs").innerHTML = TASK_TABS.map(([k, l]) => `<button type="button" class="chip${k === tt ? " on" : ""}" data-ttab="${k}">${l}</button>`).join(""); $("#hostTaskBody").innerHTML = ({ clean: hostCleanHtml, supplies: hostSuppliesHtml, out: hostOutHtml })[tt](); }
+    if ($("#hostTaskBody")) $("#hostTaskBody").innerHTML = hostSuppliesHtml() + hostOutHtml();   // supplies and outdoor & lights run on below the checklist
     $("#hostBody").innerHTML = ({ guests: hostGuestsHtml, rooms: hostRoomsHtml, table: hostTableHtml, clean: hostCleanHtml, supplies: hostSuppliesHtml, house: hostHouseHtml, away: hostAwayHtml, out: hostOutHtml })[tab]();
   }
   const roomOpts = sel => `<option value="">Not staying over</option>` + host.rooms.map(r => `<option value="${r.id}" ${r.id === sel ? "selected" : ""}>${r.icon} ${esc(r.name)}</option>`).join("");
