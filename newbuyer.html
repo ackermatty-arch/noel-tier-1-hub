@@ -1119,7 +1119,10 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
   background: var(--cream); border: 3px solid var(--gold); border-radius: 24px;
   padding: 22px 18px 16px; box-shadow: var(--shadow-lg);
   animation: pop .35s cubic-bezier(.2,1.4,.4,1);
+  max-height: calc(100vh - var(--nav-h) - var(--safe-b) - 32px); max-height: calc(100dvh - var(--nav-h) - var(--safe-b) - 32px);
+  overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
 }
+.voice-card #voiceClose { position: sticky; bottom: 0; background: #fff; }
 .voice-orb {
   width: 90px; height: 90px; border-radius: 50%; margin: 0 auto 10px;
   display: grid; place-items: center; font-size: 36px; color: #fff;
@@ -8842,6 +8845,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     listen();
   }
 
+  vPanel.addEventListener("click", e => { if (e.target === vPanel) closeVoice(); });
   function closeVoice() {
     clearTimeout(closeTimer);
     stopListening();
