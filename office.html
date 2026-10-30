@@ -2627,7 +2627,6 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
        VIEW 2 — HOLIDAY PLANNER & CHECKLIST
        ============================================================ -->
   <section class="view" id="view-planner" aria-labelledby="plannerTitle">
-    <button type="button" class="btn btn-green btn-sm gift-tasks-btn fam-only" data-goview="gifts">Gifts ›</button>
     <h2 class="view-title" id="plannerTitle" data-co-title="Event Coordinator">Plan</h2>
     <p class="view-intro" data-co-desc="Your party plan, approvals, vendors and budget in one place. Everything saves automatically.">Travel plans, guests, rooms, seating, cleaning and supplies, all in one place, so the house is ready before the doorbell rings.</p>
 
@@ -12521,7 +12520,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       `<h3 class="menu-group">Midnight</h3>` +
       blk("The finishing touches", `<p class="menu-items">Big Countdown with fireworks${dot}Wishes Jar${dot}Midnight Champagne card${dot}Appetizer Ideas${dot}Printable Party Planner</p>`) +
       `<p class="menu-note">Choose your guests and start time, and Noël builds the rest.</p>
-      <div class="menu-bottom"><p class="menu-ready">Ready to build your night?</p>${go}<button type="button" class="menu-own" data-nyecount>Just here for the countdown? Open it ›</button></div>`;
+      <div class="menu-bottom"><p class="menu-ready">Ready to build your night?</p>${go}</div>`;
   }
   document.addEventListener("click", e => {   // opening My Own Dinner from anywhere but New Year's resets its back buttons
     if (e.target.closest && e.target.closest("[data-goview=own],[data-menuskip],[data-svown],[data-offown]")) {

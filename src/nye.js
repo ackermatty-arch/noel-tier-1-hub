@@ -211,7 +211,7 @@
       `<h3 class="menu-group">Midnight</h3>` +
       blk("The finishing touches", `<p class="menu-items">Big Countdown with fireworks${dot}Wishes Jar${dot}Midnight Champagne card${dot}Appetizer Ideas${dot}Printable Party Planner</p>`) +
       `<p class="menu-note">Choose your guests and start time, and Noël builds the rest.</p>
-      <div class="menu-bottom"><p class="menu-ready">Ready to build your night?</p>${go}<button type="button" class="menu-own" data-nyecount>Just here for the countdown? Open it ›</button></div>`;
+      <div class="menu-bottom"><p class="menu-ready">Ready to build your night?</p>${go}</div>`;
   }
   document.addEventListener("click", e => {   // opening My Own Dinner from anywhere but New Year's resets its back buttons
     if (e.target.closest && e.target.closest("[data-goview=own],[data-menuskip],[data-svown],[data-offown]")) {
