@@ -2648,6 +2648,16 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       </div>
     </article>
 
+    <article class="card print-card featured" style="margin-top:12px">
+      <div class="print-thumb">✦</div>
+      <div class="print-info">
+        <span class="bundle-tag">Made in the app · your guests' names</span>
+        <h3>Christmas Place Cards</h3>
+        <p>Pick a design, add your guests, and the app prints a card for each name.</p>
+        <button type="button" class="btn btn-red btn-sm" id="goPlaceCards">Make place cards ›</button>
+      </div>
+    </article>
+
 
     
     </details>
@@ -7901,6 +7911,10 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (c) closeSheet(c.dataset.close);
   });
 
+  document.addEventListener("click", e => {
+    if (!e.target.closest("#goPlaceCards")) return;
+    showView("planner"); const hb = document.getElementById("hostPlaceCards") || document.getElementById("hostBody"); if (hb) { let d = hb.closest("details"); while (d) { d.open = true; d = d.parentElement.closest("details"); } hb.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  });
   // Placeholder PDF links → friendly message instead of a dead link
   $$(".pdf-link").forEach(a => a.addEventListener("click", e => {
     const h = a.getAttribute("href");
