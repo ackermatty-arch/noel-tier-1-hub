@@ -1074,6 +1074,12 @@
   const OFF_DEFAULT_PICKS = ["Caprese Skewers", "Charcuterie Board", "Mini Sliders", "Spinach Artichoke Dip", "Pinwheel Roll-Ups", "Mini Cheesecake Bites"];
   const offFoodCfg = () => (off.food = off.food || { style: "", mode: "meal", picks: null, got: {} });
   function offPeople() { const a = Math.max(1, +off.ev.headcount || 1), k = off.ev.who === "family" ? Math.max(0, +off.ev.kids || 0) : 0; return { a, k, eq: a + k * 0.6, all: a + k }; }
+  // 📖 recipe for one appetizer: ingredients and steps for ONE batch
+  function offRecipeHtml(n, b) {
+    const MD3 = window.NOEL_MEALS || {}, rc = (MD3.appRecipes || {})[n], bites = ((MD3.appShop || {})[n] || [0])[0];
+    if (!rc) return "";
+    return `<details class="app-rec"><summary>Recipe</summary><p class="rec-batch"><b>One batch${bites ? ` (about ${bites} bites)` : ""}.</b>${b > 1 ? ` You need ${b} batches, so repeat it ${b} times.` : ""}</p><h5>Ingredients</h5><ul>${rc.ing.map(x => `<li>${esc(x)}</li>`).join("")}</ul><h5>Steps</h5><ol>${rc.steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol></details>`;
+  }
   function offFoodPlan() {
     const F = offFoodCfg(), MD2 = window.NOEL_MEALS || {}, SHOP = MD2.appShop || {}, DR = MD2.drinkApps || [], P = offPeople();
     const all = (window.NOEL_APPS || []).map(r => r[1]);
@@ -1149,7 +1155,7 @@
         <p class="app-sum">🍢 <b>${X.items.length} appetizers</b> · about <b>${X.total} bites</b>${X.items.length ? ` (${X.each} of each)` : ""} · about <b>${cad0(X.sum)} ${currency}</b>, roughly ${cad(X.sum / Math.max(1, X.P.all))} per person</p></div>
       <div class="card pt-card"><h3>✨ Tap to choose</h3><p class="host-rem">${off.ev.who === "family" ? "⭐ marks kid favourites." : "Mix warm, cold and one sweet bite."}</p>
         <div class="apps-filters">${(window.NOEL_APPS || []).map(r => `<button type="button" class="chip${X.picks.includes(r[1]) ? " on" : ""}" data-offapp="${esc(r[1])}">${X.picks.includes(r[1]) ? "✓ " : ""}${r[0]} ${esc(r[1])}${off.ev.who === "family" && KID_APPS.includes(r[1]) ? " ⭐" : ""}</button>`).join("")}</div></div>
-      ${X.items.length || X.dItems.length ? `<div class="card pt-card"><h3>🧾 Your menu</h3><ul class="cat-list">${X.items.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.pieces} pieces · ${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}<small>💡 ${esc(i.row[3])}</small></span></li>`).join("")}${X.dItems.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}</span></li>`).join("")}</ul>
+      ${X.items.length || X.dItems.length ? `<div class="card pt-card"><h3>🧾 Your menu</h3><ul class="cat-list">${X.items.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.pieces} pieces · ${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}<small>💡 ${esc(i.row[3])}</small>${offRecipeHtml(i.n, i.b)}</span></li>`).join("")}${X.dItems.map(i => `<li><b>${i.row[0]} ${esc(i.n)}</b><span>${i.b} ${i.b === 1 ? "batch" : "batches"} · ${cad(i.cost)}</span></li>`).join("")}</ul>
         <div class="send-btns"><button type="button" class="btn btn-red" data-print="offfood">🖨️ Menu &amp; shopping list</button><button type="button" class="btn btn-ghost" id="offFoodCost">💵 Add ${cad0(X.sum)} to costs</button></div></div>` : ""}
       ${offDrinksHtml(X.P)}
       <div class="card pt-card">${offNear("Shop for it near me", [["🛒 Grocery stores", "grocery store"], ["📦 Warehouse & bulk stores", "warehouse club store"], ["🧁 Bakeries", "bakery"], ["🥤 Party supply stores", "party supply store"]], "Short on time? Grocery stores sell ready-made party platters too.")}</div>` + offSuppliesHtml(X.P);
@@ -1176,6 +1182,7 @@
     const html = `<div class="of"><h1>🍢 ${esc(off.ev.name || "Office Party")} Menu</h1><p class="of-s">${X.P.a} adults${X.P.k ? ` + ${X.P.k} kids` : ""} · about ${X.total} bites · about ${cad0(X.sum)} ${currency}</p>
       <h2>The menu</h2><table><tr><th>Appetizer</th><th>How many</th><th>Make ahead</th></tr>${X.items.map(i => `<tr><td><b>${esc(i.n)}</b></td><td>${i.pieces} pieces (${i.b} ${i.b === 1 ? "batch" : "batches"})</td><td>${esc(i.row[3])}</td></tr>`).join("")}${X.dItems.map(i => `<tr><td><b>${esc(i.n)}</b></td><td>${i.b} ${i.b === 1 ? "batch" : "batches"}</td><td>${esc(i.row[3])}</td></tr>`).join("")}</table>
       <h2>Shopping list</h2><ul>${X.items.concat(X.dItems).flatMap(i => (SHOP[i.n] || [0, []])[1].map(([t, pr]) => `<li>☐ ${i.b > 1 ? `<b>${i.b} ×</b> ` : ""}${esc(t)}${pr ? ` · ${cad(pr * i.b * fx())}` : ""} <small style="color:#999">(${esc(i.n)})</small></li>`)).join("")}</ul>
+      <h2>Recipes</h2>${X.items.concat(X.dItems).map(i => { const rc = ((window.NOEL_MEALS || {}).appRecipes || {})[i.n]; return rc ? `<div class="of-rec"><h3>${esc(i.n)}</h3><p><small>${i.b} ${i.b === 1 ? "batch" : "batches"}: the amounts below are for ONE batch.</small></p><ul>${rc.ing.map(x => `<li>${esc(x)}</li>`).join("")}</ul><ol>${rc.steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol></div>` : ""; }).join("")}
       ${(DD => DD ? `<h2>Drinks menu (${DD.mode === "none" ? "alcohol-free" : "alcohol served"})</h2>` + DD.groups.map(([g, rows]) => `<h3>${esc(g)}</h3><table>${rows.map(([n, q]) => `<tr><td><b>${esc(n)}</b></td><td>${esc(q)}</td></tr>`).join("")}</table>`).join("") + (DD.tips.length ? `<ul>${DD.tips.map(t => `<li>• ${esc(t)}</li>`).join("")}</ul>` : "") : "")(offDrinksPlan(X.P))}
       <h2>Plates, cups &amp; extras</h2><ul><li>☐ ${Math.ceil(X.P.all * 1.5)} plates</li><li>☐ ${X.P.all * 3} napkins</li><li>☐ ${X.P.all * 3} cups</li><li>☐ ${X.P.all} cutlery sets</li><li>☐ ${Math.ceil(X.P.all / 8)} bags of ice</li><li>☐ Garbage &amp; recycling bags</li></ul></div>`;
     return { title: "Office party menu & shopping list", css, html, margin: 0.5, file: "Office-Party-Menu" };
