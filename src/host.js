@@ -118,7 +118,7 @@
   }
 
   // ---------- screens ----------
-  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["table", "🍽️ Table arrangement"], ["house", "📶 House info"]];
+  const HOST_TABS = [["away", "✈️ Travel plans"], ["guests", "🚗 Guests"], ["table", "🍽️ Table arrangement"], ["house", "📶 House info"], ["cards", "💌 Cards"]];
   const TASK_TABS = [["clean", "🧽 Chores"], ["supplies", "📦 Supplies"], ["out", "💡 Outdoor & lights"]];   // these now live on the Tasks page
   function renderHost() {
     const fr = $("#hostFridge");
@@ -369,7 +369,8 @@
     if (!e.target.closest("#hostWrap, #hostTaskWrap")) return;
     const t = e.target;
     const ttb = t.closest("[data-ttab]"); if (ttb) { host.ttab = ttb.dataset.ttab; saveHost(); renderHost(); return; }
-    const tb = t.closest("[data-htab]"); if (tb) { host.tab = tb.dataset.htab; saveHost(); renderHost(); return; }
+    const tb = t.closest("[data-htab]"); if (tb && tb.dataset.htab === "cards") { showView("invites"); showPane("cards"); window.scrollTo(0, 0); return; }
+    if (tb) { host.tab = tb.dataset.htab; saveHost(); renderHost(); return; }
     const card = t.closest("[data-hg]"), room = t.closest("[data-hr]");
     if (t.closest("[data-hdel]")) {
       if (card && confirm("Remove this guest?")) { host.guests = host.guests.filter(g => g.id !== card.dataset.hg); }
