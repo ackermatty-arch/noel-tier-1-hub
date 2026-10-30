@@ -243,7 +243,7 @@
         ${active ? `<p class="meal-on">✅ Alarms are set. Noël will ring for every step${NoelNative.isNative() ? ", even when the app is closed" : ". Keep Noël open on this device"}.</p>` : ""}
       </div>
       <div class="seg seg4 sub-tabs" id="mealPanes">${panes.map(([k, l]) => `<button type="button" data-mpane="${k}" aria-pressed="${k === pane}">${l}</button>`).join("")}</div>
-      <div class="card meal-body">${body}</div>`;
+      <div class="card meal-body">${/crown$/.test(m.id) ? `<div class="crown-warn box"><b>✦ Order your crown roast now</b>Crown roasts are a special order and butchers run out fast, especially in December. Call your butcher or meat counter today, tell them the date you need it, and ask for it frenched and tied.</div>` : ""}${body}</div>`;
     if (active && (mealPlan.guests !== c.guests || mealPlan.at !== D || (mealPlan.addons || "") !== addonSig(m) || (m.options && (mealPlan.doneness !== c.doneness || !!mealPlan.gf !== c.gf)))) $("#mealDetail .meal-on").innerHTML = "⚠️ You changed your dinner details. Tap <b>Stop</b>, then <b>Start</b> again to update the alarms.";
   }
 
@@ -643,7 +643,7 @@
         let drinks = dr.flatMap(([, items]) => items.map(clean));
         if (!drinks.length) { const names = [...(m.drinks || []).map(d => d[1]).join(" ").matchAll(/((?:[A-Z][\w'’-]*\s)*[A-Z][\w'’-]*)\s*\(recipe included\)/g)].map(x => x[1]); drinks = [...names.map(esc), "wine pairings"]; }
         const est = (() => { try { const c8 = Object.assign({}, cfgFor(id), { guests: 8 }), p8 = mealSizes(m, c8); return m.shop(p8.f, p8).reduce((a, [, items]) => a + items.reduce((b, [, , e]) => b + (e != null ? e * fx() : 0), 0), 0); } catch (e) { return 0; } })();
-        return `<div class="menu-dish"><h4>${esc(m.name)}</h4><p class="menu-items">${food.flatMap(([, items]) => items.map(clean)).join(" <i>·</i> ")}</p>` + (est ? `<p class="menu-est">Estimated about <b>${cad0(est)}</b> ${currency} for 8 guests<small> · dinner wine and pantry staples extra</small></p>` : "") +
+        return `<div class="menu-dish"><h4>${esc(m.name)}</h4><p class="menu-items">${food.flatMap(([, items]) => items.map(clean)).join(" <i>·</i> ")}</p>` + (/crown$/.test(id) ? `<p class="crown-warn">✦ Order your crown roast now. Butchers run out fast.</p>` : "") + (est ? `<p class="menu-est">Estimated about <b>${cad0(est)}</b> ${currency} for 8 guests<small> · dinner wine and pantry staples extra</small></p>` : "") +
           `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p>${m.party ? "" : '<p class="menu-sub2">Vegan dish available to add</p>'}<a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
       }).join("")).join("") +
       `<p class="menu-note">Have vegan guests? Choose a vegan dish to add when you plan your dinner.</p>
