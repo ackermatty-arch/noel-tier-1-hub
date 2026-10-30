@@ -8838,8 +8838,11 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
           if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
           const u = new SpeechSynthesisUtterance(text);
           const lang = navigator.language || "en-US", vs = speechSynthesis.getVoices();
-          const v = vs.find(x => x.lang === lang && x.localService) || vs.find(x => x.lang === lang) || vs.find(x => x.lang && x.lang.slice(0, 2) === lang.slice(0, 2));
-          if (v) { u.voice = v; u.lang = v.lang; } else u.lang = lang;
+          // 🎙 a friendly North American woman's voice: US or Canadian English, known female names first, never a UK accent
+          const na = vs.filter(x => /^en[-_](US|CA)$/i.test(x.lang || "")), fem = /samantha|allison|ava\b|susan|victoria|zoe|joanna|salli|kendra|kimberly|ivy|aria|jenny|michelle|zira|nicky|siri.*female|google us english|female/i, mal = /\b(alex|fred|david|mark|aaron|guy|tom|jorge|ralph|junior|male\b|eric|roger|christopher|steffan|brandon)\b/i;
+          const v = na.find(x => fem.test(x.name) && x.localService) || na.find(x => fem.test(x.name)) || na.find(x => !mal.test(x.name) && x.localService) || na.find(x => !mal.test(x.name)) || na[0]
+            || vs.find(x => x.lang === lang && !/en[-_]GB/i.test(x.lang) && x.localService) || vs.find(x => x.lang && x.lang.slice(0, 2) === lang.slice(0, 2) && !/en[-_](GB|AU|IN|IE|ZA)/i.test(x.lang));
+          if (v) { u.voice = v; u.lang = v.lang; } else u.lang = /^en/i.test(lang) ? "en-US" : lang;
           u.rate = 1; u.volume = 1;
           u.onerror = ev => { vStatus.textContent = "Voice problem: " + (ev.error || "unknown"); };
           window.__noelUtt = u;   // Safari drops speech if nothing holds on to the utterance
