@@ -7739,7 +7739,6 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
   // --- Planner phases & default tasks. Keep each task "id" unique.
   const FAMILY_PHASES = [
     { id: "f0", icon: "💰", title: "Late October: Budget & Master List", tasks: [
-      { id: "f0-1", text: "Build the gift list by group: family, friends, service workers, coworkers" },
       { id: "f0-2", text: "Set a spending cap for each person" },
       { id: "f0-3", text: "Mark the hard deadlines: school breaks, closures, shipping cut-offs" },
       { id: "f0-4", text: "Add family gatherings, light festivals & school concerts to the calendar" },
@@ -7749,10 +7748,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       { id: "f1-1", text: "Test the holiday lights & check the tree" },
       { id: "f1-2", text: "List broken or missing decorations" },
       { id: "f1-3", text: "Choose a colour palette or theme (wrapping, tree, table)" },
-      { id: "f1-4", text: "Check baking & hosting supplies: pantry staples, linens, dinnerware" } ] },
+       ] },
     { id: "f2", icon: "✉️", title: "Mid-November: Cards & Gift Shopping", tasks: [
       { id: "f2-1", text: "Update the card list & mailing addresses" },
-      { id: "f2-2", text: "Choose or order photo cards" },
       { id: "f2-3", text: "Buy holiday postage stamps" },
       { id: "f2-4", text: "Map the Black Friday & Cyber Monday deals" },
       { id: "f2-5", text: "Log online orders: tracking, delivery date, hiding spot" } ] },
@@ -8349,6 +8347,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   const NY_IDS = ["nyw", "nye"];   // the two New Year's task groups live on the NYE tab
   const planPhases = () => PHASES.filter(p => !NY_IDS.includes(p.id)), nyPhases = () => PHASES.filter(p => NY_IDS.includes(p.id));
   function taskTag(id) {
+    return "";   // the "Noël can help" links were removed from the task list
     const g = TASK_TAGS[id]; if (!g) return "";
     return `<span class="nt ${g[0]}" role="button" tabindex="0" data-nt="${g[1]}">${g[0] === "g" ? "Noël generates" : "Noël can help"} › ${g[1]}</span>`;
   }
