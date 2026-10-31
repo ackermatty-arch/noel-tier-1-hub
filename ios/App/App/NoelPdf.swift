@@ -49,6 +49,11 @@ public class NoelPdfPlugin: CAPPlugin, CAPBridgedPlugin, WKNavigationDelegate {
         bridge?.viewController?.view.addSubview(w)
         web = w
         w.loadHTMLString(d.html, baseURL: nil)
+        // if a page never finishes loading, give up after 20 seconds instead of staying "busy" forever
+        DispatchQueue.main.asyncAfter(deadline: .now() + 20) { [weak self, weak w] in
+            guard let self = self, let w = w, self.web === w, self.call != nil else { return }
+            self.fail(NSError(domain: "NoelPdf", code: 1, userInfo: [NSLocalizedDescriptionKey: "The page took too long to load"]))
+        }
     }
 
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
