@@ -69,6 +69,7 @@
     { id: "bbq", name: "Summer BBQ or picnic", m: 6, cat: "cele", start: "11:30", end: "14:00", acts: ["potluck", "games", "music"], theme: "Summer", sign: "Summer BBQ. Grab a plate.", chk: [[28, "Choose the date and a rain plan"], [21, "Book the park or patio"], [14, "Send the invitation and the potluck sheet"], [7, "Order the meat, buns and drinks"], [2, "Confirm the headcount"], [0, "Set up tables, shade and games"]] },
     { id: "icecream", name: "Ice cream social", m: 7, cat: "team", start: "14:00", end: "15:00", acts: ["catered"], sign: "Ice cream social. Build your own sundae.", chk: [[10, "Pick the date and the budget"], [5, "Order ice cream and toppings"], [2, "Get a cooler or freezer space"], [0, "Set up the topping bar"]] },
     { id: "learning", name: "Learning lunch", m: 9, cat: "learn", start: "12:00", end: "13:30", acts: ["catered", "teamb"], theme: "Lunch and learn", sign: "Lunch and learn today.", chk: [[21, "Choose a topic and a speaker"], [14, "Book the room and any screen"], [7, "Send the invitation"], [2, "Order lunch"], [0, "Set up and welcome everyone"]] },
+    { id: "easter", name: "Easter or spring lunch", m: 4, cat: "cele", start: "12:00", end: "13:30", acts: ["catered", "games"], theme: "Spring", hint: "Easter Sunday moves every year. Plan it for the Thursday or Friday before.", sign: "Happy spring! Grab a plate and an egg.", chk: [[28, "Pick the date (the Thursday or Friday before Easter) and get approval"], [21, "Book the room and set the budget"], [14, "Decide the food: catered, potluck or baked treats"], [14, "Plan an egg hunt or spring games with small prizes"], [10, "Ask about dietary needs and allergies"], [7, "Send the invitation and collect RSVPs"], [7, "Order spring decorations, baskets and eggs"], [3, "Confirm the headcount with the caterer"], [2, "Buy prizes and treat bags"], [1, "Hide the eggs or set up the games"], [0, "Set out the food and welcome everyone"]] },
     { id: "boss", name: "Boss's Day", m: 10, cat: "rec", start: "15:00", end: "15:30", acts: ["catered"], hint: "October 16 in many countries. Check yours.", sign: "Thank you for leading us.", chk: [[14, "Decide on a card or small gift"], [10, "Pass the card around"], [3, "Order a treat or flowers"], [0, "Present it"]] },
     { id: "costume", name: "Costume or pumpkin contest", m: 10, cat: "team", start: "15:00", end: "16:30", acts: ["games", "sweater"], theme: "Fall fun", sign: "Costume contest. Vote at 3:30.", chk: [[14, "Pick the date and the rules"], [7, "Send the invitation"], [3, "Buy small prizes"], [0, "Set up voting slips and snacks"]] },
     { id: "thanksgiving", name: "Thanksgiving potluck", m: 11, cat: "cele", start: "12:00", end: "13:30", acts: ["potluck"], theme: "Gratitude", hint: "The date differs by country. Check yours.", sign: "Thankful for this team.", chk: [[21, "Pick the date and the room"], [14, "Send the potluck sign-up sheet"], [7, "Remind people what is still needed"], [2, "Gather plates, cutlery and serving spoons"], [0, "Set up the table and share what you are thankful for"]] },
@@ -110,6 +111,20 @@
     oy.events.push({ id, type: T.id, name: n.ev.name, date: n.ev.date, month: o.month || T.m || (new Date().getMonth() + 1), year: o.year || oy.year, snap: null });
     oy.active = id; off = n; saveOy(); saveOff(); offSync(); offScreen = "build"; document.body.classList.toggle("co-kids", n.ev.who === "family");
   }
+
+  // ✅ TASKS FOLLOW THE EVENT: the Tasks tab shows the checklist of the event you have open
+  const OC_AFTER = ["Send a thank-you note to the team", "Share the photos", "Return rentals and tidy up", "Hand in receipts (Budget › Reimbursement list)", "Write notes on what worked for next year"];
+  window.officeTaskInfo = () => {
+    if (SPACE !== "office") return null;
+    const T = off.oyType || "holiday"; if (T === "holiday") return { phases: null, label: "Holiday Party" };
+    const C = offChk().slice().sort((a, b) => b.d - a.d), id = oy.active || "x";
+    const B = [["w4", "📅", "A month or more before", c => c.d >= 28], ["w2", "🗓️", "2–3 weeks before", c => c.d >= 14 && c.d < 28], ["w1", "📨", "1–2 weeks before", c => c.d >= 7 && c.d < 14], ["wf", "🛒", "The final week", c => c.d >= 1 && c.d < 7], ["wd", "🎉", "Event day", c => c.d < 1]];
+    const phases = B.map(([pid, icon, title, f]) => ({ id: "oc" + pid, icon, title, tasks: C.filter(f).map(c => { checks["oc-" + c.id] = !!c.done || undefined; if (!c.done) delete checks["oc-" + c.id]; return { id: "oc-" + c.id, text: c.t }; }) })).filter(p => p.tasks.length);
+    phases.push({ id: "ocaf", icon: "✉️", title: "After the event", tasks: OC_AFTER.map((t, i) => ({ id: "oc-" + id + "-a" + i, text: t })) });
+    const d = off.ev.date ? " · " + oyDay(off.ev.date) : "";
+    return { phases, label: (off.ev.name || oyType(T).name) + d };
+  };
+  window.officeTaskTick = (tid, on) => { const c = offChk().find(x => "oc-" + x.id === tid); if (c) { c.done = on ? 1 : 0; saveOff(); offSync(); } };
   function oySwitch(id) {
     if (id !== oy.active) {
       oySyncCur(); const cur = oy.events.find(x => x.id === oy.active), t = oy.events.find(x => x.id === id); if (!t || !t.snap) return;
