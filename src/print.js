@@ -35,6 +35,7 @@
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "travel") d = travelDoc();
     else if (key === "planall") d = planAllDoc();
+    else if (key === "hostlist") d = hostListDoc();
     else if (key === "addrlabels" || key === "addrlist") d = addrDoc(key);
     else if (key === "chores") d = choresDoc();
     else if (key === "budget") d = budgetDoc();

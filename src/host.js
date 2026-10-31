@@ -348,6 +348,17 @@
       <p class="fr-foot">Made with Noël Tier 1 Hub</p></div>`;
     return { title: "Hosting fridge sheet", css, html, margin: 0.45, file: "Hosting-Fridge-Sheet" };
   }
+  function hostListDoc() {   // 🖨️ Master Hostess List: everything still to get, by category, with tick boxes
+    const cats = HOST_SUPPLIES.map(([c, l]) => [c, l.filter(i => !host.supplies[i])]).concat([["Your extras", host.custom.filter(i => !host.supplies[i])]]).filter(([, l]) => l.length);
+    const total = cats.reduce((n, [, l]) => n + l.length, 0), all = HOST_SUPPLIES.flatMap(([, l]) => l).concat(host.custom).length;
+    const css = `.ml{font:11pt/1.45 Georgia,serif;color:#1a1a1a} .ml-head{text-align:center;border-top:2px solid #B8935A;border-bottom:1px solid #B8935A;padding:14px 0 12px;margin:0 0 16px} .ml-k{font:600 8pt sans-serif;letter-spacing:.34em;text-transform:uppercase;color:#8a6d3b;margin:0 0 6px} .ml-head h1{font:400 26pt/1.1 Georgia,serif;margin:0} .ml-sub{margin:6px 0 0;color:#555;font-style:italic;font-size:10.5pt}
+      .ml-grid{columns:2;column-gap:28px} .ml-cat{break-inside:avoid;margin:0 0 14px} .ml-cat h2{font:600 9pt sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#8a6d3b;border-bottom:1px solid #B8935A;margin:0 0 5px;padding-bottom:3px} .ml-cat ul{list-style:none;margin:0;padding:0} .ml-cat li{padding:4px 2px;border-bottom:1px dotted #ccc;font-size:11pt}
+      .ml-foot{margin-top:18px;text-align:center;color:#888;font:8pt sans-serif;letter-spacing:.14em;text-transform:uppercase} .ml-done{text-align:center;font-size:13pt;margin:30px 0}
+      @media (max-width:640px){.ml-grid{columns:1}}`;
+    const body = cats.length ? `<div class="ml-grid">${cats.map(([c, l]) => `<div class="ml-cat"><h2>${esc(c)}</h2><ul>${l.map(i => `<li>☐ ${esc(i)}</li>`).join("")}</ul></div>`).join("")}</div>` : `<p class="ml-done">Everything is ready. Nothing left to get.</p>`;
+    const html = `<div class="ml"><div class="ml-head"><p class="ml-k">Noël Tier 1 Hub</p><h1>Master Hostess List</h1><p class="ml-sub">${total ? `${total} item${total === 1 ? "" : "s"} still to get` : "All ready"} · ${all - total} of ${all} ready</p></div>${body}<p class="ml-foot">Made with Noël Tier 1 Hub</p></div>`;
+    return { title: "Master Hostess List", css, html, margin: 0.6, file: "Master-Hostess-List", noBrand: true };
+  }
   function planAllDoc() {   // 🖨️ everything on the Plan page (travel, guests, seating, supplies, house info) as one printout
     const a = travelDoc(), b = fridgeDoc();
     return { title: "Everything for your home", css: a.css + " " + b.css + " .pa-break{page-break-before:always;break-before:page}", html: a.html + `<div class="pa-break"></div>` + b.html, margin: 0.45, file: "Home-Plans" };

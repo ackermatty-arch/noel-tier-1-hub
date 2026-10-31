@@ -2668,6 +2668,11 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       <span class="hf-txt"><b>Print everything</b><small>Everything you chose on this page (travel, guests, table, supplies and house info) as one printout. Look at it first, then print or save.</small></span>
       <button type="button" class="btn btn-red" data-print="planall">Print all</button>
     </div>
+    <div class="card host-fridge" id="hostMasterList">
+      <span class="hf-ico">📋</span>
+      <span class="hf-txt"><b>Master Hostess List</b><small>Everything you still need to get for hosting (wrapping, kitchen, bathroom, guest items and your own extras), as one checklist to print.</small></span>
+      <button type="button" class="btn btn-red" data-print="hostlist">Print list</button>
+    </div>
     </div>
   </section>
 
@@ -8391,7 +8396,9 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       { id: "d1-1", text: "Decorate the home: Put up the Christmas tree, hang wreaths, and set up your entryway." },
       { id: "d1-2", text: "Write and mail cards: Sign, stamp, and mail your holiday greeting cards." },
       { id: "d1-3", text: "Wrap as you go: Wrap gifts in small batches each evening to avoid a massive pile on Christmas Eve." },
-      { id: "d1-4", text: "Mail long-distance gifts: Ship packages so they arrive safely before the holiday." } ] },
+      { id: "d1-4", text: "Mail long-distance gifts: Ship packages so they arrive safely before the holiday." },
+      { id: "d1-5", text: "Confirm guest arrival plans: Check when and how each guest is arriving. Go to the Plan tab and open Guests." },
+      { id: "d1-6", text: "Check the Master Hostess List: See which items you still need. Find the list at the bottom of the Plan tab and print it." } ] },
     { id: "d2", icon: "🛍️", title: "Week 2: Deep Clean & Final Shopping", tasks: [
       { id: "d2-1", text: "Finish shopping: Buy all remaining gifts, stocking stuffers, and teacher/host gifts." },
       { id: "d2-2", text: "Deep clean the house: Clean the guest rooms, bathrooms, and living areas." },
@@ -14129,6 +14136,17 @@ const PC_DESIGNS = [
       <p class="fr-foot">Made with Noël Tier 1 Hub</p></div>`;
     return { title: "Hosting fridge sheet", css, html, margin: 0.45, file: "Hosting-Fridge-Sheet" };
   }
+  function hostListDoc() {   // 🖨️ Master Hostess List: everything still to get, by category, with tick boxes
+    const cats = HOST_SUPPLIES.map(([c, l]) => [c, l.filter(i => !host.supplies[i])]).concat([["Your extras", host.custom.filter(i => !host.supplies[i])]]).filter(([, l]) => l.length);
+    const total = cats.reduce((n, [, l]) => n + l.length, 0), all = HOST_SUPPLIES.flatMap(([, l]) => l).concat(host.custom).length;
+    const css = `.ml{font:11pt/1.45 Georgia,serif;color:#1a1a1a} .ml-head{text-align:center;border-top:2px solid #B8935A;border-bottom:1px solid #B8935A;padding:14px 0 12px;margin:0 0 16px} .ml-k{font:600 8pt sans-serif;letter-spacing:.34em;text-transform:uppercase;color:#8a6d3b;margin:0 0 6px} .ml-head h1{font:400 26pt/1.1 Georgia,serif;margin:0} .ml-sub{margin:6px 0 0;color:#555;font-style:italic;font-size:10.5pt}
+      .ml-grid{columns:2;column-gap:28px} .ml-cat{break-inside:avoid;margin:0 0 14px} .ml-cat h2{font:600 9pt sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#8a6d3b;border-bottom:1px solid #B8935A;margin:0 0 5px;padding-bottom:3px} .ml-cat ul{list-style:none;margin:0;padding:0} .ml-cat li{padding:4px 2px;border-bottom:1px dotted #ccc;font-size:11pt}
+      .ml-foot{margin-top:18px;text-align:center;color:#888;font:8pt sans-serif;letter-spacing:.14em;text-transform:uppercase} .ml-done{text-align:center;font-size:13pt;margin:30px 0}
+      @media (max-width:640px){.ml-grid{columns:1}}`;
+    const body = cats.length ? `<div class="ml-grid">${cats.map(([c, l]) => `<div class="ml-cat"><h2>${esc(c)}</h2><ul>${l.map(i => `<li>☐ ${esc(i)}</li>`).join("")}</ul></div>`).join("")}</div>` : `<p class="ml-done">Everything is ready. Nothing left to get.</p>`;
+    const html = `<div class="ml"><div class="ml-head"><p class="ml-k">Noël Tier 1 Hub</p><h1>Master Hostess List</h1><p class="ml-sub">${total ? `${total} item${total === 1 ? "" : "s"} still to get` : "All ready"} · ${all - total} of ${all} ready</p></div>${body}<p class="ml-foot">Made with Noël Tier 1 Hub</p></div>`;
+    return { title: "Master Hostess List", css, html, margin: 0.6, file: "Master-Hostess-List", noBrand: true };
+  }
   function planAllDoc() {   // 🖨️ everything on the Plan page (travel, guests, seating, supplies, house info) as one printout
     const a = travelDoc(), b = fridgeDoc();
     return { title: "Everything for your home", css: a.css + " " + b.css + " .pa-break{page-break-before:always;break-before:page}", html: a.html + `<div class="pa-break"></div>` + b.html, margin: 0.45, file: "Home-Plans" };
@@ -16650,6 +16668,7 @@ const PC_DESIGNS = [
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "travel") d = travelDoc();
     else if (key === "planall") d = planAllDoc();
+    else if (key === "hostlist") d = hostListDoc();
     else if (key === "addrlabels" || key === "addrlist") d = addrDoc(key);
     else if (key === "chores") d = choresDoc();
     else if (key === "budget") d = budgetDoc();
