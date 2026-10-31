@@ -2877,35 +2877,35 @@ window.NOEL_MEALS = (function () {
     if (/\b(onion|garlic|shallot|potato|potatoes|carrot|sprout|beans?\b|pear|orange|lemon|lime|apple|thyme|rosemary|sage|parsley|dill|chive|mushroom|spinach|celery|greens|cranberr|pomegranate|arugula|herb|ginger|squash|leek|cucumber|tomato|basil|bell pepper|fennel|lettuce|parsnip)\b/.test(s) && !/juice|stock|powder|dried|paste|sauce/.test(s)) return "Produce";
     return "Pantry & Baking";
   }
-  function qtyText(v, u) {
-    const tsp = { cup: 48, tbsp: 3, tsp: 1 }[u];
-    if (tsp) { const t = v * tsp; if (t >= 12) return cupsT(Math.round(t / 48 * 4) / 4 || 0.25); if (t >= 3) return fmtNum(Math.round(t / 3 * 2) / 2) + " tbsp"; return fmtNum(Math.max(0.25, Math.round(t * 4) / 4)) + " tsp"; }
-    if (u === "lb") return fmtNum(Math.max(0.5, Math.ceil(v * 2 - 1e-9) / 2)) + " lb";
-    if (u === "oz") return v >= 16 ? fmtNum(Math.ceil(v / 16 * 2 - 1e-9) / 2) + " lb" : Math.ceil(v - 1e-9) + " oz";
+  function qtyText(v, dim) {   // v is in tsp (volume), oz (weight) or a plain count
+    if (dim === "vol") { if (v >= 12) return frac(Math.round(v / 48 * 4) / 4 || 0.25) + (v / 48 > 1.1 ? " cups" : " cup"); if (v >= 3) return frac(Math.round(v / 3 * 2) / 2) + " tbsp"; return frac(Math.max(0.25, Math.round(v * 4) / 4)) + " tsp"; }
+    if (dim === "wt") return v >= 16 ? frac(Math.max(0.5, Math.ceil(v / 16 * 2 - 1e-9) / 2)) + " lb" : Math.ceil(v - 1e-9) + " oz";
     return String(Math.max(1, Math.ceil(v - 1e-9)));
   }
   function autoShop(recipes, extra) {
     return (f, p) => {
-      const rows = new Map(), staples = new Set();
+      const rows = new Map(), staples = new Map();
       recipes.forEach(r => (r.ing || []).forEach(ing => {
         if (ing.head) return;
         let t = typeof ing.t === "function" ? ing.t(p) : ing.t; const one = Array.isArray(t) ? t[0] : t, many = Array.isArray(t) ? t[1] : t;
         if (/^(water|ice)\b/i.test(one)) return;
         const dept = ing.d || deptOf(one);
-        if (dept === "Spices" || ing.q == null) { staples.add(String(one).replace(/\s*\(.*?\)/g, "").replace(/,.*$/, "").replace(/^(Pinch of|A pinch of)\s*/i, "")); return; }
+        if (dept === "Spices" || ing.q == null) { const nm = String(one).replace(/\s*\(.*?\)/g, "").replace(/,.*$/, "").replace(/^(Pinch of|A pinch of)\s*/i, "").trim(); const kk = nm.toLowerCase(); if (!staples.has(kk)) staples.set(kk, nm.charAt(0).toUpperCase() + nm.slice(1)); return; }
         const k = ing.s === "n" ? 1 : ing.s === "w" ? p.w / (p.wBase || 13) : ing.s === "p" ? p.pies : ing.s === "b" ? (p.batches || 1) : f;
-        const v = ing.q * k, key = dept + "|" + one + "|" + ing.u, row = rows.get(key) || { dept, one, many, u: ing.u, v: 0, cost: 0 };
-        row.v += v;
+        const v = ing.q * k, tspU = { cup: 48, tbsp: 3, tsp: 1 }[ing.u], dim = tspU ? "vol" : (ing.u === "lb" || ing.u === "oz") ? "wt" : "n";
+        const base = tspU ? v * tspU : ing.u === "lb" ? v * 16 : v;
+        const nm = String(one).replace(/,.*$/, "").replace(/\s*\(.*?\)/g, "").trim(), key = dept + "|" + nm.toLowerCase() + "|" + dim, row = rows.get(key) || { dept, one, many, dim, v: 0, cost: 0, items: 0 };
+        row.v += base; row.items += v;
         const pr = DEPT_PRICE[dept] || DEPT_PRICE["Pantry & Baking"];
         const cups = { cup: 1, tbsp: 1 / 16, tsp: 1 / 48 }[ing.u];
-        row.cost += ing.cost != null ? (typeof ing.cost === "function" ? ing.cost(p, f) : ing.cost) : cups ? v * cups * pr.cup : ing.u === "lb" ? v * pr.lb : ing.u === "oz" ? v / 16 * pr.lb : Math.ceil(v) * pr.n * (v >= 1 ? 1 : 1);
+        row.cost += ing.cost != null ? (typeof ing.cost === "function" ? ing.cost(p, f) : ing.cost) : cups ? v * cups * pr.cup : ing.u === "lb" ? v * pr.lb : ing.u === "oz" ? v / 16 * pr.lb : Math.ceil(v) * pr.n;
         rows.set(key, row);
       }));
       const out = {};
-      rows.forEach(r => { const q = qtyText(r.v, r.u); const nm = (r.v > 1.0001 && r.many) ? r.many : r.one; (out[r.dept] = out[r.dept] || []).push([q, String(nm).replace(/,.*$/, ""), Math.round(Math.max(r.cost, 0.3) * 100) / 100]); });
+      rows.forEach(r => { const q = qtyText(r.v, r.dim); const nm = (r.dim === "n" && r.v > 1.0001 && r.many) ? r.many : r.one; (out[r.dept] = out[r.dept] || []).push([q, String(nm).replace(/\s*\(.*?\)/g, "").replace(/,.*$/, "").trim(), Math.round(Math.max(r.cost, 0.3) * 100) / 100]); });
       const order = ["Produce", "Meat & Fish", "Dairy & Refrigerated", "Pantry & Baking"];
       const groups = order.filter(d => out[d]).map(d => [d, out[d]]);
-      if (staples.size) groups.push(["Spices & Staples", [...staples].map(n => ["", n, null])]);
+      if (staples.size) groups.push(["Spices & Staples", [...staples.values()].map(n => ["", n, null])]);
       return groups.concat(extra ? extra(f, p) : []);
     };
   }

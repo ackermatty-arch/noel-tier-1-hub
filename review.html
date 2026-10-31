@@ -7568,35 +7568,35 @@ window.NOEL_MEALS = (function () {
     if (/\b(onion|garlic|shallot|potato|potatoes|carrot|sprout|beans?\b|pear|orange|lemon|lime|apple|thyme|rosemary|sage|parsley|dill|chive|mushroom|spinach|celery|greens|cranberr|pomegranate|arugula|herb|ginger|squash|leek|cucumber|tomato|basil|bell pepper|fennel|lettuce|parsnip)\b/.test(s) && !/juice|stock|powder|dried|paste|sauce/.test(s)) return "Produce";
     return "Pantry & Baking";
   }
-  function qtyText(v, u) {
-    const tsp = { cup: 48, tbsp: 3, tsp: 1 }[u];
-    if (tsp) { const t = v * tsp; if (t >= 12) return cupsT(Math.round(t / 48 * 4) / 4 || 0.25); if (t >= 3) return fmtNum(Math.round(t / 3 * 2) / 2) + " tbsp"; return fmtNum(Math.max(0.25, Math.round(t * 4) / 4)) + " tsp"; }
-    if (u === "lb") return fmtNum(Math.max(0.5, Math.ceil(v * 2 - 1e-9) / 2)) + " lb";
-    if (u === "oz") return v >= 16 ? fmtNum(Math.ceil(v / 16 * 2 - 1e-9) / 2) + " lb" : Math.ceil(v - 1e-9) + " oz";
+  function qtyText(v, dim) {   // v is in tsp (volume), oz (weight) or a plain count
+    if (dim === "vol") { if (v >= 12) return frac(Math.round(v / 48 * 4) / 4 || 0.25) + (v / 48 > 1.1 ? " cups" : " cup"); if (v >= 3) return frac(Math.round(v / 3 * 2) / 2) + " tbsp"; return frac(Math.max(0.25, Math.round(v * 4) / 4)) + " tsp"; }
+    if (dim === "wt") return v >= 16 ? frac(Math.max(0.5, Math.ceil(v / 16 * 2 - 1e-9) / 2)) + " lb" : Math.ceil(v - 1e-9) + " oz";
     return String(Math.max(1, Math.ceil(v - 1e-9)));
   }
   function autoShop(recipes, extra) {
     return (f, p) => {
-      const rows = new Map(), staples = new Set();
+      const rows = new Map(), staples = new Map();
       recipes.forEach(r => (r.ing || []).forEach(ing => {
         if (ing.head) return;
         let t = typeof ing.t === "function" ? ing.t(p) : ing.t; const one = Array.isArray(t) ? t[0] : t, many = Array.isArray(t) ? t[1] : t;
         if (/^(water|ice)\b/i.test(one)) return;
         const dept = ing.d || deptOf(one);
-        if (dept === "Spices" || ing.q == null) { staples.add(String(one).replace(/\s*\(.*?\)/g, "").replace(/,.*$/, "").replace(/^(Pinch of|A pinch of)\s*/i, "")); return; }
+        if (dept === "Spices" || ing.q == null) { const nm = String(one).replace(/\s*\(.*?\)/g, "").replace(/,.*$/, "").replace(/^(Pinch of|A pinch of)\s*/i, "").trim(); const kk = nm.toLowerCase(); if (!staples.has(kk)) staples.set(kk, nm.charAt(0).toUpperCase() + nm.slice(1)); return; }
         const k = ing.s === "n" ? 1 : ing.s === "w" ? p.w / (p.wBase || 13) : ing.s === "p" ? p.pies : ing.s === "b" ? (p.batches || 1) : f;
-        const v = ing.q * k, key = dept + "|" + one + "|" + ing.u, row = rows.get(key) || { dept, one, many, u: ing.u, v: 0, cost: 0 };
-        row.v += v;
+        const v = ing.q * k, tspU = { cup: 48, tbsp: 3, tsp: 1 }[ing.u], dim = tspU ? "vol" : (ing.u === "lb" || ing.u === "oz") ? "wt" : "n";
+        const base = tspU ? v * tspU : ing.u === "lb" ? v * 16 : v;
+        const nm = String(one).replace(/,.*$/, "").replace(/\s*\(.*?\)/g, "").trim(), key = dept + "|" + nm.toLowerCase() + "|" + dim, row = rows.get(key) || { dept, one, many, dim, v: 0, cost: 0, items: 0 };
+        row.v += base; row.items += v;
         const pr = DEPT_PRICE[dept] || DEPT_PRICE["Pantry & Baking"];
         const cups = { cup: 1, tbsp: 1 / 16, tsp: 1 / 48 }[ing.u];
-        row.cost += ing.cost != null ? (typeof ing.cost === "function" ? ing.cost(p, f) : ing.cost) : cups ? v * cups * pr.cup : ing.u === "lb" ? v * pr.lb : ing.u === "oz" ? v / 16 * pr.lb : Math.ceil(v) * pr.n * (v >= 1 ? 1 : 1);
+        row.cost += ing.cost != null ? (typeof ing.cost === "function" ? ing.cost(p, f) : ing.cost) : cups ? v * cups * pr.cup : ing.u === "lb" ? v * pr.lb : ing.u === "oz" ? v / 16 * pr.lb : Math.ceil(v) * pr.n;
         rows.set(key, row);
       }));
       const out = {};
-      rows.forEach(r => { const q = qtyText(r.v, r.u); const nm = (r.v > 1.0001 && r.many) ? r.many : r.one; (out[r.dept] = out[r.dept] || []).push([q, String(nm).replace(/,.*$/, ""), Math.round(Math.max(r.cost, 0.3) * 100) / 100]); });
+      rows.forEach(r => { const q = qtyText(r.v, r.dim); const nm = (r.dim === "n" && r.v > 1.0001 && r.many) ? r.many : r.one; (out[r.dept] = out[r.dept] || []).push([q, String(nm).replace(/\s*\(.*?\)/g, "").replace(/,.*$/, "").trim(), Math.round(Math.max(r.cost, 0.3) * 100) / 100]); });
       const order = ["Produce", "Meat & Fish", "Dairy & Refrigerated", "Pantry & Baking"];
       const groups = order.filter(d => out[d]).map(d => [d, out[d]]);
-      if (staples.size) groups.push(["Spices & Staples", [...staples].map(n => ["", n, null])]);
+      if (staples.size) groups.push(["Spices & Staples", [...staples.values()].map(n => ["", n, null])]);
       return groups.concat(extra ? extra(f, p) : []);
     };
   }
@@ -12350,23 +12350,48 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   setInterval(() => { if ($("#view-meals").classList.contains("active")) renderMaster(); }, 1000);
 
   // ---- print (paper backup) ----
+  const MD_CSS = `body{font:10.5pt/1.42 Georgia,serif;color:#1a1a1a}
+    .md-head{text-align:center;border-top:2px solid #B8935A;border-bottom:1px solid #B8935A;padding:14px 0 12px;margin:0 0 14px}
+    .md-k{font:600 8pt sans-serif;letter-spacing:.34em;text-transform:uppercase;color:#8a6d3b;margin:0 0 6px}
+    .md-head h1{font:400 25pt/1.1 Georgia,serif;margin:0;letter-spacing:.02em}
+    .md-sub{margin:6px 0 0;color:#555;font-style:italic;font-size:10.5pt}
+    .md-facts{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #d9c9a3;margin:0 0 6px}
+    .md-facts div{padding:7px 8px;text-align:center;border-right:1px solid #e8dcc0} .md-facts div:last-child{border-right:0}
+    .md-facts b{display:block;font:600 7.5pt sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#8a6d3b;margin-bottom:2px} .md-facts span{font-size:10.5pt}
+    h2.md-h{font:600 10pt sans-serif;letter-spacing:.26em;text-transform:uppercase;color:#8a6d3b;border-bottom:1px solid #B8935A;margin:18px 0 8px;padding-bottom:4px;break-after:avoid}
+    .md-menu{columns:2;column-gap:26px} .md-menu p{margin:0 0 5px;break-inside:avoid;font-size:10pt} .md-menu b{display:block;font:600 7.5pt sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#8a6d3b}
+    .md-tot{margin:0 0 8px;font-size:11pt} .md-tot b{font-size:13pt}
+    .md-shop{columns:2;column-gap:26px} .md-dept{break-inside:avoid;margin:0 0 10px} .md-dept h3{font:600 8.5pt sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#8a6d3b;margin:0 0 3px;border-bottom:1px solid #eadfc4}
+    .md-dept table{width:100%;border-collapse:collapse} .md-dept td{padding:2px 3px;font-size:9.5pt;border-bottom:1px dotted #ddd;vertical-align:top} .md-dept td.k{width:14px} .md-dept td.q{width:60px;font-weight:bold;white-space:nowrap} .md-dept td.p{text-align:right;width:46px;white-space:nowrap;color:#444}
+    .md-note{font-style:italic;color:#555;font-size:9pt;margin:2px 0 0}
+    .md-tl{width:100%;border-collapse:collapse} .md-tl th{text-align:left;font:600 9pt sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8a6d3b;padding:9px 0 3px;border-bottom:1px solid #d9c9a3;break-after:avoid} .md-tl td{padding:3px 4px;border-bottom:1px dotted #ddd;vertical-align:top;font-size:10pt;break-inside:avoid} .md-tl td.t{width:72px;font-weight:bold;white-space:nowrap} .md-tl tr.sv td{font-weight:bold;border-top:1px solid #B8935A}
+    details.recipe{break-inside:avoid;margin:0 0 14px;padding:0 0 10px;border-bottom:1px solid #eadfc4} details.recipe summary{list-style:none;font:600 12.5pt Georgia,serif} .r-course{display:block;font:600 7.5pt sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#8a6d3b;margin-bottom:1px}
+    .r-meta,.r-note{color:#555;font-size:9pt;margin:3px 0} .r-ing{list-style:none;padding:0;margin:4px 0;columns:2;column-gap:20px;font-size:9.5pt} .r-ing li{break-inside:avoid;margin:1px 0} .r-head{font-weight:bold;color:#8a6d3b;margin-top:4px!important}
+    .r-steps{margin:4px 0 4px 18px;padding:0;font-size:10pt} .r-steps li{margin:2px 0} .r-tip{font-style:italic;font-size:9.5pt;margin:4px 0 0;color:#444}
+    .pm-foot{margin-top:20px;color:#888;font-size:8.5pt;text-align:center;letter-spacing:.14em;text-transform:uppercase}
+    @media (max-width:640px){.md-shop,.md-menu,.r-ing{columns:1} .md-facts{grid-template-columns:1fr 1fr} .md-facts div{border-bottom:1px solid #e8dcc0} .md-dept td{font-size:10pt}}`;
+  function shopHtmlDoc(ps) {
+    return `<div class="md-shop">` + ps.groups.map(([dept, items]) => `<div class="md-dept"><h3>${esc(dept)}</h3><table>${items.map(it => `<tr><td class="k">☐</td><td class="q">${esc(it.q || "")}</td><td>${esc(it.name)}</td><td class="p">${it.price != null ? cad(it.price) : ""}</td></tr>`).join("")}</table></div>`).join("") + `</div><p class="md-note">*Note: prices are estimated and may vary. Pantry staples you likely have are not counted.</p>`;
+  }
   function mealDoc(m) {
-    const c = cfgFor(m.id), p = mealSizes(m, c), f = p.f, steps = buildSteps(m, c);
+    const c = cfgFor(m.id), p = mealSizes(m, c), f = p.f, steps = buildSteps(m, c), ps = pricedShop(m, f, p), D = dinnerAt(c);
+    const who = `${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"}`;
     let lastDay = "";
-    const html = `<h1>${esc(m.name)}</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · ${m.party ? "party starts" : "dinner"} ${esc(dayName(dinnerAt(c)))} at ${mclock(dinnerAt(c))}${p.doneLabel ? ` · ${esc(p.doneLabel)}` : ""}${p.gf ? " · gluten-free" : ""}${p.w ? ` · ${p.w} lb ${p.meat}, about ${p.roastText}` : ""}</p>
-      <h2>Timeline</h2><table class="pm-tl">${steps.map(s => { const d = dayName(s.t), h = d !== lastDay ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; lastDay = d; return h + `<tr><td>${s.ahead ? "All day" : mclock(s.t)}</td><td>☐ ${esc(s.text)}</td></tr>`; }).join("")}</table>
-      <h2>Shopping list</h2>${(ps => `<p><b>Estimated total: ${cad0(ps.total)} ${currency}</b> (about ${cad(ps.total / c.guests)} per guest)</p>` + ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join(""))(pricedShop(m, f, p))}
-      <h2>Menu</h2>${allMenu(m).map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v.join(", "))}</p>`).join("")}
-      ${m.drinks.map(([k, v]) => `<p><b>${esc(k)}:</b> ${esc(v)}</p>`).join("")}
-      <h2>Recipes</h2>${allRecipesHtml(m, f, p, true)}
+    const tl = steps.map(s => { const d = dayName(s.t), h = d !== lastDay ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; lastDay = d; return h + `<tr${s.m === 0 ? ' class="sv"' : ""}><td class="t">${s.ahead ? "All day" : mclock(s.t)}</td><td>☐ ${esc(s.text)}</td></tr>`; }).join("");
+    const html = `<div class="md-head"><p class="md-k">Noël Tier 1 Hub</p><h1>${esc(m.name)}</h1><p class="md-sub">${esc(m.blurb || "")}</p></div>
+      <div class="md-facts"><div><b>Serves</b><span>${esc(who)}</span></div><div><b>${m.party ? "Party" : "Dinner"}</b><span>${esc(new Date(D).toLocaleDateString(undefined, { month: "short", day: "numeric" }))} · ${esc(mclock(D))}</span></div><div><b>${p.w ? "Main" : "Plan"}</b><span>${p.w ? `${p.w} lb ${esc(String(p.meat).replace(/ \(.*/, ""))}` : (p.mainLabel ? esc(p.mainLabel) : "Fixed menu")}</span></div><div><b>Estimated cost</b><span>${cad0(ps.total)} ${currency}</span></div></div>
+      ${p.w && p.roastText ? `<p class="md-sub" style="text-align:center">${esc(p.verb || "cooks")} about ${esc(p.roastText)}${p.doneLabel ? " · " + esc(p.doneLabel) : ""}${p.gf ? " · gluten-free" : ""}</p>` : ""}
+      <h2 class="md-h">The menu</h2><div class="md-menu">${allMenu(m).map(([k, v]) => `<p><b>${esc(k)}</b>${esc(v.join(", "))}</p>`).join("")}${(m.drinks || []).map(([k, v]) => `<p><b>${esc(k)}</b>${esc(v)}</p>`).join("")}</div>
+      <h2 class="md-h">Shopping list</h2><p class="md-tot">Estimated total <b>${cad0(ps.total)} ${currency}</b> · about ${cad(ps.total / c.guests)} per ${m.addon ? "portion" : "guest"}</p>${shopHtmlDoc(ps)}
+      <h2 class="md-h">Timeline</h2><table class="md-tl">${tl}</table>
+      <h2 class="md-h">Recipes &amp; instructions</h2>${allRecipesHtml(m, f, p, true)}
       <p class="pm-foot">Made with Noël Tier 1 Hub</p>`;
-    return { title: m.name + (m.addon ? "" : " plan"), css: PRINT_CSS, html, margin: 0.5, file: m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Plan" };
+    return { title: m.name + (m.addon ? "" : " plan"), css: MD_CSS, html, margin: 0.55, file: m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Plan" };
   }
   function shopDoc(m) {   // just the shopping list, to take to the store
     const c = cfgFor(m.id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
-    const html = `<h1>🛒 ${esc(m.name)}: shopping list</h1><p class="pm-sub">${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · estimated total ${cad0(ps.total)} ${currency}</p>` +
-      ps.groups.map(([dept, items]) => `<h3>${esc(dept)}</h3><ul>${items.map(it => `<li>☐ ${it.q ? `<b>${esc(it.q)}</b> ` : ""}${esc(it.name)}${it.price != null ? ` · ${cad(it.price)}` : ""}</li>`).join("")}</ul>`).join("") + `<p class="pm-foot">Made with Noël Tier 1 Hub</p>`;
-    return { title: m.name + " shopping list", css: PRINT_CSS, html, margin: 0.5, file: m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Shopping-List" };
+    const html = `<div class="md-head"><p class="md-k">Noël Tier 1 Hub</p><h1>${esc(m.name)}</h1><p class="md-sub">Shopping list · ${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · estimated total ${cad0(ps.total)} ${currency}</p></div>` + shopHtmlDoc(ps) + `<p class="pm-foot">Made with Noël Tier 1 Hub</p>`;
+    return { title: m.name + " shopping list", css: MD_CSS, html, margin: 0.55, file: m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Shopping-List" };
   }
   const PRINT_CSS = `body{font:12pt/1.45 Georgia,serif;color:#222} h1{font-size:22pt;margin:0} h2{font-size:15pt;border-bottom:1.5px solid #B8935A;margin:22px 0 8px;padding-bottom:3px} h3{font-size:12pt;margin:12px 0 4px}
     .pm-sub{color:#555;margin:4px 0 0} table{border-collapse:collapse;width:100%} td,th{text-align:left;padding:3px 6px;vertical-align:top;border-bottom:1px solid #eee} th{background:#f4efe3} td:first-child{white-space:nowrap;width:80px}
