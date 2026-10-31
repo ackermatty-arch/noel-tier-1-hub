@@ -553,7 +553,7 @@
 
 
   // ---- 🎄 guided planner: night → dinners → guests and time → next steps ----
-  const WN = { day: "Christmas Day", eve: "Christmas Eve Elegant", eved: "Christmas Eve Traditional" };
+  const WN = { day: "Christmas Day", eve: "Christmas Elegant", eved: "Christmas Traditional" };
   let wiz = load("wiz", null);
   if (!wiz || !wiz.sel) {
     const at = n => mealPlans.filter(p => !p.svc && ymdOf(p.at) === (n === "day" ? dayYmd() : eveYmd()) && (n === "day" || (n === "eve") === ((mealById(p.id) || {}).tab === "eve"))).map(p => p.id);
@@ -625,7 +625,7 @@
 
   // ---- 📖 the menu: a restaurant-style first page, then "Plan my dinner" opens the builder ----
   let mealScreen = mealSel.id ? "build" : "menu";
-  const MENU_GROUPS = [["Christmas Eve", ["eveparty", "seafood"], "Christmas Eve"], ["Traditional", ["turkey", "primerib", "ham"], "Christmas Dinner"], ["Elegant", ["lambcrown", "porkcrown"]], ["Vegan", ["vegan"]]];
+  const MENU_GROUPS = [["Christmas Appetizers & Suppers", ["eveparty", "seafood"], "Christmas Appetizers & Suppers"], ["Traditional", ["turkey", "primerib", "ham"], "Christmas Dinner"], ["Elegant", ["lambcrown", "porkcrown"]], ["Vegan", ["vegan"]]];
   function renderMealMenu() {
     const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
     const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);
