@@ -2177,6 +2177,10 @@ body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!impor
 .ab-btns button{border:1px solid #B8935A;background:#fff;color:#111;font-size:11px;padding:5px 9px;min-height:30px;cursor:pointer;border-radius:0}
 .ab-btns button[aria-pressed=true]{background:#111;color:#f1d98a}
 .ab-print{display:grid;gap:8px;margin-top:14px}
+.wish-guide{background:#111;color:#fff;border:1.5px solid #B8935A;outline:1px solid #B8935A;outline-offset:-5px;padding:16px 16px 18px;margin:0 0 16px;text-align:left}
+.wish-guide .wg-k{font-family:var(--font-display);letter-spacing:.24em;text-transform:uppercase;font-size:12px;color:#E4C77A;margin:0 0 10px}
+.wish-guide ol{margin:0 0 14px;padding-left:20px;font-size:14px;line-height:1.55;color:#fff}.wish-guide li{margin:0 0 6px}.wish-guide b{color:#E4C77A}
+.wish-guide .wg-btn{display:block;width:100%;background:#B8935A;color:#111;border:0;padding:12px 8px;font-family:var(--font-display);letter-spacing:.12em;text-transform:uppercase;font-size:12px;font-weight:700;cursor:pointer;border-radius:0}
 .nav-btn[data-view="review"]{display:none}
 body.rev-open .nav-btn[data-view="review"]{display:flex}
 .reset-box{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}.reset-in{background:#fff;border:2px solid #C9A45C;padding:18px;max-width:420px;width:100%}.reset-in h3{font-family:"Cinzel",serif;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px}.reset-in label{display:block;padding:6px 0}.reset-note{font-size:13px;color:#555}
@@ -3067,7 +3071,9 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <div id="paneWish">
       <form class="card wish-add" id="wishForm" autocomplete="off">
         <h3>💭 Gift List</h3>
-        <p class="wish-tip" style="margin:0 0 10px">First, add everyone you buy for in the <button type="button" class="classy-link" data-goview="budget">Budget tab</button> and set their spending cap. Then pick their name here, and the cap fills in. Add each gift wish and what you spent, and it counts in your budget.</p>
+        <div class="wish-guide"><p class="wg-k">How it works</p>
+          <ol><li>Add everyone you buy for in the <b>Budget tab</b>.</li><li>Set each person's <b>spending cap</b>.</li><li>Come back here, pick their name, and the cap fills in. Add wishes and what you spent, and it counts in your budget.</li></ol>
+          <button type="button" class="wg-btn" data-goview="budget">Go to Budget tab</button></div>
         <label class="wish-lab">Who wants it?
           <input class="input" name="who" list="wishPeople" maxlength="30" placeholder="e.g. Mom" required></label>
         <datalist id="wishPeople"></datalist>
