@@ -572,7 +572,7 @@ body.flash::before {
 }
 .advent-banner:active { transform: scale(.98); }
 .task-event{font:600 12px Cinzel,serif;letter-spacing:.12em;text-transform:uppercase;color:#8a6d3b;margin:-4px 0 12px}
-.story-links{font-size:13px;margin:12px 0 0;line-height:1.5}.story-links b{display:block;font:600 11px Cinzel,serif;letter-spacing:.12em;text-transform:uppercase;color:#8a6d3b;margin-bottom:4px}.story-links a{display:block;color:#111;border-bottom:1px solid #B8935A;padding:6px 0;text-decoration:none}
+.task-info{text-align:center;padding:18px 22px 22px;border-top:1px solid var(--line)}.task-info h4{font:600 17px Cinzel,serif;letter-spacing:.1em;text-transform:uppercase;margin:4px 0 8px}.task-info p{margin:0;line-height:1.6}.task-info .gold-star{color:#B8935A}
 .ab-ico { font-size: 34px; }
 .ab-text { min-width: 0; }
 .ab-text b { display: block; font-family: var(--font-display); font-size: 21px; }
@@ -2621,6 +2621,33 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
           <a class="btn btn-red btn-sm pdf-link" href="pdf/Christmas-Coloring-Pages.pdf" download>⬇ Download PDF</a>
         </div>
       </article>
+
+      <article class="card print-card">
+        <div class="print-thumb">📖</div>
+        <div class="print-info">
+          <h3>Story: The Gift of the Magi</h3>
+          <p>A young couple sacrifices what they treasure most to buy each other a Christmas gift. By O. Henry. 6 pages to read or print.</p>
+          <a class="btn btn-red btn-sm pdf-link" href="pdf/Story-Gift-of-the-Magi.pdf" download>⬇ Download PDF</a>
+        </div>
+      </article>
+
+      <article class="card print-card">
+        <div class="print-thumb">📖</div>
+        <div class="print-info">
+          <h3>Story: The Little Match Girl</h3>
+          <p>A poor little girl sees warm visions in the light of her matches on New Year’s Eve. By Hans Christian Andersen. 3 pages.</p>
+          <a class="btn btn-red btn-sm pdf-link" href="pdf/Story-Little-Match-Girl.pdf" download>⬇ Download PDF</a>
+        </div>
+      </article>
+
+      <article class="card print-card">
+        <div class="print-thumb">📖</div>
+        <div class="print-info">
+          <h3>Story: The Elves and the Shoemaker</h3>
+          <p>Little elves secretly help a struggling shoemaker. A Grimm fairy tale. 2 pages, perfect for bedtime.</p>
+          <a class="btn btn-red btn-sm pdf-link" href="pdf/Story-Elves-and-the-Shoemaker.pdf" download>⬇ Download PDF</a>
+        </div>
+      </article>
     </div>
 
     </div>
@@ -2634,21 +2661,6 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
         <h3>Christmas Movie Watch List</h3>
         <p>Classics from 1940 right up to last season's new releases, with tick boxes and star ratings, plus a page to add your own family favourites.</p>
         <a class="btn btn-red btn-sm pdf-link" href="pdf/Christmas-Movie-Watch-List.pdf" download>⬇ Download PDF</a>
-      </div>
-    </article>
-
-    <div class="section-label">Christmas Stories</div>
-    <article class="card print-card featured">
-      <div class="print-thumb">✦</div>
-      <div class="print-info">
-        <span class="bundle-tag">3 classic stories · 13 pages</span>
-        <h3>Christmas Stories</h3>
-        <p>Three timeless tales to read aloud by the fire: The Gift of the Magi, The Little Match Girl and The Elves and the Shoemaker. Read it on screen or print it.</p>
-        <a class="btn btn-red btn-sm pdf-link" href="pdf/Christmas-Stories.pdf" download>⬇ Download all three</a>
-        <p class="story-links"><b>Or just one:</b>
-          <a href="pdf/Story-Gift-of-the-Magi.pdf" download>The Gift of the Magi · 6 pages</a>
-          <a href="pdf/Story-Little-Match-Girl.pdf" download>The Little Match Girl · 3 pages</a>
-          <a href="pdf/Story-Elves-and-the-Shoemaker.pdf" download>The Elves and the Shoemaker · 2 pages</a></p>
       </div>
     </article>
   </section>
@@ -8430,7 +8442,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       { id: "ce-1", text: "Buy fresh perishables: Pick up last-minute bread, salad greens, and vegetables." },
       { id: "ce-2", text: "Kitchen prep: Chop vegetables, marinate meats, and chill drinks." },
       { id: "ce-3", text: "The magic touches: Set out cookies and milk for Santa, prep stockings, and place final gifts under the tree." },
-      { id: "ce-4", text: "Pause and enjoy: Attend a church service, watch a holiday movie, or relax with family. Find the movie list in the Games tab." } ] },
+      { id: "ce-4", info: true, title: "Pause and Enjoy", text: "Attend a church service, watch a holiday movie (find the movie list in the Games tab), read a Christmas story (find it in Kids’ Corner on the Games tab), or simply relax with family." } ] },
     { id: "cd", icon: "🎅", title: "Christmas Day", tasks: [
       { id: "cd-1", text: "Cook the meal: Roast your turkey, ham, or main dish according to your timed kitchen schedule." },
       { id: "cd-2", text: "Capture memories: Take plenty of photos with family and friends." },
@@ -8981,7 +8993,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   let collapsed = load(KEYS.collapsed, {});    // { phaseId: true }
 
   function phaseTasks(phase) {
-    return phase.tasks.map(t => ({ ...t, custom: false }))
+    return phase.tasks.filter(t => !t.info).map(t => ({ ...t, custom: false }))
       .concat(customTasks.filter(c => c.phase === phase.id).map(c => ({ id: c.id, text: c.text, custom: true })));
   }
 
@@ -9017,6 +9029,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
             ${t.custom ? `<button class="icon-btn" data-del="${t.id}" aria-label="Delete task">✕</button>` : ""}
           </li>`).join("")}
         </ul>
+        ${p.tasks.filter(t => t.info).map(t => `<div class="task-info"><span class="gold-star">✦</span><h4>${esc(t.title)}</h4><p>${esc(t.text)}</p></div>`).join("")}
       </div>`;
   }
   function renderPlanner() {
