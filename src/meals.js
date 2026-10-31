@@ -646,7 +646,7 @@
           `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p>${m.party ? "" : '<p class="menu-sub2">Vegan dish available to add</p>'}<a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
       }).join("")).join("") +
       `<p class="menu-note">Have vegan guests? Choose a vegan dish to add when you plan your dinner.</p>
-      <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}</div>`;
+      <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}</div><p class="menu-note">*Note: prices are estimated and may vary.</p>`;
   }
   document.addEventListener("click", e => {
     const nav = e.target.closest && e.target.closest("[data-view=meals]");

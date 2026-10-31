@@ -2006,6 +2006,7 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .sv-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
 .menu-top { justify-content: space-between; align-items: stretch; }
 .menu-top2 { justify-content: flex-end; margin-top: 8px; }
+.menu-note{text-align:center;font-size:12px;font-style:italic;color:#666;margin:18px 0 6px}
 .menu-opts{display:grid;gap:16px;margin:0 0 4px}.menu-opt .menu-go{width:100%;display:flex;justify-content:center;gap:6px;padding:13px 6px;font-size:12px;letter-spacing:.06em;white-space:normal}.menu-opt p{margin:8px 4px 0;text-align:center;font-size:12.5px;line-height:1.5;color:#555}
 .menu-top:not(.menu-top2) { flex-wrap: nowrap; gap: 8px; }
 .menu-top:not(.menu-top2) .menu-go { flex: 1 1 0; min-width: 0; padding: 12px 4px; font-size: 11px; letter-spacing: .04em; white-space: nowrap; text-align: center; }
@@ -12600,7 +12601,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
           `<p class="menu-drinks"><b>Drinks</b> ${drinks.join(" <i>·</i> ")}</p>${m.party ? "" : '<p class="menu-sub2">Vegan dish available to add</p>'}<a class="menu-pic" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener">See a picture example ›</a></div><p class="menu-rule sm"><span></span>✦<span></span></p>`;
       }).join("")).join("") +
       `<p class="menu-note">Have vegan guests? Choose a vegan dish to add when you plan your dinner.</p>
-      <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}</div>`;
+      <div class="menu-bottom"><p class="menu-ready">Ready to build yours?</p>${go}</div><p class="menu-note">*Note: prices are estimated and may vary.</p>`;
   }
   document.addEventListener("click", e => {
     const nav = e.target.closest && e.target.closest("[data-view=meals]");
