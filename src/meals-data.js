@@ -3473,7 +3473,6 @@ window.NOEL_MEALS = (function () {
       mousse,
       pecanAddon,
       nyeparty,
-      eveparty,
       seafood
     ],
     eveDate,
