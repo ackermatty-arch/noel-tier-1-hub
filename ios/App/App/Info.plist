@@ -28,6 +28,10 @@
 	<true/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Noël uses Face ID to unlock your private holiday lists.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Noël listens only while you tap the microphone, so you can open pages and set timers hands-free. Nothing is recorded or kept.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Noël uses speech recognition to turn what you say into a command, such as “start the turkey timer”.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Lets you save your cards and invites to your Photos.</string>
 	<key>UIApplicationSceneManifest</key>
