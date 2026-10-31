@@ -625,7 +625,7 @@
 
   // ---- 📖 the menu: a restaurant-style first page, then "Plan my dinner" opens the builder ----
   let mealScreen = mealSel.id ? "build" : "menu";
-  const MENU_GROUPS = [["Christmas Appetizers & Suppers", ["eveparty", "seafood"], "Christmas Appetizers & Suppers"], ["Traditional", ["turkey", "primerib", "ham"], "Christmas Dinner"], ["Elegant", ["lambcrown", "porkcrown"]], ["Vegan", ["vegan"]]];
+  const MENU_GROUPS = [["Christmas Appetizers & Suppers", ["eveparty", "seafood"], "Christmas Appetizers & Suppers"], ["Traditional", ["turkey", "turkeybreast", "primerib", "ham", "lasagna"], "Christmas Dinner"], ["Elegant", ["lambcrown", "porkcrown", "tenderloin", "duck", "salmon", "roulade"]], ["Vegan", ["vegan"]]];
   function renderMealMenu() {
     const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
     const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);

@@ -7550,15 +7550,609 @@ window.NOEL_MEALS = (function () {
     return (w ? String(w) : "") + (best[1] ? (w ? " " : "") + best[1] : "") || "0";
   }
 
+  // ---- more dinners (their shopping lists are built from the recipes) ----
+  const pickR = (m, id, over) => Object.assign({}, m.recipes.find(r => r.id === id), over || {});
+  const clampG = g => Math.min(20, Math.max(1, g | 0));
+  const DEPT_PRICE = { "Produce": { cup: 1.8, lb: 2.4, n: 0.9 }, "Dairy & Refrigerated": { cup: 2.4, lb: 6.5, n: 0.55 }, "Pantry & Baking": { cup: 1.0, lb: 3.5, n: 2.2 }, "Meat & Fish": { cup: 4, lb: 8, n: 4 } };
+  function deptOf(t) {
+    const s = String(t).toLowerCase();
+    if (/\b(duck|chicken breast|beef|tenderloin|pork|salmon|shrimp|sausage|bacon|prosciutto|pancetta|turkey breast|ground turkey)\b/.test(s) && !/stock|broth/.test(s)) return "Meat & Fish";
+    if (/\b(butter|cream|milk|cheese|egg|eggs|parmesan|mascarpone|ricotta|yogurt|mozzarella|gruy|feta|brie|buttermilk|goat)\b/.test(s) && !/cream of tartar|peanut butter|coconut/.test(s)) return "Dairy & Refrigerated";
+    if (/dried (cranberries|figs|apricots|cherries)|cranberry sauce|\bjam\b/.test(s)) return "Pantry & Baking";
+    if (/\bfresh\b/.test(s) && !/fresh (pasta)/.test(s)) return "Produce";
+    if (/\b(ground (cinnamon|ginger|nutmeg|cloves|cumin|allspice)|nutmeg|cinnamon|paprika|cayenne|bay leaf|bay leaves|oregano|red pepper flakes|kosher salt|black pepper|flaky salt|sea salt|salt|pepper|garlic powder|onion powder|dried \w+|italian seasoning|whole cloves?)\b/.test(s) && !/bell pepper|peppers?\b.*(roasted|jar)|peppercorn/.test(s)) return "Spices";
+    if (/\b(onion|garlic|shallot|potato|potatoes|carrot|sprout|beans?\b|pear|orange|lemon|lime|apple|thyme|rosemary|sage|parsley|dill|chive|mushroom|spinach|celery|greens|cranberr|pomegranate|arugula|herb|ginger|squash|leek|cucumber|tomato|basil|bell pepper|fennel|lettuce|parsnip)\b/.test(s) && !/juice|stock|powder|dried|paste|sauce/.test(s)) return "Produce";
+    return "Pantry & Baking";
+  }
+  function qtyText(v, u) {
+    const tsp = { cup: 48, tbsp: 3, tsp: 1 }[u];
+    if (tsp) { const t = v * tsp; if (t >= 12) return cupsT(Math.round(t / 48 * 4) / 4 || 0.25); if (t >= 3) return fmtNum(Math.round(t / 3 * 2) / 2) + " tbsp"; return fmtNum(Math.max(0.25, Math.round(t * 4) / 4)) + " tsp"; }
+    if (u === "lb") return fmtNum(Math.max(0.5, Math.ceil(v * 2 - 1e-9) / 2)) + " lb";
+    if (u === "oz") return v >= 16 ? fmtNum(Math.ceil(v / 16 * 2 - 1e-9) / 2) + " lb" : Math.ceil(v - 1e-9) + " oz";
+    return String(Math.max(1, Math.ceil(v - 1e-9)));
+  }
+  function autoShop(recipes, extra) {
+    return (f, p) => {
+      const rows = new Map(), staples = new Set();
+      recipes.forEach(r => (r.ing || []).forEach(ing => {
+        if (ing.head) return;
+        let t = typeof ing.t === "function" ? ing.t(p) : ing.t; const one = Array.isArray(t) ? t[0] : t, many = Array.isArray(t) ? t[1] : t;
+        if (/^(water|ice)\b/i.test(one)) return;
+        const dept = ing.d || deptOf(one);
+        if (dept === "Spices" || ing.q == null) { staples.add(String(one).replace(/\s*\(.*?\)/g, "").replace(/,.*$/, "").replace(/^(Pinch of|A pinch of)\s*/i, "")); return; }
+        const k = ing.s === "n" ? 1 : ing.s === "w" ? p.w / (p.wBase || 13) : ing.s === "p" ? p.pies : ing.s === "b" ? (p.batches || 1) : f;
+        const v = ing.q * k, key = dept + "|" + one + "|" + ing.u, row = rows.get(key) || { dept, one, many, u: ing.u, v: 0, cost: 0 };
+        row.v += v;
+        const pr = DEPT_PRICE[dept] || DEPT_PRICE["Pantry & Baking"];
+        const cups = { cup: 1, tbsp: 1 / 16, tsp: 1 / 48 }[ing.u];
+        row.cost += ing.cost != null ? (typeof ing.cost === "function" ? ing.cost(p, f) : ing.cost) : cups ? v * cups * pr.cup : ing.u === "lb" ? v * pr.lb : ing.u === "oz" ? v / 16 * pr.lb : Math.ceil(v) * pr.n * (v >= 1 ? 1 : 1);
+        rows.set(key, row);
+      }));
+      const out = {};
+      rows.forEach(r => { const q = qtyText(r.v, r.u); const nm = (r.v > 1.0001 && r.many) ? r.many : r.one; (out[r.dept] = out[r.dept] || []).push([q, String(nm).replace(/,.*$/, ""), Math.round(Math.max(r.cost, 0.3) * 100) / 100]); });
+      const order = ["Produce", "Meat & Fish", "Dairy & Refrigerated", "Pantry & Baking"];
+      const groups = order.filter(d => out[d]).map(d => [d, out[d]]);
+      if (staples.size) groups.push(["Spices & Staples", [...staples].map(n => ["", n, null])]);
+      return groups.concat(extra ? extra(f, p) : []);
+    };
+  }
+  const roastPlan = o => guests => {
+    const g = clampG(guests), f = g / 8, x = o.size(g), w = x.w;
+    return { g, f, w, wBase: o.wBase, icon: o.icon, meat: x.meat, verb: o.verb || "roasts", bigNote: x.note || "", roast: x.roast, roastText: hm(x.roast), rest: o.rest,
+      thawDays: Math.max(1, Math.ceil((w || 4) * 5 / 24)), pies: Math.max(1, Math.ceil(g / 9)), dishes: Math.max(1, Math.ceil(f - 0.25)), batches: x.n || 1, n: x.n || 1, mainLabel: x.label };
+  };
+  const stdDrinks = (list) => (f, p) => [["Drinks", list.map(([n, c]) => ["", n, c == null ? null : c])], ["Kitchen Supplies", [["", "instant-read meat thermometer, foil, parchment paper", null], [`${p.dishes}`, p.dishes > 1 ? "baking dishes (9×13-inch)" : "baking dish (9×13-inch)", null]]]];
+
+  // ---------- 🦆 roast duck ----------
+  const duckMain = {
+    id: "duck", course: "Main", name: "Roast Duck with Orange-Cranberry Glaze",
+    prep: "25 min, plus overnight air-drying", cook: p => p.roastText, rest: p => p.rest + " min", yieldText: (f, p) => p.n === 1 ? "1 duck (serves 3–4)" : `${p.n} ducks (about 5 lb each)`,
+    ing: [
+      { q: 3, u: "", s: "w", up: true, d: "Meat & Fish", cost: (p) => p.n * 34, t: ["whole duck, about 5 lb (thawed)", "whole ducks, about 5 lb each (thawed)"] },
+      { q: 3, u: "tbsp", s: "w", t: "kosher salt, for the skin" },
+      { q: 3, u: "", s: "w", t: ["orange, quartered", "oranges, quartered"] },
+      { q: 2, u: "", s: "w", t: ["onion, quartered", "onions, quartered"] },
+      { q: 9, u: "", s: "w", t: ["sprig fresh thyme", "sprigs fresh thyme"] },
+      { head: "Glaze" },
+      { q: 1, u: "cup", s: "w", t: "orange juice" },
+      { q: 0.5, u: "cup", s: "w", t: "whole-berry cranberry sauce" },
+      { q: 0.33, u: "cup", s: "w", t: "honey" },
+      { q: 2, u: "tbsp", s: "w", t: "soy sauce" },
+      { q: 1, u: "tbsp", s: "w", t: "balsamic vinegar" },
+      { q: 0.5, u: "tsp", s: "w", t: "ground ginger" }
+    ],
+    steps: [
+      p => `If your duck${p.n > 1 ? "s are" : " is"} frozen, thaw in the refrigerator, allowing about 1 day per 4–5 lb. Remove the neck and giblets from the cavity.`,
+      "The day before, pat the duck very dry. Prick the skin all over with a skewer, angling it so you pierce the fat but not the meat. Rub with the kosher salt and leave uncovered on a rack in the refrigerator overnight. Dry skin is what makes it crisp.",
+      "Take the duck out 1 hour before roasting. Heat the oven to 325°F (165°C) with a rack in the lower third.",
+      "Stuff the cavity with the orange quarters, onion and thyme. Tie the legs together and tuck the wing tips under.",
+      "Set the duck breast-side up on a rack in a roasting pan. Roast for the first hour, then carefully pour off the fat from the pan into a heatproof jar (save it for roast potatoes).",
+      "Meanwhile, simmer all the glaze ingredients in a small saucepan for 8–10 minutes, until syrupy.",
+      p => `Raise the oven to 400°F (200°C). Brush the duck with glaze and roast for the last 20–30 minutes, glazing every 10 minutes, until the skin is deep golden and a thermometer in the thickest part of the thigh reads 175°F (80°C). Total roasting time is about ${p.roastText}.`,
+      p => `Move the duck to a carving board, tent loosely with foil and rest for ${p.rest} minutes. Carve the breasts off the bone in slices and cut the legs apart. Serve with the extra glaze.`
+    ],
+    tip: "Duck is rich, so a little goes a long way. The overnight air-drying in the fridge is the secret to shatteringly crisp skin."
+  };
+  const duck = {
+    id: "duck", tab: "elegant", name: "Roast Duck Dinner", icon: "🦆",
+    blurb: "Crisp-skinned roast duck with orange-cranberry glaze, baked brie, truffle mash, balsamic sprouts and bread pudding.",
+    menu: [
+      ["Appetizer", ["Baked Brie in Puff Pastry with Fig & Walnuts"]],
+      ["Main", ["Roast Duck with Orange-Cranberry Glaze"]],
+      ["Sides", ["Truffle & Parmesan Mashed Potatoes", "Balsamic-Maple Roasted Brussels Sprouts", "Honey-Glazed Carrots"]],
+      ["Dessert", ["Brioche Bread Pudding with Bourbon Caramel"]]
+    ],
+    drinks: [
+      ["With dinner", "Pinot Noir or a Beaujolais. Their bright fruit cuts through the richness of duck."],
+      ["Non-alcoholic", "Sparkling cranberry-orange juice or chilled sparkling apple cider."],
+      ["With dessert", "Coffee, or a small pour of tawny port."]
+    ],
+    recipes: [pickR(porkcrown, "brie"), duckMain, pickR(porkcrown, "trufflemash"), pickR(porkcrown, "balsamicsprouts"), pickR(turkey, "carrots"), pickR(porkcrown, "breadpudding")],
+    timeline(p) {
+      const out = [], tOut = -(p.rest + 10), tIn = tOut - p.roast;
+      const add = (m, icon, text, alarm = true, main = false) => out.push({ m, icon, text, alarm, main });
+      add(tIn - 60, "🦆", "Take the duck out of the fridge");
+      add(tIn - 20, "🔥", "Heat the oven to 325°F, stuff the duck with orange, onion and thyme");
+      add(tIn, "🦆", `Duck into the oven (${p.w} lb, about ${p.roastText})`, true, true);
+      add(tIn + 60, "🥄", "Pour the fat off the pan and save it");
+      add(tOut - 60, "🥔", "Peel and boil the potatoes for the mash");
+      add(tOut - 30, "🍯", "Make the glaze, then raise the oven to 400°F and start glazing the duck");
+      add(tOut - 10, "🦆", "Last coat of glaze. Check the thigh reads 175°F");
+      add(tOut, "🦆", "Duck out to rest. Oven up to 425°F");
+      add(tOut + 2, "🥬", "Brussels sprouts into the oven");
+      add(-60, "🧀", "Brie into the oven (or serve from the morning bake) for arriving guests");
+      add(-25, "🥔", "Mash the potatoes and warm the carrots");
+      add(-12, "🥬", "Drizzle balsamic maple over the sprouts");
+      add(-10, "🔪", "Carve the duck");
+      add(0, "🍽️", "Dinner is served!");
+      add(5, "🍮", "Bread pudding into the oven (it bakes while you eat)");
+      add(50, "🍮", "Warm the bourbon caramel and serve the bread pudding");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) { return [[1, 9, "🧂", `Salt and prick the duck${p.n > 1 ? "s" : ""}, then leave uncovered in the fridge overnight`], [p.thawDays + 1, 9, "🧊", `If the duck is frozen, move it to the fridge to thaw today`], [1, 10, "📋", "Prep day: make the caramel, soak the bread pudding overnight, trim the sprouts, assemble the brie"]]; },
+    shop: null
+  };
+  duck.shop = autoShop(duck.recipes, stdDrinks([["Pinot Noir or Beaujolais", null], ["sparkling cranberry-orange juice", 6], ["coffee", null]]));
+
+  // ---------- 🥩 beef tenderloin ----------
+  const tenderMain = {
+    id: "tenderloin", course: "Main", name: "Herb-Crusted Beef Tenderloin",
+    prep: "20 min, plus 1 hour at room temperature", cook: p => p.roastText, rest: p => p.rest + " min", yieldText: (f, p) => `${p.w} lb tenderloin (${p.n === 1 ? "1 roast" : p.n + " roasts"})`,
+    ing: [
+      { q: 1, u: "lb", s: "n", d: "Meat & Fish", cost: p => p.w * 31, t: p => `whole beef tenderloin, trimmed and tied, ${p.w} lb in total` },
+      { q: 2, u: "tbsp", s: "w", t: "olive oil" },
+      { q: 1, u: "tbsp", s: "w", t: "kosher salt" },
+      { q: 1, u: "tsp", s: "w", t: "coarsely ground black pepper" },
+      { head: "Herb crust" },
+      { q: 3, u: "tbsp", s: "w", t: "Dijon mustard" },
+      { q: 2, u: "", s: "w", t: ["garlic clove, grated", "garlic cloves, grated"] },
+      { q: 2, u: "tbsp", s: "w", t: "fresh rosemary, finely chopped" },
+      { q: 2, u: "tbsp", s: "w", t: "fresh thyme leaves" },
+      { q: 2, u: "tbsp", s: "w", t: "fresh flat-leaf parsley, chopped" }
+    ],
+    steps: [
+      p => `Take the tenderloin out of the refrigerator 1 hour before roasting. Pat it very dry, tuck the thin tail end under and tie with kitchen string every 1½ inches so it cooks evenly. (Ask your butcher to trim and tie it.)${p.n > 1 ? " Cook the roasts side by side on one pan." : ""}`,
+      "Heat the oven to 425°F (220°C) with a rack in the middle. Rub the beef all over with the olive oil, salt and pepper.",
+      "Sear in a very hot pan, 1–2 minutes per side, until browned all over. Set on a rack in a roasting pan.",
+      "Mix the mustard, garlic and herbs. Brush it over the top and sides of the beef.",
+      p => `Roast for about ${p.roastText}, until a thermometer in the thickest part reads 120–125°F (50–52°C) for medium-rare.`,
+      p => `Rest the beef, loosely tented with foil, for ${p.rest} minutes. It will rise to about 130°F. Remove the string and slice into ¾-inch rounds.`
+    ],
+    tip: "Tenderloin is lean and goes from perfect to dry quickly, so trust the thermometer, not the clock."
+  };
+  const peppercorn = {
+    id: "peppercorn", course: "Main", name: "Creamy Peppercorn Sauce",
+    prep: "5 min", cook: "15 min", yieldText: f => servings(f),
+    ing: [
+      { q: 3, u: "tbsp", t: "unsalted butter" },
+      { q: 3, u: "", t: ["shallot, finely minced", "shallots, finely minced"] },
+      { q: 2, u: "tbsp", t: "whole green or black peppercorns, lightly crushed" },
+      { q: 0.5, u: "cup", t: "brandy or beef stock" },
+      { q: 1, u: "cup", t: "beef stock" },
+      { q: 1, u: "cup", t: "heavy cream" },
+      { q: 2, u: "tsp", t: "Dijon mustard" }
+    ],
+    steps: [
+      "Melt the butter in a small saucepan over medium heat. Cook the shallots 3 minutes, until soft. Add the peppercorns and cook 1 minute.",
+      "Add the brandy (or stock) and simmer until almost gone, about 2 minutes.",
+      "Pour in the stock and simmer 6–8 minutes until reduced by half. Stir in the cream and mustard and simmer 3–4 minutes until it coats a spoon. Season to taste."
+    ],
+    tip: "Make it a day ahead and rewarm gently. Spoon it over the beef at the table."
+  };
+  const tenderloin = {
+    id: "tenderloin", tab: "elegant", name: "Beef Tenderloin Dinner", icon: "🥩",
+    blurb: "Herb-crusted beef tenderloin with peppercorn sauce, shrimp cocktail, creamed spinach, truffle mash and chocolate pots de crème.",
+    menu: [
+      ["Appetizer", ["Shrimp Cocktail with Zesty Horseradish Sauce"]],
+      ["Main", ["Herb-Crusted Beef Tenderloin", "Creamy Peppercorn Sauce"]],
+      ["Sides", ["Truffle & Parmesan Mashed Potatoes", "Steakhouse Creamed Spinach", "Garlic Green Beans with Toasted Almonds"]],
+      ["Dessert", ["Chocolate Pots de Crème"]]
+    ],
+    drinks: [
+      ["With dinner", "Cabernet Sauvignon, Merlot or a Rhône-style red. Big, smooth reds suit tender beef."],
+      ["Non-alcoholic", "Sparkling pomegranate juice with a sprig of rosemary."],
+      ["With dessert", "Espresso, or a small pour of port."]
+    ],
+    recipes: [pickR(primerib, "shrimp"), tenderMain, peppercorn, pickR(porkcrown, "trufflemash"), pickR(primerib, "spinach"), pickR(ham, "beans"), pickR(primerib, "pots")],
+    timeline(p) {
+      const out = [], tOut = -(p.rest + 10), tIn = tOut - p.roast;
+      const add = (m, icon, text, alarm = true, main = false) => out.push({ m, icon, text, alarm, main });
+      add(tIn - 70, "🥩", "Take the tenderloin out of the fridge");
+      add(tIn - 25, "🔥", "Heat the oven to 425°F. Pat the beef dry and rub with oil, salt and pepper");
+      add(tIn - 12, "🍳", "Sear the tenderloin on all sides, then brush with the herb mustard");
+      add(tIn, "🥩", `Tenderloin into the oven (${p.w} lb, about ${p.roastText})`, true, true);
+      add(-75, "🍤", "Set out the shrimp cocktail on ice");
+      add(-55, "🥔", "Peel and boil the potatoes for the mash");
+      add(-35, "🍶", "Make the peppercorn sauce");
+      add(tOut - 10, "🥩", "Check the beef reads 120–125°F");
+      add(tOut, "🥩", "Beef out to rest, tented with foil");
+      add(-22, "🥬", "Make the creamed spinach");
+      add(-20, "🥔", "Mash the potatoes");
+      add(-12, "🫛", "Finish the green beans on the stove (5 minutes)");
+      add(-10, "🔪", "Slice the beef and warm the sauce");
+      add(0, "🍽️", "Dinner is served!");
+      add(45, "🍫", "Serve the chocolate pots de crème");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) { return [[p.thawDays, 9, "🧊", "If the tenderloin is frozen, move it to the fridge to thaw today"], [1, 10, "📋", "Prep day: make the pots de crème and peppercorn sauce, blanch the green beans, trim and tie the tenderloin"]]; },
+    shop: null
+  };
+  tenderloin.shop = autoShop(tenderloin.recipes, stdDrinks([["Cabernet Sauvignon or Merlot", null], ["sparkling pomegranate juice", 7], ["espresso or coffee", null]]));
+
+  // ---------- 🐟 salmon wellington ----------
+  const salmonMain = {
+    id: "wellington", course: "Main", name: "Salmon Wellington with Spinach & Herbs",
+    prep: "35 min", cook: "35–40 min", rest: "10 min", yieldText: (f, p) => `${p.n} Wellington${p.n > 1 ? "s" : ""} (serves 8 each)`,
+    ing: [
+      { q: 2.5, u: "lb", s: "b", d: "Meat & Fish", cost: p => p.n * 38, t: "centre-cut salmon fillet, skinless, about 2½ lb" },
+      { q: 2, u: "", s: "b", d: "Pantry & Baking", cost: p => p.n * 11, t: ["sheet all-butter puff pastry (about 14 oz)", "sheets all-butter puff pastry (about 14 oz)"] },
+      { q: 10, u: "oz", s: "b", t: "fresh baby spinach" },
+      { q: 4, u: "oz", s: "b", t: "cream cheese, softened" },
+      { q: 2, u: "tbsp", s: "b", t: "fresh dill, chopped" },
+      { q: 1, u: "tbsp", s: "b", t: "lemon zest" },
+      { q: 2, u: "", s: "b", t: ["garlic clove, minced", "garlic cloves, minced"] },
+      { q: 2, u: "tbsp", s: "b", t: "Dijon mustard" },
+      { q: 1, u: "", s: "b", t: ["large egg, beaten (egg wash)", "large eggs, beaten (egg wash)"] },
+      { q: 2, u: "tbsp", s: "b", t: "unsalted butter" },
+      { q: 1, u: "tsp", s: "b", t: "kosher salt" }
+    ],
+    steps: [
+      "Cook the garlic in the butter for 30 seconds. Add the spinach and stir until wilted, 2–3 minutes. Tip into a clean towel, cool, then squeeze out as much moisture as you can. Chop finely.",
+      "Mix the spinach with the cream cheese, dill and lemon zest. Season with salt and pepper.",
+      "Heat the oven to 400°F (200°C). Line a baking sheet with parchment.",
+      "Roll one sheet of pastry on a floured surface, slightly longer and wider than the salmon, and set it on the sheet. Pat the salmon dry, season, and brush with the mustard.",
+      "Spread the spinach mixture on the pastry, set the salmon on top, then cover with the second sheet of pastry, tucking it snugly around the fish. Trim the edges, press to seal, and crimp with a fork.",
+      "Brush with egg wash and score a light diamond pattern on top without cutting through. Chill 15 minutes.",
+      p => `Bake ${p.roast} minutes, until the pastry is deep golden and the thickest part of the salmon reads 125°F (52°C) for medium.`,
+      "Rest 10 minutes, then slice with a serrated knife. Serve with the lemon-dill sauce."
+    ],
+    tip: "Squeezing the spinach dry is the whole trick. Wet spinach makes the pastry soggy underneath."
+  };
+  const dillSauce = {
+    id: "dillsauce", course: "Main", name: "Lemon-Dill Cream Sauce",
+    prep: "5 min", cook: "8 min", yieldText: f => servings(f),
+    ing: [
+      { q: 2, u: "tbsp", t: "unsalted butter" },
+      { q: 1, u: "", t: ["shallot, minced", "shallots, minced"] },
+      { q: 0.5, u: "cup", t: "dry white wine or chicken stock" },
+      { q: 1, u: "cup", t: "heavy cream" },
+      { q: 2, u: "tbsp", t: "lemon juice" },
+      { q: 2, u: "tbsp", t: "fresh dill, chopped" }
+    ],
+    steps: [
+      "Melt the butter and cook the shallot 2 minutes. Add the wine and simmer until reduced by half.",
+      "Pour in the cream and simmer 4–5 minutes, until it lightly coats a spoon.",
+      "Off the heat, stir in the lemon juice and dill. Season to taste and serve warm."
+    ],
+    tip: "Add the dill and lemon at the very end so the sauce stays bright and fresh."
+  };
+  const lemonPosset = {
+    id: "posset", course: "Dessert", name: "Lemon Posset with Shortbread",
+    prep: "10 min", cook: "5 min", rest: "chill 4 hours", yieldText: f => `${Math.round(8 * f)} small glasses`,
+    ing: [
+      { q: 3, u: "cup", t: "heavy cream" },
+      { q: 0.75, u: "cup", t: "granulated sugar" },
+      { q: 0.5, u: "cup", t: "fresh lemon juice" },
+      { q: 1, u: "tbsp", t: "lemon zest" },
+      { q: 8, u: "", t: ["shortbread cookie, for serving", "shortbread cookies, for serving"] }
+    ],
+    steps: [
+      "Warm the cream and sugar in a saucepan over medium heat, stirring, until the sugar dissolves. Boil gently for exactly 3 minutes.",
+      "Take off the heat and whisk in the lemon juice and zest. Let cool 10 minutes.",
+      "Pour into small glasses or cups and chill at least 4 hours, until set like a soft pudding. Serve with a shortbread cookie."
+    ],
+    tip: "Only three real ingredients, and it sets by itself. Make it the day before so dinner day has one less job."
+  };
+  const salmon = {
+    id: "salmon", tab: "elegant", name: "Salmon Wellington Dinner", icon: "🐟",
+    blurb: "Salmon wrapped in puff pastry with spinach and dill, lemon-dill sauce, garlic mash, winter salad and lemon posset.",
+    menu: [
+      ["Appetizer", ["Herbed Cream Cheese Crostini with Cranberry"]],
+      ["Main", ["Salmon Wellington with Spinach & Herbs", "Lemon-Dill Cream Sauce"]],
+      ["Sides", ["Garlic Mashed Potatoes", "Garlic Green Beans with Toasted Almonds", "Winter Pear & Pomegranate Salad"]],
+      ["Dessert", ["Lemon Posset with Shortbread"]]
+    ],
+    drinks: [
+      ["With dinner", "Chardonnay (lightly oaked), Chablis or a dry Riesling."],
+      ["Non-alcoholic", "Sparkling water with lemon and fresh dill, or white grape sparkling juice."],
+      ["With dessert", "Tea or coffee."]
+    ],
+    recipes: [pickR(turkey, "crostini", { tip: "Toast the crostini the day before and store them airtight. Assemble no more than 30 minutes before guests arrive so they stay crisp." }), salmonMain, dillSauce, pickR(turkey, "potatoes"), pickR(ham, "beans"), pickR(ham, "salad"), lemonPosset],
+    timeline(p) {
+      const out = [], tOut = -(10 + 10), tIn = tOut - p.roast;
+      const add = (m, icon, text, alarm = true, main = false) => out.push({ m, icon, text, alarm, main });
+      add(tIn - 70, "🥬", "Wilt and squeeze the spinach, make the filling");
+      add(tIn - 40, "🐟", "Assemble the Wellington and chill it");
+      add(tIn - 20, "🔥", "Heat the oven to 400°F");
+      add(tIn, "🐟", `Salmon Wellington into the oven (about ${p.roastText})`, true, true);
+      add(-75, "🥂", "Set out the crostini for arriving guests");
+      add(-50, "🥔", "Peel and boil the potatoes");
+      add(-35, "🥗", "Assemble the salad (dressing on at the last minute)");
+      add(-25, "🍋", "Make the lemon-dill sauce");
+      add(tOut, "🐟", "Wellington out to rest");
+      add(-20, "🥔", "Mash the potatoes");
+      add(-12, "🫛", "Finish the green beans on the stove (5 minutes)");
+      add(-8, "🔪", "Slice the Wellington with a serrated knife");
+      add(0, "🍽️", "Dinner is served!");
+      add(45, "🍋", "Serve the lemon posset with shortbread");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) { return [[1, 10, "📋", "Prep day: make the lemon posset, blanch the green beans, toast the almonds, make the salad dressing"], [1, 14, "🥬", "Make the spinach filling (keep chilled)"]]; },
+    shop: null
+  };
+  salmon.shop = autoShop(salmon.recipes, stdDrinks([["Chardonnay or Chablis", null], ["white grape sparkling juice", 6], ["tea or coffee", null], ["baguette, for the crostini", 4]]));
+
+  // ---------- 🐔 stuffed chicken roulade ----------
+  const rouladeMain = {
+    id: "roulade", course: "Main", name: "Spinach, Feta & Sun-Dried Tomato Chicken Roulade",
+    prep: "40 min", cook: p => p.roastText, rest: p => p.rest + " min", yieldText: f => `${Math.round(8 * f)} roulades`,
+    ing: [
+      { q: 8, u: "", s: "f", d: "Meat & Fish", cost: (p, f) => 8 * f * 3.4, t: ["large boneless, skinless chicken breast (6–7 oz)", "large boneless, skinless chicken breasts (6–7 oz each)"] },
+      { q: 5, u: "oz", t: "fresh baby spinach" },
+      { q: 4, u: "oz", t: "feta, crumbled" },
+      { q: 0.5, u: "cup", t: "sun-dried tomatoes in oil, chopped" },
+      { q: 4, u: "oz", t: "cream cheese, softened" },
+      { q: 3, u: "", t: ["garlic clove, minced", "garlic cloves, minced"] },
+      { q: 3, u: "tbsp", t: "olive oil" },
+      { q: 2, u: "tsp", t: "smoked paprika" },
+      { q: 1, u: "tsp", t: "kosher salt" },
+      { q: 8, u: "", d: "Meat & Fish", cost: (p, f) => 8 * f * 1.2, t: ["slice bacon or prosciutto (to wrap)", "slices bacon or prosciutto (to wrap)"] }
+    ],
+    steps: [
+      "Cook the garlic in 1 tbsp of the oil for 30 seconds. Add the spinach and stir until wilted. Cool, then squeeze dry and chop.",
+      "Mix the spinach with the feta, tomatoes and cream cheese. Season with pepper.",
+      "Slice each chicken breast open sideways almost all the way through, like a book, then pound to an even ½ inch between two sheets of plastic wrap.",
+      "Season with salt, paprika and pepper. Spread a few spoonfuls of filling over each, leaving a border, and roll up snugly. Wrap each in a slice of bacon or prosciutto, seam side down, and secure with a toothpick.",
+      "Heat the oven to 400°F (200°C). Set the roulades in a lightly oiled baking dish and brush with the remaining oil.",
+      p => `Bake about ${p.roastText}, until the chicken reads 165°F (74°C) and the wrapping is golden.`,
+      p => `Rest ${p.rest} minutes, then slice each roulade on a slant into rounds. Spoon the mushroom-thyme sauce over the top.`
+    ],
+    tip: "Assemble the roulades the day before, cover and refrigerate. Add 5 minutes to the baking time if they go in cold."
+  };
+  const mushroomSauce = {
+    id: "mushroomsauce", course: "Main", name: "Creamy Mushroom & Thyme Sauce",
+    prep: "10 min", cook: "15 min", yieldText: f => servings(f),
+    ing: [
+      { q: 3, u: "tbsp", t: "unsalted butter" },
+      { q: 12, u: "oz", t: "cremini mushrooms, sliced" },
+      { q: 2, u: "", t: ["shallot, minced", "shallots, minced"] },
+      { q: 2, u: "", t: ["garlic clove, minced", "garlic cloves, minced"] },
+      { q: 2, u: "tbsp", t: "all-purpose flour" },
+      { q: 1.5, u: "cup", t: "low-sodium chicken stock" },
+      { q: 0.5, u: "cup", t: "heavy cream" },
+      { q: 1, u: "tbsp", t: "fresh thyme leaves" }
+    ],
+    steps: [
+      "Melt the butter in a wide pan over medium-high heat. Cook the mushrooms 6–8 minutes, until golden and the liquid has cooked off.",
+      "Add the shallots and garlic and cook 2 minutes. Sprinkle in the flour and stir for 1 minute.",
+      "Whisk in the stock, bring to a simmer and cook 4–5 minutes until thickened. Stir in the cream and thyme, season and keep warm."
+    ],
+    tip: "Don't crowd the pan. Cook the mushrooms in two batches if needed so they brown instead of steaming."
+  };
+  const roulade = {
+    id: "roulade", tab: "elegant", name: "Stuffed Chicken Roulade Dinner", icon: "🐔",
+    blurb: "Spinach and feta stuffed chicken with mushroom-thyme sauce, cheese ball, garlic mash, honey carrots and gingerbread.",
+    menu: [
+      ["Appetizer", ["Cranberry Pecan Cheese Ball with Crackers"]],
+      ["Main", ["Spinach, Feta & Sun-Dried Tomato Chicken Roulade", "Creamy Mushroom & Thyme Sauce"]],
+      ["Sides", ["Garlic Mashed Potatoes", "Honey-Glazed Carrots", "Garlic Green Beans with Toasted Almonds"]],
+      ["Dessert", ["Old-Fashioned Gingerbread Cake with Whipped Cream"]]
+    ],
+    drinks: [
+      ["With dinner", "Chardonnay, Pinot Gris or a light Pinot Noir."],
+      ["Non-alcoholic", "Sparkling apple cider with a slice of orange."],
+      ["With dessert", "Coffee, chai or hot tea."]
+    ],
+    recipes: [pickR(ham, "cheeseball"), rouladeMain, mushroomSauce, pickR(turkey, "potatoes"), pickR(turkey, "carrots"), pickR(ham, "beans"), pickR(ham, "gingerbread")],
+    timeline(p) {
+      const out = [], tOut = -(p.rest + 10), tIn = tOut - p.roast;
+      const add = (m, icon, text, alarm = true, main = false) => out.push({ m, icon, text, alarm, main });
+      add(tIn - 60, "🥬", "Wilt and squeeze the spinach, mix the filling");
+      add(tIn - 35, "🐔", "Stuff, roll and wrap the chicken");
+      add(tIn - 15, "🔥", "Heat the oven to 400°F");
+      add(tIn, "🐔", `Chicken roulades into the oven (about ${p.roastText})`, true, true);
+      add(-60, "🧀", "Set out the cheese ball and crackers for arriving guests");
+      add(-50, "🥔", "Peel and boil the potatoes");
+      add(-30, "🥕", "Glaze the carrots on the stove");
+      add(-25, "🍄", "Make the mushroom-thyme sauce");
+      add(tOut, "🐔", "Roulades out to rest");
+      add(-20, "🥔", "Mash the potatoes");
+      add(-12, "🫛", "Finish the green beans on the stove (5 minutes)");
+      add(-8, "🔪", "Slice the roulades and spoon on the sauce");
+      add(0, "🍽️", "Dinner is served!");
+      add(45, "🍰", "Whip the cream and serve the gingerbread");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) { return [[1, 10, "📋", `Prep day: make the cheese ball, bake ${p.pies > 1 ? p.pies + " gingerbread cakes" : "the gingerbread"}, blanch the green beans, assemble the roulades and chill them`]]; },
+    shop: null
+  };
+  roulade.shop = autoShop(roulade.recipes, stdDrinks([["Chardonnay or Pinot Gris", null], ["sparkling apple cider", 5], ["coffee or chai", null]]));
+
+  // ---------- 🦃 roast turkey breast ----------
+  const breastMain = {
+    id: "breast", course: "Main", name: "Herb-Butter Roast Turkey Breast",
+    prep: "15 min", cook: p => p.roastText, rest: p => p.rest + " min", yieldText: (f, p) => `${p.n === 1 ? "one" : p.n} bone-in breast${p.n > 1 ? "s" : ""}, ${p.w} lb in total`,
+    ing: [
+      { q: 1, u: "lb", s: "n", d: "Meat & Fish", cost: p => p.w * 8.5, t: p => `bone-in turkey breast, ${p.w} lb in total (thawed)` },
+      { q: 0.5, u: "cup", s: "w", t: "unsalted butter, softened" },
+      { q: 3, u: "", s: "w", t: ["garlic clove, minced", "garlic cloves, minced"] },
+      { q: 2, u: "tbsp", s: "w", t: "fresh thyme leaves" },
+      { q: 1, u: "tbsp", s: "w", t: "fresh rosemary, finely chopped" },
+      { q: 1, u: "tbsp", s: "w", t: "fresh sage, chopped" },
+      { q: 1, u: "", s: "w", up: true, t: ["lemon, zested", "lemons, zested"] },
+      { q: 1, u: "", s: "w", t: ["onion, thickly sliced (for the pan)", "onions, thickly sliced (for the pan)"] },
+      { q: 1, u: "cup", s: "n", t: "chicken stock, for the pan" }
+    ],
+    steps: [
+      p => `If frozen, thaw in the refrigerator for about ${p.thawDays} ${p.thawDays === 1 ? "day" : "days"}. Take the turkey out of the fridge 1 hour before roasting and pat very dry.`,
+      "Heat the oven to 325°F (165°C) with a rack in the lower third.",
+      "Mash the butter with the garlic, herbs, lemon zest, 1 tsp kosher salt and ½ tsp pepper. Loosen the skin over the breast with your fingers and spread two thirds of the butter underneath. Rub the rest over the skin.",
+      "Scatter the onion in a roasting pan, pour in the stock and set the breast on top, skin side up.",
+      p => `Roast about ${p.roastText}, basting once or twice with the pan juices, until a thermometer in the thickest part reads 160°F (71°C). The skin should be golden; cover loosely with foil if it browns too fast.`,
+      p => `Rest ${p.rest} minutes (it rises to 165°F). Carve the breast off the bone and slice across the grain. Strain the pan juices for the gravy.`
+    ],
+    tip: "A bone-in breast gives you all the turkey flavour in a fraction of the time, and no wrestling with a whole bird."
+  };
+  const panGravy = {
+    id: "pangravy", course: "Main", name: "Herb Pan Gravy",
+    prep: "5 min", cook: "10 min", yieldText: f => servings(f),
+    ing: [
+      { q: 3, u: "tbsp", t: "unsalted butter" },
+      { q: 3, u: "tbsp", t: "all-purpose flour" },
+      { q: 2.5, u: "cup", t: "low-sodium chicken stock" },
+      { q: 1, u: "tsp", t: "fresh thyme leaves" }
+    ],
+    steps: [
+      "Pour the pan juices through a sieve, skim off most of the fat and keep the juices.",
+      "Melt the butter, whisk in the flour and cook 2 minutes until golden.",
+      "Slowly whisk in the stock and the pan juices. Simmer 6–8 minutes until it coats a spoon. Add the thyme, season and keep warm."
+    ],
+    tip: "Cold stock into hot roux, or hot stock into cool roux, keeps the gravy lump free."
+  };
+  const turkeybreast = {
+    id: "turkeybreast", tab: "traditional", name: "Roast Turkey Breast Dinner", icon: "🦃",
+    blurb: "A smaller, easier turkey: herb-butter roast breast, gravy, stuffing, mash, sprouts, cranberry sauce and pumpkin pie.",
+    menu: [
+      ["Appetizer", ["Herbed Cream Cheese Crostini with Cranberry"]],
+      ["Main", ["Herb-Butter Roast Turkey Breast", "Herb Pan Gravy"]],
+      ["Stuffing", ["Classic Herb & Onion Bread Stuffing"]],
+      ["Sides", ["Garlic Mashed Potatoes", "Roasted Brussels Sprouts", "Fresh Orange-Cranberry Sauce"]],
+      ["Dessert", ["Spiced Pumpkin Pie with Whipped Cream"]]
+    ],
+    drinks: [
+      ["With dinner", "Pinot Noir, or a dry Riesling or unoaked Chardonnay."],
+      ["Non-alcoholic", "Sparkling cranberry-orange punch or chilled sparkling apple cider."],
+      ["With dessert", "Hot coffee, black tea or warm spiced apple cider."]
+    ],
+    recipes: [pickR(turkey, "crostini"), breastMain, panGravy, pickR(turkey, "stuffing"), pickR(turkey, "potatoes"), pickR(turkey, "sprouts"), pickR(turkey, "cranberry"), pickR(turkey, "pie")],
+    timeline(p) {
+      const out = [], tOut = -(p.rest + 10), tIn = tOut - p.roast;
+      const add = (m, icon, text, alarm = true, main = false) => out.push({ m, icon, text, alarm, main });
+      add(tIn - 60, "🦃", "Take the turkey breast out of the fridge");
+      add(tIn - 20, "🔥", "Heat the oven to 325°F. Rub the herb butter under the skin");
+      add(tIn, "🦃", `Turkey breast into the oven (${p.w} lb, about ${p.roastText})`, true, true);
+      add(tOut - 55, "🥖", "Stuffing into the oven, covered");
+      add(-70, "🥂", "Set out the crostini for arriving guests");
+      add(-50, "🥔", "Peel and boil the potatoes");
+      add(tOut - 10, "🦃", "Check the turkey reads 160°F");
+      add(tOut, "🦃", "Turkey out to rest. Oven up to 425°F, uncover the stuffing, sprouts in");
+      add(-25, "🍶", "Make the gravy from the pan juices");
+      add(-20, "🥔", "Mash the potatoes");
+      add(-10, "🔪", "Carve the turkey breast");
+      add(0, "🍽️", "Dinner is served!");
+      add(45, "🥧", "Whip the cream and serve the pumpkin pie");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) { return [[p.thawDays, 9, "🧊", `If the turkey breast is frozen, move it to the fridge to thaw today (about ${p.thawDays} ${p.thawDays === 1 ? "day" : "days"})`], [1, 10, "📋", `Prep day: bake ${p.pies > 1 ? p.pies + " pumpkin pies" : "the pumpkin pie"}, make the cranberry sauce, cube and dry the bread, trim the sprouts`]]; },
+    shop: null
+  };
+  turkeybreast.shop = autoShop(turkeybreast.recipes, stdDrinks([["Pinot Noir or Riesling", null], ["sparkling cranberry-orange punch ingredients", 8], ["coffee or tea", null], ["baguette, for the crostini", 4]]));
+
+  // ---------- 🍝 lasagna ----------
+  const lasagnaMain = {
+    id: "lasagna", course: "Main", name: "Classic Meat Lasagna",
+    prep: "45 min", cook: "1 hour 15 min", rest: "20 min", yieldText: (f, p) => `${p.n} lasagna${p.n > 1 ? "s" : ""} (9×13-inch, serves 8 each)`,
+    ing: [
+      { q: 1, u: "lb", s: "b", t: "ground beef" },
+      { q: 1, u: "lb", s: "b", t: "mild Italian sausage, casings removed" },
+      { q: 1, u: "", s: "b", t: ["onion, finely chopped", "onions, finely chopped"] },
+      { q: 4, u: "", s: "b", t: ["garlic clove, minced", "garlic cloves, minced"] },
+      { q: 2, u: "", s: "b", d: "Pantry & Baking", cost: p => p.n * 4.5, t: ["can (28 oz) crushed tomatoes", "cans (28 oz each) crushed tomatoes"] },
+      { q: 1, u: "", s: "b", d: "Pantry & Baking", cost: p => p.n * 1.6, t: ["can (6 oz) tomato paste", "cans (6 oz each) tomato paste"] },
+      { q: 1, u: "tbsp", s: "b", t: "dried Italian seasoning" },
+      { q: 1, u: "", s: "b", d: "Pantry & Baking", cost: p => p.n * 3.5, t: ["box (9 oz) oven-ready lasagna noodles", "boxes (9 oz each) oven-ready lasagna noodles"] },
+      { head: "Cheese layers" },
+      { q: 15, u: "oz", s: "b", t: "ricotta" },
+      { q: 2, u: "", s: "b", t: ["large egg", "large eggs"] },
+      { q: 0.5, u: "cup", s: "b", t: "grated Parmesan" },
+      { q: 3, u: "tbsp", s: "b", t: "fresh flat-leaf parsley, chopped" },
+      { q: 16, u: "oz", s: "b", t: "shredded mozzarella" }
+    ],
+    steps: [
+      "Brown the beef and sausage with the onion in a large pot, breaking up the meat, 8–10 minutes. Add the garlic and cook 1 minute. Drain off excess fat.",
+      "Stir in the crushed tomatoes, tomato paste, Italian seasoning, 1 tsp kosher salt and a pinch of sugar. Simmer 25–30 minutes, until thick.",
+      "Mix the ricotta with the eggs, half the Parmesan and the parsley.",
+      "Heat the oven to 375°F (190°C). Spread a thin layer of sauce in a 9×13-inch dish. Layer noodles, ricotta mixture, mozzarella and sauce, repeating 3 times and ending with sauce and the rest of the mozzarella and Parmesan.",
+      "Cover tightly with foil (spray it so the cheese doesn't stick). Bake 45 minutes, then uncover and bake 25–30 minutes more, until bubbling and golden.",
+      "Rest 20 minutes before cutting so the layers hold together."
+    ],
+    tip: "Assemble the day before and keep it covered in the fridge. Add 15 minutes to the covered baking time if it goes in cold."
+  };
+  const garlicBread = {
+    id: "garlicbread", course: "Sides", name: "Cheesy Garlic Bread",
+    prep: "10 min", cook: "12 min", yieldText: f => `${Math.round(8 * f)} servings`,
+    ing: [
+      { q: 1, u: "", s: "f", d: "Pantry & Baking", cost: 3.5, up: true, t: ["large baguette or ciabatta loaf", "large baguettes or ciabatta loaves"] },
+      { q: 0.5, u: "cup", t: "unsalted butter, softened" },
+      { q: 4, u: "", t: ["garlic clove, grated", "garlic cloves, grated"] },
+      { q: 2, u: "tbsp", t: "fresh flat-leaf parsley, chopped" },
+      { q: 1, u: "cup", t: "shredded mozzarella" }
+    ],
+    steps: [
+      "Heat the oven to 400°F (200°C) once the lasagna comes out.",
+      "Mash the butter with the garlic and parsley. Slice the bread in half lengthways and spread the butter on the cut sides.",
+      "Top with the mozzarella and bake 10–12 minutes, until golden and bubbling. Slice and serve warm."
+    ],
+    tip: "Mix the garlic butter the day before. It spreads best at room temperature."
+  };
+  const tiramisu = {
+    id: "tiramisu", course: "Dessert", name: "No-Bake Tiramisu",
+    prep: "25 min", cook: "none", rest: "chill 6 hours", yieldText: f => servings(f),
+    ing: [
+      { q: 4, u: "", t: ["large egg yolk", "large egg yolks"] },
+      { q: 0.5, u: "cup", t: "granulated sugar" },
+      { q: 16, u: "oz", t: "mascarpone" },
+      { q: 1, u: "cup", t: "heavy cream" },
+      { q: 1.5, u: "cup", t: "strong brewed coffee, cooled" },
+      { q: 2, u: "tbsp", t: "coffee liqueur or marsala (optional)" },
+      { q: 24, u: "", t: ["ladyfinger", "ladyfingers"] },
+      { q: 2, u: "tbsp", t: "unsweetened cocoa powder" }
+    ],
+    steps: [
+      "Whisk the egg yolks and sugar in a heatproof bowl set over simmering water for 5–6 minutes, until pale and thick. Cool, then beat in the mascarpone until smooth.",
+      "Whip the cream to stiff peaks and fold it into the mascarpone mixture.",
+      "Mix the coffee and liqueur. Dip each ladyfinger very briefly, then lay a layer in an 8×8-inch dish. Cover with half the cream, repeat, and smooth the top.",
+      "Cover and chill at least 6 hours, or overnight. Dust with cocoa just before serving."
+    ],
+    tip: "Dip the ladyfingers for just a second. Soaked biscuits turn mushy, but a quick dip softens them perfectly overnight."
+  };
+  const lasagna = {
+    id: "lasagna", tab: "traditional", name: "Lasagna Christmas Dinner", icon: "🍝",
+    blurb: "Classic meat lasagna, cheesy garlic bread, winter pear salad, cheese ball starter and tiramisu. Easy to make ahead.",
+    menu: [
+      ["Appetizer", ["Cranberry Pecan Cheese Ball with Crackers"]],
+      ["Main", ["Classic Meat Lasagna"]],
+      ["Sides", ["Cheesy Garlic Bread", "Winter Pear & Pomegranate Salad"]],
+      ["Dessert", ["No-Bake Tiramisu"]]
+    ],
+    drinks: [
+      ["With dinner", "Chianti, Montepulciano or Sangiovese. Bright, savoury reds love tomato sauce."],
+      ["Non-alcoholic", "Sparkling water with a splash of pomegranate juice and a sprig of rosemary."],
+      ["With dessert", "Espresso or a small pour of Vin Santo."]
+    ],
+    recipes: [pickR(ham, "cheeseball"), lasagnaMain, garlicBread, pickR(ham, "salad"), tiramisu],
+    timeline(p) {
+      const out = [], tOut = -(p.rest + 5), tIn = tOut - p.roast;
+      const add = (m, icon, text, alarm = true, main = false) => out.push({ m, icon, text, alarm, main });
+      add(tIn - 20, "🔥", "Heat the oven to 375°F");
+      add(tIn, "🍝", `Lasagna into the oven, covered with foil (about ${p.roastText})`, true, true);
+      add(tIn + 45, "🍝", "Uncover the lasagna for the golden finish");
+      add(-60, "🧀", "Set out the cheese ball and crackers for arriving guests");
+      add(-35, "🥗", "Assemble the salad (dressing on at the last minute)");
+      add(tOut, "🍝", "Lasagna out to rest. Oven up to 400°F, garlic bread in");
+      add(-12, "🥖", "Garlic bread out of the oven");
+      add(-8, "🥗", "Dress the salad");
+      add(0, "🍽️", "Dinner is served!");
+      add(45, "☕", "Dust the tiramisu with cocoa and serve");
+      return out.sort((a, b) => a.m - b.m);
+    },
+    ahead(p) { return [[1, 10, "📋", "Prep day: make the tiramisu, make the cheese ball, cook the sauce and assemble the lasagna (cover and refrigerate), mix the garlic butter"]]; },
+    shop: null
+  };
+  lasagna.shop = autoShop(lasagna.recipes, stdDrinks([["Chianti or Sangiovese", null], ["pomegranate juice and sparkling water", 6], ["espresso or coffee", null]]));
+
+  const duckPlan = roastPlan({ icon: "🦆", wBase: 15, rest: 20, size: g => { const n = Math.max(1, Math.ceil(g / 3.5 - 1e-9)); return { w: n * 5, n, meat: n > 1 ? `ducks (${n} × 5 lb)` : "duck", roast: Math.round((140 + (n - 1) * 10) / 5) * 5, note: "Duck needs the fat poured off after the first hour." }; } });
+  const tenderPlan = roastPlan({ icon: "🥩", wBase: 4, rest: 20, size: g => { const w = Math.max(2, Math.round(g * 0.5 * 2) / 2), n = Math.ceil(w / 5), per = w / n; return { w, n, meat: n > 1 ? `beef tenderloin (${n} roasts)` : "beef tenderloin", roast: Math.round((20 + per * 6.5) / 5) * 5, note: "Pull it out at 120–125°F for medium-rare. It rises to about 130°F as it rests." }; } });
+  const salmonPlan = roastPlan({ icon: "🐟", wBase: 2.5, rest: 10, verb: "bakes", size: g => { const n = Math.max(1, Math.ceil(g / 8 - 1e-9)); return { n, meat: "", roast: n > 1 ? 45 : 40, label: `${n} salmon Wellington${n > 1 ? "s" : ""}`, note: n > 1 ? "Bake the Wellingtons on separate sheets, rotating halfway." : "" }; } });
+  const roulPlan = roastPlan({ icon: "🐔", wBase: 4, rest: 10, verb: "bakes", size: g => { const w = Math.max(1, Math.round(g * 0.5 * 2) / 2); return { w, meat: "stuffed chicken breasts", roast: g > 12 ? 45 : 40, note: "The chicken is done at 165°F." }; } });
+  const breastPlan = roastPlan({ icon: "🦃", wBase: 6, rest: 20, size: g => { const w = Math.min(14, Math.max(3, Math.round(g * 0.75))), n = Math.ceil(w / 7), per = w / n; return { w, n, meat: n > 1 ? `bone-in turkey breasts (${n})` : "bone-in turkey breast", roast: Math.round((per * 22 + (n > 1 ? 10 : 0)) / 5) * 5, note: "Pull it out at 160°F. It rises to a safe 165°F as it rests." }; } });
+  const lasaPlan = roastPlan({ icon: "🍝", wBase: 8, rest: 20, verb: "bakes", size: g => { const n = Math.max(1, Math.ceil(g / 8 - 1e-9)); return { n, meat: "", roast: 75, label: `${n} lasagna${n > 1 ? "s" : ""} (9×13-inch)`, note: n > 1 ? "Bake the pans side by side; if your oven only holds one rack, bake them on two racks and swap halfway." : "" }; } });
+
   const placeholder = (id, tab, name, icon, blurb) => ({ id, tab, name, icon, blurb, soon: true });
   return {
     tabs: [["eve", "🕯️ Christmas Eve"], ["traditional", "Traditional"], ["elegant", "Elegant"], ["vegan", "Vegan"], ["dietary", "Dietary"]],
     meals: [
       turkey,
+      turkeybreast,
       primerib,
       ham,
+      lasagna,
       lambcrown,
       porkcrown,
+      tenderloin,
+      duck,
+      salmon,
+      roulade,
       vegan,
       squash,
       shepherd,
@@ -7579,7 +8173,7 @@ window.NOEL_MEALS = (function () {
       const each = picked ? picked.pieces : Math.ceil(p.total / (p.items.length + 1));
       return perBatch * Math.max(1, Math.ceil(each / batch - 1e-9));
     },
-    plan: { turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8), nyeparty: nyePartyPlan, eveparty: evePartyPlan, seafood: seafoodPlan },
+    plan: { turkeybreast: breastPlan, lasagna: lasaPlan, tenderloin: tenderPlan, duck: duckPlan, salmon: salmonPlan, roulade: roulPlan, turkey: turkeyPlan, ham: hamPlan, primerib: primeRibPlan, porkcrown: porkCrownPlan, lambcrown: lambCrownPlan, vegan: veganPlan, squash: addonPlan(4), shepherd: addonPlan(5), mousse: addonPlan(4), vgravy2: addonPlan(5), pecanpie: addonPlan(8), nyeparty: nyePartyPlan, eveparty: evePartyPlan, seafood: seafoodPlan },
     doneness: DONENESS,
     appShop: APP_SHOP, appRecipes: APP_RECIPES, drinkApps: DRINK_APPS,   // 🏢 the office food planner uses the same appetizer shopping data
     frac, hm, fmtNum
@@ -11983,7 +12577,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
 
   // ---- 📖 the menu: a restaurant-style first page, then "Plan my dinner" opens the builder ----
   let mealScreen = mealSel.id ? "build" : "menu";
-  const MENU_GROUPS = [["Christmas Appetizers & Suppers", ["eveparty", "seafood"], "Christmas Appetizers & Suppers"], ["Traditional", ["turkey", "primerib", "ham"], "Christmas Dinner"], ["Elegant", ["lambcrown", "porkcrown"]], ["Vegan", ["vegan"]]];
+  const MENU_GROUPS = [["Christmas Appetizers & Suppers", ["eveparty", "seafood"], "Christmas Appetizers & Suppers"], ["Traditional", ["turkey", "turkeybreast", "primerib", "ham", "lasagna"], "Christmas Dinner"], ["Elegant", ["lambcrown", "porkcrown", "tenderloin", "duck", "salmon", "roulade"]], ["Vegan", ["vegan"]]];
   function renderMealMenu() {
     const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
     const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);
