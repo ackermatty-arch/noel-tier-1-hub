@@ -560,7 +560,7 @@
     wiz = { night: null, sel: { day: at("day"), eve: at("eve"), eved: at("eved") }, time: {}, guests: {} };
   }
   if (!wiz.sel.eved) wiz.sel.eved = [];
-  if (wiz.night && !WN[wiz.night]) wiz.night = null;
+  wiz.night = "eved";   // one list of dinners now: no night to choose
   const wizSave = () => save("wiz", wiz);
   const wizDate = n => n === "eve" ? eveYmd() : dayYmd();   // appetizer and supper night is Christmas Eve; the sit-down dinners default to Christmas Day
   const wizTime = n => wiz.time[n] || (n === "day" ? "17:00" : "18:00");
@@ -576,7 +576,7 @@
   }
   function wizGuestHtml(n) {
     const g = wizGuests(n);
-    return `<div class="wz-step"><span class="wz-n">3</span>How many guests, and what time?</div>
+    return `<div class="wz-step"><span class="wz-n">2</span>How many guests, and what time?</div>
         <div class="wz-row"><div class="stepper"><button type="button" data-wzg="-1" aria-label="Fewer guests">−</button><output>${g}</output><button type="button" data-wzg="1" aria-label="More guests">+</button></div><span class="wz-lab">guests</span>
         <label class="wz-time"><span class="wz-lab">Dinner at</span><input class="input" type="time" id="wizTime" value="${esc(wizTime(n))}"></label></div>
         <p class="wz-hint">Every recipe and the shopping list are sized for <b>${g}</b> guest${g > 1 ? "s" : ""}.</p>`;
@@ -586,15 +586,15 @@
     const n = wiz.night, sel = n ? wiz.sel[n] : [];
     const dayBtn = k => `<button type="button" class="wz-night" data-wznight="${k}" aria-pressed="${n === k}"><b>${WN[k]}</b><small>${wiz.sel[k].length ? wiz.sel[k].length + " dinner" + (wiz.sel[k].length > 1 ? "s" : "") + " chosen" : "Tap to plan"}</small></button>`;
     let h = `<div class="wz-top"><button type="button" class="meal-back" data-wzmenu>‹ The menu</button><button type="button" class="meal-back" data-wzsaved>My saved menus</button></div><div class="card wz"><h3 class="wz-t">Plan your Christmas dinner</h3>
-      <div class="wz-step"><span class="wz-n">1</span>Which night?</div><div class="wz-nights">${dayBtn("eve")}${dayBtn("eved")}</div>`;
+`;
     if (n) {
-      h += `<div class="wz-step"><span class="wz-n">2</span>What are you cooking? <small>Tap one or more. Chosen dinners turn black.</small></div><div class="wz-opts">` +
+      h += `<div class="wz-step"><span class="wz-n">1</span>Choose your meal <small>Tap one or more. Chosen dinners turn black.</small></div><div class="wz-opts">` +
         MENU_GROUPS.map(([g, ids]) => `<h4 class="wz-grp">${esc(g)}</h4>` + ids.map(id => mealById(id)).filter(m => m && wizOpts(n).includes(m)).map(m => `<button type="button" class="wz-opt" data-wzpick="${m.id}" aria-pressed="${sel.includes(m.id)}"><span><b>${esc(m.name)}</b><small>${esc(m.blurb)}</small></span><i>${sel.includes(m.id) ? "✓" : "+"}</i></button>`).join("")).join("") + `</div>`;
       if (sel.length) h += wizGuestHtml(n) + wizDietHtml();
     }
     if (n && sel.length) {
       const g = wizGuests(n), planned = sel.filter(id => planOf(id)).length;
-      h += `<div class="wz-step"><span class="wz-n">4</span>Ready? See your plan first</div>
+      h += `<div class="wz-step"><span class="wz-n">3</span>Ready? See your plan first</div>
         <ul class="wz-list">${sel.map(id => `<li><button type="button" data-wzopen="${id}"><b>${esc(mealById(id).name)}</b><small>Recipes, timeline and prices</small><span class="meal-go">›</span></button></li>`).join("")}</ul>
         ${planned === sel.length ? `<p class="wz-on">Alarms are on. Noël will ring at each step.</p><button type="button" class="btn btn-ghost btn-block" data-wzstop>Turn alarms off</button>` : `<button type="button" class="btn btn-gold btn-block" data-wzalarm>See my plan</button><p class="wz-hint">You will check everything first. Nothing is set until you save.</p>`}`;
     }
@@ -633,7 +633,7 @@
     if (el.dataset.built === sig) return; el.dataset.built = sig;
     const go = `<button type="button" class="menu-go" data-menugo>Noël's dinner plans <span>›</span></button>`;
     const svN = savedMenus.length + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length, sv = svN ? `<button type="button" class="menu-go menu-saved" data-menusaved>My saved menus (${svN}) <span>›</span></button>` : "";
-    el.innerHTML = `<div class="menu-top"><button type="button" class="menu-go menu-skip" data-menuskip>My own dinner plans</button>${go}</div>${sv ? `<div class="menu-top menu-top2">${sv}</div>` : ""}
+    el.innerHTML = `<div class="menu-opts"><div class="menu-opt"><button type="button" class="menu-go menu-skip" data-menuskip>My own dinner plans</button><p>Manually input your meal, set timers and print.</p></div><div class="menu-opt">${go}<p>Choose your dinner and how many are attending. Noël provides your recipes and instructions, shopping list and estimated price, and sets your timers. These are fixed menus, and you can only add a vegan option.</p></div></div>${sv ? `<div class="menu-top menu-top2">${sv}</div>` : ""}
       <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
       MENU_GROUPS.map(([g, ids, band]) => (band ? `<h3 class="menu-group">${band}</h3>` : "") + (band === g ? "" : `<h3 class="menu-subgroup">${g}</h3>`) + ids.map(id => {
         const m = mealById(id); if (!m || m.soon) return "";
