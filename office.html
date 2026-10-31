@@ -12541,8 +12541,8 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   if (!wiz.sel.eved) wiz.sel.eved = [];
   wiz.night = "eved";   // one list of dinners now: no night to choose
   const wizSave = () => save("wiz", wiz);
-  const wizDate = n => n === "eve" ? eveYmd() : dayYmd();   // appetizer and supper night is Christmas Eve; the sit-down dinners default to Christmas Day
-  const wizTime = n => wiz.time[n] || (n === "day" ? "17:00" : "18:00");
+  const wizDate = n => wiz.day === "24" ? eveYmd() : dayYmd();   // the day the buyer picked: December 24 or 25 (25 by default)
+  const wizTime = n => wiz.time[n] || (wiz.day === "24" ? "18:00" : "17:00");
   const wizGuests = n => wiz.guests[n] || 2;
   const wizOpts = n => {
     return MD.meals.filter(m => !m.soon && !m.addon && ["traditional", "elegant", "vegan", "eve"].includes(m.tab));
@@ -12553,9 +12553,13 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     save("mealCfg", mealCfg);
     wiz.sel[n].forEach(id => { if (planOf(id)) startMealPlan(mealById(id), true); });
   }
+  function wizDayHtml() {
+    const d = wiz.day === "24" ? "24" : "25";
+    return `<div class="wz-step"><span class="wz-n">2</span>When is your Christmas dinner?</div><div class="wz-nights"><button type="button" class="wz-night" data-wzday="24" aria-pressed="${d === "24"}"><b>December 24</b><small>Christmas Eve</small></button><button type="button" class="wz-night" data-wzday="25" aria-pressed="${d === "25"}"><b>December 25</b><small>Christmas Day</small></button></div>`;
+  }
   function wizGuestHtml(n) {
     const g = wizGuests(n);
-    return `<div class="wz-step"><span class="wz-n">2</span>How many guests, and what time?</div>
+    return `<div class="wz-step"><span class="wz-n">3</span>How many guests, and what time?</div>
         <div class="wz-row"><div class="stepper"><button type="button" data-wzg="-1" aria-label="Fewer guests">−</button><output>${g}</output><button type="button" data-wzg="1" aria-label="More guests">+</button></div><span class="wz-lab">guests</span>
         <label class="wz-time"><span class="wz-lab">Dinner at</span><input class="input" type="time" id="wizTime" value="${esc(wizTime(n))}"></label></div>
         <p class="wz-hint">Every recipe and the shopping list are sized for <b>${g}</b> guest${g > 1 ? "s" : ""}.</p>`;
@@ -12569,11 +12573,11 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (n) {
       h += `<div class="wz-step"><span class="wz-n">1</span>Choose your meal <small>Tap one or more. Chosen dinners turn black.</small></div><div class="wz-opts">` +
         MENU_GROUPS.map(([g, ids]) => `<h4 class="wz-grp">${esc(g)}</h4>` + ids.map(id => mealById(id)).filter(m => m && wizOpts(n).includes(m)).map(m => `<button type="button" class="wz-opt" data-wzpick="${m.id}" aria-pressed="${sel.includes(m.id)}"><span><b>${esc(m.name)}</b><small>${esc(m.blurb)}</small></span><i>${sel.includes(m.id) ? "✓" : "+"}</i></button>`).join("")).join("") + `</div>`;
-      if (sel.length) h += wizGuestHtml(n) + wizDietHtml();
+      if (sel.length) h += wizDayHtml() + wizGuestHtml(n) + wizDietHtml();
     }
     if (n && sel.length) {
       const g = wizGuests(n), planned = sel.filter(id => planOf(id)).length;
-      h += `<div class="wz-step"><span class="wz-n">3</span>Ready? See your plan first</div>
+      h += `<div class="wz-step"><span class="wz-n">4</span>Ready? See your plan first</div>
         <ul class="wz-list">${sel.map(id => `<li><button type="button" data-wzopen="${id}"><b>${esc(mealById(id).name)}</b><small>Recipes, timeline and prices</small><span class="meal-go">›</span></button></li>`).join("")}</ul>
         ${planned === sel.length ? `<p class="wz-on">Alarms are on. Noël will ring at each step.</p><button type="button" class="btn btn-ghost btn-block" data-wzstop>Turn alarms off</button>` : `<button type="button" class="btn btn-gold btn-block" data-wzalarm>See my plan</button><p class="wz-hint">You will check everything first. Nothing is set until you save.</p>`}`;
     }
@@ -12581,6 +12585,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   }
   $("#view-meals").addEventListener("click", e => {
     const t = e.target, n = wiz.night;
+    const wd = t.closest("[data-wzday]"); if (wd) { wiz.day = wd.dataset.wzday; if (wiz.time[wiz.night] && !wiz.timeSet) delete wiz.time[wiz.night]; wizSave(); wizApply(wiz.night); renderMeals(); return; }
     const nt = t.closest("[data-wznight]"); if (nt) { wiz.night = nt.dataset.wznight; wizSave(); renderWizard(); return; }
     const pk = t.closest("[data-wzpick]");
     if (pk && n) {
@@ -12597,7 +12602,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   });
   $("#view-meals").addEventListener("change", e => {
     if (e.target.id !== "wizTime" || !wiz.night || !e.target.value) return;
-    wiz.time[wiz.night] = e.target.value; wizSave(); wizApply(wiz.night); renderMeals();
+    wiz.time[wiz.night] = e.target.value; wiz.timeSet = true; wizSave(); wizApply(wiz.night); renderMeals();
   });
 
 
