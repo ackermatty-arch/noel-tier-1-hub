@@ -566,8 +566,7 @@
   const wizTime = n => wiz.time[n] || (n === "day" ? "17:00" : "18:00");
   const wizGuests = n => wiz.guests[n] || 2;
   const wizOpts = n => {
-    const mains = MD.meals.filter(m => !m.soon && !m.addon && ["traditional", "elegant", "vegan"].includes(m.tab));
-    return n === "eve" ? MD.meals.filter(m => !m.soon && !m.addon && m.tab === "eve") : mains;
+    return MD.meals.filter(m => !m.soon && !m.addon && ["traditional", "elegant", "vegan", "eve"].includes(m.tab));
   };
   function wizApply(n) {
     const t = wizTime(n), g = wizGuests(n);
@@ -590,7 +589,7 @@
       <div class="wz-step"><span class="wz-n">1</span>Which night?</div><div class="wz-nights">${dayBtn("eve")}${dayBtn("eved")}</div>`;
     if (n) {
       h += `<div class="wz-step"><span class="wz-n">2</span>What are you cooking? <small>Tap one or more. Chosen dinners turn black.</small></div><div class="wz-opts">` +
-        wizOpts(n).map(m => `<button type="button" class="wz-opt" data-wzpick="${m.id}" aria-pressed="${sel.includes(m.id)}"><span><b>${esc(m.name)}</b><small>${esc(m.blurb)}</small></span><i>${sel.includes(m.id) ? "✓" : "+"}</i></button>`).join("") + `</div>`;
+        MENU_GROUPS.map(([g, ids]) => `<h4 class="wz-grp">${esc(g)}</h4>` + ids.map(id => mealById(id)).filter(m => m && wizOpts(n).includes(m)).map(m => `<button type="button" class="wz-opt" data-wzpick="${m.id}" aria-pressed="${sel.includes(m.id)}"><span><b>${esc(m.name)}</b><small>${esc(m.blurb)}</small></span><i>${sel.includes(m.id) ? "✓" : "+"}</i></button>`).join("")).join("") + `</div>`;
       if (sel.length) h += wizGuestHtml(n) + wizDietHtml();
     }
     if (n && sel.length) {
