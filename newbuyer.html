@@ -2639,7 +2639,6 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <h2 class="view-title" id="plannerTitle" data-co-title="Event Coordinator">Plan</h2>
     <p class="view-intro" data-co-desc="Your party plan, approvals, vendors and budget in one place. Everything saves automatically.">Travel plans, guests, seating and supplies, all in one place, so the house is ready before the doorbell rings.</p>
 
-    <div id="startHere"></div>
     <div id="coDash" class="co-only"></div>
     <button class="advent-banner office-banner" data-goview="office" id="officeBanner" hidden>
       <span class="ab-ico">🏢</span>
@@ -11001,7 +11000,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
      ============================================================ */
   let shOpen = false;
   function renderStartHere() {
-    const el = $("#startHere"); if (!el) return;
+    const el = $("#startHere"); if (!el) return;   // the Start here card was removed from the Plan page
     const nowD = new Date(), wrap = nowD >= new Date(season, 11, 28) && nowD < new Date(season + 1, 11, 1) && !load("memories", []).some(m => m.year === season) && !reviewPending();
     if (wrap) { el.innerHTML = `<div class="sh-card"><div class="sh-top"><div><h3>Christmas ${season} is wrapped</h3><small>Save it and start fresh. Your people, guests and budget carry over.</small></div></div><button class="sh-item" data-shwrap><span class="sh-box">+</span><span class="t">Save this year and start fresh</span></button></div>`; return; }
     if (load("shHide", false)) { el.innerHTML = ""; return; }
