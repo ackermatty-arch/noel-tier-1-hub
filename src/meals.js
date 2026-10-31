@@ -562,7 +562,7 @@
   if (!wiz.sel.eved) wiz.sel.eved = [];
   if (wiz.night && !WN[wiz.night]) wiz.night = null;
   const wizSave = () => save("wiz", wiz);
-  const wizDate = n => n === "day" ? dayYmd() : eveYmd();
+  const wizDate = n => n === "eve" ? eveYmd() : dayYmd();   // appetizer and supper night is Christmas Eve; the sit-down dinners default to Christmas Day
   const wizTime = n => wiz.time[n] || (n === "day" ? "17:00" : "18:00");
   const wizGuests = n => wiz.guests[n] || 2;
   const wizOpts = n => {
@@ -587,7 +587,7 @@
     const n = wiz.night, sel = n ? wiz.sel[n] : [];
     const dayBtn = k => `<button type="button" class="wz-night" data-wznight="${k}" aria-pressed="${n === k}"><b>${WN[k]}</b><small>${wiz.sel[k].length ? wiz.sel[k].length + " dinner" + (wiz.sel[k].length > 1 ? "s" : "") + " chosen" : "Tap to plan"}</small></button>`;
     let h = `<div class="wz-top"><button type="button" class="meal-back" data-wzmenu>‹ The menu</button><button type="button" class="meal-back" data-wzsaved>My saved menus</button></div><div class="card wz"><h3 class="wz-t">Plan your Christmas dinner</h3>
-      <div class="wz-step"><span class="wz-n">1</span>Which night?</div><div class="wz-nights">${dayBtn("eve")}${dayBtn("eved")}${dayBtn("day")}</div>`;
+      <div class="wz-step"><span class="wz-n">1</span>Which night?</div><div class="wz-nights">${dayBtn("eve")}${dayBtn("eved")}</div>`;
     if (n) {
       h += `<div class="wz-step"><span class="wz-n">2</span>What are you cooking? <small>Tap one or more. Chosen dinners turn black.</small></div><div class="wz-opts">` +
         wizOpts(n).map(m => `<button type="button" class="wz-opt" data-wzpick="${m.id}" aria-pressed="${sel.includes(m.id)}"><span><b>${esc(m.name)}</b><small>${esc(m.blurb)}</small></span><i>${sel.includes(m.id) ? "✓" : "+"}</i></button>`).join("") + `</div>`;
@@ -625,7 +625,7 @@
 
   // ---- 📖 the menu: a restaurant-style first page, then "Plan my dinner" opens the builder ----
   let mealScreen = mealSel.id ? "build" : "menu";
-  const MENU_GROUPS = [["Christmas Appetizers & Suppers", ["eveparty", "seafood"], "Christmas Appetizers & Suppers"], ["Traditional", ["turkey", "turkeybreast", "primerib", "ham", "lasagna"], "Christmas Dinner"], ["Elegant", ["lambcrown", "porkcrown", "tenderloin", "duck", "salmon", "roulade"]], ["Vegan", ["vegan"]]];
+  const MENU_GROUPS = [["Christmas Appetizers & Suppers", ["seafood", "eveparty"], "Christmas Appetizers & Suppers"], ["Elegant Dinner Choices", ["lambcrown", "porkcrown", "primerib", "tenderloin", "duck", "salmon", "roulade", "vegan"], "Elegant Dinner Choices"], ["Traditional", ["turkey", "turkeybreast", "ham", "lasagna"], "Traditional"]];
   function renderMealMenu() {
     const el = $("#mealMenu"), v = $("#view-meals"); if (!el) return;
     const on = mealScreen === "menu" && !msOpen && !(mealSel.id && mealById(mealSel.id) && !mealById(mealSel.id).soon);

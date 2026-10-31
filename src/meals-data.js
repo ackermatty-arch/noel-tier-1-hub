@@ -2595,7 +2595,7 @@ window.NOEL_MEALS = (function () {
   };
   const eveparty = Object.assign({}, nyeparty, {
     id: "eveparty", tab: "eve", party: true, eve: true,
-    name: "Christmas Eve Appetizer Night", icon: "🕯️",
+    name: "Christmas Appetizer Night", icon: "🕯️",
     blurb: "Charcuterie board, baked brie, slow cooker meatballs, pigs in a blanket and shrimp cocktail.",
     defaultTime: "17:30", defaultDate: eveDate,
     menu: [["Your Christmas Eve menu", ["Pick your appetizers above"]]],
