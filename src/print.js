@@ -12,6 +12,17 @@
   let tray = load("printTray", []).filter(k => typeof k === "string");
   let trayOff = {}, trayDone = false, printKey = null;
   const saveTray = () => save("printTray", tray);
+  function addrDoc(key) {   // ✉ address book: labels to tape on envelopes, or a tick-off checklist
+    const a = (load("addrbook", []) || []).filter(x => x.t !== "E-card" || key === "addrlist");
+    if (!a.length) return { error: "Add someone to your address book first" };
+    if (key === "addrlabels") {
+      const css = `.al{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font:11pt/1.35 Georgia,serif;color:#111} .al div{border:1px dashed #cfc3a5;padding:10px 12px;min-height:62px} .al b{display:block}`;
+      return { title: "Address labels", css, html: `<div class="al">${a.map(x => `<div><b>${esc(x.n)}</b>${esc(x.s)}${x.s && x.c ? "<br>" : ""}${esc(x.c)}</div>`).join("")}</div>`, margin: 0.5, file: "Address-Labels" };
+    }
+    const css = `.ac{font:10.5pt/1.4 Georgia,serif;color:#111} .ac h1{font-size:18pt;margin:0 0 8px} .ac h2{font-size:11pt;letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid #B8935A;margin:12px 0 4px} .ac table{width:100%;border-collapse:collapse} .ac td{padding:4px 5px;border-bottom:1px solid #e6e0d0;vertical-align:top} .ac td.k{width:46px;text-align:center;font-size:8pt;font-family:sans-serif}`;
+    const html = `<div class="ac"><h1>Holiday Card Checklist</h1>${["Family","Friends","Work","Neighbours"].map(g => { const l = a.filter(x => x.g === g); return l.length ? `<h2>${g}</h2><table><tr><td class="k">Sent</td><td class="k">Got</td><td></td></tr>${l.map(x => `<tr><td class="k">${x.sent ? "✓" : "☐"}</td><td class="k">${x.got ? "✓" : "☐"}</td><td><b>${esc(x.n)}</b> <i>(${esc(x.t)})</i><br>${esc([x.s, x.c].filter(Boolean).join(", "))}</td></tr>`).join("")}</table>` : ""; }).join("")}</div>`;
+    return { title: "Card checklist", css, html, margin: 0.55, file: "Card-Checklist" };
+  }
   function printDoc(key) {
     let d = null;
     if (key.startsWith("meal:")) { const m = mealById(key.slice(5)); d = m ? mealDoc(m) : null; }
@@ -24,6 +35,7 @@
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "travel") d = travelDoc();
     else if (key === "planall") d = planAllDoc();
+    else if (key === "addrlabels" || key === "addrlist") d = addrDoc(key);
     else if (key === "chores") d = choresDoc();
     else if (key === "budget") d = budgetDoc();
     else if (key === "shared") d = shrDoc();

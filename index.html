@@ -2165,6 +2165,15 @@ body .cal-cell.sel{background:#000!important;box-shadow:inset 0 0 0 2px var(--c-
 body .cal-cell.sel span,body .cal-cell.sel.today span{color:var(--c-gold2)!important}
 
 /* Holiday Review stays hidden until Dec 26 (or until opened) */
+.ab-card .add-guest{display:grid;gap:8px;margin-bottom:12px}
+.ab-prog{font-weight:700;letter-spacing:.06em;color:var(--gold-dark,#8a6d3b);margin:0 0 10px}
+.ab-grp{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8a6d3b;border-bottom:1px solid #e3d6b8;margin:12px 0 4px;padding-bottom:3px}
+.ab-row{display:grid;grid-template-columns:1fr auto;gap:6px;padding:8px 0;border-bottom:1px solid #eee}
+.ab-row b{display:block}.ab-row small{display:block;opacity:.75;line-height:1.35}
+.ab-btns{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.ab-btns button{border:1px solid #B8935A;background:#fff;color:#111;font-size:11px;padding:5px 9px;min-height:30px;cursor:pointer;border-radius:0}
+.ab-btns button[aria-pressed=true]{background:#111;color:#f1d98a}
+.ab-print{display:grid;gap:8px;margin-top:14px}
 .nav-btn[data-view="review"]{display:none}
 body.rev-open .nav-btn[data-view="review"]{display:flex}
 .reset-box{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}.reset-in{background:#fff;border:2px solid #C9A45C;padding:18px;max-width:420px;width:100%}.reset-in h3{font-family:"Cinzel",serif;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px}.reset-in label{display:block;padding:6px 0}.reset-note{font-size:13px;color:#555}
@@ -3172,6 +3181,26 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
           <button type="button" class="classy-link" id="cardOutOpen" hidden></button>
         </div>
       </div>
+      <div class="card ab-card" id="addrBook">
+        <div class="step">Address Book</div>
+        <p class="tip" style="margin:6px 0 10px">Add everyone you send cards to. It stays on your phone, so next year you only update it.</p>
+        <div class="ab-prog" id="abProg"></div>
+        <form class="add-guest" id="abForm" autocomplete="off">
+          <input class="input" name="aname" maxlength="50" placeholder="Name on the envelope (e.g. The Miller Family)" aria-label="Name" required>
+          <input class="input" name="astreet" maxlength="70" placeholder="Street address" aria-label="Street address">
+          <input class="input" name="acity" maxlength="60" placeholder="City, province or state, postal code" aria-label="City and postal code">
+          <div class="f2">
+            <select class="input" name="agroup" aria-label="Group"><option>Family</option><option>Friends</option><option>Work</option><option>Neighbours</option></select>
+            <select class="input" name="atype" aria-label="Card type"><option>Paper card</option><option>E-card</option></select>
+          </div>
+          <button class="btn btn-gold btn-block" type="submit" id="abSubmit">Add to address book</button>
+        </form>
+        <div id="abList"></div>
+        <div class="ab-print">
+          <button type="button" class="btn btn-red btn-block" data-print="addrlabels">Print address labels</button>
+          <button type="button" class="btn btn-ghost btn-block" data-print="addrlist">Print checklist</button>
+        </div>
+      </div>
     </div>
 
     <!-- 🎉 PARTY INVITES -->
@@ -3318,6 +3347,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
   <button class="nav-btn" data-view="planner"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11v16H5z"/><path d="M8 8.500h5M8 12h5"/><path d="M19.500 7.500l-6.500 6.500-.8 2.800 2.800-.8 6.500-6.500z"/></svg></span>Plan</button>
   <button class="nav-btn" data-view="tasks"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16.5" rx="1"/><path d="M9 3h6v3H9z"/><path d="M8.5 11l1.4 1.4 2.3-2.6M8.5 16.2l1.4 1.4 2.3-2.6M14 11.3h2.5M14 16.5h2.5"/></svg></span>Tasks</button>
   <button class="nav-btn" data-view="gifts"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10.5"/><rect x="3" y="7" width="18" height="3.5"/><path d="M12 7v13.5"/><path d="M12 7C10 3.5 6.5 4 7.3 6.2 8 7.6 10.5 7 12 7zM12 7c2-3.5 5.5-3 4.7-.8C16 7.6 13.5 7 12 7z"/></svg></span>Gifts</button>
+  <button class="nav-btn" data-view="invites"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="1"/><path d="M3 7l9 6.500L21 7"/><path d="M12 15.500l.6 1.200 1.300.2-.9.9.2 1.300-1.200-.6-1.200.6.2-1.300-.9-.9 1.300-.2z" stroke-width="1"/></svg></span>Cards</button>
   <button class="nav-btn" data-view="meals" id="navMeals"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 17.5a8.5 8.5 0 0 1 17 0z"/><path d="M2.5 20h19M12 9V7.2"/><circle cx="12" cy="6.4" r="1.1"/></svg></span>Menu</button>
   <button class="nav-btn" data-view="nye" id="navNye"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5v4.5M12 15v4.500M3.500 11h4.500M16 11h4.500M6 5l3.200 3.200M14.800 13.800L18 17M18 5l-3.200 3.200M9.200 13.800L6 17"/><path d="M12 22h.01M3 20h.01M21 20h.01"/></svg></span>NYE</button>
   <button class="nav-btn" data-view="games"><span class="nav-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.500 21.500h13M7 21.500c.2-4 1.200-6 3.200-8.200-1.600.4-3 1.200-4.400 2l-1.300-2c.8-2 2.600-3.700 4.200-5.800L8.800 4l2.200 1.600c.8-.8 1.800-1.500 3-1.600 3.400.4 5.800 3.600 5.800 8 0 3-.8 6-1.400 9.500"/><circle cx="11.200" cy="8.600" r=".6" fill="currentColor"/></svg></span>Games</button>
@@ -7960,7 +7990,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (name !== "gifts") santaLock();   // 🎅 leaving Gifts always locks Santa's list
     if (name === "meals") renderMeals();
     if (name === "own") renderOwn();
-    if (name === "invites") renderCardBar();
+    if (name === "invites") { renderCardBar(); renderAddrBook(); }
     if (name === "planner" && typeof renderCoDash === "function") renderCoDash();
     try { const sn = load("seen", {}); if (!sn[name]) { sn[name] = 1; save("seen", sn); } } catch (e) {}
     if (name === "planner" && typeof renderStartHere === "function") renderStartHere();
@@ -7978,7 +8008,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   /* 👆 SWIPE between tabs (left = next tab, right = previous tab)
      Ignores up/down scrolling, edge swipes (Android "back"), text boxes,
      sliders and anything inside a pop-up or full-screen page. */
-  const VIEW_ORDER = ["budget", "planner", "tasks", "gifts", "meals", "nye", "games", "review"];   // same order as the bottom bar
+  const VIEW_ORDER = ["budget", "planner", "tasks", "gifts", "invites", "meals", "nye", "games", "review"];   // same order as the bottom bar
   let swipe = null;
   document.querySelector("main").addEventListener("touchstart", e => {
     const t = e.touches[0];
@@ -10751,6 +10781,33 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     return !String(ecard.msg || "").trim() || all.includes(String(ecard.msg).trim()) || ecard.msg === "Wishing you a season full of warmth, laughter and love.";
   }
   function syncCards() { $$("#cardPick .dpick").forEach(b => b.setAttribute("aria-pressed", b.dataset.card === ecard.d ? "true" : "false")); }
+
+  // ✉ Address Book (bottom of the E-cards page)
+  const AB_GROUPS = ["Family", "Friends", "Work", "Neighbours"];
+  function abGet() { return load("addrbook", []) || []; }
+  function renderAddrBook() {
+    const box = $("#abList"); if (!box) return;
+    const a = abGet(), sent = a.filter(x => x.sent).length, got = a.filter(x => x.got).length;
+    $("#abProg").textContent = a.length ? `${sent} of ${a.length} cards sent · ${got} received` : "No one added yet";
+    box.innerHTML = AB_GROUPS.map(g => { const l = a.filter(x => x.g === g); if (!l.length) return "";
+      return `<div class="ab-grp">${g}</div>` + l.map(x => `<div class="ab-row"><div><b>${esc(x.n)}</b><small>${esc([x.s, x.c].filter(Boolean).join(", ") || "No address yet")} · ${esc(x.t)}</small>
+        <div class="ab-btns"><button type="button" data-abt="sent" data-abid="${x.id}" aria-pressed="${x.sent ? "true" : "false"}">${x.sent ? "✓ " : ""}Sent</button><button type="button" data-abt="got" data-abid="${x.id}" aria-pressed="${x.got ? "true" : "false"}">${x.got ? "✓ " : ""}Received</button><button type="button" data-abedit="${x.id}">Edit</button><button type="button" data-abdel="${x.id}">Remove</button></div></div></div>`).join(""); }).join("");
+  }
+  document.addEventListener("submit", e => {
+    if (e.target.id !== "abForm") return; e.preventDefault();
+    const f = e.target, v = k => (f.elements[k].value || "").trim(), a = abGet();
+    if (!v("aname")) return;
+    a.push({ id: "ab" + Date.now() + Math.floor(Math.random() * 99), n: v("aname"), s: v("astreet"), c: v("acity"), g: v("agroup"), t: v("atype"), sent: false, got: false });
+    save("addrbook", a); f.reset(); renderAddrBook();
+  });
+  document.addEventListener("click", e => {
+    const t = e.target.closest("[data-abt],[data-abdel],[data-abedit]"); if (!t) return;
+    let a = abGet(); const id = t.dataset.abid || t.dataset.abdel || t.dataset.abedit, x = a.find(r => r.id === id); if (!x) return;
+    if (t.dataset.abt) x[t.dataset.abt] = !x[t.dataset.abt];
+    else if (t.dataset.abdel !== undefined) a = a.filter(r => r.id !== id);
+    else { const f = $("#abForm"); f.elements.aname.value = x.n; f.elements.astreet.value = x.s; f.elements.acity.value = x.c; f.elements.agroup.value = x.g; f.elements.atype.value = x.t; a = a.filter(r => r.id !== id); f.scrollIntoView({ block: "center" }); }
+    save("addrbook", a); renderAddrBook();
+  });
   function showPane(p) {
     $("#paneCards").hidden = p !== "cards"; $("#paneInvites").hidden = p !== "invites"; $("#paneCardList").hidden = p !== "cardlist"; $("#paneThanks").hidden = p !== "thanks";
     if ((p === "cardlist" || p === "thanks") && typeof renderOrg === "function") renderOrg();
@@ -15937,6 +15994,17 @@ const PC_DESIGNS = [
   let tray = load("printTray", []).filter(k => typeof k === "string");
   let trayOff = {}, trayDone = false, printKey = null;
   const saveTray = () => save("printTray", tray);
+  function addrDoc(key) {   // ✉ address book: labels to tape on envelopes, or a tick-off checklist
+    const a = (load("addrbook", []) || []).filter(x => x.t !== "E-card" || key === "addrlist");
+    if (!a.length) return { error: "Add someone to your address book first" };
+    if (key === "addrlabels") {
+      const css = `.al{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font:11pt/1.35 Georgia,serif;color:#111} .al div{border:1px dashed #cfc3a5;padding:10px 12px;min-height:62px} .al b{display:block}`;
+      return { title: "Address labels", css, html: `<div class="al">${a.map(x => `<div><b>${esc(x.n)}</b>${esc(x.s)}${x.s && x.c ? "<br>" : ""}${esc(x.c)}</div>`).join("")}</div>`, margin: 0.5, file: "Address-Labels" };
+    }
+    const css = `.ac{font:10.5pt/1.4 Georgia,serif;color:#111} .ac h1{font-size:18pt;margin:0 0 8px} .ac h2{font-size:11pt;letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid #B8935A;margin:12px 0 4px} .ac table{width:100%;border-collapse:collapse} .ac td{padding:4px 5px;border-bottom:1px solid #e6e0d0;vertical-align:top} .ac td.k{width:46px;text-align:center;font-size:8pt;font-family:sans-serif}`;
+    const html = `<div class="ac"><h1>Holiday Card Checklist</h1>${["Family","Friends","Work","Neighbours"].map(g => { const l = a.filter(x => x.g === g); return l.length ? `<h2>${g}</h2><table><tr><td class="k">Sent</td><td class="k">Got</td><td></td></tr>${l.map(x => `<tr><td class="k">${x.sent ? "✓" : "☐"}</td><td class="k">${x.got ? "✓" : "☐"}</td><td><b>${esc(x.n)}</b> <i>(${esc(x.t)})</i><br>${esc([x.s, x.c].filter(Boolean).join(", "))}</td></tr>`).join("")}</table>` : ""; }).join("")}</div>`;
+    return { title: "Card checklist", css, html, margin: 0.55, file: "Card-Checklist" };
+  }
   function printDoc(key) {
     let d = null;
     if (key.startsWith("meal:")) { const m = mealById(key.slice(5)); d = m ? mealDoc(m) : null; }
@@ -15949,6 +16017,7 @@ const PC_DESIGNS = [
     else if (key === "fridge") d = fridgeDoc();
     else if (key === "travel") d = travelDoc();
     else if (key === "planall") d = planAllDoc();
+    else if (key === "addrlabels" || key === "addrlist") d = addrDoc(key);
     else if (key === "chores") d = choresDoc();
     else if (key === "budget") d = budgetDoc();
     else if (key === "shared") d = shrDoc();
