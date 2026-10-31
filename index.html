@@ -10199,7 +10199,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (spent && !bought) { toast("Add what was purchased"); return; }
     who = who.charAt(0).toUpperCase() + who.slice(1); what = what.charAt(0).toUpperCase() + what.slice(1); bought = bought.charAt(0).toUpperCase() + bought.slice(1);
     let p = findPerson(who);
-    if (!p && (cap || spent)) { p = { id: uid(), name: who, gifts: [] }; gifts.people.push(p); }
+    if (!p) { toast("Add " + who + " in the Budget tab first, then pick the name here"); return; }
     if (p && cap) p.cap = cap;
     if (what) addWish(who, what, 0, "");
     if (spent) {   // bought it: straight into the Gift Tracker as Bought, so it counts in the budget
