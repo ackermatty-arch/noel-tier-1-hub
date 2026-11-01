@@ -96,6 +96,14 @@
     oyEnsure(); const s = oy.events.find(x => x.id === oy.active); if (!s) return;
     s.name = off.ev.name || s.name; s.date = off.ev.date || ""; if (s.date) { s.month = +s.date.slice(5, 7); s.year = +s.date.slice(0, 4); }
   }
+  // 💵 what was really paid goes into the Budget tab; the approved event budget becomes the budget total
+  const OFF_BUD_CAT = { "Venue": "party", "Catering": "food", "Drinks": "food", "Entertainment": "party", "Decorations": "decor", "Prizes & awards": "party", "Gifts": "gifts", "Supplies": "hosting", "Transportation": "travel", "Other": "other" };
+  window.offBudgetRows = () => {
+    const rows = [], put = (ev, costs) => (costs || []).forEach(c => { if (+c.paid > 0) rows.push({ src: "Office plan", cat: OFF_BUD_CAT[c.type] || "other", name: (ev || "Event") + ": " + c.type + (c.name ? " · " + c.name : ""), amt: +c.paid, date: c.paidOn || "" }); });
+    put(off.ev.name, off.costs); (oy.events || []).forEach(e => { if (e.id !== oy.active && e.snap) put(e.name, e.snap.costs); });
+    return rows;
+  };
+  window.offBudgetAll = () => +oy.budget || ((oy.events || []).reduce((a, e) => a + oyBudgetOf(e), 0));
   const oyCost = e => e.id === oy.active ? offTotal() : ((e.snap && e.snap.costs) || []).reduce((a, c) => a + (+c.cost || 0), 0);
   const oyBudgetOf = e => e.id === oy.active ? (+off.ev.budget || 0) : ((e.snap && e.snap.ev && +e.snap.ev.budget) || 0);
   const offChk = () => { if (!off.chk) off.chk = oyType(off.oyType || "holiday").chk.map(([d, t]) => ({ id: uid(), d, t, done: 0 })); return off.chk; };
@@ -339,7 +347,8 @@
       <div class="card pt-card"><h3>✨ What's planned</h3><div class="apps-filters">${offActList().map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div>
         ${off.acts.gifts ? `<div class="off-grid" style="margin-top:8px">${fld("giftLimit", "Gift exchange limit", "number", "$")}</div>` : ""}</div>
       <div class="card pt-card"><h3>💵 Costs & vendors</h3>
-        ${off.costs.map(c => `<div class="off-cost" data-oc="${c.id}"><div><b>${esc(c.type)}</b>${c.name ? ` · ${esc(c.name)}` : ""}${c.contact ? `<small>📞 ${esc(c.contact)}</small>` : ""}${offOrderHtml(c)}</div><span>${money(+c.cost || 0)}</span><button type="button" class="icon-btn" data-ocdel aria-label="Remove">✕</button></div>`).join("") || `<p class="host-rem">Add the venue, caterer, drinks, prizes… Vendors' names and numbers are kept for next year too.</p>`}
+        ${off.costs.map(c => `<div class="off-cost" data-oc="${c.id}"><div><b>${esc(c.type)}</b>${c.name ? ` · ${esc(c.name)}` : ""}${c.contact ? `<small>📞 ${esc(c.contact)}</small>` : ""}${offOrderHtml(c)}</div><span>${money(+c.cost || 0)}</span><button type="button" class="icon-btn" data-ocdel aria-label="Remove">✕</button>
+          <div class="oc-pay">${+c.paid > 0 ? `<span>✦ ${money(+c.paid)} paid, in your Budget</span><button type="button" class="of-lnk" data-ocunpay>Remove from Budget</button>` : `<input class="input oc-amt" inputmode="decimal" placeholder="Paid? Type the real cost" aria-label="Actual cost paid"><button type="button" class="of-lnk" data-ocpay>Add to Budget</button>`}</div></div>`).join("") || `<p class="host-rem">Add the venue, caterer, drinks, prizes… Vendors' names and numbers are kept for next year too.</p>`}
         ${off.costs.length ? `<div class="off-cost total"><div><b>Estimated total</b><small>about ${money(Math.round(total / hc * 100) / 100)} per person</small></div><span>${money(total)}</span><i></i></div>` : ""}
         ${+off.ev.budget && total > +off.ev.budget ? `<p class="org-warn">⚠️ ${money(total - off.ev.budget)} over the approved budget.</p>` : ""}
         <form class="org-ev-form" id="offCostForm" autocomplete="off"><div class="org-addr-row"><select class="input" name="type">${OFF_COSTS.map(c => `<option>${c}</option>`).join("")}</select><input class="input" name="cost" type="number" inputmode="decimal" min="0" placeholder="$" style="max-width:96px"></div>
@@ -831,6 +840,8 @@
     const ac = t.closest("[data-ofact]"); if (ac) { off.acts[ac.dataset.ofact] = off.acts[ac.dataset.ofact] ? 0 : 1; saveOff(); renderOffice(); return; }
     const od = t.closest("[data-ocdone]"); if (od) { const c = off.costs.find(x => x.id === od.dataset.ocdone); if (c) { c.ordered = !c.ordered; saveOff(); renderOffice(); renderCoDash(); } return; }
     const td = t.closest("[data-tmdel]"); if (td) { off.team = (off.team || []).filter(m => m.id !== td.closest("[data-tm]").dataset.tm); saveOff(); renderOffice(); return; }
+    const pay = t.closest("[data-ocpay]"); if (pay) { const row = pay.closest("[data-oc]"), c = off.costs.find(x => x.id === row.dataset.oc), v = parseFloat(String(row.querySelector(".oc-amt").value).replace(/[^0-9.]/g, "")); if (!c) return; if (!isFinite(v) || v <= 0) { toast("💵 Type what you actually paid"); return; } c.paid = Math.round(v * 100) / 100; c.paidOn = c.paidOn || budToday(); saveOff(); renderOffice(); toast(`💵 ${money(c.paid)} added to your Budget`); return; }
+    const unp = t.closest("[data-ocunpay]"); if (unp) { const c = off.costs.find(x => x.id === unp.closest("[data-oc]").dataset.oc); if (c) { delete c.paid; saveOff(); renderOffice(); } return; }
     const cd = t.closest("[data-ocdel]"); if (cd) { off.costs = off.costs.filter(c => c.id !== cd.closest("[data-oc]").dataset.oc); saveOff(); renderOffice(); return; }
     const pd = t.closest("[data-opdel]"); if (pd) { off.pot = off.pot.filter(p => p.id !== pd.closest("[data-op]").dataset.op); saveOff(); renderOffice(); return; }
     const ad = t.closest("[data-awdel]"); if (ad) { off.awards = off.awards.filter(a => a.id !== ad.closest("[data-oa]").dataset.oa); saveOff(); renderOffice(); return; }

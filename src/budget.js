@@ -29,13 +29,15 @@
     const santa = sum(santaGifts(), isSpent); if (santa) rows.push({ src: "Santa's list", cat: "gifts", name: "🎅 Santa's gifts (kept secret)", amt: santa, date: "" });
     foodBudget.items.forEach(x => { if (+x.amt) rows.push({ src: "Food budget", cat: "food", name: x.name, amt: +x.amt, date: x.date || "" }); });
     if (typeof org !== "undefined" && hubMode === "company") org.giving.forEach(x => { if (+x.amt) rows.push({ src: "Giving", cat: "giving", name: x.what, amt: +x.amt, date: x.date || "" }); });
+    if (typeof host !== "undefined") host.trips.forEach(x => { if (+x.cost > 0) rows.push({ src: "Plan › Travel", cat: "travel", name: x.a, amt: +x.cost, date: x.paidOn || "" }); });
+    if (typeof offBudgetRows === "function" && hubMode === "company") offBudgetRows().forEach(r => rows.push(r));
     budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "", mine: !!x.mine }));
     return rows;
   }
   const catLimit = k => k === "gifts" ? +gifts.budget || 0 : k === "food" ? +foodBudget.limit || 0 : +budget.cats[k] || 0;
   function budTotals() {
     const rows = budRows(), by = {}; BUD_CATS.forEach(([k]) => { by[k] = 0; }); rows.forEach(r => { by[r.cat] = (by[r.cat] || 0) + r.amt; });
-    const spent = rows.reduce((a, r) => a + r.amt, 0), catSum = BUD_CATS.reduce((a, [k]) => a + catLimit(k), 0), limit = +budget.limit || catSum;
+    const spent = rows.reduce((a, r) => a + r.amt, 0), catSum = BUD_CATS.reduce((a, [k]) => a + catLimit(k), 0), limit = +budget.limit || (hubMode === "company" && typeof offBudgetAll === "function" ? offBudgetAll() : 0) || catSum;
     const plannedGifts = sum(gifts.people.flatMap(p => p.gifts).concat(santaGifts()), g => !isSpent(g));
     return { rows, by, spent, limit, catSum, plannedGifts };
   }

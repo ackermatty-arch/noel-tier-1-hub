@@ -254,10 +254,14 @@
       const fmt = x => (k === "trip" || k === "gtrip") && x.b ? (k === "gtrip" ? "arrives " : "") + new Date(x.b).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : k === "pass" && x.b ? "expires " + x.b : x.b || "";
       const warn = x => k === "pass" && x.b && new Date(x.b).getTime() < Date.now() + 183 * 864e5 ? ` <b class="host-pill over">${new Date(x.b).getTime() < Date.now() ? "expired" : "renew soon"}</b>` : "";
       return `<div class="card host-card"><h3>${ico} ${title}</h3>${k === "gtrip" ? `<p class="host-rem">Guests flying or taking the train to you? Add them here and Noël will put their arrival in your calendar, with a reminder to pick them up.</p>` : ""}${k === "trip" ? `<p class="host-rem">If travelling before your Christmas home plans, Noël will add your travel dates, with reminders, to your calendar.</p>` : ""}
-        ${items.length ? `<ul class="host-list">${items.map(x => `<li data-htrip="${x.id}"><span><b>${esc(x.a)}</b>${x.b ? `<small>${esc(fmt(x))}</small>` : ""}${warn(x)}</span><button type="button" class="icon-btn" data-hdeltrip aria-label="Remove">✕</button></li>`).join("")}</ul>` : `<p class="host-rem">Nothing added yet.</p>`}
+        ${items.length ? `<ul class="host-list">${items.map(x => `<li data-htrip="${x.id}"><span><b>${esc(x.a)}</b>${x.b ? `<small>${esc(fmt(x))}</small>` : ""}${+x.cost > 0 ? `<small>✦ ${money(+x.cost)} added to your Budget</small>` : ""}${warn(x)}</span><button type="button" class="icon-btn" data-hdeltrip aria-label="Remove">✕</button></li>`).join("")}</ul>` : `<p class="host-rem">Nothing added yet.</p>`}
         <form class="host-away-form" data-htripform="${k}" autocomplete="off">
           <label><span class="meal-lab">${l1}</span><input class="input" name="a" maxlength="60" placeholder="${ph}" required></label>
           <label><span class="meal-lab">${l2}</span><input class="input" name="b" type="${t2}" ${t2 === "text" ? 'maxlength="60"' : ""}></label>
+          ${["trip", "gtrip", "other"].includes(k) ? `<div class="hcost"><span class="meal-lab">Add the total travel cost to my Budget?</span>
+            <input type="hidden" name="addcost" value="0">
+            <div class="hcost-yn"><button type="button" data-hcy="0" aria-pressed="true">No</button><button type="button" data-hcy="1" aria-pressed="false">Yes</button></div>
+            <label class="hc-amt" hidden><span class="meal-lab">Total cost you already spent</span><input class="input" name="cost" inputmode="decimal" placeholder="$ total"></label></div>` : ""}
           <button class="btn btn-green btn-block" type="submit">Add</button></form></div>`;
     }).join("") + hostLeaveHtml();
   }
@@ -413,6 +417,7 @@
     if (t.closest("#hostShareCard")) { shareHouseCard(); return; }
     const dlv = t.closest("[data-hdelleave]"); if (dlv) { host.leave.custom = host.leave.custom.filter(x => x.id !== dlv.dataset.hdelleave); delete host.leave.done[dlv.dataset.hdelleave]; saveHost(); renderHost(); return; }
     const dout = t.closest("[data-hdelout]"); if (dout) { host.out.custom = host.out.custom.filter(x => x.id !== dout.dataset.hdelout); delete host.out.done[dout.dataset.hdelout]; saveHost(); renderHost(); return; }
+    const yn = t.closest("[data-hcy]"); if (yn) { const fm = yn.closest("form"), on = yn.dataset.hcy === "1"; fm.addcost.value = on ? "1" : "0"; fm.querySelectorAll("[data-hcy]").forEach(b => b.setAttribute("aria-pressed", String(b === yn))); fm.querySelector(".hc-amt").hidden = !on; if (on) fm.cost.focus(); return; }
     const dt = t.closest("[data-hdeltrip]"); if (dt) { const id = dt.closest("[data-htrip]").dataset.htrip; host.trips = host.trips.filter(x => x.id !== id); saveHost(); renderHost(); hostSync(); return; }
     const dj = t.closest("[data-hdeljob]"); if (dj) { const id = dj.closest("[data-hjob]").dataset.hjob; host.jobs = host.jobs.filter(j => j.id !== id); delete host.who["j:" + id]; delete host.jobDone[id]; saveHost(); renderHost(); return; }
   });
@@ -443,7 +448,12 @@
   document.addEventListener("submit", e => {
     if (!e.target.closest("#hostWrap, #hostTaskWrap")) return;
     e.preventDefault(); const f = e.target;
-    if (f.dataset.htripform) { const n = f.a.value.trim(); if (!n) return; host.trips.push({ id: uid(), k: f.dataset.htripform, a: n, b: f.b.value.trim() }); saveHost(); renderHost(); hostSync(); return; }
+    if (f.dataset.htripform) {
+      const n = f.a.value.trim(); if (!n) return;
+      const t = { id: uid(), k: f.dataset.htripform, a: n, b: f.b.value.trim() };
+      if (f.addcost && f.addcost.value === "1") { const v = parseFloat(String(f.cost.value).replace(/[^0-9.]/g, "")); if (!isFinite(v) || v <= 0) { toast("💵 Type the total cost, or tap No"); return; } t.cost = Math.round(v * 100) / 100; t.paidOn = budToday(); }
+      host.trips.push(t); saveHost(); renderHost(); hostSync(); if (t.cost) toast(`💵 ${money(t.cost)} added to your Budget`); return;
+    }
     if (f.id === "hostLeaveForm") { const n = f.t.value.trim(); if (!n) return; host.leave.custom.push({ id: uid(), text: n }); saveHost(); renderHost(); return; }
     if (f.id === "hostOutForm") { const n = f.t.value.trim(); if (!n) return; host.out.custom.push({ id: uid(), text: n }); saveHost(); renderHost(); return; }
     if (f.id === "hostGuestForm") { const n = f.gname.value.trim(); if (!n) return; host.guests.push({ id: uid(), name: n, people: 1, travel: "drive", room: "", pickup: false }); }

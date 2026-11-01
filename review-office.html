@@ -588,6 +588,8 @@ body.flash::before {
 input.bs-range{-webkit-appearance:none;appearance:none;width:100%;height:8px;margin:0;padding:0;border:0;border-radius:4px!important;background:linear-gradient(to right,var(--c) var(--p),#E2E2E2 var(--p));outline:none}
 input.bs-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:30px;height:30px;border-radius:50%!important;background:var(--c);border:4px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.4);cursor:pointer}
 input.bs-range::-moz-range-thumb{width:22px;height:22px;border-radius:50%!important;background:var(--c);border:4px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.4);cursor:pointer}
+.hcost{margin:2px 0 12px}.hcost-yn{display:flex;gap:8px;margin:6px 0 8px}.hcost-yn button{flex:1;padding:10px;border:1.5px solid #B8935A;background:#fff;color:#151515;font-family:inherit;letter-spacing:.1em;text-transform:uppercase;font-size:12px;cursor:pointer}.hcost-yn button[aria-pressed=true]{background:#151515;color:#F1D98A}
+.oc-pay{grid-column:1/-1;display:flex;gap:8px;align-items:center;margin-top:8px;font-size:13px}.oc-pay .oc-amt{flex:1;min-width:0}.oc-pay>span{flex:1}
 .ab-ico { font-size: 34px; }
 .ab-text { min-width: 0; }
 .ab-text b { display: block; font-family: var(--font-display); font-size: 21px; }
@@ -14175,10 +14177,14 @@ const PC_DESIGNS = [
       const fmt = x => (k === "trip" || k === "gtrip") && x.b ? (k === "gtrip" ? "arrives " : "") + new Date(x.b).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : k === "pass" && x.b ? "expires " + x.b : x.b || "";
       const warn = x => k === "pass" && x.b && new Date(x.b).getTime() < Date.now() + 183 * 864e5 ? ` <b class="host-pill over">${new Date(x.b).getTime() < Date.now() ? "expired" : "renew soon"}</b>` : "";
       return `<div class="card host-card"><h3>${ico} ${title}</h3>${k === "gtrip" ? `<p class="host-rem">Guests flying or taking the train to you? Add them here and Noël will put their arrival in your calendar, with a reminder to pick them up.</p>` : ""}${k === "trip" ? `<p class="host-rem">If travelling before your Christmas home plans, Noël will add your travel dates, with reminders, to your calendar.</p>` : ""}
-        ${items.length ? `<ul class="host-list">${items.map(x => `<li data-htrip="${x.id}"><span><b>${esc(x.a)}</b>${x.b ? `<small>${esc(fmt(x))}</small>` : ""}${warn(x)}</span><button type="button" class="icon-btn" data-hdeltrip aria-label="Remove">✕</button></li>`).join("")}</ul>` : `<p class="host-rem">Nothing added yet.</p>`}
+        ${items.length ? `<ul class="host-list">${items.map(x => `<li data-htrip="${x.id}"><span><b>${esc(x.a)}</b>${x.b ? `<small>${esc(fmt(x))}</small>` : ""}${+x.cost > 0 ? `<small>✦ ${money(+x.cost)} added to your Budget</small>` : ""}${warn(x)}</span><button type="button" class="icon-btn" data-hdeltrip aria-label="Remove">✕</button></li>`).join("")}</ul>` : `<p class="host-rem">Nothing added yet.</p>`}
         <form class="host-away-form" data-htripform="${k}" autocomplete="off">
           <label><span class="meal-lab">${l1}</span><input class="input" name="a" maxlength="60" placeholder="${ph}" required></label>
           <label><span class="meal-lab">${l2}</span><input class="input" name="b" type="${t2}" ${t2 === "text" ? 'maxlength="60"' : ""}></label>
+          ${["trip", "gtrip", "other"].includes(k) ? `<div class="hcost"><span class="meal-lab">Add the total travel cost to my Budget?</span>
+            <input type="hidden" name="addcost" value="0">
+            <div class="hcost-yn"><button type="button" data-hcy="0" aria-pressed="true">No</button><button type="button" data-hcy="1" aria-pressed="false">Yes</button></div>
+            <label class="hc-amt" hidden><span class="meal-lab">Total cost you already spent</span><input class="input" name="cost" inputmode="decimal" placeholder="$ total"></label></div>` : ""}
           <button class="btn btn-green btn-block" type="submit">Add</button></form></div>`;
     }).join("") + hostLeaveHtml();
   }
@@ -14334,6 +14340,7 @@ const PC_DESIGNS = [
     if (t.closest("#hostShareCard")) { shareHouseCard(); return; }
     const dlv = t.closest("[data-hdelleave]"); if (dlv) { host.leave.custom = host.leave.custom.filter(x => x.id !== dlv.dataset.hdelleave); delete host.leave.done[dlv.dataset.hdelleave]; saveHost(); renderHost(); return; }
     const dout = t.closest("[data-hdelout]"); if (dout) { host.out.custom = host.out.custom.filter(x => x.id !== dout.dataset.hdelout); delete host.out.done[dout.dataset.hdelout]; saveHost(); renderHost(); return; }
+    const yn = t.closest("[data-hcy]"); if (yn) { const fm = yn.closest("form"), on = yn.dataset.hcy === "1"; fm.addcost.value = on ? "1" : "0"; fm.querySelectorAll("[data-hcy]").forEach(b => b.setAttribute("aria-pressed", String(b === yn))); fm.querySelector(".hc-amt").hidden = !on; if (on) fm.cost.focus(); return; }
     const dt = t.closest("[data-hdeltrip]"); if (dt) { const id = dt.closest("[data-htrip]").dataset.htrip; host.trips = host.trips.filter(x => x.id !== id); saveHost(); renderHost(); hostSync(); return; }
     const dj = t.closest("[data-hdeljob]"); if (dj) { const id = dj.closest("[data-hjob]").dataset.hjob; host.jobs = host.jobs.filter(j => j.id !== id); delete host.who["j:" + id]; delete host.jobDone[id]; saveHost(); renderHost(); return; }
   });
@@ -14364,7 +14371,12 @@ const PC_DESIGNS = [
   document.addEventListener("submit", e => {
     if (!e.target.closest("#hostWrap, #hostTaskWrap")) return;
     e.preventDefault(); const f = e.target;
-    if (f.dataset.htripform) { const n = f.a.value.trim(); if (!n) return; host.trips.push({ id: uid(), k: f.dataset.htripform, a: n, b: f.b.value.trim() }); saveHost(); renderHost(); hostSync(); return; }
+    if (f.dataset.htripform) {
+      const n = f.a.value.trim(); if (!n) return;
+      const t = { id: uid(), k: f.dataset.htripform, a: n, b: f.b.value.trim() };
+      if (f.addcost && f.addcost.value === "1") { const v = parseFloat(String(f.cost.value).replace(/[^0-9.]/g, "")); if (!isFinite(v) || v <= 0) { toast("💵 Type the total cost, or tap No"); return; } t.cost = Math.round(v * 100) / 100; t.paidOn = budToday(); }
+      host.trips.push(t); saveHost(); renderHost(); hostSync(); if (t.cost) toast(`💵 ${money(t.cost)} added to your Budget`); return;
+    }
     if (f.id === "hostLeaveForm") { const n = f.t.value.trim(); if (!n) return; host.leave.custom.push({ id: uid(), text: n }); saveHost(); renderHost(); return; }
     if (f.id === "hostOutForm") { const n = f.t.value.trim(); if (!n) return; host.out.custom.push({ id: uid(), text: n }); saveHost(); renderHost(); return; }
     if (f.id === "hostGuestForm") { const n = f.gname.value.trim(); if (!n) return; host.guests.push({ id: uid(), name: n, people: 1, travel: "drive", room: "", pickup: false }); }
@@ -15052,13 +15064,15 @@ const PC_DESIGNS = [
     const santa = sum(santaGifts(), isSpent); if (santa) rows.push({ src: "Santa's list", cat: "gifts", name: "🎅 Santa's gifts (kept secret)", amt: santa, date: "" });
     foodBudget.items.forEach(x => { if (+x.amt) rows.push({ src: "Food budget", cat: "food", name: x.name, amt: +x.amt, date: x.date || "" }); });
     if (typeof org !== "undefined" && hubMode === "company") org.giving.forEach(x => { if (+x.amt) rows.push({ src: "Giving", cat: "giving", name: x.what, amt: +x.amt, date: x.date || "" }); });
+    if (typeof host !== "undefined") host.trips.forEach(x => { if (+x.cost > 0) rows.push({ src: "Plan › Travel", cat: "travel", name: x.a, amt: +x.cost, date: x.paidOn || "" }); });
+    if (typeof offBudgetRows === "function" && hubMode === "company") offBudgetRows().forEach(r => rows.push(r));
     budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "", mine: !!x.mine }));
     return rows;
   }
   const catLimit = k => k === "gifts" ? +gifts.budget || 0 : k === "food" ? +foodBudget.limit || 0 : +budget.cats[k] || 0;
   function budTotals() {
     const rows = budRows(), by = {}; BUD_CATS.forEach(([k]) => { by[k] = 0; }); rows.forEach(r => { by[r.cat] = (by[r.cat] || 0) + r.amt; });
-    const spent = rows.reduce((a, r) => a + r.amt, 0), catSum = BUD_CATS.reduce((a, [k]) => a + catLimit(k), 0), limit = +budget.limit || catSum;
+    const spent = rows.reduce((a, r) => a + r.amt, 0), catSum = BUD_CATS.reduce((a, [k]) => a + catLimit(k), 0), limit = +budget.limit || (hubMode === "company" && typeof offBudgetAll === "function" ? offBudgetAll() : 0) || catSum;
     const plannedGifts = sum(gifts.people.flatMap(p => p.gifts).concat(santaGifts()), g => !isSpent(g));
     return { rows, by, spent, limit, catSum, plannedGifts };
   }
@@ -15666,6 +15680,14 @@ const PC_DESIGNS = [
     oyEnsure(); const s = oy.events.find(x => x.id === oy.active); if (!s) return;
     s.name = off.ev.name || s.name; s.date = off.ev.date || ""; if (s.date) { s.month = +s.date.slice(5, 7); s.year = +s.date.slice(0, 4); }
   }
+  // 💵 what was really paid goes into the Budget tab; the approved event budget becomes the budget total
+  const OFF_BUD_CAT = { "Venue": "party", "Catering": "food", "Drinks": "food", "Entertainment": "party", "Decorations": "decor", "Prizes & awards": "party", "Gifts": "gifts", "Supplies": "hosting", "Transportation": "travel", "Other": "other" };
+  window.offBudgetRows = () => {
+    const rows = [], put = (ev, costs) => (costs || []).forEach(c => { if (+c.paid > 0) rows.push({ src: "Office plan", cat: OFF_BUD_CAT[c.type] || "other", name: (ev || "Event") + ": " + c.type + (c.name ? " · " + c.name : ""), amt: +c.paid, date: c.paidOn || "" }); });
+    put(off.ev.name, off.costs); (oy.events || []).forEach(e => { if (e.id !== oy.active && e.snap) put(e.name, e.snap.costs); });
+    return rows;
+  };
+  window.offBudgetAll = () => +oy.budget || ((oy.events || []).reduce((a, e) => a + oyBudgetOf(e), 0));
   const oyCost = e => e.id === oy.active ? offTotal() : ((e.snap && e.snap.costs) || []).reduce((a, c) => a + (+c.cost || 0), 0);
   const oyBudgetOf = e => e.id === oy.active ? (+off.ev.budget || 0) : ((e.snap && e.snap.ev && +e.snap.ev.budget) || 0);
   const offChk = () => { if (!off.chk) off.chk = oyType(off.oyType || "holiday").chk.map(([d, t]) => ({ id: uid(), d, t, done: 0 })); return off.chk; };
@@ -15909,7 +15931,8 @@ const PC_DESIGNS = [
       <div class="card pt-card"><h3>✨ What's planned</h3><div class="apps-filters">${offActList().map(([k, l]) => `<button type="button" class="chip${off.acts[k] ? " on" : ""}" data-ofact="${k}">${off.acts[k] ? "✓ " : ""}${l}</button>`).join("")}</div>
         ${off.acts.gifts ? `<div class="off-grid" style="margin-top:8px">${fld("giftLimit", "Gift exchange limit", "number", "$")}</div>` : ""}</div>
       <div class="card pt-card"><h3>💵 Costs & vendors</h3>
-        ${off.costs.map(c => `<div class="off-cost" data-oc="${c.id}"><div><b>${esc(c.type)}</b>${c.name ? ` · ${esc(c.name)}` : ""}${c.contact ? `<small>📞 ${esc(c.contact)}</small>` : ""}${offOrderHtml(c)}</div><span>${money(+c.cost || 0)}</span><button type="button" class="icon-btn" data-ocdel aria-label="Remove">✕</button></div>`).join("") || `<p class="host-rem">Add the venue, caterer, drinks, prizes… Vendors' names and numbers are kept for next year too.</p>`}
+        ${off.costs.map(c => `<div class="off-cost" data-oc="${c.id}"><div><b>${esc(c.type)}</b>${c.name ? ` · ${esc(c.name)}` : ""}${c.contact ? `<small>📞 ${esc(c.contact)}</small>` : ""}${offOrderHtml(c)}</div><span>${money(+c.cost || 0)}</span><button type="button" class="icon-btn" data-ocdel aria-label="Remove">✕</button>
+          <div class="oc-pay">${+c.paid > 0 ? `<span>✦ ${money(+c.paid)} paid, in your Budget</span><button type="button" class="of-lnk" data-ocunpay>Remove from Budget</button>` : `<input class="input oc-amt" inputmode="decimal" placeholder="Paid? Type the real cost" aria-label="Actual cost paid"><button type="button" class="of-lnk" data-ocpay>Add to Budget</button>`}</div></div>`).join("") || `<p class="host-rem">Add the venue, caterer, drinks, prizes… Vendors' names and numbers are kept for next year too.</p>`}
         ${off.costs.length ? `<div class="off-cost total"><div><b>Estimated total</b><small>about ${money(Math.round(total / hc * 100) / 100)} per person</small></div><span>${money(total)}</span><i></i></div>` : ""}
         ${+off.ev.budget && total > +off.ev.budget ? `<p class="org-warn">⚠️ ${money(total - off.ev.budget)} over the approved budget.</p>` : ""}
         <form class="org-ev-form" id="offCostForm" autocomplete="off"><div class="org-addr-row"><select class="input" name="type">${OFF_COSTS.map(c => `<option>${c}</option>`).join("")}</select><input class="input" name="cost" type="number" inputmode="decimal" min="0" placeholder="$" style="max-width:96px"></div>
@@ -16401,6 +16424,8 @@ const PC_DESIGNS = [
     const ac = t.closest("[data-ofact]"); if (ac) { off.acts[ac.dataset.ofact] = off.acts[ac.dataset.ofact] ? 0 : 1; saveOff(); renderOffice(); return; }
     const od = t.closest("[data-ocdone]"); if (od) { const c = off.costs.find(x => x.id === od.dataset.ocdone); if (c) { c.ordered = !c.ordered; saveOff(); renderOffice(); renderCoDash(); } return; }
     const td = t.closest("[data-tmdel]"); if (td) { off.team = (off.team || []).filter(m => m.id !== td.closest("[data-tm]").dataset.tm); saveOff(); renderOffice(); return; }
+    const pay = t.closest("[data-ocpay]"); if (pay) { const row = pay.closest("[data-oc]"), c = off.costs.find(x => x.id === row.dataset.oc), v = parseFloat(String(row.querySelector(".oc-amt").value).replace(/[^0-9.]/g, "")); if (!c) return; if (!isFinite(v) || v <= 0) { toast("💵 Type what you actually paid"); return; } c.paid = Math.round(v * 100) / 100; c.paidOn = c.paidOn || budToday(); saveOff(); renderOffice(); toast(`💵 ${money(c.paid)} added to your Budget`); return; }
+    const unp = t.closest("[data-ocunpay]"); if (unp) { const c = off.costs.find(x => x.id === unp.closest("[data-oc]").dataset.oc); if (c) { delete c.paid; saveOff(); renderOffice(); } return; }
     const cd = t.closest("[data-ocdel]"); if (cd) { off.costs = off.costs.filter(c => c.id !== cd.closest("[data-oc]").dataset.oc); saveOff(); renderOffice(); return; }
     const pd = t.closest("[data-opdel]"); if (pd) { off.pot = off.pot.filter(p => p.id !== pd.closest("[data-op]").dataset.op); saveOff(); renderOffice(); return; }
     const ad = t.closest("[data-awdel]"); if (ad) { off.awards = off.awards.filter(a => a.id !== ad.closest("[data-oa]").dataset.oa); saveOff(); renderOffice(); return; }
