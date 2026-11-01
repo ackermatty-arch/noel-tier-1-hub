@@ -3555,8 +3555,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
         <div class="apps-calc-row">
           <label>Guests <input class="input" id="appsGuests" type="number" inputmode="numeric" min="1" max="200" value="10"></label>
           <div class="seg apps-mode" id="appsMode" role="group" aria-label="Party type">
-            <button type="button" data-mode="before" aria-pressed="true">Before dinner</button>
-            <button type="button" data-mode="meal" aria-pressed="false">Appetizers are the meal</button>
+            <button type="button" data-mode="meal" aria-pressed="true">Appetizers only</button>
           </div>
         </div>
         <p class="apps-result" id="appsResult"></p>
@@ -11937,7 +11936,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   ];
   window.NOEL_APPS = APPETIZERS;   // 🥂 the New Year's party planner builds its menu from this list
   const APP_TAG_NAMES = { make: "Make-ahead", nocook: "No-cook", warm: "Warm", veg: "Vegetarian", sweet: "Sweet" };
-  let appFavs = load("appFavs", {}), appFilter = "all", appMode = load("appMode", "before");
+  let appFavs = load("appFavs", {}), appFilter = "all", appMode = "meal";   // appetizers are always the meal now
   function renderApps() {
     const list = APPETIZERS.filter(a => appFilter === "all" || (appFilter === "fav" ? appFavs[a[1]] : a[4].split(" ").includes(appFilter)));
     $("#appsList").innerHTML = list.length ? list.map(a => `
