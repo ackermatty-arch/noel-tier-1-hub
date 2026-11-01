@@ -104,6 +104,7 @@
   const nyeTheme = () => { try { return ptTheme(); } catch (e) { return null; } };
   function renderNyeParty() {
     const m = mealById("nyeparty"); if (!m) return;
+    { const c0 = cfgFor("nyeparty"); if (c0.mode === "before") { c0.mode = "meal"; mealCfg.nyeparty = c0; save("mealCfg", mealCfg); } }   // appetizers are always the meal
     const c = cfgFor("nyeparty"), p = mealSizes(m, c), active = !!planOf("nyeparty");
     const ps = pricedShop(m, p.f, p);
     if (!mealCfg.nyeparty || !mealCfg.nyeparty.guests) { mealCfg.nyeparty = Object.assign({}, mealCfg.nyeparty, { guests: 6 }); save("mealCfg", mealCfg); return renderNyeParty(); }
@@ -113,7 +114,7 @@
       <label class="wz-time"><span class="wz-lab">Party starts</span><input class="input" type="time" id="nyeTime" value="${esc(c.time)}"></label></div>
       <h4 class="nye-step"><span>2</span> How much food</h4>
       <div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Will you serve dinner too?">
-        <button type="button" data-nyemode="meal" aria-pressed="${c.mode !== "before"}"><b>Appetizers are the meal</b><small>About 12 bites per guest</small></button><button type="button" data-nyemode="before" aria-pressed="${c.mode === "before"}"><b>Light bites before dinner</b><small>About 5 bites per guest</small></button></div>
+        <button type="button" data-nyemode="meal" aria-pressed="true"><b>Appetizers are the meal</b><small>About 12 bites per guest</small></button></div>
       <h4 class="nye-step"><span>3</span> Your appetizers</h4>
       <div class="seg sub-tabs meal-done pm-two" role="group" aria-label="Which appetizers">
         <button type="button" data-nyeoff="set" aria-pressed="${!c.picks}"><b>Our set menu</b><small>Ready to go</small></button><button type="button" data-nyeown aria-pressed="${!!c.picks}"><b>Choose my own ›</b><small>${c.picks ? c.picks.length + " picked" : "Browse 30 ideas"}</small></button></div>
