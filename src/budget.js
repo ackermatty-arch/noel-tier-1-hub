@@ -30,7 +30,7 @@
     foodBudget.items.forEach(x => { if (+x.amt) rows.push({ src: "Food budget", cat: "food", name: x.name, amt: +x.amt, date: x.date || "" }); });
     if (typeof org !== "undefined" && hubMode === "company") org.giving.forEach(x => { if (+x.amt) rows.push({ src: "Giving", cat: "giving", name: x.what, amt: +x.amt, date: x.date || "" }); });
     try { Object.entries(acts.cost || {}).forEach(([id, c]) => { if (+c.actual > 0) { const a = allActs().find(x => x.id === id); rows.push({ src: "Activities", cat: "party", name: "Activity: " + (a ? a.name : "Outing"), amt: +c.actual, date: "" }); } }); } catch (er) {}
-    if (typeof host !== "undefined") host.trips.forEach(x => { if (+x.cost > 0) rows.push({ src: "Plan › Travel", cat: "travel", name: x.a, amt: +x.cost, date: x.paidOn || "" }); });
+    if (typeof host !== "undefined") host.trips.forEach(x => { if (+x.cost > 0) rows.push({ src: "Plan › Travel", cat: x.k === "pet" ? "other" : "travel", name: (x.k === "pet" ? "Pet care: " : x.k === "pass" ? "Passport: " : "") + x.a, amt: +x.cost, date: x.paidOn || "" }); });
     if (typeof offBudgetRows === "function" && hubMode === "company") offBudgetRows().forEach(r => rows.push(r));
     budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "", mine: !!x.mine }));
     return rows;

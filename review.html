@@ -868,7 +868,7 @@ textarea.input { font: inherit; font-size: 16px; min-height: 100px; padding: 10p
 .pb-text small { display: block; font-size: 13px; opacity: .95; }
 .photo-banner .ab-go { color: var(--gold-light); }
 .acts-count { text-align: center; font-weight: 800; color: var(--pine); margin-bottom: 8px; font-size: 14px; }
-.act-cost{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;padding-top:8px;border-top:1px solid var(--line)}.act-cost label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block}.act-cost input{margin-top:4px;min-height:40px}.act-cost small{grid-column:1/-1;font-size:12px;color:var(--muted)}
+.act-item>*{min-width:0}.act-cost{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-width:0;gap:8px 10px;padding-top:8px;border-top:1px solid var(--line)}.act-cost label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block}.act-cost input{margin-top:4px;min-height:40px;width:100%;min-width:0;box-sizing:border-box}.act-cost small{grid-column:1/-1;font-size:12px;color:var(--muted)}
 .grp-h{display:flex;justify-content:space-between;align-items:baseline;margin:18px 2px 6px;padding-bottom:6px;border-bottom:2px solid #B8935A;font-family:Cinzel,serif;letter-spacing:.12em;text-transform:uppercase;font-size:13px}.grp-h small{letter-spacing:0;text-transform:none;font-family:inherit;color:var(--muted);font-size:12px}
 .grp-pick{width:100%;margin:0 0 10px;min-height:44px}.p-grp{font-size:12px;margin-top:6px;max-width:100%}
 .act-item { display: grid; grid-template-columns: 38px 1fr auto; gap: 10px; align-items: center; padding: 12px 14px; }
@@ -9086,7 +9086,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       const st = {
         plan: !!(host.guests.length || host.trips.length || (host.table.names || []).length || Object.values(host.house || {}).some(Boolean)),
         menu: mealPlans.some(p => !p.svc) || savedMenus.length > 0 || (Array.isArray(ownDinners) && ownDinners.some(o => o.title)),
-        budget: (+budget.limit > 0) || (+gifts.budget > 0)
+        budget: (+budget.limit > 0) || (+gifts.budget > 0) || (+foodBudget.limit > 0) || Object.values(budget.cats || {}).some(v => +v > 0) || budget.expenses.length > 0 || foodBudget.items.length > 0
       };
       if (!(st.plan && st.menu && st.budget)) return { ready: false, st };
       const dt = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }), phases = [];
@@ -14198,10 +14198,10 @@ const PC_DESIGNS = [
         <form class="host-away-form" data-htripform="${k}" autocomplete="off">
           <label><span class="meal-lab">${l1}</span><input class="input" name="a" maxlength="60" placeholder="${ph}" required></label>
           <label><span class="meal-lab">${l2}</span><input class="input" name="b" type="${t2}" ${t2 === "text" ? 'maxlength="60"' : ""}></label>
-          ${["trip", "gtrip", "other"].includes(k) ? `<div class="hcost"><span class="meal-lab">Add the total travel cost to my Budget?</span>
+          ${`<div class="hcost"><span class="meal-lab">Add this cost to my Budget?</span>
             <input type="hidden" name="addcost" value="0">
             <div class="hcost-yn"><button type="button" data-hcy="0" aria-pressed="true">No</button><button type="button" data-hcy="1" aria-pressed="false">Yes</button></div>
-            <label class="hc-amt" hidden><span class="meal-lab">Total cost you already spent</span><input class="input" name="cost" inputmode="decimal" placeholder="$ total"></label></div>` : ""}
+            <label class="hc-amt" hidden><span class="meal-lab">Total cost you already spent</span><input class="input" name="cost" inputmode="decimal" placeholder="$ total"></label></div>`}
           <button class="btn btn-green btn-block" type="submit">Add</button></form></div>`;
     }).join("") + hostLeaveHtml();
   }
@@ -15082,7 +15082,7 @@ const PC_DESIGNS = [
     foodBudget.items.forEach(x => { if (+x.amt) rows.push({ src: "Food budget", cat: "food", name: x.name, amt: +x.amt, date: x.date || "" }); });
     if (typeof org !== "undefined" && hubMode === "company") org.giving.forEach(x => { if (+x.amt) rows.push({ src: "Giving", cat: "giving", name: x.what, amt: +x.amt, date: x.date || "" }); });
     try { Object.entries(acts.cost || {}).forEach(([id, c]) => { if (+c.actual > 0) { const a = allActs().find(x => x.id === id); rows.push({ src: "Activities", cat: "party", name: "Activity: " + (a ? a.name : "Outing"), amt: +c.actual, date: "" }); } }); } catch (er) {}
-    if (typeof host !== "undefined") host.trips.forEach(x => { if (+x.cost > 0) rows.push({ src: "Plan › Travel", cat: "travel", name: x.a, amt: +x.cost, date: x.paidOn || "" }); });
+    if (typeof host !== "undefined") host.trips.forEach(x => { if (+x.cost > 0) rows.push({ src: "Plan › Travel", cat: x.k === "pet" ? "other" : "travel", name: (x.k === "pet" ? "Pet care: " : x.k === "pass" ? "Passport: " : "") + x.a, amt: +x.cost, date: x.paidOn || "" }); });
     if (typeof offBudgetRows === "function" && hubMode === "company") offBudgetRows().forEach(r => rows.push(r));
     budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "", mine: !!x.mine }));
     return rows;

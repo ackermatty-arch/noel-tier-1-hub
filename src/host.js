@@ -258,10 +258,10 @@
         <form class="host-away-form" data-htripform="${k}" autocomplete="off">
           <label><span class="meal-lab">${l1}</span><input class="input" name="a" maxlength="60" placeholder="${ph}" required></label>
           <label><span class="meal-lab">${l2}</span><input class="input" name="b" type="${t2}" ${t2 === "text" ? 'maxlength="60"' : ""}></label>
-          ${["trip", "gtrip", "other"].includes(k) ? `<div class="hcost"><span class="meal-lab">Add the total travel cost to my Budget?</span>
+          ${`<div class="hcost"><span class="meal-lab">Add this cost to my Budget?</span>
             <input type="hidden" name="addcost" value="0">
             <div class="hcost-yn"><button type="button" data-hcy="0" aria-pressed="true">No</button><button type="button" data-hcy="1" aria-pressed="false">Yes</button></div>
-            <label class="hc-amt" hidden><span class="meal-lab">Total cost you already spent</span><input class="input" name="cost" inputmode="decimal" placeholder="$ total"></label></div>` : ""}
+            <label class="hc-amt" hidden><span class="meal-lab">Total cost you already spent</span><input class="input" name="cost" inputmode="decimal" placeholder="$ total"></label></div>`}
           <button class="btn btn-green btn-block" type="submit">Add</button></form></div>`;
     }).join("") + hostLeaveHtml();
   }
