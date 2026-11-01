@@ -114,7 +114,7 @@
     const xmas = new Date(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear(), 11, 25), days = Math.max(0, Math.ceil((xmas - now) / 86400000));
     const status = !T.limit ? "Set a budget on the 🎯 Budgets tab to track how much is left." : pct > 1 ? `⚠️ You're ${money(-left)} over budget.` : pct >= 0.9 ? `🟡 Almost there: ${money(left)} left.` : `✅ On track: ${money(left)} left${days ? `, about ${money(Math.floor(left / days))} a day until Christmas` : ""}.`;
     const top = T.rows.slice().sort((a, b) => b.amt - a.amt)[0];
-    const GR = [["family", "Family"], ["friends", "Friends"], ["work", "Coworkers & teachers"]], grOf = p => ["friends", "work"].includes(p.grp) ? p.grp : "family",
+    const GR = [["family", "Family"], ["friends", "Friends"], ["work", "Coworkers"], ["teachers", "Teachers"]], grOf = p => ["friends", "work", "teachers"].includes(p.grp) ? p.grp : "family",
       perGroup = GR.map(([k, l]) => { const rows = gifts.people.filter(p => grOf(p) === k).map(p => [p.name, sum(p.gifts, () => true)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]); return [l, rows, rows.reduce((a, r) => a + r[1], 0)]; }).filter(g => g[1].length),
       perPerson = perGroup.flatMap(g => g[1]), ppMax = Math.max(1, ...perPerson.map(x => x[1]));
     const last = budget.past[budget.past.length - 1];

@@ -3216,7 +3216,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <form class="card add-task" id="addPersonForm" autocomplete="off">
       <h3>➕ Add a person</h3>
       <p class="wish-tip" style="margin:0 0 10px">Start here: name everyone you buy for, then set each person's spending cap above. They show up on the Gifts page (Plan › Gifts), ready for wishes and purchases.</p>
-      <select class="input grp-pick" name="grp" aria-label="Group"><option value="family">Family</option><option value="friends">Friends</option><option value="work">Coworkers &amp; teachers</option></select>
+      <select class="input grp-pick" name="grp" aria-label="Group"><option value="family">Family</option><option value="friends">Friends</option><option value="work">Coworkers</option><option value="teachers">Teachers</option></select>
       <div class="row">
         <input class="input" name="person" maxlength="30" placeholder="e.g. Mom" aria-label="Person's name" required>
         <button class="btn btn-green" type="submit">Add</button>
@@ -10419,7 +10419,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     const budget = +gifts.budget || 0, spent = sum(withSanta, isSpent), planned = sum(withSanta, () => true);
     return { all, budget, spent, planned, left: budget - spent };
   }
-  const GIFT_GRPS = [["family", "Family"], ["friends", "Friends"], ["work", "Coworkers & teachers"]];
+  const GIFT_GRPS = [["family", "Family"], ["friends", "Friends"], ["work", "Coworkers"], ["teachers", "Teachers"]];
   const capOver = p => +p.cap > 0 && sum(p.gifts, () => true) > +p.cap;
   const capMsg = p => { if (!(+p.cap > 0)) return "Optional"; const pl = sum(p.gifts, () => true); return pl > +p.cap ? `${money(pl - p.cap)} over the cap` : `${money(p.cap - pl)} left of the cap`; };
   function renderGifts() {
@@ -10442,7 +10442,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       list.innerHTML = `<div class="card empty">🎁 Add the first person on your list below.<br>Then set a spending cap for each person.</div>`;
       return;
     }
-    const gOf = p => ["friends", "work"].includes(p.grp) ? p.grp : "family";
+    const gOf = p => ["friends", "work", "teachers"].includes(p.grp) ? p.grp : "family";
     list.innerHTML = GIFT_GRPS.map(([gk, gl]) => { const ps = gifts.people.filter(p => gOf(p) === gk); if (!ps.length) return ""; return `<div class="grp-h"><span>${gl}</span><small>${money(ps.reduce((a, p) => a + sum(p.gifts, isSpent), 0))} spent · ${money(ps.reduce((a, p) => a + sum(p.gifts, () => true), 0))} planned</small></div>` + ps.map(p => `
       <div class="card person" data-pid="${p.id}">
         <div class="person-head">
@@ -15183,7 +15183,7 @@ const PC_DESIGNS = [
     const xmas = new Date(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear(), 11, 25), days = Math.max(0, Math.ceil((xmas - now) / 86400000));
     const status = !T.limit ? "Set a budget on the 🎯 Budgets tab to track how much is left." : pct > 1 ? `⚠️ You're ${money(-left)} over budget.` : pct >= 0.9 ? `🟡 Almost there: ${money(left)} left.` : `✅ On track: ${money(left)} left${days ? `, about ${money(Math.floor(left / days))} a day until Christmas` : ""}.`;
     const top = T.rows.slice().sort((a, b) => b.amt - a.amt)[0];
-    const GR = [["family", "Family"], ["friends", "Friends"], ["work", "Coworkers & teachers"]], grOf = p => ["friends", "work"].includes(p.grp) ? p.grp : "family",
+    const GR = [["family", "Family"], ["friends", "Friends"], ["work", "Coworkers"], ["teachers", "Teachers"]], grOf = p => ["friends", "work", "teachers"].includes(p.grp) ? p.grp : "family",
       perGroup = GR.map(([k, l]) => { const rows = gifts.people.filter(p => grOf(p) === k).map(p => [p.name, sum(p.gifts, () => true)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]); return [l, rows, rows.reduce((a, r) => a + r[1], 0)]; }).filter(g => g[1].length),
       perPerson = perGroup.flatMap(g => g[1]), ppMax = Math.max(1, ...perPerson.map(x => x[1]));
     const last = budget.past[budget.past.length - 1];
