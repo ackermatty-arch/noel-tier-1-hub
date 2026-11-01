@@ -15212,38 +15212,7 @@ const PC_DESIGNS = [
   // 🎯 Budget tab = "Add your budget" + Gift tracker (moved in from Gifts). Other budgets sit in an optional fold underneath.
   let budCatOpen = false;
   if (budget.limit) { budget.limit = 0; saveBudget(); }   // the separate "total holiday budget" box is gone; the total is the sum of the budgets
-  // 🎚️ slide to split the holiday pool: the ring, the legend and every budget move together
-  const SPLIT_DEF = [["gifts", 0.55], ["food", 0.2], ["decor", 0.15], ["travel", 0.1]];
-  const splitCats = () => BUD_CATS.filter(([k]) => k !== "giving" || hubMode === "company");
-  const splitGet = k => catLimit(k);
-  function splitSet(k, v) { v = Math.max(0, Math.round(v)); if (k === "gifts") gifts.budget = v; else if (k === "food") foodBudget.limit = v; else budget.cats[k] = v; }
-  const splitPool = () => splitCats().reduce((a, [k]) => a + splitGet(k), 0);
-  const splitSave = () => { save("gifts", gifts); save("foodBudget", foodBudget); saveBudget(); };
-  function splitRing() {
-    const pool = splitPool(), centre = `<text x="100" y="95" text-anchor="middle" font-size="10" fill="#6b7a70" font-family="sans-serif" letter-spacing="1">HOLIDAY POOL</text><text x="100" y="118" text-anchor="middle" font-size="22" font-weight="700" fill="#151515" font-family="Georgia,serif">${money(pool)}</text>`;
-    return budDonut(splitCats().map(([k]) => ({ k, v: splitGet(k) })), pool || 1, pool || 1, 210, centre, "How your budget is split");
-  }
-  function splitPaint(skip) {
-    const box = $("#budSplit"); if (!box) return; const pool = splitPool(), pm = Math.max(5000, Math.ceil(pool * 1.25 / 500) * 500), cm = Math.max(1000, Math.ceil(pool / 500) * 500);
-    $("#bsRing").innerHTML = splitRing();
-    $("#bsLeg").innerHTML = splitCats().filter(([k]) => splitGet(k) > 0).map(([k, i, l]) => `<li><i style="background:${budGold(k)}"></i><span>${l}</span><b>${money(splitGet(k))}</b><small>${Math.round(splitGet(k) / pool * 100)}%</small></li>`).join("") || `<li class="host-rem">Slide anything to start your budget.</li>`;
-    $$("#budSplit [data-bsl]").forEach(inp => {
-      const k = inp.dataset.bsl, val = k === "pool" ? pool : splitGet(k), mx = k === "pool" ? pm : cm;
-      if (inp !== skip) { inp.max = mx; inp.value = val; }
-      inp.style.setProperty("--p", Math.min(100, val / (+inp.max || 1) * 100) + "%");
-      const o = box.querySelector(`[data-bsv="${k}"]`); if (o) o.textContent = money(val);
-    });
-  }
-  function budSet(T) {
-    const pool = splitPool(), pm = Math.max(5000, Math.ceil(pool * 1.25 / 500) * 500), cm = Math.max(1000, Math.ceil(pool / 500) * 500);
-    const row = (k, ico, l, v, mx, col, step) => `<div class="bs-sl"><label><span>${ico ? ico + " " : ""}${l}</span><b data-bsv="${k}">${money(v)}</b></label><input type="range" class="bs-range" data-bsl="${k}" min="0" max="${mx}" step="${step}" value="${v}" style="--c:${col};--p:${Math.min(100, v / mx * 100)}%" aria-label="${l}"></div>`;
-    return `<div class="card bud-split" id="budSplit"><h3>Split your holiday budget</h3>
-      <p class="host-rem">Slide to choose how much goes where. The ring and your budgets move as you slide.</p>
-      <div id="bsRing" class="bs-ring">${splitRing()}</div>
-      <ul class="bud-legend" id="bsLeg">${splitCats().filter(([k]) => splitGet(k) > 0).map(([k, i, l]) => `<li><i style="background:${budGold(k)}"></i><span>${l}</span><b>${money(splitGet(k))}</b><small>${Math.round(splitGet(k) / pool * 100)}%</small></li>`).join("") || `<li class="host-rem">Slide anything to start your budget.</li>`}</ul>
-      ${row("pool", "", "Total holiday pool", pool, pm, "#151515", 50)}
-      ${splitCats().map(([k, i, l, col]) => row(k, i, l, splitGet(k), cm, col, 10)).join("")}</div>`;
-  }
+  function budSet(T) { return ""; }
   function budSetMore(T) {
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
     return `<details class="fold" id="budCatFold"${budCatOpen ? " open" : ""}><summary>More budgets (optional)</summary>
@@ -15375,17 +15344,6 @@ const PC_DESIGNS = [
     const del = t.closest("[data-bdel]"); if (del) { budget.expenses = budget.expenses.filter(x => x.id !== del.dataset.bdel); saveBudget(); renderBudget(); return; }
     if (t.closest("#budCsv")) { const x = $("#xlOpen"); if (x) x.click(); }
   });
-  $("#view-budget").addEventListener("input", e => {
-    const t = e.target, k = t.dataset && t.dataset.bsl; if (!k) return;
-    const v = +t.value;
-    if (k === "pool") {
-      const cur = splitPool();
-      if (cur > 0) splitCats().forEach(([c]) => splitSet(c, Math.round(splitGet(c) * v / cur / 10) * 10));
-      else SPLIT_DEF.forEach(([c, f]) => splitSet(c, Math.round(v * f / 10) * 10));
-    } else splitSet(k, v);
-    splitPaint(t);
-  });
-  $("#view-budget").addEventListener("change", e => { if (e.target.dataset && e.target.dataset.bsl) { splitSave(); renderBudget(); } });
   $("#view-budget").addEventListener("toggle", e => { if (e.target.id === "budCatFold") budCatOpen = e.target.open; }, true);
   $("#view-budget").addEventListener("change", e => {
     const t = e.target; if (t.dataset.blim == null) return;
