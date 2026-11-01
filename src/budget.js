@@ -11,9 +11,9 @@
      app. Santa's gifts show only as one total, never by name.
      ============================================================ */
   const BUD_CATS = [
-    ["gifts", "🎁", "Gifts", "#151515"], ["food", "🍽️", "Food & drinks", "#B8935A"], ["decor", "🎄", "Decorations", "#8C8C8C"],
-    ["hosting", "🏡", "Hosting", "#D9BF8C"], ["party", "🎉", "Parties & outings", "#4A4A4A"], ["cards", "✉️", "Cards & postage", "#C4C4C4"],
-    ["travel", "🚗", "Travel", "#6B5A3A"], ["giving", "⭐", "Giving", "#A8A8A8"], ["other", "📦", "Other", "#2B2B2B"]
+    ["gifts", "🎁", "Gifts", "#8E1B2B"], ["food", "🍽️", "Food & drinks", "#D4A93C"], ["decor", "🎄", "Decorations", "#1F5C36"],
+    ["hosting", "🏡", "Hosting", "#151515"], ["party", "🎉", "Parties & outings", "#5E8C61"], ["cards", "✉️", "Cards & postage", "#EBCB6E"],
+    ["travel", "🚗", "Travel", "#6B4423"], ["giving", "⭐", "Giving", "#B24A5A"], ["other", "📦", "Other", "#7A7A7A"]
   ];
   const budCat = k => BUD_CATS.find(c => c[0] === k) || BUD_CATS[BUD_CATS.length - 1];
   let budget = load("budget", null) || { limit: 0, cats: {}, expenses: [], daily: {}, past: [], tab: "overview", sort: "date", filter: "all" };
@@ -45,17 +45,25 @@
   }
 
   // ---------- 📊 pictures (plain SVG, so they also print sharply) ----------
-  const BUD_GOLD = ["#D4A93C", "#9C7A1E", "#EBCB6E", "#B8902A", "#F0D27A", "#7A5F14", "#C9A24A", "#E0B94F"];   // the ring is gold; each kind of spending is its own shade
-  const budGold = k => BUD_GOLD[Math.max(0, BUD_CATS.findIndex(c => c[0] === k)) % BUD_GOLD.length];
+  const budGold = k => budCat(k)[3];   // each kind of spending keeps its own colour: red, gold, green, black and friends
+  const budInk = col => { const n = parseInt(col.slice(1), 16), l = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)); return l > 150 ? "#151515" : "#fff"; };
+  // a ring of coloured pieces with the percentage written inside each one
+  function budDonut(segs, den, pctOf, size, centre, label) {
+    const r = 70, C = 2 * Math.PI * r; let off = 0, arcs = "", txt = "";
+    segs.filter(x => x.v > 0).forEach(x => {
+      const len = x.v / den * C, col = budGold(x.k);
+      arcs += `<circle r="${r}" cx="100" cy="100" fill="none" stroke="${col}" stroke-width="34" stroke-dasharray="${Math.max(0, len - 1)} ${C - Math.max(0, len - 1)}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`;
+      if (x.v / den >= 0.06) { const a = (off + len / 2) / C * 2 * Math.PI - Math.PI / 2; txt += `<text x="${(100 + r * Math.cos(a)).toFixed(1)}" y="${(104 + r * Math.sin(a)).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="${budInk(col)}" font-family="sans-serif">${Math.round(x.v / pctOf * 100)}%</text>`; }
+      off += len;
+    });
+    return `<svg viewBox="0 0 200 200" width="${size}" height="${size}" role="img" aria-label="${label}">
+      <circle r="${r}" cx="100" cy="100" fill="none" stroke="#EBEBEB" stroke-width="34"/>${arcs}${txt}${centre}</svg>`;
+  }
   function budPie(by, total, limit, size) {
-    const r = 70, C = 2 * Math.PI * r; let off = 0;
-    const parts = BUD_CATS.filter(([k]) => by[k] > 0);
-    const arcs = parts.map(([k, , , col]) => { const len = by[k] / Math.max(limit || 0, total) * C, s = `<circle r="${r}" cx="100" cy="100" fill="none" stroke="${budGold(k)}" stroke-width="34" stroke-dasharray="${Math.max(0, len - 1)} ${C - Math.max(0, len - 1)}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`; off += len; return s; }).join("");
     const pct = limit ? Math.round(total / limit * 100) : 0;
-    return `<svg viewBox="0 0 200 200" width="${size}" height="${size}" role="img" aria-label="Spending by category">
-      <circle r="${r}" cx="100" cy="100" fill="none" stroke="#EBEBEB" stroke-width="34"/>${total ? arcs : ""}
-      <text x="100" y="${limit ? 94 : 104}" text-anchor="middle" font-size="22" font-weight="700" fill="#1E3A2F" font-family="Georgia,serif">${money(total)}</text>
-      ${limit ? `<text x="100" y="116" text-anchor="middle" font-size="11" fill="#6b7a70" font-family="sans-serif">of ${money(limit)} · ${pct}%</text>` : ""}</svg>`;
+    const centre = `<text x="100" y="${limit ? 94 : 104}" text-anchor="middle" font-size="22" font-weight="700" fill="#151515" font-family="Georgia,serif">${money(total)}</text>` +
+      (limit ? `<text x="100" y="116" text-anchor="middle" font-size="11" fill="#6b7a70" font-family="sans-serif">of ${money(limit)} · ${pct}%</text>` : "");
+    return budDonut(BUD_CATS.map(([k]) => ({ k, v: by[k] || 0 })), Math.max(limit || 0, total) || 1, total || 1, size, centre, "Spending by category");
   }
   function budBars(by) {
     const cats = BUD_CATS.filter(([k]) => by[k] > 0 || catLimit(k) > 0);
@@ -148,7 +156,38 @@
   // 🎯 Budget tab = "Add your budget" + Gift tracker (moved in from Gifts). Other budgets sit in an optional fold underneath.
   let budCatOpen = false;
   if (budget.limit) { budget.limit = 0; saveBudget(); }   // the separate "total holiday budget" box is gone; the total is the sum of the budgets
-  function budSet(T) { return ""; }
+  // 🎚️ slide to split the holiday pool: the ring, the legend and every budget move together
+  const SPLIT_DEF = [["gifts", 0.55], ["food", 0.2], ["decor", 0.15], ["travel", 0.1]];
+  const splitCats = () => BUD_CATS.filter(([k]) => k !== "giving" || hubMode === "company");
+  const splitGet = k => catLimit(k);
+  function splitSet(k, v) { v = Math.max(0, Math.round(v)); if (k === "gifts") gifts.budget = v; else if (k === "food") foodBudget.limit = v; else budget.cats[k] = v; }
+  const splitPool = () => splitCats().reduce((a, [k]) => a + splitGet(k), 0);
+  const splitSave = () => { save("gifts", gifts); save("foodBudget", foodBudget); saveBudget(); };
+  function splitRing() {
+    const pool = splitPool(), centre = `<text x="100" y="95" text-anchor="middle" font-size="10" fill="#6b7a70" font-family="sans-serif" letter-spacing="1">HOLIDAY POOL</text><text x="100" y="118" text-anchor="middle" font-size="22" font-weight="700" fill="#151515" font-family="Georgia,serif">${money(pool)}</text>`;
+    return budDonut(splitCats().map(([k]) => ({ k, v: splitGet(k) })), pool || 1, pool || 1, 210, centre, "How your budget is split");
+  }
+  function splitPaint(skip) {
+    const box = $("#budSplit"); if (!box) return; const pool = splitPool(), pm = Math.max(5000, Math.ceil(pool * 1.25 / 500) * 500), cm = Math.max(1000, Math.ceil(pool / 500) * 500);
+    $("#bsRing").innerHTML = splitRing();
+    $("#bsLeg").innerHTML = splitCats().filter(([k]) => splitGet(k) > 0).map(([k, i, l]) => `<li><i style="background:${budGold(k)}"></i><span>${l}</span><b>${money(splitGet(k))}</b><small>${Math.round(splitGet(k) / pool * 100)}%</small></li>`).join("") || `<li class="host-rem">Slide anything to start your budget.</li>`;
+    $$("#budSplit [data-bsl]").forEach(inp => {
+      const k = inp.dataset.bsl, val = k === "pool" ? pool : splitGet(k), mx = k === "pool" ? pm : cm;
+      if (inp !== skip) { inp.max = mx; inp.value = val; }
+      inp.style.setProperty("--p", Math.min(100, val / (+inp.max || 1) * 100) + "%");
+      const o = box.querySelector(`[data-bsv="${k}"]`); if (o) o.textContent = money(val);
+    });
+  }
+  function budSet(T) {
+    const pool = splitPool(), pm = Math.max(5000, Math.ceil(pool * 1.25 / 500) * 500), cm = Math.max(1000, Math.ceil(pool / 500) * 500);
+    const row = (k, ico, l, v, mx, col, step) => `<div class="bs-sl"><label><span>${ico ? ico + " " : ""}${l}</span><b data-bsv="${k}">${money(v)}</b></label><input type="range" class="bs-range" data-bsl="${k}" min="0" max="${mx}" step="${step}" value="${v}" style="--c:${col};--p:${Math.min(100, v / mx * 100)}%" aria-label="${l}"></div>`;
+    return `<div class="card bud-split" id="budSplit"><h3>Split your holiday budget</h3>
+      <p class="host-rem">Slide to choose how much goes where. The ring and your budgets move as you slide.</p>
+      <div id="bsRing" class="bs-ring">${splitRing()}</div>
+      <ul class="bud-legend" id="bsLeg">${splitCats().filter(([k]) => splitGet(k) > 0).map(([k, i, l]) => `<li><i style="background:${budGold(k)}"></i><span>${l}</span><b>${money(splitGet(k))}</b><small>${Math.round(splitGet(k) / pool * 100)}%</small></li>`).join("") || `<li class="host-rem">Slide anything to start your budget.</li>`}</ul>
+      ${row("pool", "", "Total holiday pool", pool, pm, "#151515", 50)}
+      ${splitCats().map(([k, i, l, col]) => row(k, i, l, splitGet(k), cm, col, 10)).join("")}</div>`;
+  }
   function budSetMore(T) {
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
     return `<details class="fold" id="budCatFold"${budCatOpen ? " open" : ""}><summary>More budgets (optional)</summary>
@@ -280,6 +319,17 @@
     const del = t.closest("[data-bdel]"); if (del) { budget.expenses = budget.expenses.filter(x => x.id !== del.dataset.bdel); saveBudget(); renderBudget(); return; }
     if (t.closest("#budCsv")) { const x = $("#xlOpen"); if (x) x.click(); }
   });
+  $("#view-budget").addEventListener("input", e => {
+    const t = e.target, k = t.dataset && t.dataset.bsl; if (!k) return;
+    const v = +t.value;
+    if (k === "pool") {
+      const cur = splitPool();
+      if (cur > 0) splitCats().forEach(([c]) => splitSet(c, Math.round(splitGet(c) * v / cur / 10) * 10));
+      else SPLIT_DEF.forEach(([c, f]) => splitSet(c, Math.round(v * f / 10) * 10));
+    } else splitSet(k, v);
+    splitPaint(t);
+  });
+  $("#view-budget").addEventListener("change", e => { if (e.target.dataset && e.target.dataset.bsl) { splitSave(); renderBudget(); } });
   $("#view-budget").addEventListener("toggle", e => { if (e.target.id === "budCatFold") budCatOpen = e.target.open; }, true);
   $("#view-budget").addEventListener("change", e => {
     const t = e.target; if (t.dataset.blim == null) return;

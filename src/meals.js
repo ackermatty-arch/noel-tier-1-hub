@@ -207,7 +207,7 @@
     } else if (pane === "shop") {
       const ps = pricedShop(m, f, p);
       body = `<div class="shop-total" id="shopTotal">${shopTotalHtml(ps, c.guests)}</div>
-        <button type="button" class="btn btn-gold btn-block" id="shopToBudget">💵 Add to my food budget</button>
+        <div id="costSlot">${costBoxHtml(m.id, `${m.name} (${c.guests} guests)`, ps.total)}</div>
         <div class="shop-note">${currencySwitchHtml()}Rough ${curName()} prices (${currency}). Tap any price to match your store. Pantry staples you likely have aren't counted.</div>` +
         `<div class="shop-timing"><p><b>Buy now:</b> pantry, frozen, drinks and anything that keeps.</p><p><b>Buy 48 hours before:</b> produce, dairy, bread, fresh meat and fish.</p></div>` +
         ps.groups.map(g => [g, /produce|veg|fruit|herb|dairy|egg|bakery|bread|meat|poultry|fish|seafood|deli|fresh|cheese|butcher/i.test(g[0].replace(/\(.*\)/, ""))]).sort((a, b) => a[1] - b[1]).map(([[dept, items], later]) => `<h4 class="shop-dept">${esc(dept)}<span class="shop-when${later ? "" : " now"}">${later ? "48 hrs before" : "Buy now"}</span></h4><ul class="shop-list">` + items.map(it =>
@@ -276,6 +276,15 @@
     const o = h => open ? h.replace("<details", "<details open") : h;
     return recipesOf(m, p).map(r => o(recipeHtml(r, f, p))).join("") +
       activeAddons(m).map(({ a, p: ap }) => a.recipes.map(r => o(recipeHtml(r, ap.f, ap))).join("")).join("");
+  }
+  // 💵 Dinner cost: our estimate, then what you really spent. Only the real number goes into the Budget.
+  function costBoxHtml(key, name, est, label) {
+    const it = foodBudget.items.find(x => x.meal === key), got = !!(it && it.actual), diff = got ? Math.round((it.amt - est) * 100) / 100 : 0;
+    return `<div class="cost-box${got ? " saved" : ""}"><h4>Dinner cost</h4>
+      <div class="cb-row"><span>${label || "Noël's estimate"}</span><b>${cad0(est)}</b></div>
+      <label class="cb-in"><span>What you actually spent at the store</span><input class="input" inputmode="decimal" placeholder="e.g. ${Math.round(est) || 100}" value="${got ? it.amt : ""}" aria-label="Actual grocery cost"></label>
+      <p class="cb-note">${got ? `✓ ${cad(it.amt)} is in your Budget under Food &amp; drinks${diff ? ` (${cad(Math.abs(diff))} ${diff > 0 ? "over" : "under"} the estimate)` : ""}.` : "Shop first, then type your real total. It goes straight into your Budget."}</p>
+      <button type="button" class="btn btn-gold btn-block" data-costadd="${esc(key)}" data-costname="${esc(name)}" data-est="${est}" data-costlabel="${esc(label || "")}">${got ? "Update my Budget" : "Add to my Budget"}</button></div>`;
   }
   function shopTotalHtml(ps, guests) {
     return `<div><span>Estimated total</span><b>${cad0(ps.total)}</b><small>about ${cad(ps.total / guests)} per guest</small></div>
@@ -501,14 +510,6 @@
     if (t.closest("#mealStop")) { if (confirm("Stop all the alarms for this meal?")) stopMealPlan(m); return; }
     const nt = t.closest("[data-night]");
     if (nt) { const c = cfgFor(m.id); c.date = nt.dataset.night === "eve" ? eveYmd() : dayYmd(); mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); toast(nt.dataset.night === "eve" ? "🕯️ Set for Christmas Eve" : "🎄 Set for Christmas Day"); return; }
-    if (t.closest("#shopToBudget")) {
-      const c = cfgFor(m.id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
-      const amt = Math.round(ps.total * 100) / 100, name = `${m.name} (${c.guests} guests)`;
-      const it = foodBudget.items.find(x => x.meal === m.id);
-      if (it) { it.name = name; it.amt = amt; } else foodBudget.items.push({ id: uid(), meal: m.id, name, amt, date: budToday() });
-      save("foodBudget", foodBudget); renderFoodBudget();
-      toast(`💵 ${cad0(amt)} ${it ? "updated in" : "added to"} your food budget`); return;
-    }
     if (t.closest("#priceReset")) { if (confirm("Go back to Noël's estimated prices?")) { mealPrices[m.id] = {}; save("mealPrices", mealPrices); renderMealDetail(m); } return; }
     if (t.closest("#shopClear")) { if (confirm("Untick everything on the shopping list?")) { mealTicks[m.id] = {}; save("mealTicks", mealTicks); renderMealDetail(m); } return; }
   });
@@ -548,6 +549,7 @@
   function refreshShopTotal(m) {
     const c = cfgFor(m.id), p = mealSizes(m, c), el = $("#shopTotal");
     if (el) el.innerHTML = shopTotalHtml(pricedShop(m, p.f, p), c.guests);
+    const slot = $("#costSlot"); if (slot) { const typed = slot.querySelector("input") ? slot.querySelector("input").value : ""; slot.innerHTML = costBoxHtml(m.id, `${m.name} (${c.guests} guests)`, pricedShop(m, p.f, p).total); const inp = slot.querySelector("input"); if (inp && typed) inp.value = typed; }
   }
 
   // ---- 💵 food budget (separate from gifts) ----
@@ -567,6 +569,17 @@
     if (!name || !isFinite(amt)) { toast("💵 Add a name and an amount"); return; }
     foodBudget.items.push({ id: uid(), name: name.slice(0, 50), amt: Math.round(amt * 100) / 100, date: budToday() }); save("foodBudget", foodBudget);
     fm.fname.value = ""; fm.famt.value = ""; renderFoodBudget();
+  });
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-costadd]"); if (!b) return;
+    const box = b.closest(".cost-box"), key = b.dataset.costadd, name = b.dataset.costname, est = +b.dataset.est || 0, label = b.dataset.costlabel || "";
+    const v = parseFloat(String(box.querySelector("input").value).replace(/[^0-9.]/g, ""));
+    if (!isFinite(v) || v <= 0) { toast("💵 Type what you actually spent"); return; }
+    const amt = Math.round(v * 100) / 100, it = foodBudget.items.find(x => x.meal === key);
+    if (it) { it.name = name; it.amt = amt; it.est = est; it.actual = true; it.date = it.date || budToday(); } else foodBudget.items.push({ id: uid(), meal: key, name, amt, est, actual: true, date: budToday() });
+    save("foodBudget", foodBudget); renderFoodBudget();
+    box.outerHTML = costBoxHtml(key, name, est, label);
+    toast(`💵 ${cad(amt)} added to your Budget`);
   });
   $("#fbList").addEventListener("click", e => {
     const b = e.target.closest("[data-fbdel]"); if (!b) return;
@@ -937,7 +950,10 @@
     const t = ownTotals(d);
     return `<b>${cad(t.total)}</b> total · ${cad(t.spent)} bought · ${cad(t.left)} still to buy` + (t.lim ? `<br>${t.over > 0 ? `<span class="own-over">${cad(t.over)} over your ${cad(t.lim)} budget</span>` : `${cad(-t.over)} left of your ${cad(t.lim)} budget`}` : "");
   }
-  const ownPaintTot = () => { const d = ownCur(), el = $("#ownTot"); if (d && el) el.innerHTML = ownTotHtml(d); };
+  const ownPaintTot = () => {
+    const d = ownCur(), el = $("#ownTot"); if (d && el) el.innerHTML = ownTotHtml(d);
+    const slot = $("#ownCostSlot"); if (d && slot) { const old = slot.querySelector("input"), typed = old ? old.value : ""; slot.innerHTML = costBoxHtml("own:" + d.id, "My dinner: " + ownName(d), ownTotals(d).total, "Your estimate (from your prices)"); const inp = slot.querySelector("input"); if (inp && typed) inp.value = typed; }
+  };
   function renderOwn() {
     const box = $("#ownBody"); if (!box) return;
     if (!ownDinners.length) { const n = ownNew(); ownDinners.push(n); ownId = n.id; saveOwn(); }
@@ -958,7 +974,7 @@
         ${d.shop.map(r => `<div class="own-row own-r4"><input type="checkbox" data-own="shop" data-id="${r.id}" data-k="got" ${r.got ? "checked" : ""} aria-label="In the cart"><input class="input" data-own="shop" data-id="${r.id}" data-k="name" placeholder="Item" value="${esc(r.name)}"><input class="input own-price" data-own="shop" data-id="${r.id}" data-k="price" inputmode="decimal" placeholder="$" value="${esc(r.price)}"><button type="button" class="icon-btn" data-owndel="shop:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
         <button type="button" class="btn btn-ghost btn-block" data-ownadd="shop">+ Add an item</button>
         <label class="calc-field own-lim"><span>My budget for this dinner (optional)</span><input class="input" data-ownf="limit" inputmode="decimal" placeholder="e.g. 150" value="${esc(d.limit)}"></label>
-        <button type="button" class="btn btn-gold btn-block" data-ownbudget>Add this total to my Budget</button></div>
+        <div id="ownCostSlot">${costBoxHtml("own:" + d.id, "My dinner: " + ownName(d), ownTotals(d).total, "Your estimate (from your prices)")}</div></div>
       <div class="card own-card"><h4 class="ms-h">Cooking timeline</h4><p class="cf-fine">Type a time and a step. Tap Timer to set a countdown for it (up to 24 hours ahead).</p>
         ${d.steps.map(r => `<div class="own-row own-r5"><input class="input" type="time" data-own="steps" data-id="${r.id}" data-k="time" value="${esc(r.time)}"><input class="input" data-own="steps" data-id="${r.id}" data-k="text" placeholder="e.g. Turkey into the oven" value="${esc(r.text)}"><button type="button" class="btn btn-ghost btn-sm own-tm" data-owntimer="${r.id}">Timer</button><button type="button" class="icon-btn" data-owndel="steps:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
         <button type="button" class="btn btn-ghost btn-block" data-ownadd="steps">+ Add a step</button></div>
@@ -1006,12 +1022,6 @@
       if (secs <= 10) { toast("That time has passed"); return; }
       if (secs > 86400) { toast("Timers can run up to 24 hours. Set this one the day before."); return; }
       getAudio(); calcTimer("own-" + r.id, r.text || "Dinner step", "⏰", Math.round(secs)); toast("⏰ Timer set for " + r.time); return;
-    }
-    if (t.closest("[data-ownbudget]")) {
-      const tot = ownTotals(d).total; if (!tot) { toast("Add some prices first"); return; }
-      const key = "own:" + d.id, it = foodBudget.items.find(x => x.meal === key), name = "My dinner: " + ownName(d);
-      if (it) { it.name = name; it.amt = Math.round(tot * 100) / 100; } else foodBudget.items.push({ id: uid(), meal: key, name, amt: Math.round(tot * 100) / 100, date: budToday() });
-      save("foodBudget", foodBudget); toast(`Added ${cad(tot)} to your Budget`); return;
     }
     const dr = t.closest("[data-owndrop]"); if (dr) { if (confirm("Delete this dinner?")) { ownDinners = ownDinners.filter(x => x.id !== dr.dataset.owndrop); foodBudget.items = foodBudget.items.filter(x => x.meal !== "own:" + dr.dataset.owndrop); save("foodBudget", foodBudget); ownId = ownDinners[0] ? ownDinners[0].id : null; saveOwn(); renderOwn(); } }
   });
