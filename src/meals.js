@@ -280,7 +280,7 @@
   // 💵 Dinner cost: our estimate, then what you really spent. Only the real number goes into the Budget.
   function costBoxHtml(key, name, est, label) {
     const it = foodBudget.items.find(x => x.meal === key), got = !!(it && it.actual), diff = got ? Math.round((it.amt - est) * 100) / 100 : 0;
-    return `<div class="cost-box${got ? " saved" : ""}"><h4>Dinner cost</h4>
+    return `<div class="cost-box${got ? " saved" : ""}"><h4>${key === "nyeparty" ? "Party cost" : "Dinner cost"}</h4>
       <div class="cb-row"><span>${label || "Noël's estimate"}</span><b>${cad0(est)}</b></div>
       <label class="cb-in"><span>What you actually spent at the store</span><input class="input" inputmode="decimal" placeholder="e.g. ${Math.round(est) || 100}" value="${got ? it.amt : ""}" aria-label="Actual grocery cost"></label>
       <p class="cb-note">${got ? `✓ ${cad(it.amt)} is in your Budget under Food &amp; drinks${diff ? ` (${cad(Math.abs(diff))} ${diff > 0 ? "over" : "under"} the estimate)` : ""}.` : "Shop first, then type your real total. It goes straight into your Budget."}</p>
