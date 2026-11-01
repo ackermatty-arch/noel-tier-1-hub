@@ -29,6 +29,7 @@
     const santa = sum(santaGifts(), isSpent); if (santa) rows.push({ src: "Santa's list", cat: "gifts", name: "🎅 Santa's gifts (kept secret)", amt: santa, date: "" });
     foodBudget.items.forEach(x => { if (+x.amt) rows.push({ src: "Food budget", cat: "food", name: x.name, amt: +x.amt, date: x.date || "" }); });
     if (typeof org !== "undefined" && hubMode === "company") org.giving.forEach(x => { if (+x.amt) rows.push({ src: "Giving", cat: "giving", name: x.what, amt: +x.amt, date: x.date || "" }); });
+    try { Object.entries(acts.cost || {}).forEach(([id, c]) => { if (+c.actual > 0) { const a = allActs().find(x => x.id === id); rows.push({ src: "Activities", cat: "party", name: "Activity: " + (a ? a.name : "Outing"), amt: +c.actual, date: "" }); } }); } catch (er) {}
     if (typeof host !== "undefined") host.trips.forEach(x => { if (+x.cost > 0) rows.push({ src: "Plan › Travel", cat: "travel", name: x.a, amt: +x.cost, date: x.paidOn || "" }); });
     if (typeof offBudgetRows === "function" && hubMode === "company") offBudgetRows().forEach(r => rows.push(r));
     budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "", mine: !!x.mine }));
@@ -113,14 +114,16 @@
     const xmas = new Date(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear(), 11, 25), days = Math.max(0, Math.ceil((xmas - now) / 86400000));
     const status = !T.limit ? "Set a budget on the 🎯 Budgets tab to track how much is left." : pct > 1 ? `⚠️ You're ${money(-left)} over budget.` : pct >= 0.9 ? `🟡 Almost there: ${money(left)} left.` : `✅ On track: ${money(left)} left${days ? `, about ${money(Math.floor(left / days))} a day until Christmas` : ""}.`;
     const top = T.rows.slice().sort((a, b) => b.amt - a.amt)[0];
-    const perPerson = gifts.people.map(p => [p.name, sum(p.gifts, () => true)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 6), ppMax = Math.max(1, ...perPerson.map(x => x[1]));
+    const GR = [["family", "Family"], ["friends", "Friends"], ["work", "Coworkers & teachers"]], grOf = p => ["friends", "work"].includes(p.grp) ? p.grp : "family",
+      perGroup = GR.map(([k, l]) => { const rows = gifts.people.filter(p => grOf(p) === k).map(p => [p.name, sum(p.gifts, () => true)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]); return [l, rows, rows.reduce((a, r) => a + r[1], 0)]; }).filter(g => g[1].length),
+      perPerson = perGroup.flatMap(g => g[1]), ppMax = Math.max(1, ...perPerson.map(x => x[1]));
     const last = budget.past[budget.past.length - 1];
     return `<div class="card bud-hero">${budPie(T.by, T.spent, T.limit, 210)}
         <ul class="bud-legend">${BUD_CATS.filter(([k]) => T.by[k] > 0).map(([k, i, l, col]) => `<li><i style="background:${budGold(k)}"></i><span>${i} ${l}</span><b>${money(T.by[k])}</b><small>${Math.round(T.by[k] / T.spent * 100)}%</small></li>`).join("") || `<li class="host-rem">Nothing spent yet. Mark gifts as bought, or add spending on the 🧾 Spreadsheet tab.</li>`}</ul>
         <p class="bud-status ${pct > 1 ? "over" : pct >= 0.9 ? "warn" : ""}">${status}</p></div>
       <div class="card pt-card"><h3>📈 Spending as the season goes</h3>${budLine(T.limit, 340, 170) || ""}<p class="host-rem">${T.rows.length ? "Your running total, stepping up on each day you spent. The gold dashed line is your budget." : "Your line appears as soon as you spend something."}</p></div>
       <div class="card pt-card"><h3>🎯 Budget vs spent</h3>${budBars(T.by)}</div>
-      ${perPerson.length ? `<div class="card pt-card"><h3>🎁 Gifts by person</h3>${perPerson.map(([n, v]) => `<div class="bud-bar"><div class="bb-top"><span>${esc(n)}</span><b>${money(v)}</b></div><div class="bb-track"><i style="width:${v / ppMax * 100}%;background:#b3262e"></i></div></div>`).join("")}<p class="host-rem">Includes gift ideas you haven't bought yet.</p></div>` : ""}
+      ${perPerson.length ? `<div class="card pt-card"><h3>🎁 Gifts by person</h3>${perGroup.map(([l, rows, tot]) => `<div class="grp-h"><span>${l}</span><small>${money(tot)}</small></div>${rows.map(([n, v]) => `<div class="bud-bar"><div class="bb-top"><span>${esc(n)}</span><b>${money(v)}</b></div><div class="bb-track"><i style="width:${v / ppMax * 100}%;background:#b3262e"></i></div></div>`).join("")}`).join("")}<p class="host-rem">Includes gift ideas you haven't bought yet.</p></div>` : ""}
       <div class="card pt-card bud-facts">
         ${top ? `<p>🏷️ <b>Biggest purchase:</b> ${esc(top.name)} · ${money(top.amt)}</p>` : ""}
         ${T.plannedGifts ? `<p>💡 <b>Gift ideas not bought yet:</b> ${money(T.plannedGifts)}${T.limit ? ` · ${T.spent + T.plannedGifts > T.limit ? "buying them all would go over budget" : "they still fit in your budget"}` : ""}</p>` : ""}
