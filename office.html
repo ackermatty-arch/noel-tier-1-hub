@@ -573,6 +573,12 @@ body.flash::before {
 .task-event{font:600 12px Cinzel,serif;letter-spacing:.12em;text-transform:uppercase;color:#8a6d3b;margin:-4px 0 12px}
 .task-info{text-align:center;padding:18px 22px 22px;border-top:1px solid var(--line)}.task-info h4{font:600 17px Cinzel,serif;letter-spacing:.1em;text-transform:uppercase;margin:4px 0 8px}.task-info p{margin:0;line-height:1.6}.task-info .gold-star{color:#B8935A}
 .plan-tools{margin:0 0 6px}.plan-tools .advent-banner{margin-bottom:10px}
+.task-gate{border:1.5px solid #B8935A;outline:1px solid #B8935A;outline-offset:-5px;background:#111;color:#fff;padding:20px 18px 18px;margin:0 0 16px;text-align:center}
+.task-gate h3{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:16px;color:#E4C77A;margin:0 0 8px}
+.task-gate p{margin:0 0 14px;line-height:1.55;font-size:14px}
+.tg-rows{display:grid;gap:8px}.tg-row{display:flex;align-items:center;gap:12px;text-align:left;background:#1b1b1b;border:1px solid #B8935A;color:#fff;padding:12px 14px;font-family:inherit;cursor:pointer}
+.tg-row b{display:block;font-family:var(--font-display);letter-spacing:.12em;text-transform:uppercase;font-size:13px}.tg-row small{display:block;font-size:12px;color:#d8d0bd;margin-top:2px}
+.tg-row span:nth-child(2){flex:1}.tg-tick{color:#555;font-size:18px}.tg-row.done .tg-tick{color:#E4C77A}.tg-go{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#E4C77A}
 .ab-ico { font-size: 34px; }
 .ab-text { min-width: 0; }
 .ab-text b { display: block; font-family: var(--font-display); font-size: 21px; }
@@ -2710,6 +2716,16 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <h2 class="view-title" id="tasksTitle">Task list</h2>
     <p class="view-intro">Tick off each task as you go. Your progress saves automatically.</p>
     <p class="task-event" id="taskEventLine" hidden></p>
+
+    <div class="task-gate fam-only" id="taskGate" hidden>
+      <h3>Your task list builds itself</h3>
+      <p>This list stays empty until your plan is set. Finish these three things and your tasks appear here, with dates to match.</p>
+      <div class="tg-rows">
+        <button type="button" class="tg-row" data-goview="planner" data-tg="plan"><span class="tg-tick">✦</span><span><b>Plan</b><small>Add your guests, travel or house details</small></span><span class="tg-go">Go ›</span></button>
+        <button type="button" class="tg-row" data-goview="meals" data-tg="menu"><span class="tg-tick">✦</span><span><b>Menu</b><small>Choose your dinner and set your timers</small></span><span class="tg-go">Go ›</span></button>
+        <button type="button" class="tg-row" data-goview="budget" data-tg="budget"><span class="tg-tick">✦</span><span><b>Budget</b><small>Set your budget and add the people you buy for</small></span><span class="tg-go">Go ›</span></button>
+      </div>
+    </div>
 
 
 
@@ -8642,7 +8658,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (name === "planner" && typeof renderHost === "function") renderHost();
     if (name === "org") renderOrg();
     if (name === "office") renderOffice();
-    if (name === "tasks" && hubMode === "company") renderPlanner();
+    if (name === "tasks") renderPlanner();
     if (name === "budget") renderBudget();
     if (name !== "gifts") santaLock();   // 🎅 leaving Gifts always locks Santa's list
     if (name === "meals") renderMeals();
@@ -9047,7 +9063,46 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
         ${p.tasks.filter(t => t.info).map(t => `<div class="task-info"><span class="gold-star">✦</span><h4>${esc(t.title)}</h4><p>${esc(t.text)}</p></div>`).join("")}
       </div>`;
   }
+  // ✅ FAMILY TASKS BUILD FROM THE PLAN: nothing shows until Plan, Menu and Budget are set, then dated tasks are made from them
+  function famTaskInfo() {
+    const none = { ready: false, st: { plan: false, menu: false, budget: false } };
+    try {
+      const st = {
+        plan: !!(host.guests.length || host.trips.length || (host.table.names || []).length || Object.values(host.house || {}).some(Boolean)),
+        menu: mealPlans.some(p => !p.svc) || savedMenus.length > 0 || (Array.isArray(ownDinners) && ownDinners.some(o => o.title)),
+        budget: (+budget.limit > 0) || (+gifts.budget > 0)
+      };
+      if (!(st.plan && st.menu && st.budget)) return { ready: false, st };
+      const dt = t => new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }), phases = [];
+      const main = mainDinnerPlan();
+      if (main) {
+        const T = [], D = main.at, nm = main.name;
+        (main.steps || []).filter(x => x.ahead).forEach((x, i) => T.push({ id: "gd-" + main.id + "-" + i, text: dt(x.t) + ": " + x.text }));
+        T.push({ id: "gd-" + main.id + "-shop", text: "Shop for " + nm + ": open your shopping list in the Menu tab (by " + dt(D - 2 * 864e5) + ")." });
+        T.push({ id: "gd-" + main.id + "-day", text: dt(D) + ": Cook " + nm + " for " + main.guests + ". Your timers and alarms are set in the Menu tab." });
+        phases.push({ id: "gd", icon: "🍽️", title: "Your Christmas Dinner", tasks: T });
+      }
+      const people = gifts.people || [];
+      if (people.length) phases.push({ id: "gg", icon: "🎁", title: "Your Gift List", tasks: people.map(p => ({ id: "gg-" + p.id, text: "Buy and wrap gifts for " + p.name + (+p.cap > 0 ? " (up to " + money(+p.cap) + ")" : "") + ". Plan › Gifts." })) });
+      const gt = [];
+      (host.guests || []).forEach(g => gt.push({ id: "gp-" + g.id, text: "Confirm " + g.name + "'s arrival" + (g.people > 1 ? " (" + g.people + " people)" : "") + (g.travel === "fly" ? " and flight details" : "") + (g.room ? ". Room: " + g.room : "") + "." }));
+      (host.trips || []).forEach(tr => gt.push({ id: "gt-" + tr.id, text: "Travel: " + tr.a + (tr.b ? " › " + tr.b : "") + ". Book or confirm it in Plan." }));
+      if (gt.length) phases.push({ id: "gp", icon: "✈️", title: "Your Guests & Travel", tasks: gt });
+      const ab = (load("addrbook", []) || []).filter(x => x.g !== "Santa");
+      if (ab.length) phases.push({ id: "gc", icon: "✉️", title: "Your Cards", tasks: [{ id: "gc-send", text: "Send your " + ab.length + " holiday card" + (ab.length > 1 ? "s" : "") + ". Plan › Cards & Address Book has the labels and checklist." }] });
+      return { ready: true, st, phases };
+    } catch (e) { return none; }
+  }
   function renderPlanner() {
+    if (hubMode !== "company") {
+      const f = famTaskInfo(); PHASES = f.ready ? f.phases.concat(FAMILY_PHASES) : FAMILY_PHASES;
+      const g = $("#taskGate"); if (g) {
+        g.hidden = f.ready;
+        $$("#taskGate [data-tg]").forEach(r => { const on = f.st[r.dataset.tg]; r.classList.toggle("done", on); r.querySelector(".tg-go").textContent = on ? "Done" : "Go ›"; });
+        $$("#view-tasks .progress-card, #phaseList, #addTaskForm, #view-tasks .board-actions").forEach(el => { el.hidden = !f.ready; });
+      }
+      const ps = $("#phaseSelect"); if (ps && ps.dataset.n !== String(PHASES.length)) { const v = ps.value; ps.innerHTML = PHASES.map(p => `<option value="${p.id}">${p.icon} ${esc(p.title)}</option>`).join(""); ps.dataset.n = String(PHASES.length); if (v) ps.value = v; }
+    }
     if (hubMode === "company" && typeof officeTaskInfo === "function") {
       const inf = officeTaskInfo(); PHASES = (inf && inf.phases) || OFFICE_PHASES;
       const el = $("#taskEventLine"); if (el && inf) { el.hidden = false; el.textContent = "✦ Tasks for: " + inf.label; }
