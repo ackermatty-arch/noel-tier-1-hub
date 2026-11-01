@@ -2345,6 +2345,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
 .oy-bars span { display: flex; align-items: flex-end; width: 100%; height: 110px; background: #F7F1E1; } .oy-bars u { display: block; width: 100%; background: #C9A45C; } .oy-bars small { font-size: 9px; color: #6A6354; } .oy-bars em { font: normal 8px Nunito, sans-serif; height: 12px; color: #151515; white-space: nowrap; }
 .back-btn,.meal-back,.back-btn *,.meal-back *{background:#D4A537 !important;color:#151515 !important;box-shadow:none !important}.back-btn,.meal-back{border:1px solid #B8935A}
 .pi-lead{display:block;color:#151515;margin-bottom:6px}
+.gen-plan{margin-top:16px;text-align:center}.gen-msg{font-size:13px;color:var(--muted);margin:10px 0 0}.gen-redo{text-align:left;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13.5px}.gen-redo b{display:block;margin-bottom:4px}.gen-redo p{margin:6px 0}
 </style>
 </head>
 <body>
@@ -2707,6 +2708,13 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
 <div class="fam-only" id="hostWrap">
     <div class="apps-filters host-tabs" id="hostTabs"></div>
     <div id="hostBody"></div>
+    <div class="card gen-plan" id="genPlan">
+      <button type="button" class="btn btn-gold btn-block" id="genPlanBtn">✦ Generate my plan</button>
+      <p class="gen-msg" id="genPlanMsg">Noël builds your dated task list from your Plan, Menu and Budget.</p>
+      <div class="gen-redo"><b>Plans changed? You don't have to start over.</b>
+        <p>Your task list rebuilds itself, so just fix what moved: a new dinner, pick it in <button type="button" class="of-lnk" data-goview="meals">Menu</button>; new guests, dates or travel, edit them here in Plan; a new budget, change it in <button type="button" class="of-lnk" data-goview="budget">Budget</button>. Then tap Generate again.</p>
+        <p>Want a clean slate for the whole season? Open <button type="button" class="of-lnk" data-goview="review">Review</button> and save this Christmas. Noël keeps your people and your budget amounts, and clears this year's gifts and activities.</p></div>
+    </div>
     <div class="card host-fridge" id="hostFridge">
       <span class="hf-ico">🧲</span>
       <span class="hf-txt"><b>Fridge sheet</b><small>Travel plans, guests, seating, supplies and house info, all on one printed page.</small></span>
@@ -9078,6 +9086,14 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
         ${p.tasks.filter(t => t.info).map(t => `<div class="task-info"><span class="gold-star">✦</span><h4>${esc(t.title)}</h4><p>${esc(t.text)}</p></div>`).join("")}
       </div>`;
   }
+  // ✦ Generate my plan: builds the task list when Plan, Menu and Budget are set, otherwise says what is missing
+  document.addEventListener("click", e => {
+    if (!e.target.closest("#genPlanBtn")) return;
+    const info = famTaskInfo(), msg = $("#genPlanMsg");
+    if (info.ready) { showView("tasks"); toast("✦ Your plan is ready: see your Task list"); return; }
+    const need = [["plan", "Plan", "planner"], ["menu", "Menu", "meals"], ["budget", "Budget", "budget"]].filter(x => !info.st[x[0]]);
+    msg.innerHTML = `Almost there. Still to set: ${need.map(x => `<button type="button" class="of-lnk" data-goview="${x[2]}">${x[1]}</button>`).join(", ")}.`;
+  });
   // ✅ FAMILY TASKS BUILD FROM THE PLAN: nothing shows until Plan, Menu and Budget are set, then dated tasks are made from them
   function famTaskInfo() {
     const none = { ready: false, st: { plan: false, menu: false, budget: false } };
