@@ -72,6 +72,7 @@
         if (A.status === "sent" && A.sentAt) add(ymd(new Date(A.sentAt + (A.followDays || 3) * 864e5)), "📨", "Follow up on your approval request");
       }
       org.packages.forEach(p => { if (p.eta && !p.arrived) add(p.eta, "📦", p.item + " arrives"); });
+      try { actDated().forEach(x => add(x.date, "✦", x.name)); } catch (e) {}
       add(`${orgYear()}-12-10`, "✉️", "Send your client cards");
       return out.sort((a, b) => (a.date + (a.time || "99")).localeCompare(b.date + (b.time || "99")));
     }
@@ -86,6 +87,7 @@
     host.trips.filter(x => x.k === "gtrip" && x.b).forEach(x => { const t = new Date(x.b); if (isNaN(t)) return; add(ymd(t), "🛬", "Pick up: " + x.a, x.b.slice(11, 16)); });
     host.guests.forEach(g => { if (g.arrive) { const t = new Date(g.arrive); add(ymd(t), g.pickup ? "🚗" : "🚪", (g.pickup ? "Pick up " : "") + g.name + (g.pickup ? "" : " arrive"), g.arrive.slice(11, 16)); } });
     org.packages.forEach(p => { if (p.eta && !p.arrived) add(p.eta, "📦", p.item + " arrives"); });
+    try { actDated().forEach(x => add(x.date, "✦", x.name)); } catch (e) {}
     add(`${orgYear()}-12-10`, "✉️", "Mail your Christmas cards");
     return out.sort((a, b) => (a.date + (a.time || "99")).localeCompare(b.date + (b.time || "99")));
   }
@@ -275,6 +277,7 @@
       if (e.time) { const [h, m] = e.time.split(":").map(Number); const t = new Date(day); t.setHours(h, m, 0, 0); add("e2-" + e.id, t.getTime() - 3600000, memberEmoji(e.who), `In 1 hour: ${e.title}`); }
     });
     org.packages.forEach(p => { if (p.eta && !p.arrived) { const t = parseYmd(p.eta); t.setHours(9, 0, 0, 0); add("p-" + p.id, t.getTime(), "📦", `${p.item} should arrive today${p.store ? ` from ${p.store}` : ""}`); } });
+    try { actDated().forEach(x => { const t = parseYmd(x.date); t.setDate(t.getDate() - 2); t.setHours(9, 0, 0, 0); add("act-" + x.id + x.date, t.getTime(), "✦", `In 2 days: ${x.name}`); }); } catch (e) {}
     if (org.contacts.length) add("cards-" + y, new Date(y, 11, 10, 10).getTime(), "✉️", "Time to mail your Christmas cards! Check the post office's holiday cut-off dates.");
     if (org.packages.length) add("cutoff-" + y, new Date(y, 11, 12, 10).getTime(), "📦", "Ordering gifts online? Check each store's last order date for Christmas delivery.");
     return out.sort((a, b) => a.t - b.t);

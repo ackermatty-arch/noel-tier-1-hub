@@ -9077,6 +9077,14 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     msg.innerHTML = `Almost there. Still to set: ${need.map(x => `<button type="button" class="of-lnk" data-goview="${x[2]}">${x[1]}</button>`).join(", ")}.`;
   });
   // ✅ FAMILY TASKS BUILD FROM THE PLAN: nothing shows until Plan, Menu and Budget are set, then dated tasks are made from them
+  // 📅 activities with a date: they go to the calendar, a reminder 2 days before, and the matching week of Tasks
+  function actDated() {
+    try { return Object.entries(acts.date || {}).filter(([id]) => acts.mark[id] === "plan").map(([id, date]) => { const a = allActs().find(x => x.id === id); return a ? { id, date, name: a.name, ico: a.ico } : null; }).filter(Boolean); } catch (e) { return []; }
+  }
+  function actPhaseFor(date) {
+    const d = date.slice(5), md = d <= "11-07" ? "n1" : d <= "11-14" ? "n2" : d <= "11-21" ? "n3" : d <= "11-30" ? "n4" : d <= "12-07" ? "d1" : d <= "12-14" ? "d2" : d <= "12-23" ? "d3" : d === "12-24" ? "ce" : d === "12-25" ? "cd" : "";
+    return date.slice(5, 7) === "10" || date.slice(5, 7) < "11" ? "n1" : md;
+  }
   function famTaskInfo() {
     const none = { ready: false, st: { plan: false, menu: false, budget: false } };
     try {
@@ -9130,6 +9138,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       }
       const ps = $("#phaseSelect"); if (ps && ps.dataset.n !== String(PHASES.length)) { const v = ps.value; ps.innerHTML = PHASES.map(p => `<option value="${p.id}">${p.icon} ${esc(p.title)}</option>`).join(""); ps.dataset.n = String(PHASES.length); if (v) ps.value = v; }
     }
+    if (hubMode !== "company") { try { const ad = actDated(); if (ad.length) PHASES = PHASES.map(p => { const mine = ad.filter(x => actPhaseFor(x.date) === p.id).sort((a, b) => a.date.localeCompare(b.date)); return mine.length && p.tasks ? Object.assign({}, p, { tasks: p.tasks.concat(mine.map(x => ({ id: "ga-" + x.id, text: "✦ " + x.name + " on " + new Date(x.date + "T12:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) + ". Your activity is on the calendar, with a reminder 2 days before." }))) }) : p; }); } catch (e) {} }
     if (hubMode === "company" && typeof officeTaskInfo === "function") {
       const inf = officeTaskInfo(); PHASES = (inf && inf.phases) || OFFICE_PHASES;
       const el = $("#taskEventLine"); if (el && inf) { el.hidden = false; el.textContent = "✦ Tasks for: " + inf.label; }
@@ -10452,7 +10461,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       return `<div class="card act-item ${m === "done" ? "done" : ""}" data-aid="${a.id}"><div class="app-emo">${a.ico}</div>
         <div><h4>${esc(a.name)}</h4><p>${esc(a.txt)}</p>${a.map ? `<button type="button" class="act-map" data-amap="${esc(a.map)}">📍 Find near me</button>` : ""}${a.addr ? `<button type="button" class="act-map" data-saddr>📬 Santa's address</button>` : ""}</div>
         <button class="act-btn ${m || ""}" data-amark aria-label="${esc(a.name)}">${m === "done" ? "✓ Done" : m === "plan" ? "⭐ On list" : "☆ Add"}</button>
-        ${m ? (() => { const c = (acts.cost || {})[a.id] || {}; return `<div class="act-cost"><label>Our estimate<input class="input" data-acost="est" inputmode="decimal" placeholder="${CUR}" value="${c.est || ""}"></label><label>Actual cost<input class="input" data-acost="actual" inputmode="decimal" placeholder="${CUR}" value="${c.actual || ""}"></label>${+c.actual > 0 ? `<small>✦ ${money(+c.actual)} is in your Budget</small>` : `<small>Type the real cost to add it to your Budget</small>`}</div>`; })() : ""}</div>`;
+        ${m ? (() => { const c = (acts.cost || {})[a.id] || {}; return `<div class="act-cost"><label>Our estimate<input class="input" data-acost="est" inputmode="decimal" placeholder="${CUR}" value="${c.est || ""}"></label><label>Actual cost<input class="input" data-acost="actual" inputmode="decimal" placeholder="${CUR}" value="${c.actual || ""}"></label><label>Date booked<input class="input" type="date" data-adate value="${esc((acts.date || {})[a.id] || "")}"></label>${+c.actual > 0 ? `<small>✦ ${money(+c.actual)} is in your Budget</small>` : `<small>Type the real cost to add it to your Budget</small>`}</div>`; })() : ""}</div>`;
     }).join("") : `<p class="apps-empty">Tap ☆ Add on any activity to build your family's bucket list.</p>`;
   }
   $("#actsFilters").addEventListener("click", e => { const b = e.target.closest("[data-af]"); if (!b) return; actFilter = b.dataset.af; $$("#actsFilters .chip").forEach(c => c.classList.toggle("on", c === b)); renderActs(); });
@@ -10485,6 +10494,8 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     save("acts", acts); renderActs();
   });
   $("#actsList").addEventListener("change", e => {
+    const dt = e.target.closest("[data-adate]");
+    if (dt) { const id = dt.closest("[data-aid]").dataset.aid; acts.date = acts.date || {}; if (dt.value) acts.date[id] = dt.value; else delete acts.date[id]; save("acts", acts); renderActs(); try { renderPlanner(); orgSync(); } catch (x) {} if (dt.value) toast("📅 Added to your calendar, with a reminder 2 days before"); return; }
     const i = e.target.closest("[data-acost]"); if (!i) return;
     const id = i.closest("[data-aid]").dataset.aid; acts.cost = acts.cost || {}; const c = acts.cost[id] = acts.cost[id] || {};
     const v = parseFloat(String(i.value).replace(/[^0-9.]/g, "")); if (v > 0) c[i.dataset.acost] = Math.round(v * 100) / 100; else delete c[i.dataset.acost];
@@ -14435,6 +14446,7 @@ const PC_DESIGNS = [
         if (A.status === "sent" && A.sentAt) add(ymd(new Date(A.sentAt + (A.followDays || 3) * 864e5)), "📨", "Follow up on your approval request");
       }
       org.packages.forEach(p => { if (p.eta && !p.arrived) add(p.eta, "📦", p.item + " arrives"); });
+      try { actDated().forEach(x => add(x.date, "✦", x.name)); } catch (e) {}
       add(`${orgYear()}-12-10`, "✉️", "Send your client cards");
       return out.sort((a, b) => (a.date + (a.time || "99")).localeCompare(b.date + (b.time || "99")));
     }
@@ -14449,6 +14461,7 @@ const PC_DESIGNS = [
     host.trips.filter(x => x.k === "gtrip" && x.b).forEach(x => { const t = new Date(x.b); if (isNaN(t)) return; add(ymd(t), "🛬", "Pick up: " + x.a, x.b.slice(11, 16)); });
     host.guests.forEach(g => { if (g.arrive) { const t = new Date(g.arrive); add(ymd(t), g.pickup ? "🚗" : "🚪", (g.pickup ? "Pick up " : "") + g.name + (g.pickup ? "" : " arrive"), g.arrive.slice(11, 16)); } });
     org.packages.forEach(p => { if (p.eta && !p.arrived) add(p.eta, "📦", p.item + " arrives"); });
+    try { actDated().forEach(x => add(x.date, "✦", x.name)); } catch (e) {}
     add(`${orgYear()}-12-10`, "✉️", "Mail your Christmas cards");
     return out.sort((a, b) => (a.date + (a.time || "99")).localeCompare(b.date + (b.time || "99")));
   }
@@ -14638,6 +14651,7 @@ const PC_DESIGNS = [
       if (e.time) { const [h, m] = e.time.split(":").map(Number); const t = new Date(day); t.setHours(h, m, 0, 0); add("e2-" + e.id, t.getTime() - 3600000, memberEmoji(e.who), `In 1 hour: ${e.title}`); }
     });
     org.packages.forEach(p => { if (p.eta && !p.arrived) { const t = parseYmd(p.eta); t.setHours(9, 0, 0, 0); add("p-" + p.id, t.getTime(), "📦", `${p.item} should arrive today${p.store ? ` from ${p.store}` : ""}`); } });
+    try { actDated().forEach(x => { const t = parseYmd(x.date); t.setDate(t.getDate() - 2); t.setHours(9, 0, 0, 0); add("act-" + x.id + x.date, t.getTime(), "✦", `In 2 days: ${x.name}`); }); } catch (e) {}
     if (org.contacts.length) add("cards-" + y, new Date(y, 11, 10, 10).getTime(), "✉️", "Time to mail your Christmas cards! Check the post office's holiday cut-off dates.");
     if (org.packages.length) add("cutoff-" + y, new Date(y, 11, 12, 10).getTime(), "📦", "Ordering gifts online? Check each store's last order date for Christmas delivery.");
     return out.sort((a, b) => a.t - b.t);
