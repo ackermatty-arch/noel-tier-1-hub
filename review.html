@@ -16964,9 +16964,9 @@ const PC_DESIGNS = [
   const ORIG_CSS = `.og{box-sizing:border-box;min-height:9.25in;border:1.5px solid #c9a24f;outline:.5px solid #c9a24f;outline-offset:-7px;border-radius:16px;padding:.35in .55in .3in;font-family:Georgia,serif;color:#33302a;position:relative}
     .og .og-top{text-align:center;color:#c9a24f;font-size:13pt;letter-spacing:.5em;margin:0} .og .og-holly{font-size:20pt;letter-spacing:0} .og .og-lab{text-align:center;font:600 8pt sans-serif;letter-spacing:.35em;text-transform:uppercase;color:#b8913f;margin:14px 0 4px}
     .og h1{text-align:center;font:400 30pt/1.15 Georgia,serif!important;color:#1e4a33;margin:0!important} .og .og-sub{text-align:center;font:italic 12.5pt Georgia,serif;color:#444;margin:6px 0 4px}
-    .og .og-div{text-align:center;color:#c9a24f;margin:4px 0 18px} .og .og-div span{display:inline-block;width:1.3in;border-top:1px solid #c9a24f;vertical-align:middle;margin:0 10px}
+    .og .og-div{text-align:center;color:#c9a24f;margin:4px 0 18px} .og .og-div span{display:inline-block;width:1.3in;max-width:30%;border-top:1px solid #c9a24f;vertical-align:middle;margin:0 10px}
     .og .tip{display:grid;grid-template-columns:34px 1fr;gap:6px;margin:0 0 16px} .og .tip i{font-style:normal;color:#c9a24f;font-size:21pt;line-height:1} .og .tip b{display:block;font:600 16pt/1.2 Georgia,serif;color:#1e4a33;margin-bottom:3px} .og .tip span{font:11pt/1.5 sans-serif;color:#444}
-    .og .og-close{border:1px solid #c9a24f;border-radius:12px;width:4.6in;margin:22px auto 0;padding:12px;text-align:center;font:italic 13pt/1.45 Georgia,serif;color:#1e4a33;position:relative}
+    .og .og-close{border:1px solid #c9a24f;border-radius:12px;width:4.6in;max-width:100%;box-sizing:border-box;margin:22px auto 0;padding:12px;text-align:center;font:italic 13pt/1.45 Georgia,serif;color:#1e4a33;position:relative}
     .og .og-close:before,.og .og-close:after{content:"★";color:#c9a24f;position:absolute;top:50%;transform:translateY(-50%);font-style:normal;font-size:10pt} .og .og-close:before{left:-6px} .og .og-close:after{right:-6px}`;
   function origPage(lab, title, sub, tips, close) {
     return `<div class="og"><p class="og-top">★ ★ <span class="og-holly">🌿</span> ★ ★</p><p class="og-lab">${lab}</p><h1>${title}</h1><p class="og-sub">${sub}</p><p class="og-div"><span></span>★<span></span></p>
