@@ -957,6 +957,22 @@
   const ownNew = () => ({ id: "od" + Date.now().toString(36), title: "", guests: "", date: dayYmd(), time: "17:00", course: {}, bring: [{ id: uid(), who: "", dish: "" }],
     shop: [{ id: uid(), name: "", price: "", got: false }], limit: "", steps: [{ id: uid(), time: "", text: "" }], notes: "", updated: Date.now() });
   const ownCur = () => ownDinners.find(d => d.id === ownId);
+  // common shopping items to tick from (family dinner / office event)
+  const OWN_COMMON = [["Fresh", ["Onions", "Garlic", "Potatoes", "Carrots", "Celery", "Green beans", "Salad greens", "Mushrooms", "Lemons", "Fresh herbs", "Apples", "Cranberries"]],
+    ["Meat and fish", ["Turkey", "Ham", "Roast beef", "Chicken", "Salmon", "Bacon", "Sausages"]],
+    ["Dairy and bread", ["Butter", "Milk", "Cream", "Eggs", "Cheese", "Sour cream", "Dinner rolls", "Bread"]],
+    ["Pantry and baking", ["Flour", "Sugar", "Brown sugar", "Baking powder", "Vanilla", "Stuffing mix", "Gravy mix", "Broth or stock", "Canned pumpkin", "Pie crusts", "Chocolate chips"]],
+    ["Spices and sauces", ["Salt and pepper", "Cinnamon", "Nutmeg", "Sage and thyme", "Olive oil", "Cranberry sauce", "Mustard"]],
+    ["Drinks", ["Wine", "Sparkling water", "Juice", "Coffee", "Tea", "Ice"]],
+    ["Table and extras", ["Napkins", "Candles", "Foil", "Plastic wrap", "Containers for leftovers", "Paper towels"]]];
+  const OWN_COMMON_CO = [["Food", ["Platters", "Sandwiches", "Salads", "Fruit tray", "Veggie tray", "Cheese tray", "Dessert", "Pastries", "Appetizers"]],
+    ["Drinks", ["Coffee", "Tea", "Water", "Juice", "Pop", "Wine and beer", "Ice"]],
+    ["Supplies", ["Plates", "Cups", "Napkins", "Cutlery", "Serving spoons", "Tablecloths", "Garbage bags", "Hand sanitizer"]],
+    ["Decor and extras", ["Name tags", "Candles", "Flowers", "Balloons", "Banner", "Prizes", "Speaker or music"]]];
+  const ownCommon = () => hubMode === "company" ? OWN_COMMON_CO : OWN_COMMON;
+  const ownRowsHtml = d => d.shop.map(r => `<div class="own-row own-r4"><input type="checkbox" data-own="shop" data-id="${r.id}" data-k="got" ${r.got ? "checked" : ""} aria-label="In the cart"><input class="input" data-own="shop" data-id="${r.id}" data-k="name" placeholder="Item" value="${esc(r.name)}"><input class="input own-price" data-own="shop" data-id="${r.id}" data-k="price" inputmode="decimal" placeholder="$" value="${esc(r.price)}"><button type="button" class="icon-btn" data-owndel="shop:${r.id}" aria-label="Remove">✕</button></div>`).join("");
+  const ownPickHtml = d => { const have = new Set(d.shop.map(r => r.name.trim().toLowerCase())); return `<details class="own-pick"${ownPickOpen ? " open" : ""}><summary>${hubMode === "company" ? "Pick from a common list" : "Pick from a common shopping list"}</summary><p class="cf-fine">Tick what you need. It lands in your list below. Untick to take it off.</p>${ownCommon().map(([g, its]) => `<div class="own-pg"><b>${g}</b><div class="own-pitems">${its.map(n => `<label class="own-pi"><input type="checkbox" data-ownpi="${esc(n)}" ${have.has(n.toLowerCase()) ? "checked" : ""}><span>${esc(n)}</span></label>`).join("")}</div></div>`).join("")}</details>`; };
+  let ownPickOpen = false;
   const ownNum = v => { const n = parseFloat(String(v).replace(/[^0-9.]/g, "")); return isFinite(n) ? n : 0; };
   const ownTotals = d => { let total = 0, spent = 0; d.shop.forEach(i => { const v = ownNum(i.price); total += v; if (i.got) spent += v; }); const lim = ownNum(d.limit); return { total, spent, left: total - spent, lim, over: lim ? total - lim : 0 }; };
   const ownName = d => d.title.trim() || (hubMode === "company" ? "My own event" : "My own dinner");
@@ -986,8 +1002,9 @@
         <button type="button" class="btn btn-ghost btn-block" data-ownadd="bring">+ Add a person</button></div>
       <div class="card own-card"><h4 class="ms-h">Shopping list and prices</h4><p class="cf-fine">Type each item and its price. Tick it when it is in your cart at the grocery store.</p>
         <div class="cf-stats own-tot" id="ownTot">${ownTotHtml(d)}</div>
-        ${d.shop.map(r => `<div class="own-row own-r4"><input type="checkbox" data-own="shop" data-id="${r.id}" data-k="got" ${r.got ? "checked" : ""} aria-label="In the cart"><input class="input" data-own="shop" data-id="${r.id}" data-k="name" placeholder="Item" value="${esc(r.name)}"><input class="input own-price" data-own="shop" data-id="${r.id}" data-k="price" inputmode="decimal" placeholder="$" value="${esc(r.price)}"><button type="button" class="icon-btn" data-owndel="shop:${r.id}" aria-label="Remove">✕</button></div>`).join("")}
-        <button type="button" class="btn btn-ghost btn-block" data-ownadd="shop">+ Add an item</button>
+        ${ownPickHtml(d)}
+        <div id="ownRows">${ownRowsHtml(d)}</div>
+        <button type="button" class="btn btn-ghost btn-block" data-ownadd="shop">+ Add something not on the list</button><button type="button" class="btn btn-ghost btn-block" data-print="ownshop:${d.id}">Print just the shopping list</button>
         <label class="calc-field own-lim"><span>My budget for this dinner (optional)</span><input class="input" data-ownf="limit" inputmode="decimal" placeholder="e.g. 150" value="${esc(d.limit)}"></label>
         <div id="ownCostSlot">${costBoxHtml("own:" + d.id, "My dinner: " + ownName(d), ownTotals(d).total, "Your estimate (from your prices)")}</div></div>
       <div class="card own-card"><h4 class="ms-h">Cooking timeline</h4><p class="cf-fine">Type a time and a step. Tap Timer to set a countdown for it (up to 24 hours ahead).</p>
@@ -1013,6 +1030,21 @@
       <h3>Guest notes</h3><p>${d.notes ? esc(d.notes).replace(/\n/g, "<br>") : "________________________________"}</p></div><p class="pm-foot">Made with Noël Tier 1 Hub.</p>`);
     return { title: ownName(d), css, html, margin: 0.5, file: hubMode === "company" ? "My-Own-Event" : "My-Own-Dinner" };
   }
+  function ownShopDoc(id) {
+    const d = ownDinners.find(x => x.id === id); if (!d) return { error: "That dinner isn't here any more" };
+    const t = ownTotals(d), items = d.shop.filter(r => r.name.trim() || r.price), blank = Array.from({ length: 12 }, () => `<li class="own-bl">&nbsp;</li>`).join("");
+    const css = PRINT_CSS + ` .od ul{list-style:none;padding:0;margin:0} .od li{margin:6px 0;font-size:12pt} .own-bl{border-bottom:1px solid #ccc;height:18px} .od .pr{float:right}`;
+    const html = coWords(`<div class="od"><h1>${esc(ownName(d))}</h1><p class="pm-sub">Shopping list</p><ul>${items.length ? items.map(r => `<li>${r.got ? "☑" : "☐"} ${esc(r.name)}${ownNum(r.price) ? `<span class="pr">${cad(ownNum(r.price))}</span>` : ""}</li>`).join("") + (t.total ? `<li><b>Total ${cad(t.total)}</b></li>` : "") : blank}</ul></div><p class="pm-foot">Made with Noël Tier 1 Hub.</p>`);
+    return { title: ownName(d) + " shopping list", css, html, margin: 0.5, file: "Shopping-List" };
+  }
+  $("#view-own").addEventListener("change", e => {
+    const t = e.target, d = ownCur(); if (!d || !t.dataset.ownpi) return;
+    const n = t.dataset.ownpi, key = n.toLowerCase();
+    if (t.checked) { if (!d.shop.some(r => r.name.trim().toLowerCase() === key)) { if (d.shop.length === 1 && !d.shop[0].name.trim() && !d.shop[0].price) d.shop = []; d.shop.push({ id: uid(), name: n, price: "", got: false }); } }
+    else { d.shop = d.shop.filter(r => r.name.trim().toLowerCase() !== key); if (!d.shop.length) d.shop.push({ id: uid(), name: "", price: "", got: false }); }
+    d.updated = Date.now(); saveOwn(); const box = $("#ownRows"); if (box) box.innerHTML = ownRowsHtml(d); ownPaintTot();
+  });
+  $("#view-own").addEventListener("toggle", e => { if (e.target.classList && e.target.classList.contains("own-pick")) ownPickOpen = e.target.open; }, true);
   $("#view-own").addEventListener("input", e => {
     const t = e.target, d = ownCur(); if (!d) return;
     if (t.dataset.ownf) d[t.dataset.ownf] = t.value;

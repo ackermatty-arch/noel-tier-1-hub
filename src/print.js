@@ -58,6 +58,7 @@
     else if (key === "mastershop") d = masterShopDoc();
     else if (key.startsWith("savedmenu:")) d = savedMenuDoc(key.slice(10));
     else if (key.startsWith("owndinner:")) d = ownDinnerDoc(key.slice(10));
+    else if (key.startsWith("ownshop:")) d = ownShopDoc(key.slice(8));
     if (!d) return { error: "That page isn't available any more" };
     // 🏷️ the family (or company) name across the top of every printed page set
     const who = familyTitle(family);
