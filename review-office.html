@@ -449,6 +449,7 @@ main {
   align-items: center; justify-content: center; padding: 24px;
   background: radial-gradient(circle at center, rgba(127,20,27,.92), rgba(10,42,25,.96));
 }
+body.co.off-season .xmas-only { display: none !important; }
 /* Noëma (Office Edition): a calm, professional look and a year-round menu */
 body.co .alert-overlay { background: radial-gradient(circle at center, rgba(38,38,42,.95), rgba(8,8,10,.98)); }
 body.co #navNye, body.co .nav-btn.co-only[data-view="nye"] { display: none !important; }
@@ -2459,7 +2460,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     </button>
 
     <div class="game-grid">
-      <article class="game-card red">
+      <article class="game-card red xmas-only">
         <div class="game-emoji">🎅</div>
         <h3>Christmas Trivia Quiz</h3>
         <p>Test your festive knowledge with fun holiday facts.</p>
@@ -2805,7 +2806,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
 
     <!-- ✏️ PRINTABLE PLANNERS: replace each href="#" with your PDF link -->
 
-    <article class="card print-card featured">
+    <article class="card print-card featured fam-only">
       <div class="print-thumb">🎁</div>
       <div class="print-info">
         <span class="bundle-tag">3 pages · low ink</span>
@@ -2815,7 +2816,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       </div>
     </article>
 
-    <article class="card print-card featured" style="margin-top:12px">
+    <article class="card print-card featured fam-only" style="margin-top:12px">
       <div class="print-thumb">🍽️</div>
       <div class="print-info">
         <span class="bundle-tag">4 pages · low ink</span>
@@ -2825,7 +2826,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       </div>
     </article>
 
-    <article class="card print-card featured" style="margin-top:12px">
+    <article class="card print-card featured fam-only" style="margin-top:12px">
       <div class="print-thumb">✦</div>
       <div class="print-info">
         <span class="bundle-tag">Made in the app · your guests' names</span>
@@ -3294,7 +3295,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
           <button type="button" class="classy-link" id="cardOutOpen" hidden></button>
         </div>
       </div>
-      <div class="card ab-card" id="santaLetter">
+      <div class="card ab-card fam-only" id="santaLetter">
         <div class="step">Letters to Santa</div>
         <p class="tip" style="margin:6px 0 10px">Kids colour the border, write their letter and mail it to the North Pole. Santa's Canada and USA addresses are already saved in your Address Book below.</p>
         <div class="ab-print">
@@ -3412,7 +3413,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
 
     <!-- 📌 Notes for next year -->
     <div class="card review-card">
-      <h3>📌 Notes for next Christmas</h3>
+      <h3 data-co-title="📌 Notes for next time">📌 Notes for next Christmas</h3>
       <p class="review-sub">Little reminders for next year. They'll pop up in your first check-in on November 1.</p>
       <form class="review-add" id="noteForm" autocomplete="off">
         <textarea class="input" name="text" rows="2" maxlength="200" placeholder="e.g. Buy wrapping paper in the boxing week sales" required></textarea>
@@ -3446,11 +3447,11 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       <a class="btn btn-block" id="revForm" href="#" target="_blank" rel="noopener" hidden>Fill in the short review form</a>
     </div>
   
-    <div class="section-label">Past Christmases</div>
+    <div class="section-label" data-co-title="Past events">Past Christmases</div>
 
     <!-- 🗂️ CHRISTMAS MEMORIES: save this year and start fresh, review past years -->
     <div class="card memories-card">
-      <p>Save this Christmas so you can look back next year at what you gave, what you spent and how you did. Then Noëma starts fresh for the new season.</p>
+      <p data-co-desc="Save this event so you can look back next time at what you planned, what you spent and how it went. Then Noëma starts fresh for the new season.">Save this Christmas so you can look back next year at what you gave, what you spent and how you did. Then Noëma starts fresh for the new season.</p>
       <div id="memoryYears"></div>
       <button class="btn btn-green btn-block" id="memorySave" type="button">🗂️ Save this Christmas &amp; start fresh</button>
     </div>
@@ -10640,7 +10641,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       const all = m.gifts.people.flatMap(p => p.gifts), spent = all.filter(g => g.status !== "idea").reduce((a, g) => a + (+g.price || 0), 0);
       return `<button class="memory-year" data-year="${m.year}"><span>🎄</span><span><b>Christmas ${m.year}</b><small>${all.length} gift${all.length === 1 ? "" : "s"} · ${money(spent)} spent</small></span><span class="my-go">View ›</span></button>`;
     }).join("");
-    $("#memorySave").textContent = `🗂️ Save Christmas ${season} & start fresh`;
+    $("#memorySave").textContent = hubMode === "company" ? `🗂️ Save ${season} & start fresh` : `🗂️ Save Christmas ${season} & start fresh`;
   }
   function openMemory(year) {
     const m = memories.find(x => x.year === +year); if (!m) return;
@@ -11112,7 +11113,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     $("#wishForm .wish-tip").hidden = hubMode === "company";
     $("#officeBanner").hidden = hubMode !== "company";                        // 🏢 the office party plan
     document.body.classList.toggle("co", hubMode === "company");               // 🏢 hide family-only things on the Office side
-    $("#gamesIntro").textContent = hubMode === "company" ? "Play, keep score and print festive games for the whole team." : "Play, keep score and print festive games for the whole family.";
+    $("#gamesIntro").textContent = hubMode === "company" ? "Play, keep score and print party games for the whole team." : "Play, keep score and print festive games for the whole family.";
     $$("[data-co-title],[data-co-desc]").forEach(el => {   // 🏢 office names for the printable games
       if (el.dataset.famText == null) el.dataset.famText = el.innerHTML;
       el.innerHTML = hubMode === "company" ? esc(el.dataset.coTitle || el.dataset.coDesc) : el.dataset.famText;
