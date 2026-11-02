@@ -106,12 +106,14 @@
   window.offBudgetAll = () => +oy.budget || ((oy.events || []).reduce((a, e) => a + oyBudgetOf(e), 0));
   const oyCost = e => e.id === oy.active ? offTotal() : ((e.snap && e.snap.costs) || []).reduce((a, c) => a + (+c.cost || 0), 0);
   const oyBudgetOf = e => e.id === oy.active ? (+off.ev.budget || 0) : ((e.snap && e.snap.ev && +e.snap.ev.budget) || 0);
-  const offChk = () => { if (!off.chk) off.chk = oyType(off.oyType || "holiday").chk.map(([d, t]) => ({ id: uid(), d, t, done: 0 })); return off.chk; };
+  const OFF_QUICK = [[28, "Pick the date and time (ask the team if you need to)"], [28, "Set the budget: cost per person × number of people"], [21, "Book the venue or order the food"], [14, "Send the invite and ask about allergies and dietary needs"], [7, "Confirm the headcount and pay any deposits"], [2, "Reconfirm with the vendor and remind the team"], [0, "Event day: set up 30 minutes early and enjoy it"], [0, "Right after: thank the team and note what worked"]];
+  const offChk = () => { if (off.quick) { if (!off.qchk) off.qchk = OFF_QUICK.map(([d, t]) => ({ id: uid(), d, t, done: 0 })); return off.qchk; } if (!off.chk) off.chk = oyType(off.oyType || "holiday").chk.map(([d, t]) => ({ id: uid(), d, t, done: 0 })); return off.chk; };
   const oyDue = c => off.ev.date ? oyAdd(off.ev.date, -c.d) : "";
   function oyMake(typeId, o) {
     o = o || {}; oySyncCur(); const T = oyType(typeId), cur = oy.events.find(x => x.id === oy.active); if (cur) cur.snap = oyCopy(off);
     const id = uid(), base = o.base, acts = {}; T.acts.forEach(k => { acts[k] = 1; });
-    const n = { tab: "event", oyType: T.id, ev: Object.assign({ name: o.name || T.name, date: o.date || "", start: T.start, end: T.end, venue: "", address: "", headcount: 20, budget: 0, theme: T.theme || "", dress: "", giftLimit: 25, organizer: "", approver: "", approverEmail: "", notes: "" },
+    const wantQuick = base ? !!base.quick : T.id !== "holiday";
+    const n = { quick: wantQuick, tab: "event", oyType: T.id, ev: Object.assign({ name: o.name || T.name, date: o.date || "", start: T.start, end: T.end, venue: "", address: "", headcount: 20, budget: 0, theme: T.theme || "", dress: "", giftLimit: 25, organizer: "", approver: "", approverEmail: "", notes: "" },
         { organizer: off.ev.organizer, approver: off.ev.approver, approverEmail: off.ev.approverEmail, headcount: off.ev.headcount, giftLimit: off.ev.giftLimit }, { who: "staff" }),
       acts, costs: [], appr: { status: "draft", log: [], followDays: 3 }, pot: [], awards: OFF_AWARDS.slice(0, 8).map(t => ({ id: uid(), t, w: "" })), wrap: { worked: "", change: "" }, past: off.past || [], fired: {},
       chk: T.chk.map(([d, t]) => ({ id: uid(), d, t, done: 0 })), guests: (off.guests || []).map(g => Object.assign({}, g, { status: "pending" })) };
@@ -124,11 +126,11 @@
   const OC_AFTER = ["Send a thank-you note to the team", "Share the photos", "Return rentals and tidy up", "Hand in receipts (Budget › Reimbursement list)", "Write notes on what worked for next year"];
   window.officeTaskInfo = () => {
     if (SPACE !== "office") return null;
-    const T = off.oyType || "holiday"; if (T === "holiday") return { phases: null, label: "Holiday Party" };
+    const T = off.oyType || "holiday"; if (T === "holiday" && !off.quick) return { phases: null, label: "Holiday Party" };
     const C = offChk().slice().sort((a, b) => b.d - a.d), id = oy.active || "x";
     const B = [["w4", "📅", "A month or more before", c => c.d >= 28], ["w2", "🗓️", "2–3 weeks before", c => c.d >= 14 && c.d < 28], ["w1", "📨", "1–2 weeks before", c => c.d >= 7 && c.d < 14], ["wf", "🛒", "The final week", c => c.d >= 1 && c.d < 7], ["wd", "🎉", "Event day", c => c.d < 1]];
     const phases = B.map(([pid, icon, title, f]) => ({ id: "oc" + pid, icon, title, tasks: C.filter(f).map(c => { checks["oc-" + c.id] = !!c.done || undefined; if (!c.done) delete checks["oc-" + c.id]; return { id: "oc-" + c.id, text: c.t }; }) })).filter(p => p.tasks.length);
-    phases.push({ id: "ocaf", icon: "✉️", title: "After the event", tasks: OC_AFTER.map((t, i) => ({ id: "oc-" + id + "-a" + i, text: t })) });
+    if (!off.quick) phases.push({ id: "ocaf", icon: "✉️", title: "After the event", tasks: OC_AFTER.map((t, i) => ({ id: "oc-" + id + "-a" + i, text: t })) });
     const d = off.ev.date ? " · " + oyDay(off.ev.date) : "";
     return { phases, label: (off.ev.name || oyType(T).name) + d };
   };
@@ -262,7 +264,7 @@
     if ((b = q("[data-oyrm]"))) { oyRemove(b.dataset.oyrm); return; }
     if ((b = q("[data-oyrep]"))) { oyRepeat(b.dataset.oyrep); return; }
     if ((b = q("[data-oychk]"))) { const c = offChk().find(x => x.id === b.dataset.oychk); if (c) { c.done = c.done ? 0 : 1; saveOff(); offSync(); renderOffice(); } return; }
-    if ((b = q("[data-oycdel]"))) { const id = b.closest("[data-oyc]").dataset.oyc; off.chk = offChk().filter(x => x.id !== id); saveOff(); offSync(); renderOffice(); return; }
+    if ((b = q("[data-oycdel]"))) { const id = b.closest("[data-oyc]").dataset.oyc; { const L = offChk().filter(x => x.id !== id); if (off.quick) off.qchk = L; else off.chk = L; } saveOff(); offSync(); renderOffice(); return; }
     if ((b = q("[data-oypdel]"))) { const id = b.closest("[data-oyp]").dataset.oyp; oy.people = oy.people.filter(x => x.id !== id); saveOy(); offSync(); renderOffice(); return; }
   });
   $("#view-office").addEventListener("submit", e => {
@@ -288,15 +290,17 @@
       <div class="cd-tiles"><button type="button" data-coto="event" data-cofocus="date"><b>${d == null ? "–" : d < 0 ? "Done" : d}</b><small>${d == null ? "date" : d < 0 ? "event over" : d === 1 ? "day to go" : "days to go"}</small></button>
       <button type="button" data-coto="${hasG ? "guests" : "event"}" data-cofocus="headcount"><b>${hc || "–"}</b><small>${hasG ? "coming" : "guests"}</small></button>
       <button type="button" data-coto="approval"><b>${esc(OFF_STATUS[off.appr.status] || off.appr.status)}</b><small>approval</small></button></div>
+      <div class="seg" role="group" aria-label="Plan size" style="margin-bottom:10px"><button type="button" data-oquick="1" aria-pressed="${!!off.quick}">✦ Quick plan</button><button type="button" data-oquick="0" aria-pressed="${!off.quick}">Full plan</button></div>
       <button type="button" class="btn btn-ghost btn-block" data-coto="year" style="margin-bottom:10px">🗓️ My year of events (${Math.max(1, oy.events.length)}) ›</button>
       ${off.appr.status === "approved" ? `<button type="button" class="btn btn-gold btn-block" data-coto="plan" style="margin-bottom:10px">📄 Open my approved plan ›</button>` : ""}
-      <button type="button" class="cd-bud" data-coto="event" data-cofocus="budget"><span><b>${money(total)}</b> planned${lim ? ` of <b>${money(lim)}</b> approved` : ""}</span>${lim ? `<i><u style="width:${pct}%"></u></i>` : `<small>Add the approved budget on the Event tab</small>`}</button>
+      <button type="button" class="cd-bud" data-coto="event" data-cofocus="budget"><span><b>${money(total)}</b> planned${lim ? ` of <b>${money(lim)}</b> approved` : ""}</span>${lim ? `<i><u style="width:${pct}%"></u></i>` : `<small>Add the approved budget on the Event tab</small>`}</button>${hc && (total || lim) ? `<p class="host-rem" style="text-align:center;margin:6px 0 10px">✦ About ${money(Math.round((total || lim) / hc))} per person for ${hc} ${hc === 1 ? "person" : "people"}</p>` : ""}
       ${(off.saved || []).length ? `<button type="button" class="btn btn-ghost btn-block" data-coto="saved" style="margin-top:10px">📁 My saved plans (${off.saved.length})</button>` : ""}
       ${todo.length ? `<div class="cd-todo"><h4>To order</h4>${todo.map(c => `<div class="cd-ord"><div><b>${esc(c.name || c.type)}</b><small>Order by ${esc(offDate(c.orderBy, { month: "short", day: "numeric" }))}${offDays(c.orderBy) < 0 ? " · date has passed" : ""}</small></div><span class="of-acts">${offLinks(c)}<button type="button" class="of-lnk of-done" data-ocdone="${c.id}">Mark ordered</button></span></div>`).join("")}</div>` : ""}</div>`;
     els.forEach(el => { el.innerHTML = dashHtml; });
   }
   window.__offPicks = () => { const F = offFoodCfg(); return F.picks && F.picks.length ? F.picks.slice() : OFF_DEFAULT_PICKS.slice(); };
   document.addEventListener("click", e => {
+    const qk = e.target.closest("[data-oquick]"); if (qk && hubMode === "company") { off.quick = qk.dataset.oquick === "1"; saveOff(); offSync(); renderCoDash(); try { renderPlanner(); } catch (x) {} toast(off.quick ? "✦ Quick plan: just the essentials" : "Full plan: every detail"); return; }
     const b = e.target.closest("[data-coto]"); if (b) { off.tab = b.dataset.coto; saveOff(); showView("office");
       const fk = b.dataset.cofocus;   // already on this page? jump down to the box and open it
       setTimeout(() => {
