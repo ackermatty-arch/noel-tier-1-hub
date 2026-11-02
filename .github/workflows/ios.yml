@@ -87,7 +87,16 @@ jobs:
         run: |
           test -n "$ASC_KEY_P8" || { echo "::error::Add the ASC_KEY_P8 secret first"; exit 1; }
           mkdir -p "$RUNNER_TEMP/keys"
-          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8"
+          # Rebuild a clean key file even if the header/footer lines were typed wrong or the line breaks were lost
+          python3 - <<'PY'
+          import os, re, textwrap
+          raw = os.environ["ASC_KEY_P8"]
+          body = re.sub(r"-+[A-Za-z ]*-+", "", raw)
+          body = re.sub(r"\s+", "", body)
+          pem = "-----BEGIN PRIVATE KEY-----\n" + "\n".join(textwrap.wrap(body, 64)) + "\n-----END PRIVATE KEY-----\n"
+          open(os.path.join(os.environ["RUNNER_TEMP"], "keys", "AuthKey_" + os.environ["ASC_KEY_ID"] + ".p8"), "w").write(pem)
+          print("key file written,", len(body), "characters of key data")
+          PY
 
       - name: Archive (signed for the App Store)
         if: github.event_name == 'workflow_dispatch'
