@@ -16,6 +16,10 @@ assert "<head>" in html
 html = html.replace("<head>", "<head>\n" + tag, 1)
 open(os.path.join(www, "index.html"), "w", encoding="utf-8").write(html)
 shutil.copy(os.path.join(root, "node_modules/@capacitor/core/dist/capacitor.js"), www)
-for f in ("icon-192.png", "icon-512.png", "manifest.webmanifest"):
-    shutil.copy(os.path.join(root, f), www)
+if EDITION == "family":
+    for f in ("icon-192.png", "icon-512.png", "manifest.webmanifest"):
+        shutil.copy(os.path.join(root, f), www)
+else:   # Noëma: pearl icons and its own manifest
+    for f in ("icon-office-192.png", "icon-office-512.png", "manifest.webmanifest"):
+        shutil.copy(os.path.join(root, "office-assets", f), www)
 print("www/ ready:", sorted(os.listdir(www)))

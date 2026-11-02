@@ -15776,18 +15776,22 @@ const PC_DESIGNS = [
   }
   const oyMsLabel = m => esc(m.p.name) + " · " + (m.kind === "bday" ? "birthday" : m.n + (m.n === 1 ? "-year" : "-year") + " anniversary");
   const oyMsWhen = m => m.in === 0 ? "today" : m.in === 1 ? "tomorrow" : `${oyDay(oyYmd(m.dt))} · in ${m.in} days`;
+  const OY_DIET = [["veg", "Vegetarian"], ["vegan", "Vegan"], ["gf", "Gluten-free"], ["df", "Dairy-free"], ["nut", "Nut allergy"], ["halal", "Halal"], ["kosher", "Kosher"]];
+  function oyDietSum() { const c = {}; oy.people.forEach(p => (p.diet || []).forEach(k => { c[k] = (c[k] || 0) + 1; })); return { n: oy.people.length, parts: OY_DIET.filter(([k]) => c[k]).map(([k, l]) => c[k] + " " + l.toLowerCase()) }; }
+  function oyDietText() { const d = oyDietSum(); return d.parts.length ? `Dietary needs for ${d.n} ${d.n === 1 ? "person" : "people"}: ${d.parts.join(", ")}.` : ""; }
   function oyPeopleHtml() {
     const up = oyMilestones(30), P = oy.people.slice().sort((a, b) => a.name.localeCompare(b.name));
     return `<div class="card pt-card"><h3>🎂 Coming up in the next 30 days</h3>
       ${up.length ? up.map(m => `<div class="oy-ms"><div><b>${oyMsLabel(m)}</b><small>${oyMsWhen(m)}${+oy.gift ? ` · about ${money(+oy.gift)} for a card or small gift` : ""}</small></div><button type="button" class="btn btn-ghost btn-sm" data-print="oycard:${m.p.id}:${m.kind}">🖨️ Card</button></div>`).join("") : `<p class="host-rem">${P.length ? "Nothing in the next 30 days." : "Add your team below and the app will remind you a week ahead."}</p>`}
       <label class="off-f wide" style="margin-top:8px"><span class="meal-lab">Budget for each card or small gift</span><input class="input" type="number" inputmode="decimal" min="0" data-oygift value="${+oy.gift || ""}" placeholder="$"></label></div>
+    ${oyDietText() ? `<div class="card pt-card"><h3>✦ For your caterer</h3><p class="host-rem" style="margin:0 0 8px">${esc(oyDietText())}</p><button type="button" class="btn btn-ghost btn-block" data-oycopy>Copy this note</button></div>` : ""}
     <div class="card pt-card"><h3>👥 My team</h3>
-      ${P.map(p => `<div class="oy-ppl" data-oyp="${p.id}"><div><b>${esc(p.name)}</b><small>${p.bd ? "Birthday " + OY_MONTHS[+p.bd.slice(0, 2) - 1].slice(0, 3) + " " + +p.bd.slice(3) : ""}${p.bd && p.start ? " · " : ""}${p.start ? "Started " + esc(p.start.slice(0, 4)) : ""}</small></div><button type="button" class="icon-btn" data-oypdel aria-label="Remove ${esc(p.name)}">✕</button></div>`).join("")}
+      ${P.map(p => `<div class="oy-ppl" data-oyp="${p.id}"><div><b>${esc(p.name)}</b><small>${p.bd ? "Birthday " + OY_MONTHS[+p.bd.slice(0, 2) - 1].slice(0, 3) + " " + +p.bd.slice(3) : ""}${p.bd && p.start ? " · " : ""}${p.start ? "Started " + esc(p.start.slice(0, 4)) : ""}</small><div class="apps-filters" style="margin-top:6px">${OY_DIET.map(([k, l]) => `<button type="button" class="chip${(p.diet || []).includes(k) ? " on" : ""}" data-oydiet="${p.id}|${k}">${l}</button>`).join("")}</div></div><button type="button" class="icon-btn" data-oypdel aria-label="Remove ${esc(p.name)}">✕</button></div>`).join("")}
       <form class="org-ev-form" id="oyPersonForm" autocomplete="off"><input class="input" name="name" maxlength="40" placeholder="First name" required>
         <div class="org-addr-row"><select class="input" name="bm" aria-label="Birthday month"><option value="">Birthday month</option>${OY_MONTHS.map((m, i) => `<option value="${oyPad(i + 1)}">${m}</option>`).join("")}</select><select class="input" name="bd" aria-label="Birthday day" style="max-width:88px"><option value="">Day</option>${Array.from({ length: 31 }, (_, i) => `<option>${i + 1}</option>`).join("")}</select></div>
         <label class="off-ob"><span>Started on (optional)</span><input class="input" name="start" type="date"></label>
         <button class="btn btn-green btn-block" type="submit">➕ Add to my team</button></form>
-      <p class="host-rem">Everything stays on this phone, locked. Keep only what your team is happy to share: a first name, a birthday month and day, and a start date. Nothing else is needed.</p></div>`;
+      <p class="host-rem">Everything stays on this phone, locked. Keep only what your team is happy to share: a first name, a birthday month and day, a start date, and food needs they have told you about. Nothing else is needed.</p></div>`;
   }
   // ---------- 💵 yearly budget ----------
   function oyMsCount(Y) { return oy.people.reduce((a, p) => a + (p.bd ? 1 : 0) + (p.start && +p.start.slice(0, 4) < Y ? 1 : 0), 0); }
@@ -15871,6 +15875,8 @@ const PC_DESIGNS = [
     if ((b = q("[data-oysub]"))) { oy.sub = b.dataset.oysub; saveOy(); renderOffice(); return; }
     if ((b = q("[data-oyyr]"))) { oy.year += +b.dataset.oyyr; saveOy(); renderOffice(); return; }
     if ((b = q("[data-oyopen]"))) { oySwitch(b.dataset.oyopen); return; }
+    if ((b = q("[data-oydiet]"))) { const [id, k] = b.dataset.oydiet.split("|"), pp = oy.people.find(x => x.id === id); if (pp) { pp.diet = pp.diet || []; const i = pp.diet.indexOf(k); if (i >= 0) pp.diet.splice(i, 1); else pp.diet.push(k); saveOy(); renderOffice(); } return; }
+    if ((b = q("[data-oycopy]"))) { const t = oyDietText(); try { navigator.clipboard.writeText(t); toast("✦ Copied. Paste it into your catering order"); } catch (er) { toast(t); } return; }
     if ((b = q("[data-oyadd]"))) { oyMake(b.dataset.oyadd, { month: +b.dataset.oym, year: oy.year }); renderOffice(); renderCoDash(); window.scrollTo(0, 0); toast("✅ Added. Your checklist is ready"); return; }
     if ((b = q("[data-oyrm]"))) { oyRemove(b.dataset.oyrm); return; }
     if ((b = q("[data-oyrep]"))) { oyRepeat(b.dataset.oyrep); return; }
@@ -15892,6 +15898,30 @@ const PC_DESIGNS = [
     if (t.dataset.oybud != null) { oy.budget = Math.max(0, +t.value || 0); saveOy(); renderOffice(); return; }
     if (t.dataset.oygift != null) { oy.gift = Math.max(0, +t.value || 0); saveOy(); renderOffice(); return; }
   });
+  // 🗓️ the front of the app: what's next, what's due, what to plan this month, and how the last event went
+  function oyGlanceHtml() {
+    try {
+      const nxt = oy.events.filter(e => e.date && oyIn(e.date) >= 0).sort((a, b) => a.date < b.date ? -1 : 1)[0];
+      const due = offChk().filter(c => !c.done && off.ev.date).map(c => ({ c, d: oyDue(c) })).filter(x => oyIn(x.d) <= 7).sort((a, b) => a.d < b.d ? -1 : 1).slice(0, 3);
+      const now = new Date(), cm = now.getMonth() + 1, used = new Set(oy.events.filter(e => e.year === oy.year).map(e => e.type));
+      const sug = OY_TYPES.filter(t => t.id !== "custom" && t.id !== "holiday" && (t.m === cm || t.m === (cm % 12) + 1) && !used.has(t.id)).slice(0, 2);
+      const past = off.ev.date && oyIn(off.ev.date) < 0 && !(off.wrap && off.wrap.again);
+      const done = off.wrap && off.wrap.again;
+      return `<div class="card co-dash"><div class="cd-head"><span class="cd-k">Your year</span><b>${nxt ? esc(nxt.name) : "Nothing booked yet"}</b><small>${nxt ? oyDay(nxt.date) + (oyIn(nxt.date) === 0 ? " · today" : " · in " + oyIn(nxt.date) + " days") : "Plan your next team event below"}</small></div>
+        ${due.length ? `<div class="cd-todo"><h4>Due now</h4>${due.map(x => `<div class="cd-ord"><div><b>${esc(x.c.t)}</b><small>${oyIn(x.d) < 0 ? "Was due " : "Due "}${oyDay(x.d)}</small></div></div>`).join("")}</div>` : ""}
+        ${sug.length ? `<div class="cd-todo"><h4>Coming up this month</h4><p class="host-rem" style="margin:0 0 6px">Plan one in 5 minutes. A ready checklist comes with it.</p>${sug.map(t => `<button type="button" class="btn btn-ghost btn-block" style="margin-bottom:6px" data-dashadd="${t.id}" data-oym="${t.m}">+ ${esc(t.name)}${t.m === cm ? "" : " (" + OY_MONTHS[t.m - 1] + ")"}</button>`).join("")}</div>` : ""}
+        ${past ? `<div class="cd-todo"><h4>How did ${esc(off.ev.name || "it")} go?</h4><p class="host-rem" style="margin:0 0 6px">Three quick answers make next time easier.</p>
+          <div class="seg" role="group" aria-label="Would you do it again"><button type="button" data-pulse="Yes" aria-pressed="false">Do it again</button><button type="button" data-pulse="Maybe" aria-pressed="false">Maybe</button><button type="button" data-pulse="No" aria-pressed="false">Not again</button></div>
+          <input class="input" id="pulseCame" inputmode="numeric" placeholder="How many people came?" style="margin-top:8px"></div>` : ""}
+        ${done ? `<p class="host-rem" style="margin:8px 0 0">✦ ${esc(off.ev.name || "Last event")}: ${esc(off.wrap.again)}${off.wrap.came ? " · " + off.wrap.came + " came" : ""}${off.wrap.came && offTotal() ? " · " + money(Math.round(offTotal() / off.wrap.came)) + " per person" : ""}</p>` : ""}</div>`;
+    } catch (er) { return ""; }
+  }
+  document.addEventListener("click", e => {
+    const a = e.target.closest && e.target.closest("[data-dashadd]");
+    if (a && hubMode === "company") { oyMake(a.dataset.dashadd, { month: +a.dataset.oym, year: oy.year }); renderOffice(); renderCoDash(); toast("✅ Added. Your checklist is ready"); return; }
+    const pl = e.target.closest && e.target.closest("[data-pulse]");
+    if (pl && hubMode === "company") { const c = parseInt(($("#pulseCame") || {}).value, 10) || 0; off.wrap = Object.assign({ worked: "", change: "" }, off.wrap, { again: pl.dataset.pulse, came: c }); const ev = oy.events.find(x => x.id === oy.active); if (ev) ev.pulse = { again: pl.dataset.pulse, came: c }; saveOff(); saveOy(); renderCoDash(); toast("✦ Saved to your year"); }
+  });
   function renderCoDash() {
     const els = [$("#coDash"), $("#offDash")].filter(Boolean); if (!els.length || hubMode !== "company") return;
     const e = off.ev, hasG = offGuests().length > 0, hc = hasG ? offAttend() : Math.max(0, +e.headcount || 0), total = offTotal(), lim = +e.budget || 0, pct = lim ? Math.min(100, Math.round(total / lim * 100)) : 0;
@@ -15907,7 +15937,7 @@ const PC_DESIGNS = [
       <button type="button" class="cd-bud" data-coto="event" data-cofocus="budget"><span><b>${money(total)}</b> planned${lim ? ` of <b>${money(lim)}</b> approved` : ""}</span>${lim ? `<i><u style="width:${pct}%"></u></i>` : `<small>Add the approved budget on the Event tab</small>`}</button>${hc && (total || lim) ? `<p class="host-rem" style="text-align:center;margin:6px 0 10px">✦ About ${money(Math.round((total || lim) / hc))} per person for ${hc} ${hc === 1 ? "person" : "people"}</p>` : ""}
       ${(off.saved || []).length ? `<button type="button" class="btn btn-ghost btn-block" data-coto="saved" style="margin-top:10px">📁 My saved plans (${off.saved.length})</button>` : ""}
       ${todo.length ? `<div class="cd-todo"><h4>To order</h4>${todo.map(c => `<div class="cd-ord"><div><b>${esc(c.name || c.type)}</b><small>Order by ${esc(offDate(c.orderBy, { month: "short", day: "numeric" }))}${offDays(c.orderBy) < 0 ? " · date has passed" : ""}</small></div><span class="of-acts">${offLinks(c)}<button type="button" class="of-lnk of-done" data-ocdone="${c.id}">Mark ordered</button></span></div>`).join("")}</div>` : ""}</div>`;
-    els.forEach(el => { el.innerHTML = dashHtml; });
+    els.forEach(el => { el.innerHTML = (el.id === "coDash" ? oyGlanceHtml() : "") + dashHtml; });
   }
   window.__offPicks = () => { const F = offFoodCfg(); return F.picks && F.picks.length ? F.picks.slice() : OFF_DEFAULT_PICKS.slice(); };
   document.addEventListener("click", e => {
@@ -16429,6 +16459,8 @@ const PC_DESIGNS = [
     const day = ssDay(); if (ssOn() && day) { const t = new Date(day + "T10:00"); t.setDate(t.getDate() - 3); out.push({ k: "ss" + day, t: t.getTime(), text: `Secret Santa exchange is ${offDate(day, { weekday: "long", month: "short", day: "numeric" })}${+off.ev.giftLimit ? `. Limit ${money(+off.ev.giftLimit)}` : ""}. Remind the team!` }); }
     (off.chk || []).forEach(c => { if (c.done || !off.ev.date) return; const t = new Date(oyDue(c) + "T09:00").getTime(); if (t > Date.now() - 6 * 36e5) out.push({ k: "chk" + c.id, t, text: `${off.ev.name || "Event"}: ${c.t}` }); });
     oyMilestones(14).forEach(m => { const t = m.in <= 7 ? new Date(oyYmd(new Date()) + "T09:00").getTime() : new Date(oyAdd(oyYmd(m.dt), -7) + "T09:00").getTime(); out.push({ g: 1, k: "ms" + m.p.id + m.kind + m.dt.getFullYear(), t, text: m.kind === "bday" ? `${m.p.name}'s birthday is ${oyMsWhen(m).split(" · ")[0]}` : `${m.p.name}'s ${m.n}-year anniversary is ${oyMsWhen(m).split(" · ")[0]}` }); });
+    { const n = new Date(); for (let i = 0; i < 3; i++) { const m0 = new Date(n.getFullYear(), n.getMonth() + i, 1, 9, 0), mm = m0.getMonth() + 1, nm = (mm % 12) + 1, t = OY_TYPES.find(x => x.m === nm && x.id !== "custom" && x.id !== "holiday" && !oy.events.some(e => e.type === x.id && e.year === m0.getFullYear()));
+        if (t && m0.getTime() > Date.now()) out.push({ g: 1, k: "mo" + m0.getFullYear() + mm, t: m0.getTime(), text: `${OY_MONTHS[nm - 1]}: ${t.name} is coming. Plan it in 5 minutes?` }); } }
     return out;
   };
   function offSync() { if (SPACE === "office") NoelNative.scheduleList(9100, 9110, offReminders().filter(r => r.t > Date.now()).sort((a, b) => a.t - b.t).slice(0, 10).map(r => ({ t: r.t, title: "📨 " + r.text, body: "Noël Tier 1 Hub · Office" }))); }
