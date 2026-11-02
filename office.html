@@ -2346,6 +2346,9 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
 .back-btn,.meal-back,.back-btn *,.meal-back *{background:#D4A537 !important;color:#151515 !important;box-shadow:none !important}.back-btn,.meal-back{border:1px solid #B8935A}
 .pi-lead{display:block;color:#151515;margin-bottom:6px}
 .gen-plan{margin-top:16px;text-align:center}.gen-msg{font-size:13px;color:var(--muted);margin:10px 0 0}.gen-redo{text-align:left;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13.5px}.gen-redo b{display:block;margin-bottom:4px}.gen-redo p{margin:6px 0}
+.gblur-btn{margin:0 0 12px}.gblur #peopleList .g-name,.gblur #peopleList .g-price,.gblur .stock-card li,.gblur #view-gifts #wishList,.gblur #view-gifts #paneSanta,.gblur #view-budget .bud-bar,.gblur #view-budget .bud-list{filter:blur(8px);user-select:none;pointer-events:none}
+.stock-chip{border:1.5px solid #B8935A;background:#fff;color:#151515;font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}.stock-chip.on{background:#D4A537}
+.stock-card ul{list-style:none;margin:8px 0 0;padding:0}.stock-card li{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px dashed var(--line);font-size:14px}.stock-card small{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -3136,6 +3139,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <button type="button" class="btn btn-green btn-sm gift-tasks-btn fam-only" data-goview="planner">‹ Plan</button>
     <h2 class="view-title" id="giftsTitle">Gifts</h2>
     <p class="view-intro">Jot down wishes as you hear them, then track what you buy against your budget.</p>
+    <button type="button" class="btn btn-ghost btn-block gblur-btn" aria-pressed="false">Hide gift names and prices: Off</button>
 
     <div class="seg seg3 sub-tabs" id="giftTabs" role="group" aria-label="Wish list or Santa's secret list">
       <button type="button" data-gpane="wish" aria-pressed="true">📝 Wishes</button>
@@ -3210,6 +3214,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     </div>
 
     <div class="section-label">Gift tracker</div>
+    <button type="button" class="btn btn-ghost btn-block gblur-btn" aria-pressed="false">Hide gift names and prices: Off</button>
     <div id="peopleList"></div>
 
     <form class="card add-task" id="addPersonForm" autocomplete="off">
@@ -10418,6 +10423,11 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     const budget = +gifts.budget || 0, spent = sum(withSanta, isSpent), planned = sum(withSanta, () => true);
     return { all, budget, spent, planned, left: budget - spent };
   }
+  // 🙈 hide gift names and prices if someone peeks at the screen
+  let gBlur = load("gblur", false);
+  const gBlurPaint = () => { document.body.classList.toggle("gblur", !!gBlur); $$(".gblur-btn").forEach(b => { b.setAttribute("aria-pressed", String(!!gBlur)); b.textContent = "Hide gift names and prices: " + (gBlur ? "On" : "Off"); }); };
+  document.addEventListener("click", e => { if (e.target.closest(".gblur-btn")) { gBlur = !gBlur; save("gblur", gBlur); gBlurPaint(); } });
+  setTimeout(gBlurPaint, 0);
   const GIFT_GRPS = [["family", "Family"], ["friends", "Friends"], ["work", "Coworkers"], ["teachers", "Teachers"]];
   const capOver = p => +p.cap > 0 && sum(p.gifts, () => true) > +p.cap;
   const capMsg = p => { if (!(+p.cap > 0)) return "Optional"; const pl = sum(p.gifts, () => true); return pl > +p.cap ? `${money(pl - p.cap)} over the cap` : `${money(p.cap - pl)} left of the cap`; };
@@ -10442,7 +10452,9 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       return;
     }
     const gOf = p => ["friends", "work", "teachers"].includes(p.grp) ? p.grp : "family";
-    list.innerHTML = GIFT_GRPS.map(([gk, gl]) => { const ps = gifts.people.filter(p => gOf(p) === gk); if (!ps.length) return ""; return `<div class="grp-h"><span>${gl}</span><small>${money(ps.reduce((a, p) => a + sum(p.gifts, isSpent), 0))} spent · ${money(ps.reduce((a, p) => a + sum(p.gifts, () => true), 0))} planned</small></div>` + ps.map(p => `
+    const stk = gifts.people.flatMap(p => p.gifts.filter(g => g.stock).map(g => [p.name, g]));
+    const stockCard = stk.length ? `<div class="card stock-card"><h3>Santa's stocking</h3><p class="host-rem">${stk.length} stocking ${stk.length === 1 ? "stuffer" : "stuffers"} · ${money(stk.reduce((a, [, g]) => a + (+g.price || 0), 0))}</p><ul>${stk.map(([n, g]) => `<li><span>${esc(g.name)} <small>for ${esc(n)}</small></span><b>${g.price ? money(+g.price) : ""}</b></li>`).join("")}</ul></div>` : "";
+    list.innerHTML = stockCard + GIFT_GRPS.map(([gk, gl]) => { const ps = gifts.people.filter(p => gOf(p) === gk); if (!ps.length) return ""; return `<div class="grp-h"><span>${gl}</span><small>${money(ps.reduce((a, p) => a + sum(p.gifts, isSpent), 0))} spent · ${money(ps.reduce((a, p) => a + sum(p.gifts, () => true), 0))} planned</small></div>` + ps.map(p => `
       <div class="card person" data-pid="${p.id}">
         <div class="person-head">
           <span class="p-avatar">${esc((p.name[0] || "?").toUpperCase())}</span>
@@ -10457,6 +10469,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
           return `<li class="gift-item ${s.key}" data-gid="${g.id}">
             <button class="status-chip s-${s.key}" data-act="status" aria-label="${s.label}. Tap to change">${s.icon} ${s.label}</button>
             <span class="g-name">${esc(g.name)}</span>
+            <button type="button" class="stock-chip${g.stock ? " on" : ""}" data-act="stock" aria-pressed="${!!g.stock}" aria-label="Stocking stuffer">Stocking</button>
             <span class="g-price">${g.price ? money(+g.price) : ""}</span>
             <button class="icon-btn" data-act="del-gift" aria-label="Delete ${esc(g.name)}">✕</button>
           </li>`; }).join("")}</ul>
@@ -10484,6 +10497,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
         if (g.status === "idea") delete g.boughtAt; else if (!g.boughtAt) g.boughtAt = budToday();   // 💰 dates the purchase for the Budget tab
         if (navigator.vibrate) navigator.vibrate(12);
       }
+      if (b.dataset.act === "stock") g.stock = !g.stock;
       if (b.dataset.act === "del-gift") p.gifts = p.gifts.filter(x => x !== g);
     }
     save("gifts", gifts); renderGifts();
@@ -11281,8 +11295,8 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     const gl = load("guests", []).map(x => [x.name || "", x.tel || "", x.email || "", ({ new: "Not invited", sent: "Invited", yes: "Coming", maybe: "Maybe", no: "Can't come" })[x.s] || x.s || ""]);
     if (gl.length) S.push({ name: "Guests", widths: [24, 16, 28, 14], rows: [...T("Guest List", stamp), H(["Name", "Phone", "Email", "Status"]), ...gl] });
     const sm = load("savedMenus", []), sr = [];
-    sm.forEach(m => (m.shop || []).forEach(([d, its]) => its.forEach(i => sr.push([(m.names || []).join(", "), d, i.q || "", i.name || "", i.have ? "Have it" : "Buy", i.price != null ? money(i.price) : ""]))));
-    if (sr.length) S.push({ name: "Shopping", widths: [24, 16, 10, 30, 10, 12], rows: [...T("Shopping List", stamp), H(["Menu", "Aisle", "Qty", "Item", "Need", "Est. price"]), ...sr] });
+    sm.forEach(m => { const items = (m.shop || []).flatMap(([d, its]) => its.map(i => [d, i.q || "", i.name || "", i.have ? "Have it" : "Buy", i.price != null ? money(i.price) : ""])); if (!items.length) return; sr.push([{ v: (m.names || []).join(" · "), s: 4 }], ...items, []); });
+    if (sr.length) S.push({ name: "Shopping", widths: [18, 10, 34, 10, 12], rows: [...T("Shopping List", stamp), H(["Aisle", "Qty", "Item", "Need", "Est. price"]), ...sr] });
     const du = (load("duties", []) || []).map(d => [d.name || "", Math.round((d.duration || 0) / 60)]);
     if (du.length) S.push({ name: "Timers", widths: [32, 12], rows: [...T("Timers", stamp), H(["Timer", "Minutes"]), ...du] });
     return S;
