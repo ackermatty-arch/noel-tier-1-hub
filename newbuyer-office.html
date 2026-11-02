@@ -15152,7 +15152,8 @@ const PC_DESIGNS = [
   }
 
   // ---------- 📊 pictures (plain SVG, so they also print sharply) ----------
-  const budGold = k => budCat(k)[3];   // each kind of spending keeps its own colour: red, gold, green, black and friends
+  const BUD_PEARL = { gifts: "#8A6A2F", food: "#B8893A", decor: "#D4AF6A", hosting: "#E8D8B0", party: "#2B2B2F", nye: "#55555A", cards: "#808086", travel: "#A9A9AE", giving: "#C9C3B6", other: "#6E5A34" };   // Noëma: gold and graphite
+  const budGold = k => (hubMode === "company" && BUD_PEARL[budCat(k)[0]]) || budCat(k)[3];   // each kind of spending keeps its own colour: red, gold, green, black and friends
   const budInk = col => { const n = parseInt(col.slice(1), 16), l = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)); return l > 150 ? "#151515" : "#fff"; };
   // a ring of coloured pieces with the percentage written inside each one
   function budDonut(segs, den, pctOf, size, centre, label) {
@@ -15216,7 +15217,7 @@ const PC_DESIGNS = [
   function budOverview(T) {
     const left = T.limit - T.spent, pct = T.limit ? T.spent / T.limit : 0, now = new Date();
     const xmas = new Date(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear(), 11, 25), days = Math.max(0, Math.ceil((xmas - now) / 86400000));
-    const status = !T.limit ? "Set a budget on the 🎯 Budgets tab to track how much is left." : pct > 1 ? `⚠️ You're ${money(-left)} over budget.` : pct >= 0.9 ? `🟡 Almost there: ${money(left)} left.` : `✅ On track: ${money(left)} left${days ? `, about ${money(Math.floor(left / days))} a day until Christmas` : ""}.`;
+    const status = !T.limit ? "Set a budget on the 🎯 Budgets tab to track how much is left." : pct > 1 ? `⚠️ You're ${money(-left)} over budget.` : pct >= 0.9 ? `🟡 Almost there: ${money(left)} left.` : `✅ On track: ${money(left)} left${days ? `, about ${money(Math.floor(left / days))} a day until ${hubMode === "company" ? "your event" : "Christmas"}` : ""}.`;
     const top = T.rows.slice().sort((a, b) => b.amt - a.amt)[0];
     const GR = [["family", "Family"], ["friends", "Friends"], ["work", "Coworkers"], ["teachers", "Teachers"]], grOf = p => ["friends", "work", "teachers"].includes(p.grp) ? p.grp : "family",
       perGroup = GR.map(([k, l]) => { const rows = gifts.people.filter(p => grOf(p) === k).map(p => [p.name, sum(p.gifts, () => true)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]); return [l, rows, rows.reduce((a, r) => a + r[1], 0)]; }).filter(g => g[1].length),
@@ -15225,7 +15226,7 @@ const PC_DESIGNS = [
     return `<div class="card bud-hero">${budPie(T.by, T.spent, T.limit, 210)}
         <ul class="bud-legend">${BUD_CATS.filter(([k]) => T.by[k] > 0).map(([k, i, l, col]) => `<li><i style="background:${budGold(k)}"></i><span>${i} ${l}</span><b>${money(T.by[k])}</b><small>${Math.round(T.by[k] / T.spent * 100)}%</small></li>`).join("") || `<li class="host-rem">Nothing spent yet. Mark gifts as bought, or add spending on the 🧾 Spreadsheet tab.</li>`}</ul>
         <p class="bud-status ${pct > 1 ? "over" : pct >= 0.9 ? "warn" : ""}">${status}</p></div>
-      <div class="card pt-card"><h3>📈 Spending as the season goes</h3>${budLine(T.limit, 340, 170) || ""}<p class="host-rem">${T.rows.length ? "Your running total, stepping up on each day you spent. The gold dashed line is your budget." : "Your line appears as soon as you spend something."}</p></div>
+      <div class="card pt-card"><h3>📈 Spending as the ${hubMode === "company" ? "year" : "season"} goes</h3>${budLine(T.limit, 340, 170) || ""}<p class="host-rem">${T.rows.length ? "Your running total, stepping up on each day you spent. The gold dashed line is your budget." : "Your line appears as soon as you spend something."}</p></div>
       <div class="card pt-card"><h3>🎯 Budget vs spent</h3>${budBars(T.by)}</div>
       ${perPerson.length ? `<div class="card pt-card"><h3>🎁 Gifts by person</h3>${perGroup.map(([l, rows, tot]) => `<div class="grp-h"><span>${l}</span><small>${money(tot)}</small></div>${rows.map(([n, v]) => `<div class="bud-bar"><div class="bb-top"><span>${esc(n)}</span><b>${money(v)}</b></div><div class="bb-track"><i style="width:${v / ppMax * 100}%;background:#b3262e"></i></div></div>`).join("")}`).join("")}<p class="host-rem">Includes gift ideas you haven't bought yet.</p></div>` : ""}
       <div class="card pt-card bud-facts">
@@ -15244,7 +15245,7 @@ const PC_DESIGNS = [
     return `<form class="card pt-card org-ev-form" id="budAddForm" autocomplete="off"><h3>➕ Add spending</h3>
         <input class="input" name="name" maxlength="60" placeholder="What was it? e.g. Tree lights" aria-label="What">
         ${fillChips((SPACE === "office" ? [["Decorations", "decor"], ["Prizes", "party"], ["Gift cards", "other"], ["Venue deposit", "party"], ["Catering", "food"], ["Drinks", "food"], ["Plates & napkins", "hosting"], ["Charity donation", "other"]] : [["Tree", "decor"], ["Lights", "decor"], ["Wrapping paper", "other"], ["Christmas cards", "cards"], ["Stamps & postage", "cards"], ["Groceries", "food"], ["Restaurant", "food"], ["Gas", "travel"], ["Flights", "travel"], ["Outfits", "other"], ["Babysitter", "other"], ["Event tickets", "party"], ["Hosting supplies", "hosting"], ["Charity / donation", "other"]]).map(([n, c]) => [n, n, { "#budAddForm [name=cat]": c }]), "#budAddForm [name=name]")}
-        <div class="org-addr-row"><select class="input" name="cat" aria-label="Category">${BUD_CATS.filter(([k]) => k !== "gifts" && k !== "food" && k !== "giving").concat(BUD_CATS.filter(([k]) => k === "food")).map(([k, i, l]) => `<option value="${k}">${i} ${l}</option>`).join("")}</select>
+        <div class="org-addr-row"><select class="input" name="cat" aria-label="Category">${BUD_CATS.filter(([k]) => k !== "gifts" && k !== "food" && k !== "giving" && !(k === "nye" && hubMode === "company")).concat(BUD_CATS.filter(([k]) => k === "food")).map(([k, i, l]) => `<option value="${k}">${i} ${l}</option>`).join("")}</select>
           <input class="input" name="amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="$" aria-label="Amount" style="max-width:96px"></div>
         <input class="input" name="date" type="date" value="${budToday()}" aria-label="Date">
         ${SPACE === "office" ? `<label class="host-check"><input type="checkbox" name="mine" checked> 💳 I paid for this myself (add it to my reimbursement list)</label>` : ""}
@@ -15270,7 +15271,7 @@ const PC_DESIGNS = [
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
     return `<details class="fold" id="budCatFold"${budCatOpen ? " open" : ""}><summary>More budgets (optional)</summary>
       <div class="card pt-card"><h3>Budget for each category</h3>
-        ${BUD_CATS.filter(([k]) => k !== "gifts" && (k !== "giving" || hubMode === "company")).map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>
+        ${BUD_CATS.filter(([k]) => k !== "gifts" && (k !== "giving" || hubMode === "company") && !(k === "nye" && hubMode === "company")).map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>
       <button type="button" class="btn btn-green btn-block bud-next" data-goview="planner">Let's plan ›</button>`;
   }
 
