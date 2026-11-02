@@ -3723,6 +3723,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
   </div>
   <div class="sheet-body">
     <div class="sheet-inner">
+      <div id="teamPlan"></div>
       <p class="advent-intro">Get the team out from behind the desk. Tap <b>Find places near me</b> to open your phone's Maps. Noël never sees your location.</p>
       <div class="tb-sec">Active &amp; Adventurous</div>
       <div class="tb-row"><b>Guided Hiking &amp; Nature Treks</b><p>Take a day trip along a local forest or mountain trail. Walking in nature naturally encourages conversation and peer support while building trust.</p><button type="button" class="btn btn-ghost btn-sm" data-tmap="hiking trails">Find places near me ›</button></div>
@@ -9081,8 +9082,44 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   // ✅ FAMILY TASKS BUILD FROM THE PLAN: nothing shows until Plan, Menu and Budget are set, then dated tasks are made from them
   // 📅 activities with a date: they go to the calendar, a reminder 2 days before, and the matching week of Tasks
   function actDated() {
+    if (hubMode === "company") { try { return teamActs.filter(x => x.date).map(x => ({ id: x.id, date: x.date, name: x.name, ico: "✦" })); } catch (e) { return []; } }
     try { return Object.entries(acts.date || {}).filter(([id]) => acts.mark[id] === "plan").map(([id, date]) => { const a = allActs().find(x => x.id === id); return a ? { id, date, name: a.name, ico: a.ico } : null; }).filter(Boolean); } catch (e) { return []; }
   }
+  // 🏢 Office: team activities with a date, sorted into the plan by how far they are from the event
+  function offActPhase(date) {
+    try {
+      const ev = off.ev.date; if (!ev) return "";
+      const days = Math.round((new Date(ev + "T12:00") - new Date(date + "T12:00")) / 864e5), hol = (off.oyType || "holiday") === "holiday";
+      if (hol) return days < 0 ? "" : days === 0 ? "od" : days < 14 ? "o1" : days < 28 ? "o2" : days < 60 ? "on" : "os";
+      return days < 0 ? "ocaf" : days < 7 ? "ocwf" : days < 14 ? "ocw1" : days < 28 ? "ocw2" : "ocw4";
+    } catch (e) { return ""; }
+  }
+  function renderTeamPlan() {
+    const el = $("#teamPlan"); if (!el) return;
+    const names = [...document.querySelectorAll("#teamSheet .tb-row > b")].map(b => b.textContent.trim());
+    const money0 = v => +v > 0 ? money(+v) : "";
+    el.innerHTML = `<div class="card"><h3>✦ My team activities</h3>
+      <p class="host-rem">Pick or type an activity, then add its date and cost. It goes on your calendar with a reminder 2 days before, into your plan, and the real cost goes into your Budget.</p>
+      ${teamActs.map(x => `<div class="act-item" data-tid="${x.id}" style="display:block;border-top:1px solid var(--line);padding:10px 0"><div class="host-row"><b>${esc(x.name)}</b><button type="button" class="icon-btn" data-tdel aria-label="Remove">✕</button></div>
+        <div class="act-cost"><label>Date<input class="input" type="date" data-tf="date" value="${esc(x.date || "")}"></label><label>Our estimate<input class="input" data-tf="est" inputmode="decimal" placeholder="${CUR}" value="${x.est || ""}"></label><label>Actual cost<input class="input" data-tf="actual" inputmode="decimal" placeholder="${CUR}" value="${x.actual || ""}"></label>
+        <small>${+x.actual > 0 ? `✦ ${money(+x.actual)} is in your Budget` : "Type the real cost to add it to your Budget"}${x.date && !offActPhase(x.date) ? " · set your event date in Plan to place it in your plan" : ""}</small></div></div>`).join("")}
+      <form id="teamAddForm" autocomplete="off" class="org-addr-row" style="margin-top:10px"><input class="input" name="name" list="teamNames" maxlength="50" placeholder="Pick or type an activity" required><datalist id="teamNames">${names.map(n => `<option value="${esc(n)}">`).join("")}</datalist><button class="btn btn-green" type="submit">Add</button></form></div>`;
+  }
+  document.addEventListener("click", e => {
+    if (e.target.closest && e.target.closest('[data-open="teamSheet"]')) setTimeout(renderTeamPlan, 60);
+    const d = e.target.closest && e.target.closest("[data-tdel]"); if (d) { const id = d.closest("[data-tid]").dataset.tid; teamActs = teamActs.filter(x => x.id !== id); save("teamacts", teamActs); renderTeamPlan(); try { renderPlanner(); orgSync(); } catch (x) {} }
+  });
+  document.addEventListener("submit", e => {
+    if (e.target.id !== "teamAddForm") return; e.preventDefault();
+    const n = e.target.name.value.trim(); if (!n) return; teamActs.push({ id: uid(), name: n.slice(0, 50), date: "", est: 0, actual: 0 }); save("teamacts", teamActs); renderTeamPlan(); toast("✦ Added. Now give it a date and cost");
+  }, true);
+  document.addEventListener("change", e => {
+    const i = e.target.closest && e.target.closest("[data-tf]"); if (!i) return;
+    const x = teamActs.find(z => z.id === i.closest("[data-tid]").dataset.tid); if (!x) return; const k = i.dataset.tf;
+    if (k === "date") x.date = i.value; else { const v = parseFloat(String(i.value).replace(/[^0-9.]/g, "")); x[k] = v > 0 ? Math.round(v * 100) / 100 : 0; }
+    save("teamacts", teamActs); renderTeamPlan(); try { renderPlanner(); orgSync(); } catch (z) {}
+    if (k === "date" && i.value) toast("📅 On your calendar, with a reminder 2 days before"); if (k === "actual" && x.actual) toast(`💵 ${money(x.actual)} added to your Budget`);
+  });
   function actPhaseFor(date) {
     const d = date.slice(5), md = d <= "11-07" ? "n1" : d <= "11-14" ? "n2" : d <= "11-21" ? "n3" : d <= "11-30" ? "n4" : d <= "12-07" ? "d1" : d <= "12-14" ? "d2" : d <= "12-23" ? "d3" : d === "12-24" ? "ce" : d === "12-25" ? "cd" : "";
     return date.slice(5, 7) === "10" || date.slice(5, 7) < "11" ? "n1" : md;
@@ -9144,6 +9181,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (hubMode === "company" && typeof officeTaskInfo === "function") {
       const inf = officeTaskInfo(); PHASES = (inf && inf.phases) || OFFICE_PHASES;
       const el = $("#taskEventLine"); if (el && inf) { el.hidden = false; el.textContent = "✦ Tasks for: " + inf.label; }
+      try { if (teamActs.some(x => x.date)) PHASES = PHASES.map(p => { const mine = teamActs.filter(x => x.date && offActPhase(x.date) === p.id).sort((a, b) => a.date.localeCompare(b.date)); return mine.length ? Object.assign({}, p, { tasks: p.tasks.concat(mine.map(x => ({ id: "ga-" + x.id, text: "✦ " + x.name + " on " + new Date(x.date + "T12:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) + ". Reminder set 2 days before." }))) }) : p; }); } catch (e) {}
     }
     $("#phaseList").innerHTML = planPhases().map(p => (p.head ? `<h2 class="phase-month">${esc(p.head)}</h2>` : "") + phaseHtml(p)).join("");
     const ny = nyPhases(), nt = $("#nyeTasks"); if (nt) { nt.innerHTML = ny.map(phaseHtml).join(""); $("#nyeTasksLabel").hidden = !ny.length; }
@@ -10459,6 +10497,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     {"id": "a27", "w": "in", "ico": "📖", "name": "Christmas story night", "txt": "Read holiday stories by candlelight or twinkle lights. Find free stories in Kids' Corner on the Games tab.", "tags": "kids free"},
     {"id": "a29", "map": "cultural Christmas festival", "w": "out", "ico": "🌍", "name": "Cultural Christmas festivities", "txt": "Discover how other cultures celebrate: Las Posadas, Filipino parols, German and Ukrainian traditions, and more near you.", "tags": "kids"}
   ];
+  let teamActs = load("teamacts", []);   // Office: [{ id, name, date, est, actual }]
   let acts = load("acts", { mark: {}, own: [] });     // mark: { id: "plan" | "done" }
   let actFilter = "all";
   const allActs = () => ACTIVITIES.concat(acts.own.map(o => ({ id: o.id, w: "own", ico: "💫", name: o.name, txt: "Your own tradition", tags: "", own: true })));
@@ -15072,6 +15111,7 @@ const PC_DESIGNS = [
     try { Object.entries(acts.cost || {}).forEach(([id, c]) => { if (+c.actual > 0) { const a = allActs().find(x => x.id === id); rows.push({ src: "Activities", cat: "party", name: "Activity: " + (a ? a.name : "Outing"), amt: +c.actual, date: "" }); } }); } catch (er) {}
     if (typeof host !== "undefined") host.trips.forEach(x => { if (+x.cost > 0) rows.push({ src: "Plan › Travel", cat: x.k === "pet" ? "other" : "travel", name: (x.k === "pet" ? "Pet care: " : x.k === "pass" ? "Passport: " : "") + x.a, amt: +x.cost, date: x.paidOn || "" }); });
     if (typeof org !== "undefined") org.packages.forEach(x => { const a = (+x.price || 0) + (+x.ship || 0); if (a > 0) rows.push({ src: "Plan › Packages", cat: "gifts", name: "Order: " + x.item + (+x.ship ? " (with shipping)" : ""), amt: a, date: x.date || "" }); });
+    if (typeof teamActs !== "undefined" && hubMode === "company") teamActs.forEach(x => { if (+x.actual > 0) rows.push({ src: "Activities", cat: "party", name: "Team activity: " + x.name, amt: +x.actual, date: x.date || "" }); });
     if (typeof offBudgetRows === "function" && hubMode === "company") offBudgetRows().forEach(r => rows.push(r));
     budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "", mine: !!x.mine }));
     return rows;
