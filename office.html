@@ -15041,7 +15041,7 @@ const PC_DESIGNS = [
      ============================================================ */
   const BUD_CATS = [
     ["gifts", "🎁", "Gifts", "#8E1B2B"], ["food", "🍽️", "Food & drinks", "#D4A93C"], ["decor", "🎄", "Decorations", "#1F5C36"],
-    ["hosting", "🏡", "Hosting", "#151515"], ["party", "🎉", "Parties & activities", "#5E8C61"], ["cards", "✉️", "Cards & postage", "#EBCB6E"],
+    ["hosting", "🏡", "Hosting", "#151515"], ["party", "🎉", "Parties & activities", "#5E8C61"], ["nye", "✦", "New Year's", "#A67C2E"], ["cards", "✉️", "Cards & postage", "#EBCB6E"],
     ["travel", "🚗", "Travel", "#6B4423"], ["giving", "⭐", "Giving", "#B24A5A"], ["other", "📦", "Other", "#7A7A7A"]
   ];
   const budCat = k => BUD_CATS.find(c => c[0] === k) || BUD_CATS[BUD_CATS.length - 1];
@@ -15056,7 +15056,7 @@ const PC_DESIGNS = [
     const rows = [];
     gifts.people.forEach(p => p.gifts.forEach(g => { if (isSpent(g) && +g.price) rows.push({ src: "Gift Tracker", cat: "gifts", name: `${g.name} for ${p.name}`, amt: +g.price, date: g.boughtAt || "" }); }));
     const santa = sum(santaGifts(), isSpent); if (santa) rows.push({ src: "Santa's list", cat: "gifts", name: "🎅 Santa's gifts (kept secret)", amt: santa, date: "" });
-    foodBudget.items.forEach(x => { if (+x.amt) rows.push({ src: "Food budget", cat: "food", name: x.name, amt: +x.amt, date: x.date || "" }); });
+    foodBudget.items.forEach(x => { if (+x.amt) rows.push({ src: "Food budget", cat: x.meal === "nyeparty" ? "nye" : "food", name: x.name, amt: +x.amt, date: x.date || "" }); });
     if (typeof org !== "undefined" && hubMode === "company") org.giving.forEach(x => { if (+x.amt) rows.push({ src: "Giving", cat: "giving", name: x.what, amt: +x.amt, date: x.date || "" }); });
     try { Object.entries(acts.cost || {}).forEach(([id, c]) => { if (+c.actual > 0) { const a = allActs().find(x => x.id === id); rows.push({ src: "Activities", cat: "party", name: "Activity: " + (a ? a.name : "Outing"), amt: +c.actual, date: "" }); } }); } catch (er) {}
     if (typeof host !== "undefined") host.trips.forEach(x => { if (+x.cost > 0) rows.push({ src: "Plan › Travel", cat: x.k === "pet" ? "other" : "travel", name: (x.k === "pet" ? "Pet care: " : x.k === "pass" ? "Passport: " : "") + x.a, amt: +x.cost, date: x.paidOn || "" }); });
