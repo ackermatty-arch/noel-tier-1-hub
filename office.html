@@ -9101,12 +9101,26 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       if (gt.length) phases.push({ id: "gp", icon: "✈️", title: "Your Guests & Travel", tasks: gt });
       const ab = (load("addrbook", []) || []).filter(x => x.g !== "Santa");
       if (ab.length) phases.push({ id: "gc", icon: "✉️", title: "Your Cards", tasks: [{ id: "gc-send", text: "Send your " + ab.length + " holiday card" + (ab.length > 1 ? "s" : "") + ". Plan › Cards & Address Book has the labels and checklist." }] });
-      return { ready: true, st, phases };
+      // 🍽️ the everyday Christmas tasks name your dinner instead of saying "turkey, ham or roast"
+      const ov = {};
+      if (main) {
+        const nm = main.name;
+        Object.assign(ov, {
+          "n3-2": "Menu chosen: " + nm + ". Review the menu and shopping list in the Menu tab.",
+          "n3-3": "Order specialty ingredients: Reserve whatever " + nm + " needs (see the shopping list in the Menu tab).",
+          "d3-1": "Do the final grocery run: Buy non-perishables, drinks and the pantry items on your " + nm + " shopping list.",
+          "d3-2": "Prep and freeze: Make the sauces, sides or desserts your " + nm + " timeline says can be made ahead.",
+          "ce-1": "Buy fresh perishables: Pick up the fresh items on your " + nm + " shopping list.",
+          "ce-2": "Kitchen prep: Follow the make-ahead steps in your " + nm + " timeline and chill the drinks.",
+          "cd-1": "Cook the meal: Make " + nm + " following your timed kitchen schedule in the Menu tab."
+        });
+      }
+      return { ready: true, st, phases, ov };
     } catch (e) { return none; }
   }
   function renderPlanner() {
     if (hubMode !== "company") {
-      const f = famTaskInfo(); PHASES = f.ready ? f.phases.concat(FAMILY_PHASES) : FAMILY_PHASES;
+      const f = famTaskInfo(); PHASES = f.ready ? f.phases.concat(FAMILY_PHASES.map(p => p.tasks ? Object.assign({}, p, { tasks: p.tasks.map(t => f.ov && f.ov[t.id] ? Object.assign({}, t, { text: f.ov[t.id] }) : t) }) : p)) : FAMILY_PHASES;
       const g = $("#taskGate"); if (g) {
         g.hidden = f.ready;
         $$("#taskGate [data-tg]").forEach(r => { const on = f.st[r.dataset.tg]; r.classList.toggle("done", on); r.querySelector(".tg-go").textContent = on ? "Done" : "Go ›"; });
