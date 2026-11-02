@@ -79,6 +79,22 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO build | tail -n 40
 
+      - name: Check the four Apple secrets are all there
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          S1: ${{ secrets.APPLE_TEAM_ID }}
+          S2: ${{ secrets.ASC_KEY_ID }}
+          S3: ${{ secrets.ASC_ISSUER_ID }}
+          S4: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          missing=""
+          [ -n "$S1" ] || missing="$missing APPLE_TEAM_ID"
+          [ -n "$S2" ] || missing="$missing ASC_KEY_ID"
+          [ -n "$S3" ] || missing="$missing ASC_ISSUER_ID"
+          [ -n "$S4" ] || missing="$missing ASC_KEY_P8"
+          if [ -n "$missing" ]; then echo "::error::Missing secrets:$missing"; exit 1; fi
+          echo "All four secrets are present."
+
       - name: Save App Store Connect key
         if: github.event_name == 'workflow_dispatch'
         env:
