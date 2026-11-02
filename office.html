@@ -2963,6 +2963,9 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       <div class="seg" id="soundPick" role="group" aria-label="Alarm sound">
         <button data-sound="song" aria-pressed="true">🎵 Merry Xmas song</button>
         <button data-sound="bell" aria-pressed="false">🔔 Bell chime</button>
+        <button class="co-only" data-sound="soft" aria-pressed="false">✦ Soft chime</button>
+        <button class="co-only" data-sound="marimba" aria-pressed="false">✦ Marimba</button>
+        <button class="co-only" data-sound="ping" aria-pressed="false">✦ Double ping</button>
       </div>
       <!-- ✏️ Music credit -->
       <p class="sound-credit">Music: “Merry Xmas” by angelika728 via Pixabay</p>
@@ -9394,7 +9397,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       setTimeout(() => { if (!playSong(12)) { playChime(); toast("🔔 Song still loading, here's the bell"); } }, 700);
       return;
     }
-    playChime(); toast("🔔 Ding! Sound is working.");
+    playChime(); toast("✦ Sound is working.");
   });
   $("#soundPick").addEventListener("click", e => {
     const b = e.target.closest("[data-sound]");
@@ -9441,7 +9444,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
      (a 60-second, compressed clip so the app still works offline).
      ✏️ To use a different song, replace that clip; the bell is always the backup. */
   let songBuffer = null, songLoading = false, songSrc = null, songGain = null;
-  let alarmSound = load("alarmSound", "song");          // "song" or "bell"
+  let alarmSound = load("alarmSound", window.NOEL_EDITION === "office" ? "bell" : "song");          // "song" or "bell"
   function loadSong() {
     if (songBuffer || songLoading || !audioCtx || !window.ALARM_SONG) return;
     songLoading = true;
@@ -9501,10 +9504,18 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   }
 
   // ✏️ The chime melody (note frequencies in Hz). Currently a rising G-C-E-G sleigh-bell arpeggio.
+  function tone(ctx, freq, t, vol, dur, type) {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + dur + 0.05);
+  }
   function playChime() {
     const ctx = getAudio();
     if (!ctx) return;
     const t = ctx.currentTime + 0.05;
+    if (alarmSound === "soft") { tone(ctx, 880, t, 0.25, 1.4, "sine"); tone(ctx, 659.25, t + 0.35, 0.25, 1.6, "sine"); return; }
+    if (alarmSound === "marimba") { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(ctx, f, t + i * 0.14, 0.3, 0.5, "triangle")); return; }
+    if (alarmSound === "ping") { [0, 0.35].forEach(d => { tone(ctx, 1174.66, t + d, 0.25, 0.3, "sine"); tone(ctx, 1567.98, t + d + 0.08, 0.18, 0.3, "sine"); }); return; }
     [783.99, 1046.5, 1318.51, 1567.98].forEach((f, i) => bell(ctx, f, t + i * 0.16, 0.28));
     bell(ctx, 2093.0, t + 0.8, 0.22);
     bell(ctx, 1567.98, t + 0.95, 0.18);
