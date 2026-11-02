@@ -52,6 +52,8 @@ import re as _re, base64 as _b64
 _pearl = _b64.b64encode(open("office-assets/icon-office-192.png", "rb").read()).decode()
 off = _re.sub(r'(<link rel="(?:apple-touch-icon|icon)"[^>]*href=")data:image/png;base64,[^"]*(")', lambda m: m.group(1) + "data:image/png;base64," + _pearl + m.group(2), off)
 off = off.replace('content="#1E3A2F"', 'content="#151515"')
+# the pearl is the Noëma logo in both Family and Office mode (the dove stays with Noël)
+off = off.replace("body.co .brand-logo {", "body .brand-logo {").replace("body.co .welcome-star {", "body .welcome-star {")
 off = off.replace("Noël", "Noëma").replace("NOËL", "NOËMA")
 off = off.replace('["Noëma Tier 1 Hub", "Noëma Tier 1", "Christmas Holiday Hub"]', '["Noëma Tier 1 Hub", "Noël Tier 1 Hub", "Noël Tier 1", "Christmas Holiday Hub"]')
 open("office.html", "w").write(off)
