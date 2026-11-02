@@ -885,19 +885,34 @@
       <div class="card cf-menu"><h4 class="ms-h">Menu</h4>${s.menu.map(m => `<div class="cf-dish"><h4>${esc(m.name)}</h4><p class="cf-when">${esc(whenLong(m.at))} · ${m.guests} guest${m.guests > 1 ? "s" : ""}</p>` +
         m.courses.map(([k, items]) => `<p class="cf-course"><b>${esc(k)}</b> ${items.map(esc).join(" <i>·</i> ")}</p>`).join("") + `</div>`).join("")}</div>
       <div class="card cf-stats"><div class="cf-big"><small>Estimated cost to buy</small><b>${cad0(s.toBuy)}</b></div><p class="cf-fine" id="svCount">${done} of ${n} in the cart</p></div>
+      ${costBoxHtml("saved:" + s.id, s.names.join(" and "), s.toBuy, "Our estimate (what's left to buy)")}
       <div class="ms-acts"><button type="button" class="btn btn-gold" data-print="savedmenu:${s.id}">Print or save PDF</button><button type="button" class="btn btn-ghost" data-svcopy="${s.id}">Copy list</button></div>
       <div class="card ms-list">` + buy.map(([d, its]) => `<h4 class="ms-dept">${esc(d)}</h4><ul class="ms-items">` + its.map(i =>
         `<li class="${s.bought[i.key] ? "on" : ""}"><label><input type="checkbox" data-svtick="${esc(i.key)}" ${s.bought[i.key] ? "checked" : ""}><span class="ms-t">${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}</span></label></li>`).join("") + `</ul>`).join("") +
       (haveItems.length ? `<h4 class="ms-dept">Already at home</h4><p class="cf-fine">${haveItems.map(i => esc(i.name)).join(", ")}</p>` : "") + `</div>
+      ${svCookHtml(s, false)}
       <div class="send-btns"><button type="button" class="btn btn-ghost" data-svdel="${s.id}">Delete this saved menu</button></div>`;
+  }
+  // 👩‍🍳 the cooking plan for a saved menu: the timeline and the recipes for each dinner on it
+  const svMeals = s => s.menu.map(m => MD.meals.find(x => x.name === m.name)).filter(Boolean);
+  function svCookHtml(s, print) {
+    return svMeals(s).map(m => {
+      const c = cfgFor(m.id), p = mealSizes(m, c), steps = buildSteps(m, c); let last = "";
+      const tl = print
+        ? `<table class="md-tl">` + steps.map(st => { const d = dayName(st.t), h = d !== last ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; last = d; return h + `<tr${st.m === 0 ? ' class="sv"' : ""}><td class="t">${st.ahead ? "All day" : mclock(st.t)}</td><td>☐ ${esc(st.text)}</td></tr>`; }).join("") + `</table>`
+        : `<ol class="meal-tl">` + steps.map(st => { const d = dayName(st.t), h = d !== last ? `<li class="tl-day">${esc(d)}</li>` : ""; last = d; return h + `<li class="${st.m === 0 ? "serve" : ""}"><time>${st.ahead ? "All day" : mclock(st.t)}</time><span>${st.icon} ${esc(st.text)}</span></li>`; }).join("") + `</ol>`;
+      return print
+        ? `<h2 class="md-h">${esc(m.name)}: timeline</h2>${tl}<h2 class="md-h">${esc(m.name)}: recipes &amp; instructions</h2>${allRecipesHtml(m, p.f, p, true)}`
+        : `<div class="card sv-cook"><h4 class="ms-h">${esc(m.name)}: your timeline</h4>${tl}<h4 class="ms-h" style="margin-top:14px">Recipes and instructions</h4>${allRecipesHtml(m, p.f, p, false)}</div>`;
+    }).join("");
   }
   const svText = s => `Noël menu (${s.names.join(", ")})\n${whenLong(s.at)}\nEstimated to buy ${cad0(s.toBuy)} ${s.cur || ""}\n` + svBuyList(s).map(([d, its]) => `\n${d.toUpperCase()}\n` + its.map(i => `${s.bought[i.key] ? "☑" : "☐"} ${i.q ? i.q + " " : ""}${i.name}`).join("\n")).join("\n");
   function savedMenuDoc(id) {
     const s = savedMenus.find(x => x.id === id); if (!s) return { error: "That saved menu isn't here any more" };
-    const css = PRINT_CSS + ` .ms-c{column-count:2;column-gap:28px} .ms-c h3{font:600 9pt sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#B08D4E;border-bottom:1px solid #C9A45C;padding-bottom:3px;margin:14px 0 5px;break-after:avoid} .ms-c li{margin:3px 0;break-inside:avoid;font-size:11pt} .sm-d{margin:0 0 12px} .sm-d h2{font-size:15pt;margin:0 0 2px} .sm-d p{margin:2px 0;font-size:10.5pt}`;
+    const css = PRINT_CSS + MD_CSS.replace(/^body\{[^}]*\}/, "") + ` .ms-c{column-count:2;column-gap:28px} .ms-c h3{font:600 9pt sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#B08D4E;border-bottom:1px solid #C9A45C;padding-bottom:3px;margin:14px 0 5px;break-after:avoid} .ms-c li{margin:3px 0;break-inside:avoid;font-size:11pt} .sm-d{margin:0 0 12px} .sm-d h2{font-size:15pt;margin:0 0 2px} .sm-d p{margin:2px 0;font-size:10.5pt}`;
     const menu = s.menu.map(m => `<div class="sm-d"><h2>${esc(m.name)}</h2><p>${esc(whenLong(m.at))} · ${m.guests} guest${m.guests > 1 ? "s" : ""}</p>` + m.courses.map(([k, items]) => `<p><b>${esc(k)}:</b> ${items.map(esc).join(" · ")}</p>`).join("") + `</div>`).join("");
     const html = `<h1>Menu and shopping list</h1><p class="pm-sub">${esc(s.names.join(" · "))}<br>Estimated to buy ${cad0(s.toBuy)} ${esc(s.cur || "")}</p>${menu}<div class="ms-c">` +
-      svBuyList(s).map(([d, its]) => `<h3>${esc(d)}</h3><ul>${its.map(i => `<li>☐ ${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}</li>`).join("")}</ul>`).join("") + `</div><p class="pm-foot">Made with Noël Tier 1 Hub.</p>`;
+      svBuyList(s).map(([d, its]) => `<h3>${esc(d)}</h3><ul>${its.map(i => `<li>☐ ${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}</li>`).join("")}</ul>`).join("") + `</div>` + svCookHtml(s, true) + `<p class="pm-foot">Made with Noël Tier 1 Hub.</p>`;
     return { title: "Menu and shopping list", css, html, margin: 0.5, file: "My-Noel-Menu" };
   }
   $("#view-meals").addEventListener("click", async e => {
