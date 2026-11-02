@@ -230,17 +230,23 @@
   // ---------- 📦 Packages ----------
   function orgPackagesHtml() {
     const today = ymd(new Date());
-    return `<div class="card org-card"><p class="host-rem">Track online orders so nothing goes missing. You'll get a nudge on each delivery day, plus a reminder in mid-December to check stores' last order dates for Christmas delivery.</p></div>
+    return `<div class="card org-card"><p class="host-rem">Once you've ordered something, add it here by hand. Noël keeps track so nothing goes missing, nudges you on each delivery day, and reminds you in mid-December to check stores' last order dates. Add the price and any shipping and they go straight into your Budget.</p></div>
       ${org.packages.map(p => { const late = p.eta && p.eta < today && !p.arrived;
         return `<div class="card org-item${p.arrived ? " done" : ""}" data-op="${p.id}"><div class="host-row"><b>${esc(p.item)}</b><button class="icon-btn" data-odel aria-label="Remove">✕</button></div>
           <p class="org-addr">${esc(p.store || "")}${p.eta ? ` · expected ${shortDate(p.eta)}` : ""}${p.track ? ` · #${esc(p.track)}` : ""}</p>
+          ${(+p.price || +p.ship) ? `<p class="org-addr">✦ ${money((+p.price || 0) + (+p.ship || 0))} in your Budget${+p.ship ? ` (includes ${money(+p.ship)} shipping)` : ""}</p>` : ""}
           ${late ? `<p class="org-warn">⚠️ Running late. Check the tracking or contact the store.</p>` : ""}
           <button type="button" class="chip${p.arrived ? " on" : ""}" data-oarrived>${p.arrived ? "✓ Arrived" : "Mark as arrived"}</button></div>`; }).join("")}
-      <form class="card add-task org-ev-form" id="orgPackageForm" autocomplete="off"><h3>➕ Add an order</h3>
+      <form class="card add-task org-ev-form" id="orgPackageForm" autocomplete="off"><h3>✦ Add an order by hand</h3>
         <input class="input" name="item" maxlength="60" placeholder="What did you order?" aria-label="Item">
         ${fillChips((currency === "USD" ? ["Amazon", "Walmart", "Target", "Best Buy", "Costco"] : ["Amazon", "Walmart", "Canadian Tire", "Best Buy", "Costco"]).map(x => [x]), "#orgPackageForm [name=store]")}
         <div class="org-addr-row"><input class="input" name="store" maxlength="30" placeholder="Store" aria-label="Store"><input class="input" name="eta" type="date" aria-label="Expected delivery"></div>
         <input class="input" name="track" maxlength="40" placeholder="Tracking number (optional)" aria-label="Tracking number">
+        <label><span class="meal-lab">Order total (optional)</span><input class="input" name="price" inputmode="decimal" placeholder="$ what you paid"></label>
+        <div class="hcost"><span class="meal-lab">Shipping not included at checkout?</span>
+          <input type="hidden" name="addship" value="0">
+          <div class="hcost-yn"><button type="button" data-pky="0" aria-pressed="true">No</button><button type="button" data-pky="1" aria-pressed="false">Yes</button></div>
+          <label class="pk-ship" hidden><span class="meal-lab">Shipping cost</span><input class="input" name="ship" inputmode="decimal" placeholder="$ shipping"></label></div>
         <button class="btn btn-green btn-block" type="submit">Add</button></form>`;
   }
   // ---------- ⭐ Giving ----------
@@ -322,6 +328,7 @@
       else return;
       orgChanged(); return;
     }
+    const yn = t.closest("[data-pky]"); if (yn) { const fm = yn.closest("form"), on = yn.dataset.pky === "1"; fm.addship.value = on ? "1" : "0"; fm.querySelectorAll("[data-pky]").forEach(b => b.setAttribute("aria-pressed", String(b === yn))); fm.querySelector(".pk-ship").hidden = !on; if (on) fm.ship.focus(); return; }
     const pk = t.closest("[data-op]"), p = pk && org.packages.find(x => x.id === pk.dataset.op);
     if (p) { if (t.closest("[data-oarrived]")) { p.arrived = !p.arrived; if (p.arrived) toast("📦 Arrived!"); } else if (t.closest("[data-odel]")) org.packages = org.packages.filter(x => x !== p); else return; orgChanged(); return; }
     const tn = t.closest("[data-otnote]"); if (tn) { const x = org.thanks.find(z => z.id === tn.closest("[data-ot]").dataset.ot); if (x) showTy(x); return; }
@@ -348,7 +355,7 @@
     if (f.id === "orgEventForm") { const ti = f.title.value.trim(); if (!ti) { toast("📅 Give the event a name"); return; } org.events.push({ id: uid(), date: org.calDay || ymd(new Date()), time: f.time.value, title: ti, who: f.who.value, notes: f.notes.value.trim(), remind: f.remind.checked }); toast("📅 Added to your calendar"); }
     if (f.id === "orgMemberForm") { const n = f.mname.value.trim(); if (!n) return; org.members.push({ id: uid(), name: n, emoji: f.emoji.value }); }
     if (f.id === "orgThanksForm") { const fr = f.from.value.trim(); if (!fr) return; org.thanks.push({ id: uid(), from: fr, gift: f.gift.value.trim(), done: false }); }
-    if (f.id === "orgPackageForm") { const it = f.item.value.trim(); if (!it) return; org.packages.push({ id: uid(), item: it, store: f.store.value.trim(), eta: f.eta.value, track: f.track.value.trim(), arrived: false }); }
+    if (f.id === "orgPackageForm") { const it = f.item.value.trim(); if (!it) return; org.packages.push({ id: uid(), item: it, store: f.store.value.trim(), eta: f.eta.value, track: f.track.value.trim(), price: parseFloat(f.price.value) || 0, ship: f.addship.value === "1" ? (parseFloat(f.ship.value) || 0) : 0, date: budToday(), arrived: false }); }
     if (f.id === "orgGiveForm") { const w = f.what.value.trim(); if (!w) return; org.giving.push({ id: uid(), what: w, amt: parseFloat(f.amt.value) || 0, done: false, date: budToday() }); }
     if (f.id === "orgOtherForm") { const n = f.name.value.trim(); if (!n) return; org.other.push({ id: uid(), name: n, amt: parseFloat(f.amt.value) || 0 }); }
     orgChanged();
