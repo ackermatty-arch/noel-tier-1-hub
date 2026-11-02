@@ -31,9 +31,9 @@
      ✏️ BRANDING: App name (browser tab + home-screen label)
      ============================================================ -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: capacitor:; script-src 'self' 'unsafe-inline' capacitor:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src data:; connect-src 'self' data: blob: capacitor:">
-<title>Noël Tier 1 Hub</title>
+<title>Noëma Tier 1 Hub</title>
 <meta name="description" content="Your all-in-one Christmas companion: games, planner checklist and kitchen duty timers.">
-<meta name="apple-mobile-web-app-title" content="Noël Tier 1 Hub">
+<meta name="apple-mobile-web-app-title" content="Noëma Tier 1 Hub">
 
 <!-- Native-app feel when saved to the Home Screen -->
 <meta name="theme-color" content="#0f3d24">
@@ -1941,7 +1941,7 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .wz-hint { font-size: 12.5px; color: #6b6b6b; margin: 6px 0 0; }
 .wz-more { margin: 14px 0; border: 1px solid #E6E6E6; padding: 0 12px; }
 .wz-more > summary { padding: 14px 0; cursor: pointer; font-family: var(--font-display); letter-spacing: .08em; text-transform: uppercase; font-size: 12.5px; }
-/* The Noël Menu */
+/* The Noëma Menu */
 #view-meals.on-menu > :not(#mealMenu), #view-nye.on-menu > :not(#nyeMenu), #view-office.on-menu > :not(#offMenu):not([data-goview="planner"]) { display: none !important; }
 #mealMenu, #nyeMenu, #offMenu { text-align: center; padding: 0 4px 24px; }
 .menu-top, .menu-bottom { display: flex; justify-content: flex-end; }
@@ -2032,7 +2032,7 @@ h1, h2, h3, .view-title { font-weight: 600; letter-spacing: .05em; }
 .menu-top:not(.menu-top2) { flex-wrap: nowrap; gap: 8px; }
 .menu-top:not(.menu-top2) .menu-go { flex: 1 1 0; min-width: 0; padding: 12px 4px; font-size: 11px; letter-spacing: .04em; white-space: nowrap; text-align: center; }
 .menu-top:not(.menu-top2) .menu-go span { margin-left: 2px; }
-/* Meals: the planner stops at "See my plan". Noël generates everything after that. */
+/* Meals: the planner stops at "See my plan". Noëma generates everything after that. */
 #view-meals .wz-more, #view-meals #mealSkip, #view-meals #foodBudget, #view-meals #mealOwn, #view-meals #mealDietBottom { display: none !important; }
 .wz-por { display: flex; align-items: center; gap: 8px; margin: 4px 0 0 28px; }
 .wz-por small { color: #666; font-size: 12.5px; }
@@ -2310,7 +2310,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
 .app-rec h5 { margin: 10px 0 2px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #8a6d33; }
 .app-rec ul, .app-rec ol { margin: 4px 0 4px 20px; padding: 0; } .app-rec li { margin: 3px 0; font-size: 14px; line-height: 1.4; }
 .app-rec .rec-batch { margin: 8px 0 0; font-size: 13px; }
-/* Bottom bar icons: gold line icons drawn for Noël */
+/* Bottom bar icons: gold line icons drawn for Noëma */
 .bottom-nav .nav-ico { background: none !important; width: 26px !important; height: 26px !important; display: grid; place-items: center; color: #D4A93C; filter: none !important; }
 .bottom-nav .nav-ico svg { width: 24px; height: 24px; display: block; }
 .bottom-nav .nav-btn:not(.active) .nav-ico { opacity: .6; }
@@ -2381,7 +2381,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <div class="brand" role="button" tabindex="0" title="Tap to personalise">
       <div class="brand-logo" aria-hidden="true">🎄</div>
       <div class="brand-text">
-        <h1 class="brand-title">Noël Tier 1 Hub</h1>
+        <h1 class="brand-title">Noëma Tier 1 Hub</h1>
         <div class="brand-sub">Plan · Celebrate · Remember</div>
       </div>
     </div>
@@ -2688,7 +2688,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
        ============================================================ -->
   <section class="view" id="view-planner" aria-labelledby="plannerTitle">
     <h2 class="view-title" id="plannerTitle" data-co-title="Event Coordinator">Plan</h2>
-    <p class="view-intro" data-co-desc="Your party plan, approvals, vendors and budget in one place. Everything saves automatically."><b class="pi-lead">Build your plan here.</b> Add your gifts, cards, travel and activities, then head to <b>Menu</b> to plan your dinner. Noël generates the rest for you: your shopping list, timeline, tasks and budget.</p>
+    <p class="view-intro" data-co-desc="Your party plan, approvals, vendors and budget in one place. Everything saves automatically."><b class="pi-lead">Build your plan here.</b> Add your gifts, cards, travel and activities, then head to <b>Menu</b> to plan your dinner. Noëma generates the rest for you: your shopping list, timeline, tasks and budget.</p>
     <p class="co-only" style="color:#A67C2E;border:1px solid #C9A45C;padding:8px 10px;margin:0 0 12px">✦ Set your total on the Budget tab first. Then every vendor, activity and order you add here counts against it.</p>
 
     <div class="plan-tools fam-only">
@@ -2713,10 +2713,10 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <div id="hostBody"></div>
     <div class="card gen-plan" id="genPlan">
       <button type="button" class="btn btn-gold btn-block" id="genPlanBtn">✦ Generate my plan</button>
-      <p class="gen-msg" id="genPlanMsg">Noël builds your dated task list from your Plan, Menu and Budget.</p>
+      <p class="gen-msg" id="genPlanMsg">Noëma builds your dated task list from your Plan, Menu and Budget.</p>
       <div class="gen-redo"><b>Plans changed? You don't have to start over.</b>
         <p>Your task list rebuilds itself, so just fix what moved: a new dinner, pick it in <button type="button" class="of-lnk" data-goview="meals">Menu</button>; new guests, dates or travel, edit them here in Plan; a new budget, change it in <button type="button" class="of-lnk" data-goview="budget">Budget</button>. Then tap Generate again.</p>
-        <p>Want a clean slate for the whole season? Open <button type="button" class="of-lnk" data-goview="review">Review</button> and save this Christmas. Noël keeps your people and your budget amounts, and clears this year's gifts and activities.</p></div>
+        <p>Want a clean slate for the whole season? Open <button type="button" class="of-lnk" data-goview="review">Review</button> and save this Christmas. Noëma keeps your people and your budget amounts, and clears this year's gifts and activities.</p></div>
     </div>
     <div class="card host-fridge" id="hostFridge">
       <span class="hf-ico">🧲</span>
@@ -2842,7 +2842,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
 
     <!-- 🔒 APP LOCK -->
     <div class="card backup-card" id="lockCard">
-      <p>Everything you save is encrypted and stays on this phone. Turn on <b>App lock</b> to ask for a PIN whenever Noël opens.</p>
+      <p>Everything you save is encrypted and stays on this phone. Turn on <b>App lock</b> to ask for a PIN whenever Noëma opens.</p>
       <p class="backup-last" id="lockStatus">App lock is off.</p>
       <div class="send-btns">
         <button type="button" class="btn btn-green" id="lockSet">🔒 Set a PIN</button>
@@ -2855,11 +2855,11 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
 
     <details class="fold" id="helpFold"><summary>Help &amp; troubleshooting</summary>
     <div class="card backup-card" id="helpCard">
-      <p><b>New phone, or deleted the app by accident?</b><br>Open the App Store, tap your picture, then Purchased, find Noël Tier 1 Hub and tap the cloud to download it again. Use the same Apple ID you bought it with. It's free to re-download and works on your iPhone and iPad.</p>
+      <p><b>New phone, or deleted the app by accident?</b><br>Open the App Store, tap your picture, then Purchased, find Noëma Tier 1 Hub and tap the cloud to download it again. Use the same Apple ID you bought it with. It's free to re-download and works on your iPhone and iPad.</p>
       <p><b>Bring your lists back</b><br>Your lists are saved on the device only. In the app, go to Tasks, open Backup, spreadsheet &amp; privacy, and tap Save a backup. Keep the file in Files, iCloud Drive or email it to yourself. On the new device tap Restore from a backup and choose that file. Without a backup, a deleted app means the lists are gone.</p>
-      <p><b>Forgot your PIN?</b><br>The only way back in is to erase the Noël data on this device, then restore a backup. This is why a backup matters.</p>
-      <p><b>No alarms or reminders?</b><br>Open your phone Settings, then Notifications, then Noël Tier 1 Hub, and turn notifications on. Also turn off Do Not Disturb and check the silent switch.</p>
-      <p><b>Voice does not hear you?</b><br>In Settings, then Noël Tier 1 Hub, turn on Microphone and Speech Recognition. Tap the microphone button and speak after it opens.</p>
+      <p><b>Forgot your PIN?</b><br>The only way back in is to erase the Noëma data on this device, then restore a backup. This is why a backup matters.</p>
+      <p><b>No alarms or reminders?</b><br>Open your phone Settings, then Notifications, then Noëma Tier 1 Hub, and turn notifications on. Also turn off Do Not Disturb and check the silent switch.</p>
+      <p><b>Voice does not hear you?</b><br>In Settings, then Noëma Tier 1 Hub, turn on Microphone and Speech Recognition. Tap the microphone button and speak after it opens.</p>
       <p><b>Printing or sharing a file?</b><br>Tap Print and choose Save as PDF, or use the Share arrow to send it by email, AirDrop or Files.</p>
       <p><b>Still stuck?</b> Email us and tell us what you see on screen.</p>
       <div class="send-btns"><button type="button" class="btn btn-green" id="helpMail">Email for help</button></div>
@@ -2883,7 +2883,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
   </section>
 
   <section class="view" id="view-own" aria-labelledby="ownTitle">
-    <button type="button" class="meal-back fam-only" data-goview="meals">‹ The Noël menu</button>
+    <button type="button" class="meal-back fam-only" data-goview="meals">‹ The Noëma menu</button>
     <button type="button" class="meal-back co-only" data-goview="planner">‹ Planner</button>
     <h2 class="view-title" id="ownTitle" data-co-title="My Own Event">My Own Dinner</h2>
     <p class="view-intro" data-co-desc="Planning your own event? Type in your menu or catering order, supplies, prices and run of show. It saves as you type, only on this phone.">Cooking your own dinner? Type in your menu, shopping list, prices and timeline. It saves as you type, only on this phone.</p>
@@ -2916,7 +2916,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
           <option value="18">6:00 in the evening</option>
           <option value="19">7:00 in the evening</option>
         </select></label>
-      <p class="checkin-step" id="checkinStep"><b>One-time setup:</b> add the reminders to your phone's calendar so they pop up even when Noël is closed.</p>
+      <p class="checkin-step" id="checkinStep"><b>One-time setup:</b> add the reminders to your phone's calendar so they pop up even when Noëma is closed.</p>
       <div class="send-btns">
         <a class="btn btn-green" id="checkinGoogle" target="_blank" rel="noopener">📅 Google Calendar</a>
         <button class="btn btn-ghost" id="checkinIcs" type="button">📅 Apple / other</button>
@@ -3006,7 +3006,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
   <section class="view" id="view-meals" aria-labelledby="mealsTitle">
     <div id="mealMenu" hidden></div>
     <h2 class="view-title" id="mealsTitle">Meal Planner</h2>
-    <p class="view-intro">Pick a dinner, choose how many guests and when you'll eat. Noël sizes every recipe, estimates your grocery prices, writes your shopping list and sets every alarm.</p>
+    <p class="view-intro">Pick a dinner, choose how many guests and when you'll eat. Noëma sizes every recipe, estimates your grocery prices, writes your shopping list and sets every alarm.</p>
     <div id="voiceShopBox" hidden></div>
     <div class="meal-master" id="mealMaster" hidden></div>
     <a href="#mealOwn" class="meal-skip" id="mealSkip">Making your own dinner? Timers &amp; vegan dishes ↓</a>
@@ -3037,7 +3037,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     </div>
     <div class="card meal-own" id="mealOwn">
       <h3>⏲️ Your own dinner timers</h3>
-      <p class="review-sub">Cooking your own menu? Type in a timer for each dish and Noël will ring when it's time.</p>
+      <p class="review-sub">Cooking your own menu? Type in a timer for each dish and Noëma will ring when it's time.</p>
       <form id="mealOwnForm" autocomplete="off">
         <input class="input" name="oname" maxlength="40" placeholder="e.g. Ham out of the oven" aria-label="Timer name">
         <div class="meal-row two">
@@ -3075,7 +3075,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <div class="section-label">Party Planner</div>
     <div class="card nye-plan-card">
       <h3 class="party-star">New Year's Eve Party</h3>
-      <p class="review-sub">Four quick steps, top to bottom. Noël works out how much to make, writes a priced shopping list and sets alarms right through to the midnight toast.</p>
+      <p class="review-sub">Four quick steps, top to bottom. Noëma works out how much to make, writes a priced shopping list and sets alarms right through to the midnight toast.</p>
       <div class="nye-plan-sum" id="nyePartySum"></div>
       <button type="button" class="btn btn-gold btn-block" id="nyePlan">See my plan</button>
     </div>
@@ -3191,7 +3191,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       <div class="gi-cats" id="giCats"></div>
       <div class="apps-filters gi-filters" id="giFilters"></div>
       <div id="giList"></div>
-      <p class="photo-credit">Prices are rough estimates. Store links open a search page, not a specific product, and Noël never sees what you browse.</p>
+      <p class="photo-credit">Prices are rough estimates. Store links open a search page, not a specific product, and Noëma never sees what you browse.</p>
     </div>
 
   </section>
@@ -3371,7 +3371,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <!-- ⭐ How was your season? -->
     <div class="card review-card">
       <h3>How was your season?</h3>
-      <p class="review-sub">How much did Noël help?</p>
+      <p class="review-sub">How much did Noëma help?</p>
       <div class="rev-stars" id="revStars" role="group" aria-label="Rating"><button type="button" data-n="1" aria-label="1 star">★</button><button type="button" data-n="2" aria-label="2 stars">★</button><button type="button" data-n="3" aria-label="3 stars">★</button><button type="button" data-n="4" aria-label="4 stars">★</button><button type="button" data-n="5" aria-label="5 stars">★</button></div>
       <h3 style="margin-top:14px">What helped most?</h3>
       <div class="apps-filters" id="helpChips">
@@ -3432,7 +3432,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
 
     <!-- 🗂️ CHRISTMAS MEMORIES: save this year and start fresh, review past years -->
     <div class="card memories-card">
-      <p>Save this Christmas so you can look back next year at what you gave, what you spent and how you did. Then Noël starts fresh for the new season.</p>
+      <p>Save this Christmas so you can look back next year at what you gave, what you spent and how you did. Then Noëma starts fresh for the new season.</p>
       <div id="memoryYears"></div>
       <button class="btn btn-green btn-block" id="memorySave" type="button">🗂️ Save this Christmas &amp; start fresh</button>
     </div>
@@ -3440,7 +3440,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
   </section>
 
   <!-- ✏️ BRANDING: footer text (shown under every page) -->
-  <footer class="app-footer">Noël Tier 1 Hub · Private &amp; stored only on this device</footer>
+  <footer class="app-footer">Noëma Tier 1 Hub · Private &amp; stored only on this device</footer>
 </main>
 
 <!-- ============================================================
@@ -3726,7 +3726,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
   <div class="sheet-body">
     <div class="sheet-inner">
       <div id="teamPlan"></div>
-      <p class="advent-intro">Get the team out from behind the desk. Tap <b>Find places near me</b> to open your phone's Maps. Noël never sees your location.</p>
+      <p class="advent-intro">Get the team out from behind the desk. Tap <b>Find places near me</b> to open your phone's Maps. Noëma never sees your location.</p>
       <div class="tb-sec">Active &amp; Adventurous</div>
       <div class="tb-row"><b>Guided Hiking &amp; Nature Treks</b><p>Take a day trip along a local forest or mountain trail. Walking in nature naturally encourages conversation and peer support while building trust.</p><button type="button" class="btn btn-ghost btn-sm" data-tmap="hiking trails">Find places near me ›</button></div>
       <div class="tb-row"><b>Scavenger Hunts &amp; Amazing Races</b><p>Divide the office into competing teams to solve clues, navigate a park or city centre, and complete photo challenges.</p><button type="button" class="btn btn-ghost btn-sm" data-tmap="scavenger hunt amazing race team building">Find places near me ›</button></div>
@@ -3760,7 +3760,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
         <button class="chip" data-af="free">⭐ Free</button>
         <button class="chip" data-af="list">⭐ Our list</button>
       </div>
-      <p class="act-map-note">📍 <b>Find near me</b> opens your phone's Maps app to show what's close by. Noël never sees your location.</p>
+      <p class="act-map-note">📍 <b>Find near me</b> opens your phone's Maps app to show what's close by. Noëma never sees your location.</p>
       <div class="apps-list" id="actsList"></div>
       <form class="card add-task" id="actsAdd" autocomplete="off" style="margin-top:14px">
         <h3>➕ Add your own tradition</h3>
@@ -3853,11 +3853,11 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
   <div class="xl-foot"><button type="button" id="xlSave">SAVE SPREADSHEET</button></div></div>
 <div class="alert-overlay" id="welcomeOverlay" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
   <form class="welcome-box classy-frame" id="welcomeForm" autocomplete="off">
-    <div class="classy-brand">NOËL TIER 1 HUB</div>
+    <div class="classy-brand">NOËMA TIER 1 HUB</div>
     <span class="welcome-star" aria-hidden="true"></span>
     <h2 id="welcomeTitle">Welcome</h2>
     <div class="classy-rule"></div>
-    <p class="welcome-text" id="welcomeAsk">Let's make Noël Tier 1 Hub your own.</p>
+    <p class="welcome-text" id="welcomeAsk">Let's make Noëma Tier 1 Hub your own.</p>
     <div class="mode-pick" id="modePick" role="group" aria-label="Family or company" hidden>
       <button type="button" data-mode="family" aria-pressed="true">🏡 Family</button>
       <button type="button" data-mode="company" aria-pressed="false">🏢 Company</button>
@@ -3986,7 +3986,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
 <div id="mediaBusy" hidden style="position:fixed;inset:0;z-index:300;background:rgba(19,40,30,.88);display:flex;align-items:center;justify-content:center;text-align:center;color:#F3EBDA;padding:30px">
   <div><div style="font:italic 400 26px/1.3 Lora,Georgia,serif;color:#fff">Making your video…</div>
   <div style="width:220px;height:3px;background:rgba(217,191,140,.25);margin:18px auto 12px"><div id="mediaBar" style="height:100%;width:0;background:#D9BF8C"></div></div>
-  <div style="font:300 13px/1.5 Poppins,sans-serif;opacity:.8">About 10 seconds. Please keep Noël open.</div></div>
+  <div style="font:300 13px/1.5 Poppins,sans-serif;opacity:.8">About 10 seconds. Please keep Noëma open.</div></div>
 </div>
 
 <script>
@@ -4203,7 +4203,7 @@ const INVITE = (() => {
   };
 
   const CARDS = {
-    noel:     { name: "Noël Star", front: () => `<svg class="c-art" viewBox="0 0 200 200" aria-hidden="true">${artNoel()}</svg><div class="c-caps">Noël</div><div class="c-sub">Peace on earth, goodwill to all</div>` },
+    noel:     { name: "Noëma Star", front: () => `<svg class="c-art" viewBox="0 0 200 200" aria-hidden="true">${artNoel()}</svg><div class="c-caps">Noëma</div><div class="c-sub">Peace on earth, goodwill to all</div>` },
     tree:     { name: "Golden Tree", front: () => `<svg class="c-art" viewBox="0 0 200 220" aria-hidden="true">${artTree()}</svg><div class="c-script">Merry Christmas</div><div class="c-sub caps">and a happy new year</div>` },
     garland:  { name: "Ornament Garland", front: () => `<svg class="c-art wide" viewBox="0 0 300 175" aria-hidden="true">${artGarland()}</svg><div class="c-caps">Happy Holidays</div><div class="c-line"></div>` },
     mountain: { name: "Mountain Christmas", front: () => `<svg class="c-full" viewBox="0 0 200 280" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${artMountain()}</svg><div class="c-script top">Peace &amp; Joy</div>` },
@@ -4341,7 +4341,7 @@ const INVITE = (() => {
   <form class="gate-box classy-frame dark" id="lockForm" autocomplete="off">
     <div class="classy-brand">PRIVATE · ENCRYPTED</div>
     <svg class="gate-star" width="54" height="54" viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="25" fill="none" stroke="#D9BF8C" stroke-width=".9"/><path d="M27 12l3.6 8.8 9.4.6-7.2 6.1 2.3 9.2L27 31.6l-8.1 5.1 2.3-9.2-7.2-6.1 9.4-.6z" fill="none" stroke="#D9BF8C" stroke-width="1.1"/></svg>
-    <h2 id="lockTitle">Noël<br>Tier 1 Hub</h2>
+    <h2 id="lockTitle">Noëma<br>Tier 1 Hub</h2>
     <div class="classy-kicker">YOUR PRIVATE HOLIDAY COMPANION</div>
     <p id="lockMsg">Enter your PIN to open your lists.</p>
     <input class="gate-input" id="lockInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="PIN" aria-label="PIN" autocomplete="off">
@@ -4360,7 +4360,7 @@ const INVITE = (() => {
 /* 🛟 Crash handling: if the app fails while starting, show a calm screen instead of a blank page */
 window.NOEL_STARTED = false;
 window.noelCrash = function (msg) {
-  if (window.NOEL_STARTED) { console.error("Noël:", msg); return; }   // after start-up, keep the app running
+  if (window.NOEL_STARTED) { console.error("Noëma:", msg); return; }   // after start-up, keep the app running
   var c = document.getElementById("crashScreen"); if (!c) return;
   if (msg && /encrypt/i.test(String(msg))) document.getElementById("crashMsg").textContent = "This device can't open your secure storage. Please update your phone's software and reopen the app.";
   c.hidden = false;
@@ -4370,8 +4370,8 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
 </script>
 <script id="noel-native">
 /* ============================================================
-   📱 NOËL NATIVE: iPhone app extras (does nothing in a browser)
-   - Duty timers ring as phone notifications, even if Noël is closed.
+   📱 NOËMA NATIVE: iPhone app extras (does nothing in a browser)
+   - Duty timers ring as phone notifications, even if Noëma is closed.
    - Weekly check-ins become phone reminders (no calendar or Google needed).
    All reminders are scheduled on the phone itself. Nothing is sent anywhere.
    ============================================================ */
@@ -4423,7 +4423,7 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
         await LN().schedule({ notifications: running.map(({ d, i }) => ({
           id: Native.offset + DUTY_BASE + i,
           title: `${d.icon || "⏰"} ${d.name || "Timer"}`,
-          body: "⏰ Time's up! Tap to open Noël.",
+          body: "⏰ Time's up! Tap to open Noëma.",
           schedule: { at: new Date(d.endAt), allowWhileIdle: true }
         })) });
       }).catch(() => {});
@@ -4435,7 +4435,7 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
       await cancelRange(CHECKIN_BASE, CHECKIN_BASE + 100);
       const now = Date.now(), future = dates.filter(d => d.getTime() > now).slice(0, 60);
       if (future.length) await LN().schedule({ notifications: future.map((d, i) => ({
-        id: Native.offset + CHECKIN_BASE + i, title: "🎄 Time to check in!", body: "Open Noël to check your list, gifts and budget.",
+        id: Native.offset + CHECKIN_BASE + i, title: "🎄 Time to check in!", body: "Open Noëma to check your list, gifts and budget.",
         schedule: { at: d, allowWhileIdle: true }
       })) });
       return true;
@@ -4457,7 +4457,7 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
 </script>
 <script id="noel-vault">
 /* ============================================================
-   🔐 NOËL VAULT: encrypted on-device storage
+   🔐 NOËMA VAULT: encrypted on-device storage
    - Every saved list and setting is encrypted with AES-256-GCM
      before it touches the phone's storage.
    - The key never leaves the device:
@@ -4529,7 +4529,7 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
         try {
           if (v === null) localStorage.removeItem(k);
           else localStorage.setItem(k, await seal(v));
-        } catch (e) { console.warn("Noël: could not save", k, e); }
+        } catch (e) { console.warn("Noëma: could not save", k, e); }
       }
       writing = null;
     })();
@@ -4569,7 +4569,7 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
 </script>
 <script id="noel-media">
 /* ============================================================
-   🎬 NOËL MEDIA: turn a flip card or invite into a video or picture
+   🎬 NOËMA MEDIA: turn a flip card or invite into a video or picture
    - Everything is made on the phone. Nothing is uploaded.
    - Video: the card fades in, flips open and plays its own music
      (about 10 seconds, MP4 on iPhone).
@@ -4659,7 +4659,7 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
     });
     ctx.fillStyle = "#D9BF8C"; ctx.textAlign = "center";
     ctx.font = "500 22px Poppins, sans-serif"; spaced(ctx, kicker, 360, 150, 7);
-    ctx.fillStyle = "rgba(243,235,218,.45)"; ctx.font = "300 17px Poppins, sans-serif"; spaced(ctx, "MADE WITH NOËL TIER 1 HUB", 360, 1215, 3);
+    ctx.fillStyle = "rgba(243,235,218,.45)"; ctx.font = "300 17px Poppins, sans-serif"; spaced(ctx, "MADE WITH NOËMA TIER 1 HUB", 360, 1215, 3);
   }
   function spaced(ctx, text, cx, y, gap) {          // letter-spaced capitals
     const chars = [...text], widths = chars.map(c => ctx.measureText(c).width);
@@ -4742,7 +4742,7 @@ window.addEventListener("unhandledrejection", function (e) { window.noelCrash(e.
       drawCard(ctx, front, 420, 560, 680, 952, 1);
       drawCard(ctx, inside, 1180, 560, 680, 952, 1);
       ctx.fillStyle = "rgba(30,58,47,.45)"; ctx.font = "300 22px Poppins, sans-serif"; ctx.textAlign = "center";
-      spaced(ctx, "MADE WITH NOËL TIER 1 HUB", 800, 1125, 4);
+      spaced(ctx, "MADE WITH NOËMA TIER 1 HUB", 800, 1125, 4);
       return new Promise(res => c.toBlob(res, "image/jpeg", 0.92));
     },
 
@@ -8266,7 +8266,7 @@ window.NOEL_MEALS = (function () {
 </script>
 <script id="noel-lock">
 /* ============================================================
-   🔒 NOËL LOCK: optional PIN / Face ID lock
+   🔒 NOËMA LOCK: optional PIN / Face ID lock
    - Off until the person turns it on (Review tab → Privacy).
    - The PIN is never stored, only a salted PBKDF2 fingerprint of it,
      inside the encrypted vault. Face ID / fingerprint runs on the
@@ -8295,7 +8295,7 @@ window.NOEL_MEALS = (function () {
   }
   async function tryBio() {
     const p = bioPlugin(), c = cfg(); if (!p || !c || !c.bio) return false;
-    try { await p.verifyIdentity({ reason: "Unlock Noël Tier 1 Hub", title: "Unlock Noël" }); return true; } catch (e) { return false; }
+    try { await p.verifyIdentity({ reason: "Unlock Noëma Tier 1 Hub", title: "Unlock Noëma" }); return true; } catch (e) { return false; }
   }
 
   function show(m) {
@@ -8335,7 +8335,7 @@ window.NOEL_MEALS = (function () {
     NoelVault.setItem(KEY, JSON.stringify({ salt: b64(salt), hash: await hashPin(pin, salt), bio: !!(old && old.bio) }));
     await NoelVault.flush();
     hide(); Lock.refreshCard();
-    alert("🔒 App lock is on.\n\nPlease remember your PIN. If you forget it, the only way back in is to erase this phone's Noël data and restore a backup.");
+    alert("🔒 App lock is on.\n\nPlease remember your PIN. If you forget it, the only way back in is to erase this phone's Noëma data and restore a backup.");
   }
 
   const Lock = {
@@ -8364,19 +8364,19 @@ window.NOEL_MEALS = (function () {
     $("#lockBio").addEventListener("click", async () => { if (await tryBio()) hide(); });
     $("#lockCancel").addEventListener("click", () => { $("#lockScreen").hidden = true; if (!document.querySelector(".sheet.open, .alert-overlay.show")) document.body.classList.remove("lock"); });
     $("#lockForgot").addEventListener("click", () => {
-      if (!confirm("Forgot your PIN?\n\nThe only way back in is to erase all Noël data on this phone. You can then restore a backup if you saved one.")) return;
+      if (!confirm("Forgot your PIN?\n\nThe only way back in is to erase all Noëma data on this phone. You can then restore a backup if you saved one.")) return;
       if (!confirm("Erase everything on this phone and start fresh? This can't be undone.")) return;
       Object.keys(localStorage).filter(k => k.startsWith("xmasHub_")).forEach(k => localStorage.removeItem(k));
       location.reload();
     });
     $("#lockSet").addEventListener("click", () => show("set"));
     $("#lockOff").addEventListener("click", async () => {
-      if (!confirm("Turn off app lock? Anyone with your phone will be able to open Noël.")) return;
+      if (!confirm("Turn off app lock? Anyone with your phone will be able to open Noëma.")) return;
       NoelVault.removeItem(KEY); await NoelVault.flush(); Lock.refreshCard();
     });
     $("#lockBioToggle").addEventListener("change", async e => {
       const c = cfg(); if (!c) return;
-      if (e.target.checked && !(await bioPlugin().verifyIdentity({ reason: "Turn on Face ID for Noël", title: "Unlock Noël" }).then(() => true, () => false))) { e.target.checked = false; return; }
+      if (e.target.checked && !(await bioPlugin().verifyIdentity({ reason: "Turn on Face ID for Noëma", title: "Unlock Noëma" }).then(() => true, () => false))) { e.target.checked = false; return; }
       c.bio = e.target.checked; NoelVault.setItem(KEY, JSON.stringify(c));
     });
     document.addEventListener("visibilitychange", () => {
@@ -8451,14 +8451,14 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       { id: "n1-3", text: "Address book update: Check and update your holiday card mailing list. Go to Plan › Cards & Address Book." },
       { id: "n1-4", text: "Book travel: Finalize and book flights, trains, or hotels if you are traveling." } ] },
     { id: "n2", icon: "✉️", title: "Week 2: Cards, Custom Orders & Shipping Deadlines", tasks: [
-      { id: "n2-1", text: "Order custom items: Place orders for personalized gifts, photo cards, or handmade items early before maker queues fill up. Once you've ordered something, add it by hand in Plan › Calendar › Packages, with the price and any shipping, and Noël tracks it and adds the cost to your Budget." },
+      { id: "n2-1", text: "Order custom items: Place orders for personalized gifts, photo cards, or handmade items early before maker queues fill up. Once you've ordered something, add it by hand in Plan › Calendar › Packages, with the price and any shipping, and Noëma tracks it and adds the cost to your Budget." },
       { id: "n2-2", text: "Far-away mail: Check shipping deadlines for military (APO/FPO) or international mail." },
       { id: "n2-3", text: "Declutter & donate: Go through closets or living spaces to donate unused items before decorating." } ] },
     { id: "n3", icon: "🎨", title: "Week 3: Decor Check & Menus", tasks: [
       { id: "n3-1", text: "Inventory decor: Bring down holiday boxes, check string lights, and note what needs replacing." },
       { id: "n3-2", text: "Plan the menus: Draft your Christmas Eve and Christmas Day dinner menus. Go to the Menu tab." },
       { id: "n3-3", text: "Order centerpieces or specialty meats: Reserve your turkey, ham, or main roast from the butcher." },
-      { id: "n3-4", text: "Shop early sales: Take advantage of Black Friday and Cyber Monday deals using your master gift list. Noël added the dates to your calendar." } ] },
+      { id: "n3-4", text: "Shop early sales: Take advantage of Black Friday and Cyber Monday deals using your master gift list. Noëma added the dates to your calendar." } ] },
     { id: "n4", icon: "🎁", title: "Week 4: Baking & Wrapping Prep", tasks: [
       { id: "n4-1", text: "Stock wrapping supplies: Gather wrapping paper, tape, scissors, gift tags, and ribbons." },
       { id: "n4-2", text: "Baking prep: Make your holiday baking list and freeze durable doughs or make-ahead treats." },
@@ -8542,7 +8542,7 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
       { id: "oa-6", text: "Send the team a quick feedback survey" }, { id: "oa-7", text: "Thank the vendors and volunteers" },
       { id: "oa-8", text: "Write notes on what worked for next year" } ] }
   ];
-const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],"f0-1":["h","Gifts"],"f0-2":["h","Gifts"],"f0-3":["h","Calendar"],"f0-4":["h","Calendar"],"f1-4":["h","Menu"],"f2-1":["h","Calendar"],"f2-2":["h","Cards"],"f2-4":["g","Calendar"],"f2-5":["h","Calendar"],"w4-1":["h","Budget"],"w4-6":["h","Plan"],"w4-2":["h","Gifts"],"w4-3":["h","Calendar"],"w4-4":["h","Plan"],"f3-1":["g","Menu"],"f3-2":["h","Menu"],"f3-3":["h","Menu"],"w2-1":["h","Gifts"],"w2-7":["h","Calendar"],"w2-4":["g","Menu"],"w4-5":["g","Cards"],"w1-1":["g","Menu"],"w1-6":["h","Menu"],"w1-7":["g","Menu"],"w1-8":["h","Plan"],"w1-3":["h","Menu"],"w1-4":["h","Plan"],"eve-1":["g","Menu"],"eve-2":["g","Menu"],"eve-3":["h","Plan"],"day-1":["g","Menu"],"day-4":["g","Menu"],"nyw-1":["g","NYE"],"nyw-2":["g","Cards"],"nyw-3":["h","NYE"],"nyw-5":["h","Games"],"nye-1":["g","NYE"],"nye-2":["g","NYE"],"nye-4":["h","NYE"],"nye-5":["g","NYE"],"nye-6":["g","NYE"],"os-1":["h","Plan"],"o4-1":["h","Plan"],"os-2":["g","Plan"],"o4-2":["h","Plan"],"os-3":["h","Plan"],"o4-3":["h","Cards"],"os-5":["h","Budget"],"os-6":["h","Plan"],"os-7":["h","Plan"],"o4-4":["h","Plan"],"o4-5":["h","Plan"],"on-1":["g","Plan"],"on-2":["h","Plan"],"on-3":["h","Plan"],"on-4":["h","Plan"],"on-8":["h","Plan"],"on-9":["h","Plan"],"o2-1":["h","Cards"],"o2-2":["h","Plan"],"o2-3":["h","Plan"],"o2-4":["h","Plan"],"o2-5":["h","Plan"],"o2-6":["h","Plan"],"o2-8":["h","Plan"],"o1-1":["h","Plan"],"o1-2":["g","Plan"],"o1-3":["g","Plan"],"o1-4":["h","Plan"],"o1-5":["h","Plan"],"od-2":["h","Tasks"],"od-4":["h","Games"],"od-5":["h","Plan"],"oa-1":["h","Cards"],"oa-5":["g","Budget"],"oa-4":["g","Plan"],"oa-6":["g","Plan"],"oa-7":["h","Cards"],"oa-8":["h","Plan"]};   // ✦ which tasks Noël generates (g) or can help with (h), and which tab
+const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],"f0-1":["h","Gifts"],"f0-2":["h","Gifts"],"f0-3":["h","Calendar"],"f0-4":["h","Calendar"],"f1-4":["h","Menu"],"f2-1":["h","Calendar"],"f2-2":["h","Cards"],"f2-4":["g","Calendar"],"f2-5":["h","Calendar"],"w4-1":["h","Budget"],"w4-6":["h","Plan"],"w4-2":["h","Gifts"],"w4-3":["h","Calendar"],"w4-4":["h","Plan"],"f3-1":["g","Menu"],"f3-2":["h","Menu"],"f3-3":["h","Menu"],"w2-1":["h","Gifts"],"w2-7":["h","Calendar"],"w2-4":["g","Menu"],"w4-5":["g","Cards"],"w1-1":["g","Menu"],"w1-6":["h","Menu"],"w1-7":["g","Menu"],"w1-8":["h","Plan"],"w1-3":["h","Menu"],"w1-4":["h","Plan"],"eve-1":["g","Menu"],"eve-2":["g","Menu"],"eve-3":["h","Plan"],"day-1":["g","Menu"],"day-4":["g","Menu"],"nyw-1":["g","NYE"],"nyw-2":["g","Cards"],"nyw-3":["h","NYE"],"nyw-5":["h","Games"],"nye-1":["g","NYE"],"nye-2":["g","NYE"],"nye-4":["h","NYE"],"nye-5":["g","NYE"],"nye-6":["g","NYE"],"os-1":["h","Plan"],"o4-1":["h","Plan"],"os-2":["g","Plan"],"o4-2":["h","Plan"],"os-3":["h","Plan"],"o4-3":["h","Cards"],"os-5":["h","Budget"],"os-6":["h","Plan"],"os-7":["h","Plan"],"o4-4":["h","Plan"],"o4-5":["h","Plan"],"on-1":["g","Plan"],"on-2":["h","Plan"],"on-3":["h","Plan"],"on-4":["h","Plan"],"on-8":["h","Plan"],"on-9":["h","Plan"],"o2-1":["h","Cards"],"o2-2":["h","Plan"],"o2-3":["h","Plan"],"o2-4":["h","Plan"],"o2-5":["h","Plan"],"o2-6":["h","Plan"],"o2-8":["h","Plan"],"o1-1":["h","Plan"],"o1-2":["g","Plan"],"o1-3":["g","Plan"],"o1-4":["h","Plan"],"o1-5":["h","Plan"],"od-2":["h","Tasks"],"od-4":["h","Games"],"od-5":["h","Plan"],"oa-1":["h","Cards"],"oa-5":["g","Budget"],"oa-4":["g","Plan"],"oa-6":["g","Plan"],"oa-7":["h","Cards"],"oa-8":["h","Plan"]};   // ✦ which tasks Noëma generates (g) or can help with (h), and which tab
   const TAG_VIEW = { Gifts: "gifts", Calendar: "org", Menu: "meals", Cards: "invites", NYE: "nye", Games: "games", Budget: "budget", Tasks: "tasks" };
   let hubMode = SPACE === "office" ? "company" : "family";   // the Office space is the company side
   let PHASES = hubMode === "company" ? OFFICE_PHASES : FAMILY_PHASES;
@@ -9041,9 +9041,9 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   const NY_IDS = ["nyw", "nye"];   // the two New Year's task groups live on the NYE tab
   const planPhases = () => PHASES.filter(p => !NY_IDS.includes(p.id)), nyPhases = () => PHASES.filter(p => NY_IDS.includes(p.id));
   function taskTag(id) {
-    return "";   // the "Noël can help" links were removed from the task list
+    return "";   // the "Noëma can help" links were removed from the task list
     const g = TASK_TAGS[id]; if (!g) return "";
-    return `<span class="nt ${g[0]}" role="button" tabindex="0" data-nt="${g[1]}">${g[0] === "g" ? "Noël generates" : "Noël can help"} › ${g[1]}</span>`;
+    return `<span class="nt ${g[0]}" role="button" tabindex="0" data-nt="${g[1]}">${g[0] === "g" ? "Noëma generates" : "Noëma can help"} › ${g[1]}</span>`;
   }
   document.addEventListener("click", e => {
     const n = e.target.closest && e.target.closest("[data-nt]"); if (!n) return;
@@ -9266,7 +9266,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   });
 
   $("#startFresh").addEventListener("click", async () => {
-    if (!confirm("Erase everything saved in the " + (SPACE === "office" ? "Office" : "Family") + " side of Noël on this phone?\n\nEvery plan, list, alarm and setting will be gone. Save a backup first if you want to keep anything.")) return;
+    if (!confirm("Erase everything saved in the " + (SPACE === "office" ? "Office" : "Family") + " side of Noëma on this phone?\n\nEvery plan, list, alarm and setting will be gone. Save a backup first if you want to keep anything.")) return;
     if (!confirm("Last check. Erase it all and start fresh? This can't be undone.")) return;
     try { await NoelVault.flush(); } catch (e) {}
     try { NoelNative.scheduleList(3000, 5000, []); NoelNative.scheduleList(9300, 9316, []); } catch (e) {}
@@ -10494,7 +10494,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     {"id": "a21", "w": "in", "ico": "☕", "name": "Hot cocoa bar", "txt": "Marshmallows, peppermint and whipped cream: build your own mug.", "tags": "kids"},
     {"id": "a22", "w": "in", "ico": "🎨", "name": "Ornament making", "txt": "Salt dough, felt or photo ornaments to keep for years.", "tags": "kids"},
     {"id": "a24", "w": "in", "ico": "🎶", "name": "Carol & karaoke night", "txt": "Sing the classics, with bonus points for dramatic solos.", "tags": "free"},
-    {"id": "a25", "w": "in", "ico": "🎲", "name": "Family game night", "txt": "Play the party games in Noël and keep score on the Scoreboard.", "tags": "kids free"},
+    {"id": "a25", "w": "in", "ico": "🎲", "name": "Family game night", "txt": "Play the party games in Noëma and keep score on the Scoreboard.", "tags": "kids free"},
     {"id": "a26", "w": "in", "ico": "📸", "name": "Matching pajama photos", "txt": "Cozy pajamas, the tree and a timer for this year's family photo.", "tags": "kids free"},
     {"id": "a27", "w": "in", "ico": "📖", "name": "Christmas story night", "txt": "Read holiday stories by candlelight or twinkle lights. Find free stories in Kids' Corner on the Games tab.", "tags": "kids free"},
     {"id": "a29", "map": "cultural Christmas festival", "w": "out", "ico": "🌍", "name": "Cultural Christmas festivities", "txt": "Discover how other cultures celebrate: Las Posadas, Filipino parols, German and Ukrainian traditions, and more near you.", "tags": "kids"}
@@ -10529,7 +10529,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (e.target.id === "santaAddr" || e.target.closest("#santaAddrClose")) { $("#santaAddr").classList.remove("show"); return; }
     if (e.target.closest("#santaAddrMore")) { const q = currency === "USD" ? "USPS letters to Santa mailing deadline" : "Canada Post letters to Santa deadline"; const u = "https://www.google.com/search?q=" + encodeURIComponent(q), br = NoelNative.plugin("Browser"); if (br) br.open({ url: u }).catch(() => window.open(u, "_blank")); else window.open(u, "_blank", "noopener"); }
   });
-  // 📍 opens the phone's own Maps app to search nearby. Noël never sees or stores the location.
+  // 📍 opens the phone's own Maps app to search nearby. Noëma never sees or stores the location.
   function openMapSearch(q) {
     if (NoelNative.isNative() && INVITE.isIOS()) { window.location.href = "maps://?q=" + encodeURIComponent(q); return; }
     if (/Android/i.test(navigator.userAgent)) { window.location.href = "geo:0,0?q=" + encodeURIComponent(q); return; }
@@ -10607,13 +10607,13 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     const co = hubMode === "company", at = (y, m, d) => new Date(y, m, d, 9, 30).getTime(), y = season;
     const list = co ? [
       { t: at(y, 11, 27), title: "The season is wrapped", body: "Save this year and start fresh. Your event, vendors and budget carry over." },
-      { t: at(y + 1, 8, 1), title: "Book the holiday party early", body: "Venues and caterers fill up. Your plan is ready in Noël Tier 1 Hub." },
+      { t: at(y + 1, 8, 1), title: "Book the holiday party early", body: "Venues and caterers fill up. Your plan is ready in Noëma Tier 1 Hub." },
       { t: at(y + 1, 9, 15), title: "The holiday party is ten weeks away", body: "Check your approval and vendor order dates." }
     ] : [
-      { t: at(y, 10, 1), title: "Time to start planning Christmas", body: "Your plan is ready in Noël Tier 1 Hub" },
+      { t: at(y, 10, 1), title: "Time to start planning Christmas", body: "Your plan is ready in Noëma Tier 1 Hub" },
       { t: at(y, 11, 27), title: "The season is wrapped", body: "Save this year and start fresh. Your list, guests and budget carry over." },
       { t: at(y + 1, 9, 15), title: "Christmas is ten weeks away", body: "Last year's list, guests and menus are saved and ready." },
-      { t: at(y + 1, 10, 1), title: "Time to start planning Christmas", body: "Open Noël Tier 1 Hub and set your budget" }
+      { t: at(y + 1, 10, 1), title: "Time to start planning Christmas", body: "Open Noëma Tier 1 Hub and set your budget" }
     ];
     NoelNative.scheduleList(9300, 9310, list);  }
   function renderMemories() {
@@ -10732,7 +10732,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   function renderCheckinCard() {
     $("#checkinHour").value = String(checkin.hour || 9);
     const { first, end, hubUrl } = calRange(), stop = new Date(first.getTime() + 15 * 60000);
-    const details = "Open your Noël Tier 1 Hub to check your list, gifts and budget: " + hubUrl;
+    const details = "Open your Noëma Tier 1 Hub to check your list, gifts and budget: " + hubUrl;
     $("#checkinGoogle").href = "https://calendar.google.com/calendar/render?action=TEMPLATE" +
       "&text=" + encodeURIComponent("🎄 Time to check in!") + "&dates=" + icsDate(first) + "/" + icsDate(stop) +
       "&details=" + encodeURIComponent(details) + "&recur=" + encodeURIComponent("RRULE:FREQ=WEEKLY;UNTIL=" + icsDate(end));
@@ -10740,7 +10740,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (NoelNative.isNative()) {
       $("#checkinGoogle").hidden = true;
       $("#checkinIcs").textContent = checkin.phone ? "🔔 Reminders are on" : "🔔 Turn on reminders";
-      $("#checkinStep").innerHTML = "<b>One tap:</b> Noël reminds you every week through Christmas, even when it's closed.";
+      $("#checkinStep").innerHTML = "<b>One tap:</b> Noëma reminds you every week through Christmas, even when it's closed.";
     }
     $("#checkinNext").textContent = next ? `Next check-in: ${next.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} at ${next.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}` : "Check-ins are done for this season. Happy New Year! 🥂";
   }
@@ -10749,14 +10749,14 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   $("#checkinIcs").addEventListener("click", async () => {
     if (NoelNative.isNative()) {
       if (await NoelNative.scheduleCheckins(seasonDates())) { checkin.phone = true; save("checkin", checkin); renderCheckinCard(); toast("🔔 Weekly reminders are on"); }
-      else toast("🔔 Please allow notifications for Noël in your iPhone Settings");
+      else toast("🔔 Please allow notifications for Noëma in your iPhone Settings");
       return;
     }
     const { first, end, hubUrl } = calRange(), stop = new Date(first.getTime() + 15 * 60000);
     const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Noel Tier 1 Hub//EN", "BEGIN:VEVENT",
       "UID:holidayhub-checkin-" + first.getFullYear() + "@noeltier1hub", "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z",
       "DTSTART:" + icsDate(first), "DTEND:" + icsDate(stop), "RRULE:FREQ=WEEKLY;UNTIL=" + icsDate(end),
-      "SUMMARY:🎄 Time to check in!", "DESCRIPTION:Open your Noël Tier 1 Hub to check your list\\, gifts and budget: " + hubUrl, "URL:" + hubUrl,
+      "SUMMARY:🎄 Time to check in!", "DESCRIPTION:Open your Noëma Tier 1 Hub to check your list\\, gifts and budget: " + hubUrl, "URL:" + hubUrl,
       "BEGIN:VALARM", "ACTION:DISPLAY", "TRIGGER:PT0M", "DESCRIPTION:Time to check in!", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
     const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar" })), a = document.createElement("a");
     a.href = url; a.download = "Noel-Tier-1-Hub-Check-ins.ics"; document.body.appendChild(a); a.click(); a.remove();
@@ -11080,10 +11080,10 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   }
   function applyFamily() {
     const t = familyTitle(family);
-    $(".brand-title").textContent = t || "Noël Tier 1 Hub";          // ✏️ default title
-    $(".brand-sub").textContent = t ? "Noël Tier 1 Hub" : hubMode === "company" ? "Event Coordinator" : "Plan · Celebrate · Remember";  // ✏️ default subtitle
-    $(".app-footer").textContent = t ? `${t}${/s$/i.test(t) ? "'" : "'s"} Noël Hub` : "Noël Tier 1 Hub · Private & stored only on this device";   // ✏️ footer
-    document.title = t ? `${t} · Noël Tier 1 Hub` : "Noël Tier 1 Hub";
+    $(".brand-title").textContent = t || "Noëma Tier 1 Hub";          // ✏️ default title
+    $(".brand-sub").textContent = t ? "Noëma Tier 1 Hub" : hubMode === "company" ? "Event Coordinator" : "Plan · Celebrate · Remember";  // ✏️ default subtitle
+    $(".app-footer").textContent = t ? `${t}${/s$/i.test(t) ? "'" : "'s"} Noëma Hub` : "Noëma Tier 1 Hub · Private & stored only on this device";   // ✏️ footer
+    document.title = t ? `${t} · Noëma Tier 1 Hub` : "Noëma Tier 1 Hub";
     $("#navMeals").hidden = hubMode === "company";   // 🍽️ the big-dinner planner is for families
     $("#giftsTitle").textContent = "Gifts";
     $("#view-gifts .view-intro").textContent = hubMode === "company" ? "Staff and client gifts: write down who gets what, then track what you spend against your budget." : "Jot down wishes as you hear them, then track what you buy against your budget.";
@@ -11198,7 +11198,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   function xlSheets() {
     const H = a => a.map(v => ({ v, s: 1 })), T = (t, sub) => [[{ v: t, s: 3 }], [sub || ""], []];
     const co = hubMode === "company", dt = x => x ? new Date(x).toISOString().slice(0, 10) : "", S = [];
-    const stamp = "Noël Tier 1 Hub · exported " + new Date().toISOString().slice(0, 10);
+    const stamp = "Noëma Tier 1 Hub · exported " + new Date().toISOString().slice(0, 10);
     const withTotal = (rows, c) => { const sum = rows.reduce((a, r) => a + (+(r[c] && r[c].v != null ? r[c].v : r[c]) || 0), 0); const t = []; t[0] = { v: "TOTAL", s: 4 }; t[c] = { v: Math.round(sum * 100) / 100, s: 5 }; return rows.concat([t]); };
     const money = n => ({ v: +n || 0, s: 2 });
     if (co) {
@@ -11267,7 +11267,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   $("#xlTabs").addEventListener("click", e => { const b = e.target.closest("[data-xl]"); if (b) { xlI = +b.dataset.xl; xlShow(); } });
   $("#xlSave").addEventListener("click", async () => {
     const name = (hubMode === "company" ? "Noel-Office-Plan-" : "Noel-Family-Plan-") + new Date().toISOString().slice(0, 10) + ".xlsx", blob = XL.build(xlSh);
-    if (NoelNative.isNative()) { try { await NoelMedia.share(blob, name, "My Noël Tier 1 Hub spreadsheet"); } catch (e) {} return; }
+    if (NoelNative.isNative()) { try { await NoelMedia.share(blob, name, "My Noëma Tier 1 Hub spreadsheet"); } catch (e) {} return; }
     try { const file = new File([blob], name, { type: blob.type }); if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
     const url = URL.createObjectURL(blob), a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000); toast("Spreadsheet saved");
   });
@@ -11448,11 +11448,11 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     const helped = $$("#helpChips .chip.on").map(c => c.textContent), picks = $$("#ideaChips .chip.on").map(c => c.textContent), own = $("#ideaText").value.trim();
     if (!revStars && !helped.length && !picks.length && !own) { toast("Tap a star or type a few words first"); return; }
     const ed = document.body.classList.contains("co") ? "Office" : "Family", name = $("#revName").value.trim();
-    const body = `Noël Tier 1 Hub review ${season} (${ed} edition)\n` + (revStars ? `Rating: ${revStars} of 5\n` : "") +
+    const body = `Noëma Tier 1 Hub review ${season} (${ed} edition)\n` + (revStars ? `Rating: ${revStars} of 5\n` : "") +
       (helped.length ? "\nHelped most:\n" + helped.map(p => "• " + p).join("\n") + "\n" : "") +
       (picks.length ? "\nWould love next year:\n" + picks.map(p => "• " + p).join("\n") + "\n" : "") +
       (own ? "\n" + own + "\n" : "") + (name ? "\nFirst name: " + name : "") + ($("#revQuote").checked ? "\nYou may quote me: yes" : "");
-    const subject = `Noël Tier 1 Hub review ${season}${revStars ? " · " + revStars + " star" + (revStars > 1 ? "s" : "") : ""}`;
+    const subject = `Noëma Tier 1 Hub review ${season}${revStars ? " · " + revStars + " star" + (revStars > 1 ? "s" : "") : ""}`;
     if (FEEDBACK_EMAIL) { location.href = INVITE.mailHref(FEEDBACK_EMAIL, subject, body); }
     else {
       try { await navigator.clipboard.writeText(body); toast("Review copied. Thank you!"); } catch (err) { toast("Thank you! Your review is ready to send."); }
@@ -12047,13 +12047,13 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     NoelVault.keys().forEach(k => {
       if (k.startsWith(PREFIX) && !BACKUP_SKIP.includes(k.slice(PREFIX.length))) data[k.slice(PREFIX.length)] = NoelVault.getItem(k);
     });
-    return JSON.stringify({ app: "Noël Tier 1 Hub", version: 1, saved: new Date().toISOString(), data }, null, 1);
+    return JSON.stringify({ app: "Noëma Tier 1 Hub", version: 1, saved: new Date().toISOString(), data }, null, 1);
   }
   function showLastBackup() {
     const t = load("lastBackup", 0);
     $("#backupLast").textContent = t ? "Last backup: " + new Date(t).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "No backup saved yet.";
   }
-  $("#helpMail").addEventListener("click", () => { location.href = INVITE.mailHref(FEEDBACK_EMAIL, "Noël Tier 1 Hub help", "Hi! I need help with:\n\n(Please tell us what you see on screen.)\n\nApp: " + (document.body.classList.contains("co") ? "Office" : "Family") + " edition"); });
+  $("#helpMail").addEventListener("click", () => { location.href = INVITE.mailHref(FEEDBACK_EMAIL, "Noëma Tier 1 Hub help", "Hi! I need help with:\n\n(Please tell us what you see on screen.)\n\nApp: " + (document.body.classList.contains("co") ? "Office" : "Family") + " edition"); });
   // November 1: gentle reminder to save a backup
   setTimeout(() => {
     const now = new Date(), y = now.getFullYear();
@@ -12062,21 +12062,21 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (last && Date.now() - last < 45 * 864e5) return;
     if ($$(".alert-overlay.show, .sheet.open").length) return;
     save("backupNudge", y);
-    if (confirm("Save a backup of your Noël lists?\n\nA backup lets you bring everything back on a new phone, or after deleting the app.")) { showView("tasks"); const f = $("#safeFold"); if (f) f.open = true; setTimeout(() => $("#backupCard").scrollIntoView({ behavior: "smooth", block: "center" }), 200); }
+    if (confirm("Save a backup of your Noëma lists?\n\nA backup lets you bring everything back on a new phone, or after deleting the app.")) { showView("tasks"); const f = $("#safeFold"); if (f) f.open = true; setTimeout(() => $("#backupCard").scrollIntoView({ behavior: "smooth", block: "center" }), 200); }
   }, 6000);
   $("#backupSave").addEventListener("click", async () => {
     const name = `Noel-Tier-1-Hub-Backup-${new Date().toISOString().slice(0, 10)}.json`;
     const blob = new Blob([backupText()], { type: "application/json" });
     const done = () => { save("lastBackup", Date.now()); showLastBackup(); toast("💾 Backup saved"); };
     if (NoelNative.isNative()) {   // 📱 iPhone: share sheet → Save to Files, AirDrop, email…
-      try { if (await NoelMedia.share(blob, name, "My Noël Tier 1 Hub backup. Keep this file safe.") !== "cancelled") done(); }
+      try { if (await NoelMedia.share(blob, name, "My Noëma Tier 1 Hub backup. Keep this file safe.") !== "cancelled") done(); }
       catch (e) { /* closed the share sheet */ }
       return;
     }
     try {
       const file = new File([blob], name, { type: "application/json" });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: "Noël Tier 1 Hub backup", text: "My Noël Tier 1 Hub backup. Keep this file safe." });
+        await navigator.share({ files: [file], title: "Noëma Tier 1 Hub backup", text: "My Noëma Tier 1 Hub backup. Keep this file safe." });
         done(); return;
       }
     } catch (e) { if (e && e.name === "AbortError") return; }
@@ -12093,7 +12093,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     reader.onload = () => {
       let b;
       try { b = JSON.parse(reader.result); } catch (err) { b = null; }
-      if (!b || !["Noël Tier 1 Hub", "Noël Tier 1", "Christmas Holiday Hub"].includes(b.app) || !b.data) { toast("That file isn't a Noël Tier 1 Hub backup"); return; }
+      if (!b || !["Noëma Tier 1 Hub", "Noël Tier 1 Hub", "Noël Tier 1", "Christmas Holiday Hub"].includes(b.app) || !b.data) { toast("That file isn't a Noëma Tier 1 Hub backup"); return; }
       const when = b.saved ? new Date(b.saved).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "an earlier date";
       if (!confirm(`Restore your backup from ${when}? This replaces the lists on this device.`)) return;
       Object.entries(b.data).forEach(([k, v]) => { if (typeof v === "string" && !BACKUP_SKIP.includes(k)) { try { NoelVault.setItem(PREFIX + k, v); } catch (err) {} } });
@@ -12111,7 +12111,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   /* @meals-start */
   /* ============================================================
      🍽️ MEAL PLANNER (Family edition)
-     Pick a dinner → guests (1–20) + dinner time → Noël scales every
+     Pick a dinner → guests (1–20) + dinner time → Noëma scales every
      recipe and the shopping list, builds the day's timeline and sets
      all the alarms. Print gives a paper backup for power cuts.
      Recipes live in NOEL_MEALS (the "noel-meals-data" script).
@@ -12351,7 +12351,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
           ${active ? `<button type="button" class="btn btn-ghost" id="mealStop">⏹ Stop dinner alarms</button>` : `<button type="button" class="btn btn-red" id="mealStart">⏰ Start my dinner alarms</button>`}
           <button type="button" class="btn btn-green" id="mealPrint" data-print="meal:${m.id}">🖨️ Print</button>
         </div>
-        ${active ? `<p class="meal-on">✅ Alarms are set. Noël will ring for every step${NoelNative.isNative() ? ", even when the app is closed" : ". Keep Noël open on this device"}.</p>` : ""}
+        ${active ? `<p class="meal-on">✅ Alarms are set. Noëma will ring for every step${NoelNative.isNative() ? ", even when the app is closed" : ". Keep Noëma open on this device"}.</p>` : ""}
       </div>
       <div class="seg seg4 sub-tabs" id="mealPanes">${panes.map(([k, l]) => `<button type="button" data-mpane="${k}" aria-pressed="${k === pane}">${l}</button>`).join("")}</div>
       <div class="card meal-body">${/crown$/.test(m.id) ? `<div class="crown-warn box"><b>✦ Order your crown roast now</b>Crown roasts are a special order and butchers run out fast, especially in December. Call your butcher or meat counter today, tell them the date you need it, and ask for it frenched and tied.</div>` : ""}${body}</div>`;
@@ -12392,7 +12392,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   function costBoxHtml(key, name, est, label) {
     const it = foodBudget.items.find(x => x.meal === key), got = !!(it && it.actual), diff = got ? Math.round((it.amt - est) * 100) / 100 : 0;
     return `<div class="cost-box${got ? " saved" : ""}"><h4>${key === "nyeparty" ? "Party cost" : "Dinner cost"}</h4>
-      <div class="cb-row"><span>${label || "Noël's estimate"}</span><b>${cad0(est)}</b></div>
+      <div class="cb-row"><span>${label || "Noëma's estimate"}</span><b>${cad0(est)}</b></div>
       <label class="cb-in"><span>What you actually spent at the store</span><input class="input" inputmode="decimal" placeholder="e.g. ${Math.round(est) || 100}" value="${got ? it.amt : ""}" aria-label="Actual grocery cost"></label>
       <p class="cb-note">${got ? `✓ ${cad(it.amt)} is in your Budget under Food &amp; drinks${diff ? ` (${cad(Math.abs(diff))} ${diff > 0 ? "over" : "under"} the estimate)` : ""}.` : "Shop first, then type your real total. It goes straight into your Budget."}</p>
       <button type="button" class="btn btn-gold btn-block" data-costadd="${esc(key)}" data-costname="${esc(name)}" data-est="${est}" data-costlabel="${esc(label || "")}">${got ? "Update my Budget" : "Add to my Budget"}</button></div>`;
@@ -12468,7 +12468,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   function syncMealNative() {
     if (!NoelNative.isNative()) return;
     const items = [];
-    mealPlans.forEach(pl => pl.steps.filter(s => s.alarm && !s.fired && s.t > Date.now() + 1000).forEach(s => items.push({ t: s.t, title: `${s.icon} ${s.text}`, body: pl.svc ? "Noël Tier 1 Hub · Christmas Eve" : `${pl.name} · ${pl.party ? "starts" : "dinner"} at ${mclock(pl.at)}` })));
+    mealPlans.forEach(pl => pl.steps.filter(s => s.alarm && !s.fired && s.t > Date.now() + 1000).forEach(s => items.push({ t: s.t, title: `${s.icon} ${s.text}`, body: pl.svc ? "Noëma Tier 1 Hub · Christmas Eve" : `${pl.name} · ${pl.party ? "starts" : "dinner"} at ${mclock(pl.at)}` })));
     NoelNative.scheduleList(3000, 5000, items.sort((a, b) => a.t - b.t));
   }
   function mealTick() {
@@ -12543,19 +12543,19 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     const who = `${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"}`;
     let lastDay = "";
     const tl = steps.map(s => { const d = dayName(s.t), h = d !== lastDay ? `<tr><th colspan="2">${esc(d)}</th></tr>` : ""; lastDay = d; return h + `<tr${s.m === 0 ? ' class="sv"' : ""}><td class="t">${s.ahead ? "All day" : mclock(s.t)}</td><td>☐ ${esc(s.text)}</td></tr>`; }).join("");
-    const html = `<div class="md-head"><p class="md-k">Noël Tier 1 Hub</p><h1>${esc(m.name)}</h1><p class="md-sub">${esc(m.blurb || "")}</p></div>
+    const html = `<div class="md-head"><p class="md-k">Noëma Tier 1 Hub</p><h1>${esc(m.name)}</h1><p class="md-sub">${esc(m.blurb || "")}</p></div>
       <div class="md-facts"><div><b>Serves</b><span>${esc(who)}</span></div><div><b>${m.party ? "Party" : "Dinner"}</b><span>${esc(new Date(D).toLocaleDateString(undefined, { month: "short", day: "numeric" }))} · ${esc(mclock(D))}</span></div><div><b>${p.w ? "Main" : "Plan"}</b><span>${p.w ? `${p.w} lb ${esc(String(p.meat).replace(/ \(.*/, ""))}` : (p.mainLabel ? esc(p.mainLabel) : "Fixed menu")}</span></div><div><b>Estimated cost</b><span>${cad0(ps.total)} ${currency}</span></div></div>
       ${p.w && p.roastText ? `<p class="md-sub" style="text-align:center">${esc(p.verb || "cooks")} about ${esc(p.roastText)}${p.doneLabel ? " · " + esc(p.doneLabel) : ""}${p.gf ? " · gluten-free" : ""}</p>` : ""}
       <h2 class="md-h">The menu</h2><div class="md-menu">${allMenu(m).map(([k, v]) => `<p><b>${esc(k)}</b>${esc(v.join(", "))}</p>`).join("")}${(m.drinks || []).map(([k, v]) => `<p><b>${esc(k)}</b>${esc(v)}</p>`).join("")}</div>
       <h2 class="md-h">Shopping list</h2><p class="md-tot">Estimated total <b>${cad0(ps.total)} ${currency}</b> · about ${cad(ps.total / c.guests)} per ${m.addon ? "portion" : "guest"}</p>${shopHtmlDoc(ps)}
       <h2 class="md-h">Timeline</h2><table class="md-tl">${tl}</table>
       <h2 class="md-h">Recipes &amp; instructions</h2>${allRecipesHtml(m, f, p, true)}
-      <p class="pm-foot">Made with Noël Tier 1 Hub</p>`;
+      <p class="pm-foot">Made with Noëma Tier 1 Hub</p>`;
     return { title: m.name + (m.addon ? "" : " plan"), css: MD_CSS, html, margin: 0.55, file: m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Plan" };
   }
   function shopDoc(m) {   // just the shopping list, to take to the store
     const c = cfgFor(m.id), p = mealSizes(m, c), ps = pricedShop(m, p.f, p);
-    const html = `<div class="md-head"><p class="md-k">Noël Tier 1 Hub</p><h1>${esc(m.name)}</h1><p class="md-sub">Shopping list · ${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · estimated total ${cad0(ps.total)} ${currency}</p></div>` + shopHtmlDoc(ps) + `<p class="pm-foot">Made with Noël Tier 1 Hub</p>`;
+    const html = `<div class="md-head"><p class="md-k">Noëma Tier 1 Hub</p><h1>${esc(m.name)}</h1><p class="md-sub">Shopping list · ${c.guests} ${m.addon ? (c.guests === 1 ? "person" : "people") : "guests"} · estimated total ${cad0(ps.total)} ${currency}</p></div>` + shopHtmlDoc(ps) + `<p class="pm-foot">Made with Noëma Tier 1 Hub</p>`;
     return { title: m.name + " shopping list", css: MD_CSS, html, margin: 0.55, file: m.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Shopping-List" };
   }
   const PRINT_CSS = `body{font:12pt/1.45 Georgia,serif;color:#222} h1{font-size:22pt;margin:0} h2{font-size:15pt;border-bottom:1.5px solid #B8935A;margin:22px 0 8px;padding-bottom:3px} h3{font-size:12pt;margin:12px 0 4px}
@@ -12621,7 +12621,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (t.closest("#mealStop")) { if (confirm("Stop all the alarms for this meal?")) stopMealPlan(m); return; }
     const nt = t.closest("[data-night]");
     if (nt) { const c = cfgFor(m.id); c.date = nt.dataset.night === "eve" ? eveYmd() : dayYmd(); mealCfg[m.id] = c; save("mealCfg", mealCfg); renderMealDetail(m); toast(nt.dataset.night === "eve" ? "🕯️ Set for Christmas Eve" : "🎄 Set for Christmas Day"); return; }
-    if (t.closest("#priceReset")) { if (confirm("Go back to Noël's estimated prices?")) { mealPrices[m.id] = {}; save("mealPrices", mealPrices); renderMealDetail(m); } return; }
+    if (t.closest("#priceReset")) { if (confirm("Go back to Noëma's estimated prices?")) { mealPrices[m.id] = {}; save("mealPrices", mealPrices); renderMealDetail(m); } return; }
     if (t.closest("#shopClear")) { if (confirm("Untick everything on the shopping list?")) { mealTicks[m.id] = {}; save("mealTicks", mealTicks); renderMealDetail(m); } return; }
   });
   $("#view-meals").addEventListener("change", e => {
@@ -12749,7 +12749,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       const g = wizGuests(n), planned = sel.filter(id => planOf(id)).length;
       h += `<div class="wz-step"><span class="wz-n">4</span>Ready? See your plan first</div>
         <ul class="wz-list">${sel.map(id => `<li><button type="button" data-wzopen="${id}"><b>${esc(mealById(id).name)}</b><small>Recipes, timeline and prices</small><span class="meal-go">›</span></button></li>`).join("")}</ul>
-        ${planned === sel.length ? `<p class="wz-on">Alarms are on. Noël will ring at each step.</p><button type="button" class="btn btn-ghost btn-block" data-wzstop>Turn alarms off</button>` : `<button type="button" class="btn btn-gold btn-block" data-wzalarm>See my plan</button><p class="wz-hint">You will check everything first. Nothing is set until you save.</p>`}`;
+        ${planned === sel.length ? `<p class="wz-on">Alarms are on. Noëma will ring at each step.</p><button type="button" class="btn btn-ghost btn-block" data-wzstop>Turn alarms off</button>` : `<button type="button" class="btn btn-gold btn-block" data-wzalarm>See my plan</button><p class="wz-hint">You will check everything first. Nothing is set until you save.</p>`}`;
     }
     $("#wizBox").innerHTML = h + `</div>`;
   }
@@ -12785,10 +12785,10 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     v.classList.toggle("on-menu", on); el.hidden = !on; if (!on) return;
     const hasPlan = mealPlans.some(p => !p.svc), sig = currency + (hasPlan ? "plan" : "none") + savedMenus.length + "/" + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length;
     if (el.dataset.built === sig) return; el.dataset.built = sig;
-    const go = `<button type="button" class="menu-go" data-menugo>Noël's dinner plans <span>›</span></button>`;
+    const go = `<button type="button" class="menu-go" data-menugo>Noëma's dinner plans <span>›</span></button>`;
     const svN = savedMenus.length + ownDinners.filter(o => o.title || o.shop.some(r => r.name)).length, sv = svN ? `<button type="button" class="menu-go menu-saved" data-menusaved>My saved menus (${svN}) <span>›</span></button>` : "";
-    el.innerHTML = `<div class="menu-opts"><div class="menu-opt"><button type="button" class="menu-go menu-skip" data-menuskip>My own dinner plans</button><p>Manually input your meal, set timers and print.</p></div><div class="menu-opt">${go}<p>Choose your dinner and how many are attending. Noël provides your recipes and instructions, shopping list and estimated price, and sets your timers. These are fixed menus, and you can only add a vegan option.</p></div></div>${sv ? `<div class="menu-top menu-top2">${sv}</div>` : ""}
-      <p class="menu-star">✦</p><h2 class="menu-title">The Noël Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
+    el.innerHTML = `<div class="menu-opts"><div class="menu-opt"><button type="button" class="menu-go menu-skip" data-menuskip>My own dinner plans</button><p>Manually input your meal, set timers and print.</p></div><div class="menu-opt">${go}<p>Choose your dinner and how many are attending. Noëma provides your recipes and instructions, shopping list and estimated price, and sets your timers. These are fixed menus, and you can only add a vegan option.</p></div></div>${sv ? `<div class="menu-top menu-top2">${sv}</div>` : ""}
+      <p class="menu-star">✦</p><h2 class="menu-title">The Noëma Menu</h2><p class="menu-sub">Christmas dinners, planned from the first thaw to the last dessert</p><p class="menu-rule"><span></span>✦<span></span></p>` +
       MENU_GROUPS.map(([g, ids, band]) => (band ? `<h3 class="menu-group">${band}</h3>` : "") + (band === g ? "" : `<h3 class="menu-subgroup">${g}</h3>`) + ids.map(id => {
         const m = mealById(id); if (!m || m.soon) return "";
         const all = (m.menuFor ? m.menuFor(mealSizes(m, cfgFor(id))) : m.menu).filter(([c]) => !/pairing/i.test(c)), clean = i => esc(String(i).replace(/\s*\(\d+ pieces\)/, ""));
@@ -12845,7 +12845,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     items.forEach(i => { if (i.price != null) { total += i.price; if (!i.on) left += i.price; } if (i.on) done++; });
     return { ids, groups, items, total, left, done };
   }
-  const msTextOf = b => `Noël shopping list (${b.ids.map(id => mealById(id).name).join(", ")})\nEstimated ${cad0(b.total)} ${currency}\n` +
+  const msTextOf = b => `Noëma shopping list (${b.ids.map(id => mealById(id).name).join(", ")})\nEstimated ${cad0(b.total)} ${currency}\n` +
     b.groups.map(([d, its]) => `\n${d.toUpperCase()}\n` + its.map(i => `${i.on ? "☑" : "☐"} ${i.q ? i.q + " " : ""}${i.name}`).join("\n")).join("\n");
   function msStatsHtml(b) {
     const pct = b.items.length ? Math.round(100 * b.done / b.items.length) : 0;
@@ -12865,7 +12865,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     const chips = MD.meals.filter(m => !m.soon && !m.addon && m.shop).map(m => `<button type="button" class="ms-chip" data-mssel="${m.id}" aria-pressed="${pick.has(m.id)}">${esc(m.name)}</button>`).join("");
     box.innerHTML = `<button type="button" class="meal-back" id="msBack">‹ All meals</button>
       <h3 class="meal-title">Master shopping list</h3>
-      <p class="view-intro">Pick the recipes you're cooking. Noël merges them into one list and adds up repeats like onions and butter. It's saved on this phone, so it works in the store with no signal.</p>
+      <p class="view-intro">Pick the recipes you're cooking. Noëma merges them into one list and adds up repeats like onions and butter. It's saved on this phone, so it works in the store with no signal.</p>
       <div class="card"><h4 class="ms-h">Recipes on this list</h4><div class="ms-chips">${chips}</div></div>` +
       (b.items.length ? `<div class="card ms-stats" id="msStats">${msStatsHtml(b)}</div>
       <div class="ms-acts">
@@ -12885,7 +12885,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     const b = msBuild(); if (!b.items.length) return { error: "Choose a recipe first" };
     const css = PRINT_CSS + ` .ms-c{column-count:2;column-gap:28px} .ms-c h3{font:600 9pt sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#B08D4E;border-bottom:1px solid #C9A45C;padding-bottom:3px;margin:14px 0 5px;break-after:avoid} .ms-c li{margin:3px 0;break-inside:avoid;font-size:11pt} .ms-c small{color:#777;font-size:8.5pt}`;
     const html = `<h1>Shopping list</h1><p class="pm-sub">${esc(b.ids.map(id => mealById(id).name).join(" · "))}<br>${b.items.length} items · estimated ${cad0(b.total)} ${currency}</p><div class="ms-c">` +
-      b.groups.map(([d, its]) => `<h3>${esc(d)}</h3><ul>${its.map(i => `<li>☐ ${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}${i.price != null ? ` <small>${cad(i.price)}</small>` : ""}</li>`).join("")}</ul>`).join("") + `</div><p class="pm-foot">Made with Noël Tier 1 Hub. Repeated items are already added together.</p>`;
+      b.groups.map(([d, its]) => `<h3>${esc(d)}</h3><ul>${its.map(i => `<li>☐ ${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}${i.price != null ? ` <small>${cad(i.price)}</small>` : ""}</li>`).join("")}</ul>`).join("") + `</div><p class="pm-foot">Made with Noëma Tier 1 Hub. Repeated items are already added together.</p>`;
     return { title: "Master shopping list", css, html, margin: 0.5, file: "Master-Shopping-List" };
   }
   $("#view-meals").addEventListener("click", async e => {
@@ -13017,13 +13017,13 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
         : `<div class="card sv-cook"><h4 class="ms-h">${esc(m.name)}: your timeline</h4>${tl}<h4 class="ms-h" style="margin-top:14px">Recipes and instructions</h4>${allRecipesHtml(m, p.f, p, false)}</div>`;
     }).join("");
   }
-  const svText = s => `Noël menu (${s.names.join(", ")})\n${whenLong(s.at)}\nEstimated to buy ${cad0(s.toBuy)} ${s.cur || ""}\n` + svBuyList(s).map(([d, its]) => `\n${d.toUpperCase()}\n` + its.map(i => `${s.bought[i.key] ? "☑" : "☐"} ${i.q ? i.q + " " : ""}${i.name}`).join("\n")).join("\n");
+  const svText = s => `Noëma menu (${s.names.join(", ")})\n${whenLong(s.at)}\nEstimated to buy ${cad0(s.toBuy)} ${s.cur || ""}\n` + svBuyList(s).map(([d, its]) => `\n${d.toUpperCase()}\n` + its.map(i => `${s.bought[i.key] ? "☑" : "☐"} ${i.q ? i.q + " " : ""}${i.name}`).join("\n")).join("\n");
   function savedMenuDoc(id) {
     const s = savedMenus.find(x => x.id === id); if (!s) return { error: "That saved menu isn't here any more" };
     const css = PRINT_CSS + MD_CSS.replace(/^body\{[^}]*\}/, "") + ` .ms-c{column-count:2;column-gap:28px} .ms-c h3{font:600 9pt sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#B08D4E;border-bottom:1px solid #C9A45C;padding-bottom:3px;margin:14px 0 5px;break-after:avoid} .ms-c li{margin:3px 0;break-inside:avoid;font-size:11pt} .sm-d{margin:0 0 12px} .sm-d h2{font-size:15pt;margin:0 0 2px} .sm-d p{margin:2px 0;font-size:10.5pt}`;
     const menu = s.menu.map(m => `<div class="sm-d"><h2>${esc(m.name)}</h2><p>${esc(whenLong(m.at))} · ${m.guests} guest${m.guests > 1 ? "s" : ""}</p>` + m.courses.map(([k, items]) => `<p><b>${esc(k)}:</b> ${items.map(esc).join(" · ")}</p>`).join("") + `</div>`).join("");
     const html = `<h1>Menu and shopping list</h1><p class="pm-sub">${esc(s.names.join(" · "))}<br>Estimated to buy ${cad0(s.toBuy)} ${esc(s.cur || "")}</p>${menu}<div class="ms-c">` +
-      svBuyList(s).map(([d, its]) => `<h3>${esc(d)}</h3><ul>${its.map(i => `<li>☐ ${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}</li>`).join("")}</ul>`).join("") + `</div>` + svCookHtml(s, true) + `<p class="pm-foot">Made with Noël Tier 1 Hub.</p>`;
+      svBuyList(s).map(([d, its]) => `<h3>${esc(d)}</h3><ul>${its.map(i => `<li>☐ ${i.q ? `<b>${esc(i.q)}</b> ` : ""}${esc(i.name)}</li>`).join("")}</ul>`).join("") + `</div>` + svCookHtml(s, true) + `<p class="pm-foot">Made with Noëma Tier 1 Hub.</p>`;
     return { title: "Menu and shopping list", css, html, margin: 0.5, file: "My-Noel-Menu" };
   }
   $("#view-meals").addEventListener("click", async e => {
@@ -13121,7 +13121,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       <h3>Who is bringing what</h3><ul>${bring.length ? bring.map(r => `<li>${esc(r.who)}: ${esc(r.dish)}</li>`).join("") : blank(4)}</ul>
       <h3>Shopping list</h3><ul>${shop.length ? shop.map(r => `<li>${r.got ? "☑" : "☐"} ${esc(r.name)}${ownNum(r.price) ? `<span class="pr">${cad(ownNum(r.price))}</span>` : ""}</li>`).join("") + `<li><b>Total ${cad(t.total)}</b>${t.lim ? ` of ${cad(t.lim)} budget` : ""}</li>` : blank(8)}</ul>
       <h3>Cooking timeline</h3><ul>${steps.length ? steps.map(r => `<li><b>${esc(r.time)}</b> ${esc(r.text)}</li>`).join("") : blank(6)}</ul>
-      <h3>Guest notes</h3><p>${d.notes ? esc(d.notes).replace(/\n/g, "<br>") : "________________________________"}</p></div><p class="pm-foot">Made with Noël Tier 1 Hub.</p>`);
+      <h3>Guest notes</h3><p>${d.notes ? esc(d.notes).replace(/\n/g, "<br>") : "________________________________"}</p></div><p class="pm-foot">Made with Noëma Tier 1 Hub.</p>`);
     return { title: ownName(d), css, html, margin: 0.5, file: hubMode === "company" ? "My-Own-Event" : "My-Own-Dinner" };
   }
   $("#view-own").addEventListener("input", e => {
@@ -13358,7 +13358,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   function renderNyeMenu() {
     const el = $("#nyeMenu"), v = $("#view-nye"); if (!el) return;
     const on = nyeScreen === "menu"; v.classList.toggle("on-menu", on); el.hidden = !on; if (!on || el.dataset.built) return; el.dataset.built = "1";
-    const go = `<button type="button" class="menu-go" data-nyego>Noël's plans <span>›</span></button>`;
+    const go = `<button type="button" class="menu-go" data-nyego>Noëma's plans <span>›</span></button>`;
     const m = mealById("nyeparty"), all = m ? (m.menuFor ? m.menuFor(mealSizes(m, cfgFor("nyeparty"))) : m.menu) : [];
     const clean = i => esc(String(i).replace(/\s*\(24 pieces\)/, ""));
     const food = all.filter(([c]) => !/drink|pairing/i.test(c)).flatMap(([, it]) => it.map(clean)), drinks = all.filter(([c]) => /drink/i.test(c)).flatMap(([, it]) => it.map(clean));
@@ -13374,13 +13374,13 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       blk("Pass the phone and play", `<p class="menu-items">Who Wrote It?${dot}Would You Rather${dot}Who's Most Likely To${dot}Two Truths &amp; a Midnight Lie${dot}Guess the Resolution${dot}Draw the Countdown${dot}Happy New Year Categories${dot}10-Second Countdown${dot}Year-in-Review Quiz</p>`) +
       `<h3 class="menu-group">Midnight</h3>` +
       blk("The finishing touches", `<p class="menu-items">Big Countdown with fireworks${dot}Wishes Jar${dot}Midnight Champagne card${dot}Appetizer Ideas${dot}Printable Party Planner</p>`) +
-      `<p class="menu-note">Choose your guests and start time, and Noël builds the rest.</p>
+      `<p class="menu-note">Choose your guests and start time, and Noëma builds the rest.</p>
       <div class="menu-bottom"><p class="menu-ready">Ready to build your night?</p>${go}</div>`;
   }
   document.addEventListener("click", e => {   // opening My Own Dinner from anywhere but New Year's resets its back buttons
     if (e.target.closest && e.target.closest("[data-goview=own],[data-menuskip],[data-svown],[data-offown]")) {
       const f = $("#view-own .meal-back.fam-only"), c = $("#view-own .meal-back.co-only");
-      if (f) { f.dataset.goview = "meals"; f.textContent = "‹ The Noël menu"; } if (c) { c.dataset.goview = "planner"; c.textContent = "‹ Planner"; }
+      if (f) { f.dataset.goview = "meals"; f.textContent = "‹ The Noëma menu"; } if (c) { c.dataset.goview = "planner"; c.textContent = "‹ Planner"; }
     }
   }, true);
   document.addEventListener("click", e => {
@@ -14060,7 +14060,7 @@ const PC_DESIGNS = [
   }
   function hostSync() {
     if (!NoelNative.isNative()) return;
-    const items = host.remind ? hostReminders().filter(r => !host.fired[r.k] && r.t > Date.now()).map(r => ({ t: r.t, title: `${r.icon} ${r.text}`, body: "Noël Tier 1 Hub" })) : [];
+    const items = host.remind ? hostReminders().filter(r => !host.fired[r.k] && r.t > Date.now()).map(r => ({ t: r.t, title: `${r.icon} ${r.text}`, body: "Noëma Tier 1 Hub" })) : [];
     NoelNative.scheduleList(6000, 7000, items);
   }
   function hostTick() {
@@ -14192,7 +14192,7 @@ const PC_DESIGNS = [
     const html = `<div class="ch"><h1>📋 Holiday Chore Chart</h1><p class="ch-sub">Many hands make light work · dinner ${esc(hostFmt(D))}</p>
       <h2>Deep-clean countdown</h2><table>${head}${HOST_CLEAN.map(([id, days, text]) => row(text, days ? day(atDay(D, days, 10)) : "Dinner day", "c:" + id, host.clean[id])).join("")}</table>
       <h2>Jobs on the big day</h2><table>${head}${HOST_JOBS.map(([id, text, when]) => row(text, when, "j:" + id, host.jobDone[id])).join("")}${host.jobs.map(j => row(j.text, j.when || "", "j:" + j.id, host.jobDone[j.id])).join("")}</table>
-      <p class="ch-foot">Made with Noël Tier 1 Hub</p></div>`;
+      <p class="ch-foot">Made with Noëma Tier 1 Hub</p></div>`;
     return { title: "Holiday chore chart", css, html, margin: 0.5, file: "Holiday-Chore-Chart" };
   }
   function hostSuppliesHtml() {
@@ -14212,7 +14212,7 @@ const PC_DESIGNS = [
       const items = host.trips.filter(x => x.k === k);
       const fmt = x => (k === "trip" || k === "gtrip") && x.b ? (k === "gtrip" ? "arrives " : "") + new Date(x.b).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : k === "pass" && x.b ? "expires " + x.b : x.b || "";
       const warn = x => k === "pass" && x.b && new Date(x.b).getTime() < Date.now() + 183 * 864e5 ? ` <b class="host-pill over">${new Date(x.b).getTime() < Date.now() ? "expired" : "renew soon"}</b>` : "";
-      return `<div class="card host-card"><h3>${ico} ${title}</h3>${k === "gtrip" ? `<p class="host-rem">Guests flying or taking the train to you? Add them here and Noël will put their arrival in your calendar, with a reminder to pick them up.</p>` : ""}${k === "trip" ? `<p class="host-rem">If travelling before your Christmas home plans, Noël will add your travel dates, with reminders, to your calendar.</p>` : ""}
+      return `<div class="card host-card"><h3>${ico} ${title}</h3>${k === "gtrip" ? `<p class="host-rem">Guests flying or taking the train to you? Add them here and Noëma will put their arrival in your calendar, with a reminder to pick them up.</p>` : ""}${k === "trip" ? `<p class="host-rem">If travelling before your Christmas home plans, Noëma will add your travel dates, with reminders, to your calendar.</p>` : ""}
         ${items.length ? `<ul class="host-list">${items.map(x => `<li data-htrip="${x.id}"><span><b>${esc(x.a)}</b>${x.b ? `<small>${esc(fmt(x))}</small>` : ""}${+x.cost > 0 ? `<small>✦ ${money(+x.cost)} added to your Budget</small>` : ""}${warn(x)}</span><button type="button" class="icon-btn" data-hdeltrip aria-label="Remove">✕</button></li>`).join("")}</ul>` : `<p class="host-rem">Nothing added yet.</p>`}
         <form class="host-away-form" data-htripform="${k}" autocomplete="off">
           <label><span class="meal-lab">${l1}</span><input class="input" name="a" maxlength="60" placeholder="${ph}" required></label>
@@ -14284,7 +14284,7 @@ const PC_DESIGNS = [
       .fr h2{font-size:12pt;color:#1E3A2F;border-bottom:1.5px solid #B8935A;margin:12px 0 4px;padding-bottom:2px} .fr table{border-collapse:collapse;width:100%} .fr td{text-align:left;padding:4px 6px;border-bottom:1px solid #e6e0d2} .fr ul{list-style:none;margin:0;padding:0} .fr li{margin:3px 0} .fr-foot{margin-top:14px;font:8pt sans-serif;color:#999;text-align:center}`;
     const html = `<div class="fr"><h1>✈️ Our Travel Plans</h1><p class="fr-sub">Before we go</p>${sec || "<p>No travel added yet.</p>"}
       <h2>🔑 Before we leave home</h2><ul>${all.map(([k, t]) => `<li>${box(host.leave.done[k])} ${esc(t)}</li>`).join("")}</ul>
-      <p class="fr-foot">Made with Noël Tier 1 Hub</p></div>`;
+      <p class="fr-foot">Made with Noëma Tier 1 Hub</p></div>`;
     return { title: "Travel plans", css, html, margin: 0.5, file: "Travel-Plans" };
   }
   function fridgeDoc() {
@@ -14308,7 +14308,7 @@ const PC_DESIGNS = [
         </div>
       <h2>Still to get</h2>${need.length ? `<ul class="fr-need">${need.map(i => `<li>☐ ${esc(i)}</li>`).join("")}</ul>` : "<p>Everything's ready! ✨</p>"}
       ${house.length ? `<h2>House info</h2><table>${house.map(([k, v]) => `<tr><td style="width:90px"><b>${k}</b></td><td>${esc(v)}</td></tr>`).join("")}</table>` : ""}
-      <p class="fr-foot">Made with Noël Tier 1 Hub</p></div>`;
+      <p class="fr-foot">Made with Noëma Tier 1 Hub</p></div>`;
     return { title: "Hosting fridge sheet", css, html, margin: 0.45, file: "Hosting-Fridge-Sheet" };
   }
   function hostListDoc() {   // 🖨️ Master Hostess List: everything still to get, by category, with tick boxes
@@ -14319,7 +14319,7 @@ const PC_DESIGNS = [
       .ml-foot{margin-top:18px;text-align:center;color:#888;font:8pt sans-serif;letter-spacing:.14em;text-transform:uppercase} .ml-done{text-align:center;font-size:13pt;margin:30px 0}
       @media (max-width:640px){.ml-grid{columns:1}}`;
     const body = cats.length ? `<div class="ml-grid">${cats.map(([c, l]) => `<div class="ml-cat"><h2>${esc(c)}</h2><ul>${l.map(i => `<li>☐ ${esc(i)}</li>`).join("")}</ul></div>`).join("")}</div>` : `<p class="ml-done">Everything is ready. Nothing left to get.</p>`;
-    const html = `<div class="ml"><div class="ml-head"><p class="ml-k">Noël Tier 1 Hub</p><h1>Master Hostess List</h1><p class="ml-sub">${total ? `${total} item${total === 1 ? "" : "s"} still to get` : "All ready"} · ${all - total} of ${all} ready</p></div>${body}<p class="ml-foot">Made with Noël Tier 1 Hub</p></div>`;
+    const html = `<div class="ml"><div class="ml-head"><p class="ml-k">Noëma Tier 1 Hub</p><h1>Master Hostess List</h1><p class="ml-sub">${total ? `${total} item${total === 1 ? "" : "s"} still to get` : "All ready"} · ${all - total} of ${all} ready</p></div>${body}<p class="ml-foot">Made with Noëma Tier 1 Hub</p></div>`;
     return { title: "Master Hostess List", css, html, margin: 0.6, file: "Master-Hostess-List", noBrand: true };
   }
   function planAllDoc() {   // 🖨️ everything on the Plan page (travel, guests, seating, supplies, house info) as one printout
@@ -14337,7 +14337,7 @@ const PC_DESIGNS = [
     let y = 420; x.textAlign = "left";
     const wrap = (txt, max) => { const words = String(txt).split(" "), lines = []; let l = ""; words.forEach(w => { const t = l ? l + " " + w : w; if (x.measureText(t).width > max) { lines.push(l); l = w; } else l = t; }); if (l) lines.push(l); return lines; };
     rows.forEach(([k, v]) => { x.fillStyle = "#D9BF8C"; x.font = "500 30px Poppins, sans-serif"; x.fillText(k, 140, y); y += 50; x.fillStyle = "#F3EBDA"; x.font = "400 40px Lora, Georgia, serif"; wrap(v, 800).forEach(l => { x.fillText(l, 140, y); y += 54; }); y += 36; });
-    x.textAlign = "center"; x.fillStyle = "rgba(243,235,218,.5)"; x.font = "300 22px Poppins, sans-serif"; x.fillText("Made with Noël Tier 1 Hub", 540, 1240);
+    x.textAlign = "center"; x.fillStyle = "rgba(243,235,218,.5)"; x.font = "300 22px Poppins, sans-serif"; x.fillText("Made with Noëma Tier 1 Hub", 540, 1240);
     const blob = await new Promise(r => c.toBlob(r, "image/png"));
     try { await NoelMedia.share(blob, "House-Info.png", "Welcome! Here's everything you need for your stay."); } catch (e) {}
   }
@@ -14426,7 +14426,7 @@ const PC_DESIGNS = [
   /* ============================================================
      📒 ORGANIZER: six simple tools, each on its own clean screen
      ✉️ Card List (address book, sent/received, Avery 5160 labels, CSV)
-     📅 Calendar (your family's events + everything Noël has planned)
+     📅 Calendar (your family's events + everything Noëma has planned)
      🙏 Thank-Yous · 📦 Packages · ⭐ Giving · 🗂️ Spending at a glance
      Everything stays encrypted on the phone.
      ============================================================ */
@@ -14552,7 +14552,7 @@ const PC_DESIGNS = [
         ${monthChips(m0, "data-omgo")}<p class="mc-hint">Swipe left or right to change month</p>
         <div class="cal-grid">${["S", "M", "T", "W", "T", "F", "S"].map(d => `<span class="cal-dow">${d}</span>`).join("")}${cells.join("")}</div><div class="send-btns" style="margin-top:10px"><button type="button" class="btn btn-ghost" data-print="calendar">🖨️ Print this month</button></div></div>
       <div class="card org-card"><h3>${shortDate(sel)}</h3>
-        ${dayList.length ? `<ul class="cal-list">${dayList.map(e => `<li class="${e.auto ? "auto" : ""}" ${e.mine ? `data-oev="${e.id}"` : ""}><span class="cl-time">${e.time ? mclock(parseYmd(e.date).setHours(...e.time.split(":").map(Number))) : "All day"}</span><span class="cl-txt">${e.mine ? memberEmoji(e.who) : e.icon} ${esc(e.title)}${e.notes ? `<small>${esc(e.notes)}</small>` : ""}${e.auto ? `<small>From your Noël plans</small>` : ""}</span>${e.mine ? `<button class="icon-btn" data-odelev aria-label="Remove">✕</button>` : ""}</li>`).join("")}</ul>` : `<p class="host-rem">Nothing planned yet.</p>`}
+        ${dayList.length ? `<ul class="cal-list">${dayList.map(e => `<li class="${e.auto ? "auto" : ""}" ${e.mine ? `data-oev="${e.id}"` : ""}><span class="cl-time">${e.time ? mclock(parseYmd(e.date).setHours(...e.time.split(":").map(Number))) : "All day"}</span><span class="cl-txt">${e.mine ? memberEmoji(e.who) : e.icon} ${esc(e.title)}${e.notes ? `<small>${esc(e.notes)}</small>` : ""}${e.auto ? `<small>From your Noëma plans</small>` : ""}</span>${e.mine ? `<button class="icon-btn" data-odelev aria-label="Remove">✕</button>` : ""}</li>`).join("")}</ul>` : `<p class="host-rem">Nothing planned yet.</p>`}
         <form id="orgEventForm" class="org-ev-form" autocomplete="off">
           <input class="input" name="title" maxlength="60" placeholder="Type your own or pick below" aria-label="Event">
           ${fillChips((hubMode === "company" ? ["🎉 Office party", "🎁 Gift exchange", "🥘 Potluck lunch", "📞 Client gifts go out", "🏖️ Office closed"] : ["🎶 School concert", "⭐ Christmas pageant", "🎅 Photos with Santa", "🎄 Tree lighting", "⛪ Christmas Eve service", "💼 Work party", "🏒 Hockey game", "🍪 Cookie exchange", "🎁 Gift exchange", "🛍️ Holiday shopping day", "✈️ Travel day", "🦃 Family dinner", "✏️ Other (type your own)"]).map(x => [x, /Other/.test(x) ? "" : x.replace(/^\S+\s/, "")]), "#orgEventForm [name=title]")}
@@ -14657,7 +14657,7 @@ const PC_DESIGNS = [
   // ---------- 📦 Packages ----------
   function orgPackagesHtml() {
     const today = ymd(new Date());
-    return `<div class="card org-card"><p class="host-rem">Once you've ordered something, add it here by hand. Noël keeps track so nothing goes missing, nudges you on each delivery day, and reminds you in mid-December to check stores' last order dates. Add the price and any shipping and they go straight into your Budget.</p></div>
+    return `<div class="card org-card"><p class="host-rem">Once you've ordered something, add it here by hand. Noëma keeps track so nothing goes missing, nudges you on each delivery day, and reminds you in mid-December to check stores' last order dates. Add the price and any shipping and they go straight into your Budget.</p></div>
       ${org.packages.map(p => { const late = p.eta && p.eta < today && !p.arrived;
         return `<div class="card org-item${p.arrived ? " done" : ""}" data-op="${p.id}"><div class="host-row"><b>${esc(p.item)}</b><button class="icon-btn" data-odel aria-label="Remove">✕</button></div>
           <p class="org-addr">${esc(p.store || "")}${p.eta ? ` · expected ${shortDate(p.eta)}` : ""}${p.track ? ` · #${esc(p.track)}` : ""}</p>
@@ -14709,7 +14709,7 @@ const PC_DESIGNS = [
   }
   function orgSync() {
     if (!NoelNative.isNative()) return;
-    NoelNative.scheduleList(7000, 8000, orgReminders().filter(r => !org.fired[r.k] && r.t > Date.now()).map(r => ({ t: r.t, title: `${r.icon} ${r.text}`, body: "Noël Tier 1 Hub" })));
+    NoelNative.scheduleList(7000, 8000, orgReminders().filter(r => !org.fired[r.k] && r.t > Date.now()).map(r => ({ t: r.t, title: `${r.icon} ${r.text}`, body: "Noëma Tier 1 Hub" })));
   }
   function orgTick() {
     const now = Date.now(), due = orgReminders().filter(r => !org.fired[r.k] && r.t <= now);
@@ -14949,7 +14949,7 @@ const PC_DESIGNS = [
   function renderPt() {
     const t = ptTheme(), el = $("#ptBody");
     if (!t) {
-      el.innerHTML = `<p class="advent-intro">Pick a theme and Noël plans the whole night: a timeline with alarms, food and drinks, a priced shopping list, the music mood and three games that fit.</p>
+      el.innerHTML = `<p class="advent-intro">Pick a theme and Noëma plans the whole night: a timeline with alarms, food and drinks, a priced shopping list, the music mood and three games that fit.</p>
         <div class="pt-tiles">${PARTY_THEMES.map(x => `<button type="button" class="pt-tile" data-pt="${x.id}"><span class="pt-ico">${x.icon}</span><b>${esc(x.name)}</b><small>${esc(x.tag)}</small></button>`).join("")}</div>`;
       return;
     }
@@ -14961,7 +14961,7 @@ const PC_DESIGNS = [
       night: () => `<div class="card pt-card"><p class="pt-dress"><b>Dress code:</b> ${esc(t.dress)}</p>
           <ul class="cal-list">${ptTimeline(t).map(x => `<li><span class="cl-time">${mclock(x.t)}</span><span class="cl-txt">${x.icon} ${esc(x.text)}</span></li>`).join("")}</ul>
           ${t.early ? `<button type="button" class="btn btn-gold btn-block" id="ptKids">🎆 Start a 1-minute kids' countdown now</button>` : ""}</div>
-        <div class="card pt-card"><label class="host-switch"><input type="checkbox" id="ptRemind" ${pt.remind ? "checked" : ""}><span><b>🔔 Party alarms</b><small>${pt.remind ? "On. Noël rings for each moment above, from setup to the last goodbye." : "Turn on to get a ring for each moment of the night."}</small></span></label></div>
+        <div class="card pt-card"><label class="host-switch"><input type="checkbox" id="ptRemind" ${pt.remind ? "checked" : ""}><span><b>🔔 Party alarms</b><small>${pt.remind ? "On. Noëma rings for each moment above, from setup to the last goodbye." : "Turn on to get a ring for each moment of the night."}</small></span></label></div>
         <div class="card pt-card"><h3>🎨 Decorations</h3><ul class="pt-list">${t.decor.map(d => `<li>${esc(d)}</li>`).join("")}</ul></div>`,
       food: () => `<div class="card pt-card"><h3>🍢 Bites</h3><ul class="pt-list">${t.food.map(d => `<li>${esc(d)}</li>`).join("")}</ul>
           <p class="host-rem">Make-ahead tip: choose 2 or 3 bites you can make the day before, and ask guests to bring one each. Hosting is more fun when you're not stuck in the kitchen.</p>
@@ -15005,13 +15005,13 @@ const PC_DESIGNS = [
       <h2>Music</h2><ul>${t.music.map(d => `<li>• ${esc(d)}</li>`).join("")}</ul><p>Search your music app for: ${esc(t.search)}</p>
       <h2>Games</h2>${t.games.map(([n, how]) => `<h3>${esc(n)}</h3><p>${esc(how)}</p>`).join("")}
       <h2>Photo booth</h2><p>Tinsel fringe backdrop with fairy lights · a basket of props · instant cameras and a guestbook · a big clock set to 11:59</p>
-      <p class="pm-foot">Made with Noël Tier 1 Hub</p>`;
+      <p class="pm-foot">Made with Noëma Tier 1 Hub</p>`;
     return { title: t.name + " party plan", css: PRINT_CSS, html, margin: 0.5, file: t.name.replace(/[^A-Za-z0-9]+/g, "-") + "-Party-Plan" };
   }
 
   // ---------- alarms ----------
   const ptReminders = () => { const t = ptTheme(); return t && pt.remind ? ptTimeline(t).map(x => ({ k: t.id + x.k + x.t, t: x.t, icon: x.icon, text: x.text })) : []; };
-  function ptSync() { if (NoelNative.isNative()) NoelNative.scheduleList(8000, 9000, ptReminders().filter(r => !pt.fired[r.k] && r.t > Date.now()).map(r => ({ t: r.t, title: `${r.icon} ${r.text}`, body: "Noël Tier 1 Hub · New Year's Eve" }))); }
+  function ptSync() { if (NoelNative.isNative()) NoelNative.scheduleList(8000, 9000, ptReminders().filter(r => !pt.fired[r.k] && r.t > Date.now()).map(r => ({ t: r.t, title: `${r.icon} ${r.text}`, body: "Noëma Tier 1 Hub · New Year's Eve" }))); }
   function ptTick() {
     const now = Date.now(), due = ptReminders().filter(r => !pt.fired[r.k] && r.t <= now); if (!due.length) return;
     due.forEach(r => { pt.fired[r.k] = 1; }); savePt();
@@ -15276,7 +15276,7 @@ const PC_DESIGNS = [
         <tr><td><b>Total</b></td><td class="num"><b>${money(T.spent)}</b></td><td class="num"><b>${T.limit ? money(T.limit) : "—"}</b></td><td class="num"><b>${T.limit ? money(T.limit - T.spent) : "—"}</b></td></tr></table></div>
       ${T.rows.length ? `<h2>Spending over time</h2>${budLine(T.limit, 680, 200)}` : ""}
       <h2>Every purchase</h2><table><tr><th>Date</th><th>Category</th><th>Item</th><th class="num">Amount</th></tr>${T.rows.slice().sort((a, b) => (a.date || "0").localeCompare(b.date || "0")).map(r => `<tr><td>${r.date || "—"}</td><td>${budCat(r.cat)[2]}</td><td>${esc(r.name)}</td><td class="num">${money(r.amt)}</td></tr>`).join("")}</table>
-      <p class="bd-foot">Made with Noël Tier 1 Hub</p></div>`;
+      <p class="bd-foot">Made with Noëma Tier 1 Hub</p></div>`;
     return { title: "Budget report", css, html, margin: 0.5, file: "Holiday-Budget-Report" };
   }
   // 💳 Office space: what the coordinator paid out of pocket
@@ -15335,7 +15335,7 @@ const PC_DESIGNS = [
   function budShared() {
     const s = shr(), { bal, pays } = shrBalances(), total = s.items.reduce((a, x) => a + x.amt, 0), many = s.people.length >= 2;
     const fam = (typeof org !== "undefined" && org.members) ? org.members.filter(m => !s.people.some(p => p.name.toLowerCase() === m.name.toLowerCase())) : [];
-    return `<div class="card pt-card"><h3>Shared costs</h3><p class="host-rem">Sharing a hotel, groceries, a gift or a party? Add who's in, log each cost with who paid, and Noël works out who owes whom.</p></div>
+    return `<div class="card pt-card"><h3>Shared costs</h3><p class="host-rem">Sharing a hotel, groceries, a gift or a party? Add who's in, log each cost with who paid, and Noëma works out who owes whom.</p></div>
       <div class="card pt-card"><h3>Who's sharing</h3><div class="shr-people">${s.people.map(p => `<span class="shr-chip">${esc(p.name)}<button type="button" class="shr-x" data-shrp="${p.id}" aria-label="Remove ${esc(p.name)}">✕</button></span>`).join("") || `<small class="host-rem">Nobody yet. Add names below.</small>`}</div>
         <form id="shrPersonForm" class="santa-kid-row" autocomplete="off"><input class="input" name="pname" maxlength="20" placeholder="Name" aria-label="Name"><button class="btn btn-green" type="submit">Add</button></form>
         ${fam.length ? `<button type="button" class="btn btn-ghost btn-block" data-shrfam style="margin-top:8px">Add my family members</button>` : ""}</div>
@@ -15571,7 +15571,7 @@ const PC_DESIGNS = [
     ];
   };
   const stReminders = () => { const sp = stSurprise(); if (!stAlarm.on) return sp; const y = stYear(), a = stArrive(stMyOff(), y); return sp.concat([{ k: y + "b3", t: a - 3 * 3600000, text: "Santa is 3 hours away. Time to get ready for bed!" }, { k: y + "b1", t: a - 3600000, text: "Santa is 1 hour away! Everyone into bed, quick! 🛷" }]); };
-  function stSync() { if (NoelNative.isNative()) NoelNative.scheduleList(9000, 9020, stReminders().filter(r => r.t > Date.now()).map(r => ({ t: r.t, title: (r.icon || "🎅") + " " + r.text, body: "Noël Tier 1 Hub · Santa Tracker" }))); }
+  function stSync() { if (NoelNative.isNative()) NoelNative.scheduleList(9000, 9020, stReminders().filter(r => r.t > Date.now()).map(r => ({ t: r.t, title: (r.icon || "🎅") + " " + r.text, body: "Noëma Tier 1 Hub · Santa Tracker" }))); }
   function stAlertItem(id) { if (!String(id).startsWith("st:")) return null; const r = stReminders().find(x => "st:" + x.k === id); return r ? { icon: r.icon || "🎅", name: r.text } : null; }
   setInterval(() => {
     stBanner();
@@ -15979,7 +15979,7 @@ const PC_DESIGNS = [
     const a = off.appr, L = offLetter(a.status === "changes"), last = a.log[a.log.length - 1];
     const missing = [!off.ev.date && "a date", !off.ev.venue && "a venue", !off.costs.length && "costs", !off.ev.organizer && "your name"].filter(Boolean);
     return `<div class="card pt-card ap-status ${a.status}"><div class="ap-big">${AP_TXT[a.status][0]}</div><div><b>${AP_TXT[a.status][1]}</b>
-        <small>${a.status === "sent" && a.sentAt ? `Sent ${new Date(a.sentAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })} to ${esc(off.ev.approver || "your approver")}. Noël will remind you to follow up in ${a.followDays} days if you haven't heard back.` : a.status === "approved" ? `Go ahead and book everything! 🎉${last && last.note ? `<br>“${esc(last.note)}”` : ""}` : a.status === "changes" ? `${last && last.note ? `“${esc(last.note)}”<br>` : ""}Update the plan on the Event tab, then send the new version below.` : "Fill in the plan, check the letter below, then send it."}</small></div></div>
+        <small>${a.status === "sent" && a.sentAt ? `Sent ${new Date(a.sentAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })} to ${esc(off.ev.approver || "your approver")}. Noëma will remind you to follow up in ${a.followDays} days if you haven't heard back.` : a.status === "approved" ? `Go ahead and book everything! 🎉${last && last.note ? `<br>“${esc(last.note)}”` : ""}` : a.status === "changes" ? `${last && last.note ? `“${esc(last.note)}”<br>` : ""}Update the plan on the Event tab, then send the new version below.` : "Fill in the plan, check the letter below, then send it."}</small></div></div>
       ${a.status !== "draft" || off.confirmed ? `<button type="button" class="btn btn-ghost btn-block" data-offundo style="margin-bottom:12px">↩ Undo, take this back to draft</button>` : ""}
       ${a.status === "approved" ? `<button type="button" class="btn btn-gold btn-block" data-oftab="plan" style="margin-bottom:12px">📄 Open my approved plan ›</button>` : ""}
       ${a.status !== "approved" ? `<div class="card pt-card"><h3>🙋 No one to ask?</h3><p class="host-rem">Own the business or make this call yourself? Skip the request and mark it approved. Your plan opens right away.</p><button type="button" class="btn btn-green btn-block" data-apset="approved" data-apnote="Approved by me, no request needed">✅ I approve it myself</button></div>` : ""}
@@ -16177,8 +16177,8 @@ const PC_DESIGNS = [
       ${e.notes ? `<h2>Notes</h2><p>${esc(e.notes)}</p>` : ""}`;
   }
   const OFF_PLAN_CSS = `.pl{font:10.5pt/1.45 Georgia,serif;color:#222} .pl h1{font-size:20pt;margin:0;color:#1E3A2F} .pl .pl-s{color:#8a6d3b;font:600 8.5pt sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:2px 0 12px} .pl h2{font-size:12.5pt;color:#1E3A2F;border-bottom:1.5px solid #B8935A;margin:14px 0 5px;padding-bottom:2px} .pl table{width:100%;border-collapse:collapse} .pl td,.pl th{padding:4px 6px;border-bottom:1px solid #e6dcc6;text-align:left;vertical-align:top;font-size:10pt} .pl .num{text-align:right}`;
-  function offPlanDoc() { return { title: "Event plan", css: OFF_PLAN_CSS, html: `<div class="pl">${offPlanBody()}<p class="pl-s" style="margin-top:16px">Made with Noël Tier 1 Hub · Office Edition</p></div>`, margin: 0.5, file: "Event-Plan" }; }
-  function offSavedDoc(id) { const s = (off.saved || []).find(x => x.id === id); return s ? { title: s.name, css: OFF_PLAN_CSS, html: `<div class="pl">${s.html}<p class="pl-s" style="margin-top:16px">Made with Noël Tier 1 Hub · Office Edition</p></div>`, margin: 0.5, file: "Event-Plan" } : null; }
+  function offPlanDoc() { return { title: "Event plan", css: OFF_PLAN_CSS, html: `<div class="pl">${offPlanBody()}<p class="pl-s" style="margin-top:16px">Made with Noëma Tier 1 Hub · Office Edition</p></div>`, margin: 0.5, file: "Event-Plan" }; }
+  function offSavedDoc(id) { const s = (off.saved || []).find(x => x.id === id); return s ? { title: s.name, css: OFF_PLAN_CSS, html: `<div class="pl">${s.html}<p class="pl-s" style="margin-top:16px">Made with Noëma Tier 1 Hub · Office Edition</p></div>`, margin: 0.5, file: "Event-Plan" } : null; }
   function offStartOverCard() {
     return `<div class="card pt-card"><h3>✦ Plans changed?</h3><p class="host-rem">The boss wants something different? Start over in one step. Your old plan is saved first.</p><button type="button" class="btn btn-ghost btn-block" data-offnew>Start a new plan</button></div>`;
   }
@@ -16368,7 +16368,7 @@ const PC_DESIGNS = [
       ${offSurveyYE()}
       ${oyYearEndHtml()}
       <h2>Notes for next year</h2><p><b>What worked:</b> ${esc(off.wrap.worked || "—")}</p><p><b>Change next time:</b> ${esc(off.wrap.change || "—")}</p>
-      <p class="ye-foot">Made with Noël Tier 1 Hub · Office Edition</p></div>`;
+      <p class="ye-foot">Made with Noëma Tier 1 Hub · Office Edition</p></div>`;
     return { title: "Year-End Report", css, html, margin: 0.5, file: "Office-Year-End-Report" };
   }
   // password-locked handover file (PBKDF2 → AES-GCM), made and opened on the phone
@@ -16410,7 +16410,7 @@ const PC_DESIGNS = [
     oyMilestones(14).forEach(m => { const t = m.in <= 7 ? new Date(oyYmd(new Date()) + "T09:00").getTime() : new Date(oyAdd(oyYmd(m.dt), -7) + "T09:00").getTime(); out.push({ g: 1, k: "ms" + m.p.id + m.kind + m.dt.getFullYear(), t, text: m.kind === "bday" ? `${m.p.name}'s birthday is ${oyMsWhen(m).split(" · ")[0]}` : `${m.p.name}'s ${m.n}-year anniversary is ${oyMsWhen(m).split(" · ")[0]}` }); });
     return out;
   };
-  function offSync() { if (SPACE === "office") NoelNative.scheduleList(9100, 9110, offReminders().filter(r => r.t > Date.now()).sort((a, b) => a.t - b.t).slice(0, 10).map(r => ({ t: r.t, title: "📨 " + r.text, body: "Noël Tier 1 Hub · Office" }))); }
+  function offSync() { if (SPACE === "office") NoelNative.scheduleList(9100, 9110, offReminders().filter(r => r.t > Date.now()).sort((a, b) => a.t - b.t).slice(0, 10).map(r => ({ t: r.t, title: "📨 " + r.text, body: "Noëma Tier 1 Hub · Office" }))); }
   function offAlertItem(id) { if (!String(id).startsWith("off:")) return null; const r = offReminders().find(x => "off:" + x.k === id); return r ? { icon: "📨", name: r.text } : null; }
   if (SPACE === "office") setInterval(() => {
     const now = Date.now(), due = offReminders().filter(r => !off.fired[r.k] && !oy.fired[r.k] && r.t <= now); if (!due.length) return;
@@ -16667,7 +16667,7 @@ const PC_DESIGNS = [
   }, true);
 
   /* ---------- 📍 WHERE: in the office, a rented venue, an outing or a home ---------- */
-  // 📍 one-tap "find near me": opens the phone's own Maps app (Noël never sees the location)
+  // 📍 one-tap "find near me": opens the phone's own Maps app (Noëma never sees the location)
   const offNear = (title, list, note) => `<div class="near-card"><p class="near-t">📍 ${title}</p><div class="near-btns">${list.map(([l, q]) => `<button type="button" class="near-btn" data-amap="${esc(q)}">${l}</button>`).join("")}</div>${note ? `<p class="host-rem" style="margin:6px 0 0">${note}</p>` : ""}</div>`;
   const OFF_WHERE = [
     ["office", "🏢", "In the office", "Cozy and personal, no venue costs.", [["🪑 Boardroom or meeting room", "Book the room, push the table to the wall for a buffet, and check how many people it holds."], ["🖥️ Around our desks", "Keep it relaxed: snacks on a shared table, each team decorates their pod, and a desk-hop for treats."], ["☕ Break room or kitchen", "Handy for food and fridge space. Plan a plug-in spot for slow cookers and a garbage station."], ["🛋️ Lobby or reception", "Great for mingling and photos. Put a sign on the door if clients might drop in."], ["🏬 The whole floor", "Spread out stations: food in one spot, games in another, a quiet corner for chatting."]]],
@@ -16691,7 +16691,7 @@ const PC_DESIGNS = [
   }
 
   /* ---------- 🍽️ FOOD: appetizers we make, catered, potluck or the venue ---------- */
-  const OFF_FOOD = [["apps", "🍢", "Appetizers we make", "Pick the bites. Noël works out how many, the cost and the shopping list."], ["catered", "🍽️", "Catered or ordered in", "How much to order for your group."], ["potluck", "🥘", "Potluck", "Everyone brings something."], ["venue", "🍴", "The venue provides it", "Just note the menu and cost."]];
+  const OFF_FOOD = [["apps", "🍢", "Appetizers we make", "Pick the bites. Noëma works out how many, the cost and the shopping list."], ["catered", "🍽️", "Catered or ordered in", "How much to order for your group."], ["potluck", "🥘", "Potluck", "Everyone brings something."], ["venue", "🍴", "The venue provides it", "Just note the menu and cost."]];
   const KID_APPS = ["Pigs in a Blanket", "Pinwheel Roll-Ups", "Veggie Cups", "Mini Sliders", "Cookie Platter", "Party Snack Mix", "Chocolate-Dipped Strawberries"];
   const OFF_DEFAULT_PICKS = ["Caprese Skewers", "Charcuterie Board", "Mini Sliders", "Spinach Artichoke Dip", "Pinwheel Roll-Ups", "Mini Cheesecake Bites"];
   const offFoodCfg = () => (off.food = off.food || { style: "", mode: "meal", picks: null, got: {} });
@@ -16832,7 +16832,7 @@ const PC_DESIGNS = [
   function renderOffMenu() {
     const el = $("#offMenu"), v = $("#view-office"); if (!el) return;
     const on = offScreen === "menu"; v.classList.toggle("on-menu", on); el.hidden = !on; if (!on || el.dataset.built) return; el.dataset.built = "1";
-    const go = `<button type="button" class="menu-go" data-offgo>Noël's plans <span>›</span></button>`, own = `<button type="button" class="menu-go menu-skip" data-offown>My own plans</button>`, dot = " <i>·</i> ";
+    const go = `<button type="button" class="menu-go" data-offgo>Noëma's plans <span>›</span></button>`, own = `<button type="button" class="menu-go menu-skip" data-offown>My own plans</button>`, dot = " <i>·</i> ";
     const blk = (n, b) => `<div class="menu-dish"><h4>${n}</h4>${b}</div><p class="menu-rule sm"><span></span>✦<span></span></p>`, line = x => `<p class="menu-items">${x}</p>`;
     const plain = l => l.replace(/^\S+\s/, "");
     el.innerHTML = `<div class="menu-top">${own}${go}</div>
@@ -17149,7 +17149,7 @@ const PC_DESIGNS = [
           <li>Ask for <b>letter size (8½ × 11)</b>, printed at <b>actual size / 100%</b>, not "fit to page".</li>
           <li>Printing mailing labels? Bring your own <b>Avery 5160</b> label sheets, or ask if they stock them.</li>
         </ol>
-        <p class="host-rem">Noël never sends your plans anywhere by itself. You choose where the PDF goes.</p></details>`;
+        <p class="host-rem">Noëma never sends your plans anywhere by itself. You choose where the PDF goes.</p></details>`;
   }
   function trayOpen() { renderTray(); openSheet("traySheet"); }
   $("#trayBtn").addEventListener("click", trayOpen);

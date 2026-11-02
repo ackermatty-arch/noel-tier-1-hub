@@ -47,6 +47,9 @@ open("index.html", "w").write(s)
 # 🏢 the Office Edition is the same app with one switch flipped
 off = s.replace('window.NOEL_EDITION = "family";', 'window.NOEL_EDITION = "office";', 1)
 assert off != s
+# ✦ the Office Edition has its own name: Noëma (the Family Edition stays Noël)
+off = off.replace("Noël", "Noëma").replace("NOËL", "NOËMA")
+off = off.replace('["Noëma Tier 1 Hub", "Noëma Tier 1", "Christmas Holiday Hub"]', '["Noëma Tier 1 Hub", "Noël Tier 1 Hub", "Noël Tier 1", "Christmas Holiday Hub"]')
 open("office.html", "w").write(off)
 print("office.html updated")
 
