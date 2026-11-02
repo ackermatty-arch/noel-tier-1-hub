@@ -2389,7 +2389,6 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     <div class="header-actions">
       <button class="music-btn tray-btn" id="outBtn" aria-label="Outbox: cards waiting to send" hidden>✉️<span class="tray-count" id="outCount">0</span></button>
       <button class="music-btn tray-btn" id="trayBtn" aria-label="Print Tray">🖨️<span class="tray-count" id="trayCount">0</span></button>
-      <button class="music-btn" id="musicBtn" aria-label="Holiday music">🎵</button>
       <button class="music-btn cal-btn" id="calBtn" aria-label="Open my calendar and timers" type="button"></button><span class="nav-badge" id="alarmBadge" hidden>0</span>
       <div class="countdown-chip" aria-live="polite" hidden>
         <strong id="xmasDays">--</strong>
@@ -3962,31 +3961,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
   </div>
 </div>
 
-<!-- ============================================================
-     🎵 HOLIDAY MUSIC PLAYER (songs are embedded at the bottom of this file)
-     ============================================================ -->
-<div class="voice-panel" id="musicPanel" role="dialog" aria-modal="true" aria-labelledby="musicTitle" hidden>
-  <div class="voice-card music-card">
-    <h2 class="music-heading" id="musicTitle">Holiday Music</h2>
-    <div class="now-playing">
-      <div class="np-title" id="npTitle">Pick a song</div>
-      <div class="np-artist" id="npArtist"></div>
-      <div class="np-bar" id="npSeek" role="slider" aria-label="Song position"><span id="npBar"></span></div>
-      <div class="np-times"><span id="npCur">0:00</span><span id="npDur">0:00</span></div>
-    </div>
-    <div class="np-controls">
-      <button id="npPrev" aria-label="Previous song">⏮</button>
-      <button id="npPlay" class="np-play" aria-label="Play">▶</button>
-      <button id="npNext" aria-label="Next song">⏭</button>
-    </div>
-    <div class="np-vol" id="npVolRow"><span aria-hidden="true">🔈</span><input type="range" id="npVol" min="0" max="100" value="70" aria-label="Music volume"><span aria-hidden="true">🔊</span></div>
-    <p class="np-hint" id="npVolHint" hidden>Use your phone's volume buttons to change the music volume.</p>
-    <ul class="track-list" id="trackList"></ul>
-    <!-- ✏️ Music credits -->
-    <p class="sound-credit">Music from Pixabay by wings_of_freedom, clavier-music, white_records and clavier-music. Music pauses automatically when an alarm rings.</p>
-    <div style="text-align:center"><button class="btn btn-ghost btn-sm" id="musicClose">Close</button></div>
-  </div>
-</div>
+
 
 <!-- ✉️ Invite preview -->
 <div class="inv-preview" id="invPreview" role="dialog" aria-modal="true" aria-label="Invite preview">
@@ -9794,18 +9769,6 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     // Show the timers / calendar page
     if (has(/\b(show|open|find|see|go to|take me to|bring up)\b/) && has(/\b(timers?|alarms?|calendar)\b/) && !has(/\b(start|set|add|pause|stop|cancel|delete)\b/)) { closeSheets(); org.view = "cal"; saveOrg(); renderOrg(); showView("org"); window.scrollTo(0, 0); return "Here are your timers and calendar."; }
 
-    // Music
-    if (has(/\b(pause|stop|turn off|mute)\b.*\b(music|songs?|tunes)\b/)) { pauseMusic(); return "Music paused."; }
-    if (has(/\b(next|skip)\b.*\b(song|track|tune)\b|^ skip $/)) { playMusic(trackIdx + 1); return `Now playing ${tracks()[trackIdx] ? tracks()[trackIdx].title : "the next song"}.`; }
-    if (has(/\b(play|start|put on|turn on)\b.*\b(music|songs?|tunes)\b/)) {
-      const pick = bestMatch(t, tracks(), x => x.title + " " + x.mood);
-      playMusic(pick ? tracks().indexOf(pick) : undefined);
-      return tracks().length ? `Playing ${tracks()[trackIdx].title}.` : "The music is still loading.";
-    }
-    if ((m = /\bplay (.+)/.exec(t))) {
-      const pick = bestMatch(m[1], tracks(), x => x.title + " " + x.mood);
-      if (pick) { playMusic(tracks().indexOf(pick)); return `Playing ${pick.title}.`; }
-    }
 
     // ---- More voice: countdown, tasks, shopping list, budget, cards, thank-yous, New Year's ----
     if (has(/\bhow many (days|sleeps)\b.*\b(christmas|xmas)\b|\bdays (until|till|to|before) (christmas|xmas)\b|\bhow long (until|till|to) (christmas|xmas)\b|\bcountdown\b/)) {
@@ -10148,103 +10111,11 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     runCommand([chip.dataset.cmd]);
   });
 
-  /* ============================================================
-     🎵 HOLIDAY MUSIC PLAYER
-     Songs are embedded at the bottom of this file (window.HUB_MUSIC).
-     ============================================================ */
-  const music = new Audio();
-  music.preload = "none";
-  let trackIdx = load("musicTrack", 0), musicVol = load("musicVol", 70), resumeAfterAlarm = false, ducked = false;
-  const tracks = () => window.HUB_MUSIC || [];
-  // iPhones ignore volume set by web pages, so we hide the slider there
-  const volWorks = (() => { try { const a = new Audio(); a.volume = .5; return a.volume === .5; } catch (e) { return false; } })();
-
-  function setVol() { try { music.volume = Math.min(1, (ducked ? .15 : 1) * Math.pow(musicVol / 100, 1.5)); } catch (e) {} }
-  function duckMusic(on) { ducked = on; setVol(); }
+  /* 🎵 The holiday music player was taken out (it ran slowly on iPhone). These stand-ins keep alarms, voice and cards working. */
+  const music = { paused: true, pause() {}, currentTime: 0 };
+  let resumeAfterAlarm = false;
+  const pauseMusic = () => {}, playMusic = () => {}, duckMusic = () => {};
   const clock = s => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
-
-  function renderTracks() {
-    $("#trackList").innerHTML = tracks().map((t, i) =>
-      `<li><button class="track ${i === trackIdx ? "active" : ""}" data-i="${i}">
-         <span class="t-ico">${t.icon}</span>
-         <span><span class="t-name">${esc(t.title)}</span><br><span class="t-meta">${esc(t.mood)} · ${esc(t.artist)}</span></span>
-       </button></li>`).join("");
-  }
-  function updateNow() {
-    const t = tracks()[trackIdx], playing = !music.paused;
-    $("#npTitle").textContent = t ? t.title : "Music is still loading…";
-    $("#npArtist").textContent = t ? t.artist : "";
-    $("#npPlay").textContent = playing ? "❚❚" : "▶";
-    $("#npPlay").setAttribute("aria-label", playing ? "Pause" : "Play");
-    $("#musicBtn").classList.toggle("playing", playing);
-    $$("#trackList .track").forEach(b => b.classList.toggle("active", +b.dataset.i === trackIdx));
-  }
-  function loadTrack(i) {
-    const list = tracks();
-    if (!list.length) return false;
-    trackIdx = ((i % list.length) + list.length) % list.length;
-    save("musicTrack", trackIdx);
-    music.src = list[trackIdx].src;
-    try {
-      if ("mediaSession" in navigator)
-        navigator.mediaSession.metadata = new MediaMetadata({ title: list[trackIdx].title, artist: list[trackIdx].artist, album: "Noël Tier 1 Hub" });
-    } catch (e) {}
-    return true;
-  }
-  function playMusic(i) {
-    if (i !== undefined || !music.getAttribute("src")) { if (!loadTrack(i === undefined ? trackIdx : i)) { toast("🎵 Music is still loading, try again in a moment"); return; } }
-    setVol();
-    const p = music.play();
-    if (p && p.catch) p.catch(() => {});
-    updateNow();
-  }
-  function pauseMusic() { music.pause(); }
-  function openMusic() {
-    if (trackIdx >= tracks().length) trackIdx = 0;
-    renderTracks(); updateNow();
-    $("#musicPanel").hidden = false; document.body.classList.add("lock");
-  }
-  function closeMusic() {
-    $("#musicPanel").hidden = true;
-    if (!$(".sheet.open") && !$("#alertOverlay").classList.contains("show") && $("#voicePanel").hidden) document.body.classList.remove("lock");
-  }
-
-  music.addEventListener("play", updateNow);
-  music.addEventListener("pause", updateNow);
-  music.addEventListener("ended", () => playMusic(trackIdx + 1));          // plays the whole list on repeat
-  music.addEventListener("timeupdate", () => {
-    const d = music.duration || 0;
-    $("#npBar").style.width = d ? (music.currentTime / d * 100) + "%" : "0";
-    $("#npCur").textContent = clock(music.currentTime); $("#npDur").textContent = clock(d);
-  });
-
-  $("#musicBtn").addEventListener("click", () => { getAudio(); openMusic(); });
-  $("#musicClose").addEventListener("click", closeMusic);
-  $("#musicPanel").addEventListener("click", e => { if (e.target.id === "musicPanel") closeMusic(); });
-  $("#npPlay").addEventListener("click", () => music.paused ? playMusic() : pauseMusic());
-  $("#npNext").addEventListener("click", () => playMusic(trackIdx + 1));
-  $("#npPrev").addEventListener("click", () => { if (music.currentTime > 3) music.currentTime = 0; else playMusic(trackIdx - 1); });
-  $("#trackList").addEventListener("click", e => {
-    const b = e.target.closest(".track"); if (!b) return;
-    const i = +b.dataset.i;
-    if (i === trackIdx && !music.paused) pauseMusic(); else playMusic(i);
-  });
-  $("#npSeek").addEventListener("click", e => {
-    const d = music.duration; if (!d) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    music.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * d;
-  });
-  $("#npVol").value = musicVol;
-  $("#npVol").addEventListener("input", e => { musicVol = +e.target.value; save("musicVol", musicVol); setVol(); });
-  if (!volWorks) { $("#npVolRow").hidden = true; $("#npVolHint").hidden = false; }
-  try {
-    if ("mediaSession" in navigator) {
-      navigator.mediaSession.setActionHandler("play", () => playMusic());
-      navigator.mediaSession.setActionHandler("pause", pauseMusic);
-      navigator.mediaSession.setActionHandler("nexttrack", () => playMusic(trackIdx + 1));
-      navigator.mediaSession.setActionHandler("previoustrack", () => playMusic(trackIdx - 1));
-    }
-  } catch (e) {}
 
   /* ============================================================
      🦃 TURKEY & HAM CALCULATOR
