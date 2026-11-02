@@ -35,7 +35,8 @@
     budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "", mine: !!x.mine }));
     return rows;
   }
-  const catLimit = k => k === "gifts" ? +gifts.budget || 0 : k === "food" ? +foodBudget.limit || 0 : +budget.cats[k] || 0;
+  const capsSum = () => gifts.people.reduce((a, p) => a + (+p.cap || 0), 0);
+  const catLimit = k => k === "gifts" ? +gifts.budget || capsSum() : k === "food" ? +foodBudget.limit || 0 : +budget.cats[k] || 0;
   function budTotals() {
     const rows = budRows(), by = {}; BUD_CATS.forEach(([k]) => { by[k] = 0; }); rows.forEach(r => { by[r.cat] = (by[r.cat] || 0) + r.amt; });
     const spent = rows.reduce((a, r) => a + r.amt, 0), catSum = BUD_CATS.reduce((a, [k]) => a + catLimit(k), 0), limit = +budget.limit || (hubMode === "company" && typeof offBudgetAll === "function" ? offBudgetAll() : 0) || catSum;
@@ -160,7 +161,7 @@
   }
   // 🎯 Budget tab = "Add your budget" + Gift tracker (moved in from Gifts). Other budgets sit in an optional fold underneath.
   let budCatOpen = false;
-  if (budget.limit) { budget.limit = 0; saveBudget(); }   // the separate "total holiday budget" box is gone; the total is the sum of the budgets
+  // 💰 "Add your budget" is the TOTAL holiday budget (budget.limit). The category budgets and spending caps are shares of it.
   function budSet(T) { return ""; }
   function budSetMore(T) {
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;

@@ -10421,7 +10421,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
   const sum = (list, f) => list.reduce((a, g) => a + (f(g) ? (+g.price || 0) : 0), 0);
   function giftTotals() {
     const all = gifts.people.flatMap(p => p.gifts), withSanta = all.concat(santaGifts());   // 🎅 Santa's amounts count, quietly
-    const budget = +gifts.budget || 0, spent = sum(withSanta, isSpent), planned = sum(withSanta, () => true);
+    const T = budTotals(), budget = T.limit, spent = T.spent, planned = sum(withSanta, () => true);   // 💰 the total budget against everything spent, not just gifts
     return { all, budget, spent, planned, left: budget - spent };
   }
   // 🙈 hide gift names and prices if someone peeks at the screen
@@ -10477,7 +10477,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       </div>`).join(""); }).join("");
   }
   $("#peopleList").addEventListener("change", e => { const s = e.target.closest("[data-grp]"); if (!s) return; const p = gifts.people.find(x => x.id === s.closest(".person").dataset.pid); if (p) { p.grp = s.value; save("gifts", gifts); renderGifts(); } });
-  $("#giftBudget").addEventListener("input", e => { gifts.budget = parseFloat(e.target.value) || 0; save("gifts", gifts); renderGifts(); });
+  $("#giftBudget").addEventListener("input", e => { budget.limit = Math.max(0, parseFloat(e.target.value) || 0); saveBudget(); if (gifts.budget) { gifts.budget = 0; save("gifts", gifts); } renderGifts(); });
   $("#addPersonForm").addEventListener("submit", e => {
     e.preventDefault();
     const n = e.target.person.value.trim(); if (!n) return;
@@ -11286,7 +11286,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       bRows.push([{ v: "TOTAL", s: 4 }, { f: `SUM(B${n0}:B${last})`, v: sB, s: 5 }, { f: `SUM(C${n0}:C${last})`, v: sA, s: 5 }, { f: `B${tr}-C${tr}`, v: sB - sA, s: 7 }]);
       const bought = nG.filter(x => x.status !== "idea").length, coming = load("guests", []).filter(x => x.s === "yes").length;
       S.push({ name: "Summary", widths: [30, 18], rows: [...T("Holiday Budget Summary", stamp), H(["", "Amount"]),
-        ["Total budget", { f: `Budget!B${tr}`, v: sB, s: 5 }], ["Spent so far", { f: `Budget!C${tr}`, v: sA, s: 5 }], ["Left to spend", { f: `Budget!D${tr}`, v: sB - sA, s: 7 }], [],
+        ["Total budget", limit > 0 ? money(limit) : { f: `Budget!B${tr}`, v: sB, s: 5 }], ["Spent so far", { f: `Budget!C${tr}`, v: sA, s: 5 }], ["Left to spend", limit > 0 ? { f: `B5-B6`, v: limit - sA, s: 7 } : { f: `Budget!D${tr}`, v: sB - sA, s: 7 }], [],
         ["Gifts bought", bought + " of " + nG.length], ["Guests coming", coming]] });
       S.push({ name: "Budget", widths: [26, 16, 16, 16], rows: [...T("Budget by Category", stamp), H(["Category", "Budget", "Actual", "Difference"]), ...bRows] });
     }
@@ -15135,7 +15135,8 @@ const PC_DESIGNS = [
     budget.expenses.forEach(x => rows.push({ src: "", id: x.id, cat: x.cat, name: x.name, amt: +x.amt || 0, date: x.date || "", mine: !!x.mine }));
     return rows;
   }
-  const catLimit = k => k === "gifts" ? +gifts.budget || 0 : k === "food" ? +foodBudget.limit || 0 : +budget.cats[k] || 0;
+  const capsSum = () => gifts.people.reduce((a, p) => a + (+p.cap || 0), 0);
+  const catLimit = k => k === "gifts" ? +gifts.budget || capsSum() : k === "food" ? +foodBudget.limit || 0 : +budget.cats[k] || 0;
   function budTotals() {
     const rows = budRows(), by = {}; BUD_CATS.forEach(([k]) => { by[k] = 0; }); rows.forEach(r => { by[r.cat] = (by[r.cat] || 0) + r.amt; });
     const spent = rows.reduce((a, r) => a + r.amt, 0), catSum = BUD_CATS.reduce((a, [k]) => a + catLimit(k), 0), limit = +budget.limit || (hubMode === "company" && typeof offBudgetAll === "function" ? offBudgetAll() : 0) || catSum;
@@ -15260,7 +15261,7 @@ const PC_DESIGNS = [
   }
   // 🎯 Budget tab = "Add your budget" + Gift tracker (moved in from Gifts). Other budgets sit in an optional fold underneath.
   let budCatOpen = false;
-  if (budget.limit) { budget.limit = 0; saveBudget(); }   // the separate "total holiday budget" box is gone; the total is the sum of the budgets
+  // 💰 "Add your budget" is the TOTAL holiday budget (budget.limit). The category budgets and spending caps are shares of it.
   function budSet(T) { return ""; }
   function budSetMore(T) {
     const inp = (k, v, ph) => `<input class="input bud-in" type="number" inputmode="decimal" min="0" step="1" data-blim="${k}" value="${v || ""}" placeholder="${ph || "$"}">`;
