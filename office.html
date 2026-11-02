@@ -11582,6 +11582,8 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     save("pane", p);
   }
   $("#invTabs").addEventListener("click", e => { const b = e.target.closest("[data-pane]"); if (b) showPane(b.dataset.pane); });
+  // "Cards & Address Book" from Plan always opens on Send a Card, where the Santa letter and address book live
+  document.addEventListener("click", e => { if (e.target.closest('.advent-banner[data-goview="invites"]')) showPane("cards"); });
   $("#cardPick").addEventListener("click", e => { const b = e.target.closest("[data-card]"); if (!b) return; const stock = cardMsgIsStock(); ecard.d = b.dataset.card; if (stock && cardIdeaList()[0]) { ecard.msg = cardIdeaList()[0][1]; $("#cardMsg").value = ecard.msg; } save("ecard", ecard); syncCards(); renderCardIdeas(); });
   [["#cardTo", "to"], ["#cardMsg", "msg"], ["#cardFrom", "fr"]].forEach(([sel, k]) =>
     $(sel).addEventListener("input", e => { ecard[k] = e.target.value; save("ecard", ecard); }));
