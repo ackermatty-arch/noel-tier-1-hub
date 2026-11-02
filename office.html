@@ -3279,6 +3279,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
           <button type="button" class="btn btn-ghost btn-block" data-saddr>Santa's addresses &amp; mailing tips</button>
         </div>
       </div>
+      <div class="card ab-card" id="cardCost"></div>
       <div class="card ab-card" id="addrBook">
         <div class="step">Address Book</div>
         <p class="tip" style="margin:6px 0 10px">Add everyone you send cards to. It stays on your phone, so next year you only update it.</p>
@@ -11451,6 +11452,29 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     a.unshift(mk("Santa Claus (USA)", "123 Elf Road", "North Pole, 88888"), mk("Santa Claus (Canada)", "North Pole", "H0H 0H0, Canada"));
     save("addrbook", a);
   }
+  // 💌 card costs: a spending cap, then what you really paid (printing, stamps, envelopes). Goes into Budget under Cards & postage.
+  function renderCardCost() {
+    const box = $("#cardCost"); if (!box) return;
+    try {
+      const cap = +budget.cats.cards || 0, items = budget.expenses.filter(x => x.cat === "cards"), spent = items.reduce((a, x) => a + (+x.amt || 0), 0);
+      const msg = !cap ? "Optional" : spent > cap ? `${money(spent - cap)} over the cap` : `${money(cap - spent)} left of the cap`;
+      box.innerHTML = `<div class="step">Card costs</div>
+        <p class="tip" style="margin:6px 0 10px">Set a cap for cards and postage, then add what you really paid. It goes straight into your Budget.</p>
+        <div class="cap-row"><label for="ccCap">Spending cap</label><input class="input" id="ccCap" data-cccap type="number" inputmode="decimal" min="0" step="1" placeholder="${CUR}" value="${cap || ""}"><span class="cap-msg${cap && spent > cap ? " over" : ""}">${msg}</span></div>
+        <ul class="gift-items">${items.map(x => `<li class="gift-item" data-ccid="${x.id}"><span class="g-name">${esc(x.name)}</span><span class="g-price">${money(+x.amt || 0)}</span><button type="button" class="icon-btn" data-ccdel aria-label="Delete ${esc(x.name)}">✕</button></li>`).join("")}</ul>
+        <form class="add-guest" id="ccForm" autocomplete="off"><div class="f2"><input class="input" name="what" maxlength="40" placeholder="e.g. Printed cards, stamps" aria-label="What you paid for"><input class="input" name="amt" inputmode="decimal" placeholder="Actual cost" aria-label="Actual cost"></div><button class="btn btn-gold btn-block" type="submit">Add to my Budget</button></form>`;
+    } catch (e) { /* the budget is still starting up */ }
+  }
+  document.addEventListener("change", e => { const c = e.target.closest("[data-cccap]"); if (!c) return; budget.cats.cards = Math.max(0, parseFloat(c.value) || 0); saveBudget(); renderCardCost(); });
+  document.addEventListener("submit", e => {
+    if (e.target.id !== "ccForm") return; e.preventDefault();
+    const f = e.target, v = parseFloat(String(f.amt.value).replace(/[^0-9.]/g, ""));
+    if (!isFinite(v) || v <= 0) { toast("💵 Type what you actually paid"); return; }
+    budget.expenses.push({ id: uid(), cat: "cards", name: f.what.value.trim() || "Cards & postage", amt: Math.round(v * 100) / 100, date: budToday() }); saveBudget(); renderCardCost(); toast(`💵 ${money(v)} added to your Budget`);
+  });
+  document.addEventListener("click", e => { const d = e.target.closest("#cardCost [data-ccdel]"); if (!d) return; budget.expenses = budget.expenses.filter(x => x.id !== d.closest("[data-ccid]").dataset.ccid); saveBudget(); renderCardCost(); });
+  document.addEventListener("click", e => { if (e.target.closest('[data-goview="invites"], [data-pane="cards"]')) setTimeout(renderCardCost, 50); });
+  setTimeout(renderCardCost, 1200);
   function renderAddrBook() {
     const box = $("#abList"); if (!box) return; abSeedSanta();
     const a = abGet(), sent = a.filter(x => x.sent).length, got = a.filter(x => x.got).length;
