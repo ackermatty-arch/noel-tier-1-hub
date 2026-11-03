@@ -2548,8 +2548,10 @@ window.NOEL_MEALS = (function () {
         id: "app-" + i.name, course: DRINK_APPS.includes(i.name) ? "Drink" : (i.row[4].includes("sweet") ? "Sweet bite" : "Appetizer"), name: i.name,
         prep: i.row[5], cook: i.row[4].includes("warm") ? "served warm" : "no cooking needed",
         yieldText: () => i.pieces ? `about ${i.pieces} pieces (${i.batches} ${i.batches === 1 ? "batch" : "batches"})` : `${i.batches} ${i.batches === 1 ? "batch" : "batches"}`,
-        ing: (APP_SHOP[i.name] || [0, []])[1].map(([n]) => ({ q: null, u: "", s: "n", t: (i.batches > 1 ? i.batches + " × " : "") + n })),
-        steps: [i.row[2], "Make-ahead: " + i.row[3]], tip: ""
+        ing: APP_RECIPES[i.name] ? APP_RECIPES[i.name].ing.map(n => ({ q: null, u: "", s: "n", t: n })) : (APP_SHOP[i.name] || [0, []])[1].map(([n]) => ({ q: null, u: "", s: "n", t: (i.batches > 1 ? i.batches + " × " : "") + n })),
+        steps: APP_RECIPES[i.name]
+          ? (i.batches > 1 ? [`Your plan makes ${i.batches} batches. The amounts below are for one batch, so multiply them by ${i.batches}.`] : []).concat(APP_RECIPES[i.name].steps, ["Make-ahead: " + i.row[3]])
+          : [i.row[2], "Make-ahead: " + i.row[3]], tip: ""
       }));
     },
     recipes: [],
