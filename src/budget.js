@@ -171,6 +171,8 @@
     return `<details class="fold" id="budCatFold"${budCatOpen ? " open" : ""}><summary>More budgets (optional)</summary>
       <div class="card pt-card"><h3>Budget for each category</h3>
         ${BUD_CATS.filter(([k]) => k !== "gifts" && (k !== "giving" || hubMode === "company") && !(k === "nye" && hubMode === "company")).map(([k, i, l]) => `<div class="bud-set-row"><span>${l}${k === "food" ? "<small>Same as the Meal Planner food budget</small>" : ""}</span>${inp(k, catLimit(k))}</div>`).join("")}</div></details>
+      <div class="card pt-card"><button type="button" class="btn btn-ghost btn-block" id="budClear">🧹 Clear this budget</button>
+        <p class="host-rem">Plans changed? This clears your budget amounts, the spending you added and Shared costs in one tap. Your gift people, gifts and meal plans stay.</p></div>
       <button type="button" class="btn btn-green btn-block bud-next" data-goview="planner">Let's plan ›</button>`;
   }
 
@@ -291,6 +293,12 @@
   // ---------- taps & typing ----------
   $("#view-budget").addEventListener("click", e => {
     const t = e.target;
+    if (t.closest("#budClear")) {   // 🧹 one-tap fresh budget (people, gifts and meal plans stay)
+      if (!confirm("Clear this budget?\n\nThis removes your budget amounts, the spending you added, the spending chart and Shared costs.\n\nYour gift people, gifts and meal plans stay.\n\nThis can't be undone.")) return;
+      budget.limit = 0; budget.cats = {}; budget.expenses = []; budget.daily = {}; budget.shared = null;
+      gifts.budget = 0; save("gifts", gifts); foodBudget.limit = 0; save("foodBudget", foodBudget);
+      saveBudget(); renderBudget(); toast("🧹 Budget cleared"); return;
+    }
     const tb = t.closest("[data-btab]"); if (tb) { budget.tab = tb.dataset.btab; saveBudget(); renderBudget(); if (tb.dataset.bnext) scrollTo(0, 0); return; }
     const fl = t.closest("[data-bfilter]"); if (fl) { budget.filter = fl.dataset.bfilter; saveBudget(); renderBudget(); return; }
     const so = t.closest("[data-bsort]"); if (so) { budget.sort = so.dataset.bsort; saveBudget(); renderBudget(); return; }
