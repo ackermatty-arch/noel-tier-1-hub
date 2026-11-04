@@ -2181,7 +2181,7 @@ input[type=time], input[type=date], input[type=datetime-local] { cursor: pointer
 /* Spreadsheet export */
 .xl-ov{position:fixed;inset:0;z-index:10040;display:none;background:#fff;flex-direction:column}
 .xl-ov.show{display:flex}
-.xl-head{background:#000;color:var(--c-gold2);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;font:600 14px "Cinzel",serif;letter-spacing:.12em}
+.xl-head{background:#000;color:var(--c-gold2);padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;display:flex;align-items:center;justify-content:space-between;font:600 14px "Cinzel",serif;letter-spacing:.12em}
 .xl-head button{background:none;border:1px solid var(--c-gold);color:var(--c-gold2);min-height:36px;padding:0 14px;font:600 12px "Cinzel",serif;cursor:pointer}
 .xl-tabs{display:flex;gap:0;overflow-x:auto;border-bottom:1px solid var(--c-gold);flex:0 0 auto}
 .xl-tabs button{flex:0 0 auto;min-height:44px;padding:0 16px;background:#fff;border:0;border-right:1px solid var(--c-line);font:600 13px "Cinzel",serif;color:var(--c-ink);cursor:pointer}
@@ -2290,7 +2290,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
 .pr-grand { border-top: 1px solid #D9BF86; padding-top: 10px; }
 
 .pv-overlay { position: fixed; inset: 0; z-index: 100000; background: #fff; display: flex; flex-direction: column; }
-.pv-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; background: #121212; color: #fff; border-bottom: 1px solid #C9A45C; }
+.pv-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: calc(10px + env(safe-area-inset-top, 0px)) 14px 10px; background: #121212; color: #fff; border-bottom: 1px solid #C9A45C; }
 .pv-bar b { font: 600 14px Cinzel, serif; letter-spacing: .06em; }
 .pv-frame { flex: 1; width: 100%; border: 0; background: #fff; }
 
