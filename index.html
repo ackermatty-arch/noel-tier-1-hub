@@ -8772,8 +8772,16 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       const b = ev.target.closest("[data-pdfa]");
       if (ev.target !== el && !b) return;
       const act = b ? b.dataset.pdfa : "x";
-      if (act === "view") window.open(h, "_blank");
-      else if (act === "dl") { const d = document.createElement("a"); d.href = h; d.download = h.split("/").pop(); document.body.appendChild(d); d.click(); d.remove(); }
+      // 📱 in the iPhone app, a new window or a download link does nothing, so open the PDF in the phone's share sheet (preview, save to Files, print, AirDrop)
+      const inApp = window.NoelNative && NoelNative.isNative && NoelNative.isNative() && window.NoelMedia;
+      const sharePdf = async () => {
+        try {
+          const blob = await (await fetch(h)).blob();
+          await NoelMedia.share(new Blob([blob], { type: "application/pdf" }), h.split("/").pop(), t);
+        } catch (err) { if (!(err && /cancel/i.test(String(err.message || err)))) toast("Couldn't open that PDF. Please try again."); }
+      };
+      if (act === "view") { if (inApp) sharePdf(); else window.open(h, "_blank"); }
+      else if (act === "dl") { if (inApp) sharePdf(); else { const d = document.createElement("a"); d.href = h; d.download = h.split("/").pop(); document.body.appendChild(d); d.click(); d.remove(); } }
       if (act !== "view") el.remove();
     });
   }));
