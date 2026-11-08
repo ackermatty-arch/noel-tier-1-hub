@@ -2859,7 +2859,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
       </div>
       <p class="backup-last" style="margin-top:14px">Want a clean slate? This erases every plan, list, alarm and setting saved on this phone, on this side of the app only.</p>
       <button type="button" class="btn btn-ghost btn-block" id="startFresh">Start fresh (erase everything)</button>
-      <input type="file" id="backupFile" accept=".json,application/json" hidden>
+      <input type="file" id="backupFile" hidden>
     </div>
 
     
@@ -12100,7 +12100,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     if (confirm("Save a backup of your Noëma lists?\n\nA backup lets you bring everything back on a new phone, or after deleting the app.")) { showView("tasks"); const f = $("#safeFold"); if (f) f.open = true; setTimeout(() => $("#backupCard").scrollIntoView({ behavior: "smooth", block: "center" }), 200); }
   }, 6000);
   $("#backupSave").addEventListener("click", async () => {
-    const name = `Noel-Tier-1-Hub-Backup-${new Date().toISOString().slice(0, 10)}.json`;
+    const name = `Noema-Tier-1-Hub-Backup-${new Date().toISOString().slice(0, 10)}.json`;
     const blob = new Blob([backupText()], { type: "application/json" });
     const done = () => { save("lastBackup", Date.now()); showLastBackup(); toast("💾 Backup saved"); };
     if (NoelNative.isNative()) {   // 📱 iPhone: share sheet → Save to Files, AirDrop, email…
