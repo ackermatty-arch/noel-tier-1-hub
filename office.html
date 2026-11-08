@@ -2806,7 +2806,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
     </div>
 
 
-    <details class="fold" id="printFold"><summary>Printable planner pages</summary>
+    <details class="fold fam-only" id="printFold"><summary>Printable planner pages</summary>
 
 
     <!-- ✏️ PRINTABLE PLANNERS: replace each href="#" with your PDF link -->
@@ -15819,9 +15819,20 @@ const PC_DESIGNS = [
     oyMake(e.type, { base: src, date, month: e.month, year: y, name: src.ev.name }); oy.year = y; saveOy(); renderOffice(); window.scrollTo(0, 0); toast("🔁 Planned again for " + y + ". Vendors and the room are copied over");
   }
   function oyRemove(id) {
-    const e = oy.events.find(x => x.id === id); if (!e || id === oy.active) return;
+    const e = oy.events.find(x => x.id === id); if (!e) return;
     if (!confirm(`Remove "${e.name}" from your year? Its plan and costs are deleted.`)) return;
-    oy.events = oy.events.filter(x => x.id !== id); saveOy(); renderOffice();
+    if (id === oy.active) {
+      const t = oy.events.find(x => x.id !== id && x.snap);
+      if (t) { const past = oyMergePast(off.past || [], t.snap.past || []); off = t.snap; off.past = past; t.snap = null; oy.active = t.id; oy.events = oy.events.filter(x => x.id !== id); }
+      else {
+        off = { tab: "event", ev: { name: "Holiday Party", date: "", start: "17:00", end: "21:00", venue: "", address: "", headcount: 20, budget: 0, theme: "", dress: "", giftLimit: 25, organizer: "", approver: "", approverEmail: "", notes: "" },
+          acts: { potluck: 1, gifts: 1, awards: 1, games: 1 }, costs: [], team: [], appr: { status: "draft", log: [], followDays: 3 },
+          pot: [], awards: OFF_AWARDS.slice(0, 8).map(t => ({ id: uid(), t, w: "" })), wrap: { worked: "", change: "" }, past: off.past || [], fired: {} };
+        oy.events = []; oy.active = ""; oyEnsure();
+      }
+      off.tab = "event"; saveOff(); offSync(); document.body.classList.toggle("co-kids", off.ev.who === "family");
+    } else oy.events = oy.events.filter(x => x.id !== id);
+    saveOy(); renderOffice(); renderCoDash();
   }
   // ---------- 🎂 people ----------
   function oyMilestones(days) {
@@ -15877,7 +15888,7 @@ const PC_DESIGNS = [
       <div class="oy-yr"><button type="button" data-oyyr="-1" aria-label="Previous year">‹</button><b>${Y}</b><button type="button" data-oyyr="1" aria-label="Next year">›</button></div>
       <p class="host-rem">Tap an event to open it. Tap a suggestion to add it to your year, with a ready checklist.</p>
       <div class="oy-year">${OY_MONTHS.map((mn, i) => { const m = i + 1, here = evs.filter(e => e.month === m), sug = OY_TYPES.filter(t => t.m === m && !used.has(t.id));
-        return `<div class="oy-m${m === curM ? " now" : ""}"><h4>${mn}</h4>${here.map(e => `<div class="oy-e${e.id === oy.active ? " on" : ""}"><button type="button" data-oyopen="${e.id}"><b>${esc(e.name)}</b><small>${e.date ? oyDay(e.date) : "date not set"} · ${money(oyCost(e))}</small></button>${e.id === oy.active ? "" : `<button type="button" class="icon-btn" data-oyrm="${e.id}" aria-label="Remove ${esc(e.name)}">✕</button>`}</div>${Y <= now.getFullYear() ? `<button type="button" class="classy-link oy-rep" data-oyrep="${e.id}">Plan again in ${Y + 1}</button>` : ""}`).join("")}
+        return `<div class="oy-m${m === curM ? " now" : ""}"><h4>${mn}</h4>${here.map(e => `<div class="oy-e${e.id === oy.active ? " on" : ""}"><button type="button" data-oyopen="${e.id}"><b>${esc(e.name)}</b><small>${e.date ? oyDay(e.date) : "date not set"} · ${money(oyCost(e))}</small></button><button type="button" class="icon-btn" data-oyrm="${e.id}" aria-label="Remove ${esc(e.name)}">✕</button></div>${Y <= now.getFullYear() ? `<button type="button" class="classy-link oy-rep" data-oyrep="${e.id}">Plan again in ${Y + 1}</button>` : ""}`).join("")}
           ${sug.map(t => `<button type="button" class="oy-s" data-oyadd="${t.id}" data-oym="${m}"${t.hint ? ` title="${esc(t.hint)}"` : ""}>+ ${esc(t.name)}</button>`).join("")}</div>`; }).join("")}</div>
       <form class="card pt-card org-ev-form" id="oyAddForm" autocomplete="off"><h3>➕ Add my own</h3>
         <input class="input" name="name" maxlength="50" placeholder="Event name, e.g. Team trivia afternoon">
