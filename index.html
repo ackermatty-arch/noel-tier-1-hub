@@ -10632,6 +10632,10 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     const year = season;
     memories = memories.filter(m => m.year !== year).concat(snapshot(year)).sort((a, b) => b.year - a.year);
     budgetArchive(year);   // 💰 remember this season's total for next year's comparison
+    // 🧹 everything that counts as "spent" on the Budget tab starts over too (the limits you set stay)
+    try { foodBudget.items = []; save("foodBudget", foodBudget); } catch (e) {}
+    try { if (typeof org !== "undefined") { org.packages = []; if (hubMode === "company") org.giving = []; saveOrg(); } } catch (e) {}
+    try { if (typeof host !== "undefined") { (host.trips || []).forEach(x => { x.cost = 0; }); saveHost(); } } catch (e) {}
     save("memories", memories);
     // Gifts: keep everyone on the list and the budget, clear this year's gifts
     gifts.people.forEach(p => { p.gifts = []; });
