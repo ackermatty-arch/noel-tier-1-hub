@@ -11166,7 +11166,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       document.body.classList.add("space-switching"); location.reload();
     });
   }
-  function openWelcome() { $("#familyInput").value = family; pickedMode = hubMode; syncModePick(hubMode); $("#welcomeOverlay").classList.add("show"); }
+  function openWelcome() { if (EDITION === "office") { $("#welcomeAsk").textContent = SPACE === "office" ? "Welcome to the Office side. Let's set up your company." : "Welcome to the Family side. Let's set up your family."; } $("#familyInput").value = family; pickedMode = hubMode; syncModePick(hubMode); $("#welcomeOverlay").classList.add("show"); }
   if (/[?&]welcome\b/.test(location.search)) setTimeout(() => openWelcome(), 600);   // 👋 ?welcome on the link shows the welcome page again
 
   /* ============================================================
