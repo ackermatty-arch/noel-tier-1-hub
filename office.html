@@ -8426,7 +8426,8 @@ NoelVault.ready().then(() => NoelLock.check()).then(() => {
      its own saved data, switched from the bar under the header.
      ============================================================ */
   const EDITION = window.NOEL_EDITION === "office" ? "office" : "family";
-  const SPACE = EDITION === "office" && NoelVault.getItem("xmasHub_space") !== '"family"' ? "office" : "family";   // the Office edition opens in Office until the buyer switches
+  const SPACE_Q = (/[?&]space=(family|office)\b/.exec(location.search) || [])[1];
+  const SPACE = EDITION === "office" && (SPACE_Q ? SPACE_Q === "office" : NoelVault.getItem("xmasHub_space") !== '"family"') ? "office" : "family";   // the Office edition opens in Office until the buyer switches
   // Change the prefix if you sell several hub apps, so their saved data never mixes.
   const PREFIX = SPACE === "office" ? "xmasHub_office_" : "xmasHub_";
   NoelNative.offset = SPACE === "office" ? 20000 : 0;   // 📱 office reminders use their own phone-alarm ids
@@ -11163,7 +11164,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       const b = e.target.closest("[data-space]"); if (!b || b.dataset.space === SPACE) return;
       NoelVault.setItem("xmasHub_space", JSON.stringify(b.dataset.space));
       try { await NoelVault.flush(); } catch (err) {}
-      document.body.classList.add("space-switching"); location.reload();
+      document.body.classList.add("space-switching"); if (window.NOEL_FRESH) { const u = new URL(location.href); u.searchParams.set("space", b.dataset.space); location.replace(u.toString()); } else location.reload();
     });
   }
   function openWelcome() { if (EDITION === "office") { $("#welcomeAsk").textContent = SPACE === "office" ? "Welcome to the Office side. Let's set up your company." : "Welcome to the Family side. Let's set up your family."; } $("#familyInput").value = family; pickedMode = hubMode; syncModePick(hubMode); $("#welcomeOverlay").classList.add("show"); }
