@@ -15744,7 +15744,7 @@ const PC_DESIGNS = [
     { id: "costume", name: "Costume or pumpkin contest", m: 10, cat: "team", start: "15:00", end: "16:30", acts: ["games", "sweater"], theme: "Fall fun", sign: "Costume contest. Vote at 3:30.", chk: [[14, "Pick the date and the rules"], [7, "Send the invitation"], [3, "Buy small prizes"], [0, "Set up voting slips and snacks"]] },
     { id: "thanksgiving", name: "Thanksgiving potluck", m: 11, cat: "cele", start: "12:00", end: "13:30", acts: ["potluck"], theme: "Gratitude", hint: "The date differs by country. Check yours.", sign: "Thankful for this team.", chk: [[21, "Pick the date and the room"], [14, "Send the potluck sign-up sheet"], [7, "Remind people what is still needed"], [2, "Gather plates, cutlery and serving spoons"], [0, "Set up the table and share what you are thankful for"]] },
     { id: "drive", name: "Food or toy drive", m: 11, cat: "comm", start: "09:00", end: "17:00", acts: ["charity"], sign: "Drop your donation here.", chk: [[28, "Choose the charity and ask what they need"], [21, "Set a goal"], [14, "Announce it and put out a collection box"], [3, "Remind the team"], [0, "Count and deliver the donations"]] },
-    { id: "holiday", name: "Holiday Party", m: 12, cat: "cele", start: "17:00", end: "21:00", acts: ["potluck", "gifts", "awards", "games"], theme: "", sign: "Happy holidays!", chk: [[56, "Get the budget and date approved"], [42, "Book the venue or caterer"], [28, "Send the save-the-date"], [21, "Plan activities and the gift exchange"], [14, "Order food and drinks"], [7, "Confirm the headcount and allergies"], [2, "Print signs and certificates"], [0, "Set up and celebrate"]] },
+    { id: "holiday", name: "Holiday Party", m: 12, cat: "cele", start: "17:00", end: "21:00", acts: ["potluck", "gifts", "awards", "games"], theme: "", sign: "Happy holidays!", chk: (typeof OFFICE_PHASES !== "undefined" ? [["os", 56], ["on", 35], ["o2", 14], ["o1", 7], ["od", 0]].reduce((acc, [pid, d]) => acc.concat(((OFFICE_PHASES.find(p => p.id === pid) || { tasks: [] }).tasks).map(t => [d, t.text])), []) : [[56, "Get the budget and date approved"], [14, "Order food and drinks"], [7, "Confirm the headcount and allergies"], [0, "Set up and celebrate"]]) },
     { id: "custom", name: "My own event", m: 0, cat: "cele", start: "12:00", end: "13:30", acts: [], sign: "", chk: OY_GEN }
   ];
   let oy = load("officeyear", null) || { events: [], active: "", people: [], budget: 0, gift: 0, sub: "cal", year: new Date().getFullYear(), fired: {} };
@@ -15777,7 +15777,7 @@ const PC_DESIGNS = [
   const oyCost = e => e.id === oy.active ? offTotal() : ((e.snap && e.snap.costs) || []).reduce((a, c) => a + (+c.cost || 0), 0);
   const oyBudgetOf = e => e.id === oy.active ? (+off.ev.budget || 0) : ((e.snap && e.snap.ev && +e.snap.ev.budget) || 0);
   const OFF_QUICK = [[28, "Pick the date and time (ask the team if you need to)"], [28, "Set the budget: cost per person × number of people"], [21, "Book the venue or order the food"], [14, "Send the invite and ask about allergies and dietary needs"], [7, "Confirm the headcount and pay any deposits"], [2, "Reconfirm with the vendor and remind the team"], [0, "Event day: set up 30 minutes early and enjoy it"], [0, "Right after: thank the team and note what worked"]];
-  const offChk = () => { if (off.quick) { if (!off.qchk) off.qchk = OFF_QUICK.map(([d, t]) => ({ id: uid(), d, t, done: 0 })); return off.qchk; } if (!off.chk) off.chk = oyType(off.oyType || "holiday").chk.map(([d, t]) => ({ id: uid(), d, t, done: 0 })); return off.chk; };
+  const offChk = () => { if (off.quick) { if (!off.qchk) off.qchk = OFF_QUICK.map(([d, t]) => ({ id: uid(), d, t, done: 0 })); return off.qchk; } if (!off.chk || ((off.oyType || "holiday") === "holiday" && off.chk.length <= 8 && !off.chkV)) { const old = off.chk || []; off.chkV = 2; off.chk = oyType(off.oyType || "holiday").chk.map(([d, t]) => ({ id: uid(), d, t, done: (old.find(o => o.t === t) || {}).done || 0 })); } return off.chk; };
   const oyDue = c => off.ev.date ? oyAdd(off.ev.date, -c.d) : "";
   function oyMake(typeId, o) {
     o = o || {}; oySyncCur(); const T = oyType(typeId), cur = oy.events.find(x => x.id === oy.active); if (cur) cur.snap = oyCopy(off);
@@ -15796,7 +15796,7 @@ const PC_DESIGNS = [
   const OC_AFTER = ["Send a thank-you note to the team", "Share the photos", "Return rentals and tidy up", "Hand in receipts (Budget › Reimbursement list)", "Write notes on what worked for next year"];
   window.officeTaskInfo = () => {
     if (SPACE !== "office") return null;
-    const T = off.oyType || "holiday"; if (T === "holiday" && !off.quick) return { phases: null, label: "Holiday Party" };
+    const T = off.oyType || "holiday";
     const C = offChk().slice().sort((a, b) => b.d - a.d), id = oy.active || "x";
     const B = [["w4", "📅", "A month or more before", c => c.d >= 28], ["w2", "🗓️", "2–3 weeks before", c => c.d >= 14 && c.d < 28], ["w1", "📨", "1–2 weeks before", c => c.d >= 7 && c.d < 14], ["wf", "🛒", "The final week", c => c.d >= 1 && c.d < 7], ["wd", "🎉", "Event day", c => c.d < 1]];
     const phases = B.map(([pid, icon, title, f]) => ({ id: "oc" + pid, icon, title, tasks: C.filter(f).map(c => { checks["oc-" + c.id] = !!c.done || undefined; if (!c.done) delete checks["oc-" + c.id]; return { id: "oc-" + c.id, text: c.t }; }) })).filter(p => p.tasks.length);
