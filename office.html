@@ -9184,7 +9184,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
       const people = gifts.people || [];
       if (people.length) phases.push({ id: "gg", icon: "🎁", title: "Your Gift List", tasks: people.map(p => ({ id: "gg-" + p.id, text: "Buy and wrap gifts for " + p.name + (+p.cap > 0 ? " (up to " + money(+p.cap) + ")" : "") + ". Plan › Gifts." })) });
       const gt = [];
-      (host.guests || []).forEach(g => gt.push({ id: "gp-" + g.id, text: "Confirm " + g.name + "'s arrival" + (g.people > 1 ? " (" + g.people + " people)" : "") + (g.travel === "fly" ? " and flight details" : "") + (g.room ? ". Room: " + g.room : "") + "." }));
+      (host.guests || []).forEach(g => gt.push({ id: "gp-" + g.id, text: "Confirm " + g.name + "'s arrival" + (g.people > 1 ? " (" + g.people + " people)" : "") + (g.travel === "fly" ? " and flight details" : "") + (g.room ? ". Room: " + (((host.rooms || []).find(r => r.id === g.room) || {}).name || "") : "") + "." }));
       (host.trips || []).forEach(tr => gt.push({ id: "gt-" + tr.id, text: "Travel: " + tr.a + (tr.b ? " › " + tr.b : "") + ". Book or confirm it in Plan." }));
       if (gt.length) phases.push({ id: "gp", icon: "✈️", title: "Your Guests & Travel", tasks: gt });
       const ab = (load("addrbook", []) || []).filter(x => x.g !== "Santa");
