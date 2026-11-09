@@ -3306,6 +3306,7 @@ input[data-dl]{padding-right:44px !important;background-image:url("data:image/sv
         <div class="ab-print">
           <a class="btn btn-red btn-block pdf-link" href="pdf/Letter-to-Santa.pdf" download>⬇ Printable Letter to Santa (PDF)</a>
           <button type="button" class="btn btn-ghost btn-block" data-saddr>Santa's addresses &amp; mailing tips</button>
+          <button type="button" class="btn btn-ghost btn-block" data-semail>💌 Email Santa</button>
         </div>
       </div>
       <div class="card ab-card" id="cardCost"></div>
@@ -10557,9 +10558,21 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     const us = `<div class="sa-box"><b>🇺🇸 From the U.S.</b><p>Santa Claus<br>123 Elf Road<br>North Pole, 88888</p><small>Add a regular first-class stamp.</small></div>`;
     $("#santaAddrBody").innerHTML = (currency === "USD" ? us + ca : ca + us) +
       `<ul class="sa-tips"><li>✉️ Write your full name and return address on the envelope so Santa can write back.</li><li>👧👦 Writing for a few kids? Put all the letters in one envelope.</li><li>📅 Mail by <b>early December</b> for a reply before Christmas.</li></ul>`;
-    $("#santaAddr").classList.add("show");
+    $("#santaAddrTitle").textContent = "Santa's mailing address"; $("#santaAddrMore").hidden = false; $("#santaAddr").classList.add("show");
   }
   document.addEventListener("click", e => { if (e.target.closest("#santaLetter [data-saddr]")) showSantaAddr(); });
+  // 💌 Email Santa: opens the sites outside the app. Nothing is sent from the app.
+  const SANTA_MAIL = [["emailSanta.com", "https://www.emailsanta.com", "A quick form: name, age and wish list. Santa replies right away."], ["SantaUpdate.com", "https://www.santaupdate.com", "Send a message through the North Pole Post Office."]];
+  function showSantaEmail() {
+    $("#santaAddrTitle").textContent = "Email Santa";
+    $("#santaAddrBody").innerHTML = `<p class="tip" style="margin:6px 0 10px">These open in your browser. Nothing is sent from this app, and nothing is saved here. Check with a grown-up before you type in a name.</p>` +
+      SANTA_MAIL.map(([n, u, d]) => `<div class="sa-box"><b>${n}</b><p>${d}</p><button type="button" class="btn btn-red btn-block" data-smail="${u}">Open ${n} ›</button></div>`).join("");
+    $("#santaAddrMore").hidden = true; $("#santaAddr").classList.add("show");
+  }
+  document.addEventListener("click", e => {
+    if (e.target.closest("#santaLetter [data-semail]")) { showSantaEmail(); return; }
+    const m = e.target.closest("[data-smail]"); if (m) { const u = m.dataset.smail, br = NoelNative.plugin("Browser"); if (br) br.open({ url: u }).catch(() => window.open(u, "_blank")); else window.open(u, "_blank", "noopener"); }
+  });
   $("#santaAddr").addEventListener("click", e => {
     if (e.target.id === "santaAddr" || e.target.closest("#santaAddrClose")) { $("#santaAddr").classList.remove("show"); return; }
     if (e.target.closest("#santaAddrMore")) { const q = currency === "USD" ? "USPS letters to Santa mailing deadline" : "Canada Post letters to Santa deadline"; const u = "https://www.google.com/search?q=" + encodeURIComponent(q), br = NoelNative.plugin("Browser"); if (br) br.open({ url: u }).catch(() => window.open(u, "_blank")); else window.open(u, "_blank", "noopener"); }
