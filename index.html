@@ -15461,7 +15461,7 @@ const PC_DESIGNS = [
     if (t.closest("#budClear")) {   // 🧹 one-tap fresh budget (people, gifts and meal plans stay)
       if (!confirm("Clear this budget?\n\nThis removes your budget amounts, the spending you added, the spending chart and Shared costs.\n\nYour gift people, gifts and meal plans stay.\n\nThis can't be undone.")) return;
       budget.limit = 0; budget.cats = {}; budget.expenses = []; budget.daily = {}; budget.shared = null;
-      gifts.budget = 0; save("gifts", gifts); foodBudget.limit = 0; foodBudget.items = []; save("foodBudget", foodBudget);
+      gifts.budget = 0; gifts.people.forEach(p => { p.cap = 0; }); save("gifts", gifts); foodBudget.limit = 0; foodBudget.items = []; save("foodBudget", foodBudget);
       saveBudget(); renderBudget(); toast("🧹 Budget cleared"); return;
     }
     const tb = t.closest("[data-btab]"); if (tb) { budget.tab = tb.dataset.btab; saveBudget(); renderBudget(); if (tb.dataset.bnext) scrollTo(0, 0); return; }
