@@ -28,8 +28,8 @@
 <script>
 (function () {
   try {
-    if (!/[?&]gate\b/.test(location.search)) return;
-    var PID = "", MAXUSES = 2;   // Gumroad product id (empty = test codes only)
+    if (!(/[?&]gate\b/.test(location.search) || /\.github\.io$/.test(location.hostname))) return;   // web link on github.io always asks for a code; the iPhone app never does
+    var PID = "R50l6czVk0FUZcS5IytS-Q==", MAXUSES = 2;   // Gumroad product id (empty = test codes only)
     var KEY = "noel_web_unlock", OK = ["e9348050e693f78c9edf777b2f35a9799a0cfb56f5b877fd08a3343ef20c0d4f", "f441205f0d0d55e9c2a670bcdd1305dc5a0878bc8f6100eba85556a8c31b3af8"];   // test codes only
     var have = ""; try { have = window.localStorage.getItem(KEY) || ""; } catch (e) {}
     if (OK.indexOf(have) > -1 || /^gr:./.test(have)) return;
@@ -71,7 +71,7 @@
 <!-- ============================================================
      ✏️ BRANDING: App name (browser tab + home-screen label)
      ============================================================ -->
-<script>document.write('<meta http-equiv="Content-Security-Policy" content="'+"default-src 'self' data: blob: capacitor:; script-src 'self' 'unsafe-inline' capacitor:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src data:; connect-src 'self' data: blob: capacitor:"+(/[?&]gate\b/.test(location.search)?' https://api.gumroad.com':'')+''+'">');</script>
+<script>document.write('<meta http-equiv="Content-Security-Policy" content="'+"default-src 'self' data: blob: capacitor:; script-src 'self' 'unsafe-inline' capacitor:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src data:; connect-src 'self' data: blob: capacitor:"+((/[?&]gate\b/.test(location.search)||/\.github\.io$/.test(location.hostname))?' https://api.gumroad.com':'')+''+'">');</script>
 <title>Noëma Tier 1 Hub</title>
 <meta name="description" content="Your all-in-one Christmas companion: games, planner checklist and kitchen duty timers.">
 <meta name="apple-mobile-web-app-title" content="Noëma Tier 1 Hub">
