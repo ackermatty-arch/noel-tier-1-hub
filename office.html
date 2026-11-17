@@ -24,6 +24,35 @@
   } catch (e) {}
 })();
 </script>
+<!-- 🔑 WEB UNLOCK (test): only runs on a link with ?gate in it. The iPhone app and the normal link never see it. -->
+<script>
+(function () {
+  try {
+    if (!/[?&]gate\b/.test(location.search)) return;
+    var KEY = "noel_web_unlock", OK = ["e9348050e693f78c9edf777b2f35a9799a0cfb56f5b877fd08a3343ef20c0d4f", "f441205f0d0d55e9c2a670bcdd1305dc5a0878bc8f6100eba85556a8c31b3af8"];   // test codes only
+    var have = ""; try { have = window.localStorage.getItem(KEY) || ""; } catch (e) {}
+    if (OK.indexOf(have) > -1) return;
+    var css = document.createElement("style");
+    css.textContent = "#noelGate{position:fixed;inset:0;z-index:2147483000;background:#111;color:#f3ead2;display:flex;align-items:center;justify-content:center;padding:24px;font-family:Georgia,serif}#noelGate .g{max-width:360px;width:100%;text-align:center;border:1px solid #c9a24b;padding:32px 22px}#noelGate h1{font-size:22px;letter-spacing:.12em;color:#c9a24b;margin:0 0 6px;font-weight:600}#noelGate p{font-size:15px;line-height:1.5;margin:10px 0}#noelGate input{width:100%;box-sizing:border-box;padding:14px;font-size:17px;text-align:center;letter-spacing:.08em;background:#1b1b1b;color:#fff;border:1px solid #c9a24b;border-radius:0}#noelGate button{width:100%;margin-top:14px;padding:14px;font-size:15px;letter-spacing:.14em;background:#c9a24b;color:#111;border:0;font-weight:700}#noelGate small{display:block;margin-top:14px;color:#a89c7c;font-size:12px;line-height:1.5}#noelGate .e{color:#ff9d8a;min-height:20px;font-size:14px}";
+    document.addEventListener("DOMContentLoaded", function () {
+      document.head.appendChild(css);
+      var d = document.createElement("div"); d.id = "noelGate";
+      d.innerHTML = '<div class="g"><h1>' + (document.title || "Welcome").toUpperCase() + '</h1><p>Enter the code from your receipt to open your app.</p><input id="noelGateIn" autocomplete="off" autocapitalize="characters" placeholder="XXXX-XXXX-XXXX" aria-label="Your code"><div class="e" id="noelGateErr"></div><button id="noelGateGo" type="button">OPEN MY APP</button><small>You only enter this once on this phone. After that the app works offline. Your plans and lists never leave your phone.</small></div>';
+      document.body.appendChild(d);
+      async function sha(s) { var b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return Array.from(new Uint8Array(b)).map(function (x) { return x.toString(16).padStart(2, "0"); }).join(""); }
+      async function go() {
+        var v = document.getElementById("noelGateIn").value.trim().toUpperCase(), err = document.getElementById("noelGateErr");
+        if (!v) { err.textContent = "Please type your code."; return; }
+        var h = await sha(v);
+        if (OK.indexOf(h) > -1) { try { window.localStorage.setItem(KEY, h); } catch (e) {} d.remove(); }
+        else err.textContent = "That code didn't work. Check it and try again.";
+      }
+      document.getElementById("noelGateGo").addEventListener("click", go);
+      document.getElementById("noelGateIn").addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
+    });
+  } catch (e) {}
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
