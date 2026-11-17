@@ -10865,7 +10865,7 @@ const TASK_TAGS = {"w2-4b":["h","Menu"],"f0-6":["h","Menu"],"os-4":["h","Plan"],
     $("#checkinList").innerHTML = checkinSummary();
     $("#checkinOverlay").classList.add("show");
     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    try { if (!(alarmSound === "song" && playSong(20))) { playChime(); setTimeout(playChime, 2500); } } catch (e) {}
+    // 🔕 no sound: this pop-up appears when you open the app, so it stays quiet
   }
   function closeCheckin() { stopSong(); $("#checkinOverlay").classList.remove("show"); }
   function markCheckinDone() { const d = dueCheckin(); checkin.done = d ? d.getTime() : Date.now(); checkin.snooze = 0; save("checkin", checkin); }
